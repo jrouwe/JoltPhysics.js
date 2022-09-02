@@ -1,0 +1,97 @@
+enum Layers {
+	"Layers::MOVING",
+	"Layers::NON_MOVING"
+};
+
+enum EMotionType {
+	"EMotionType::Static",
+	"EMotionType::Kinematic",
+	"EMotionType::Dynamic"
+};
+
+enum EActivation {
+	"EActivation::Activate",
+	"EActivation::DontActivate"
+};
+
+[Prefix="JPH::"]
+interface Vec3 {
+  void Vec3();
+  void Vec3(float inX, float inY, float inZ);
+  float Length();
+  float GetX();
+  float GetY();
+  float GetZ();
+  void SetX(float inX);
+  void SetY(float inY);
+  void SetZ(float inZ);
+};
+
+[Prefix="JPH::"]
+interface Quat {
+  void Quat();
+  void Quat(float inX, float inY, float inZ, float inW);
+  float Length();
+  float GetX();
+  float GetY();
+  float GetZ();
+  float GetW();
+};
+
+[Prefix="JPH::"]
+interface PhysicsMaterial {
+};
+
+[Prefix="JPH::"]
+interface Shape {
+};
+
+[Prefix="JPH::"]
+interface SphereShape {
+	void SphereShape(float inRadius, PhysicsMaterial inMaterial);
+};
+
+SphereShape implements Shape;
+
+[Prefix="JPH::"]
+interface BoxShape {
+	void BoxShape([Ref] Vec3 inHalfExtent, float inConvexRadius, PhysicsMaterial inMaterial);
+};
+
+BoxShape implements Shape;
+
+[Prefix="JPH::"]
+interface CylinderShape {
+	void CylinderShape(float inHalfHeight, float inRadius, float inConvexRadius, PhysicsMaterial inMaterial);
+};
+
+CylinderShape implements Shape;
+
+[Prefix="JPH::"]
+interface BodyID {
+	void BodyID();
+	void BodyID(unsigned long inID);
+	[Const] unsigned long GetIndexAndSequenceNumber();
+};
+
+[Prefix="JPH::"]
+interface BodyInterface {
+	[Value] BodyID CreateAndAddBody([Const, Ref] BodyCreationSettings inSettings, EActivation inActivationMode);
+	[Const] void GetPositionAndRotation([Const, Ref] BodyID inBodyID, [Ref] Vec3 outPosition, [Ref] Quat outRotation);
+};
+
+[Prefix="JPH::"]
+interface PhysicsSystem {
+	[Ref] BodyInterface GetBodyInterface();
+};
+
+[Prefix="JPH::"]
+interface BodyCreationSettings {
+	void BodyCreationSettings([Const] Shape inShape, [Ref] Vec3 inPosition, [Ref] Quat inRotation, EMotionType inMotionType, unsigned short inObjectLayer);
+};
+
+interface JoltInterface {
+	void JoltInterface();
+	void Step(float inDeltaTime, long inCollisionSteps, long inIntegrationSubSteps);
+	PhysicsSystem GetPhysicsSystem();
+};
