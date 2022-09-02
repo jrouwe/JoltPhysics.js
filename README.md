@@ -8,7 +8,7 @@ This project is work in progress, much of the interface hasn't been exposed yet.
 
 ## Using
 
-A precompiled version of the library is here: [examples/js/ammo.js](examples/js/ammo.js). See [examples/falling_shapes.html](examples/falling_shapes.html) for an example on how to use the library.
+A precompiled version of the library is [here](Examples/js/jolt.js). See [falling_shapes.html](Examples/falling_shapes.html) for an example on how to use the library.
 
 ## Building
 
