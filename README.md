@@ -2,7 +2,7 @@
 
 This project enables using Jolt Physics in JavaScript.
 
-[![Demo](http://htmlpreview.github.io/?https://github.com/jrouwe/JoltPhysics.js/blob/main/Examples/falling_shapes.html)](http://htmlpreview.github.io/?https://github.com/jrouwe/JoltPhysics.js/blob/main/Examples/falling_shapes.html)
+[Click here for a demo](http://htmlpreview.github.io/?https://github.com/jrouwe/JoltPhysics.js/blob/main/Examples/falling_shapes.html).
 
 This project is work in progress, much of the interface hasn't been exposed yet. If you need something, just add it to JoltJS.idl and JoltJS.h and send a pull request.
 
