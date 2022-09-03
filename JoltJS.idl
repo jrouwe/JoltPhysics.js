@@ -9,6 +9,11 @@ enum EMotionType {
 	"EMotionType::Dynamic"
 };
 
+enum EMotionQuality {
+	"EMotionQuality::Discrete",
+	"EMotionQuality::LinearCast"
+};
+
 enum EActivation {
 	"EActivation::Activate",
 	"EActivation::DontActivate"
@@ -70,12 +75,20 @@ CylinderShape implements Shape;
 [Prefix="JPH::"]
 interface BodyID {
 	void BodyID();
-	void BodyID(unsigned long inID);
-	[Const] unsigned long GetIndexAndSequenceNumber();
+	void BodyID([Const, Ref] BodyID inID);
+};
+
+[Prefix="JPH::"]
+interface Body {
+	[Value] BodyID GetID();
+	[Value] Vec3 GetPosition();
+	[Value] Quat GetRotation();
 };
 
 [Prefix="JPH::"]
 interface BodyInterface {
+	Body CreateBody([Const, Ref] BodyCreationSettings inSettings);
+	void AddBody([Const, Ref] BodyID inBodyID, EActivation inActivationMode);
 	[Value] BodyID CreateAndAddBody([Const, Ref] BodyCreationSettings inSettings, EActivation inActivationMode);
 	[Const] void GetPositionAndRotation([Const, Ref] BodyID inBodyID, [Ref] Vec3 outPosition, [Ref] Quat outRotation);
 };
@@ -88,6 +101,24 @@ interface PhysicsSystem {
 [Prefix="JPH::"]
 interface BodyCreationSettings {
 	void BodyCreationSettings([Const] Shape inShape, [Ref] Vec3 inPosition, [Ref] Quat inRotation, EMotionType inMotionType, unsigned short inObjectLayer);
+	[Value] attribute Vec3 mPosition;
+	[Value] attribute Quat mRotation;
+	[Value] attribute Vec3 mLinearVelocity;
+	[Value] attribute Vec3 mAngularVelocity;
+	attribute long long mUserData;
+	attribute short mObjectLayer;
+	attribute EMotionType mMotionType;
+	attribute boolean mAllowDynamicOrKinematic;
+	attribute boolean mIsSensor;
+	attribute EMotionQuality mMotionQuality;
+	attribute boolean mAllowSleeping;
+	attribute float mFriction;
+	attribute float mRestitution;
+	attribute float mLinearDamping;
+	attribute float mAngularDamping;
+	attribute float mMaxLinearVelocity;
+	attribute float mMaxAngularVelocity;
+	attribute float mGravityFactor;
 };
 
 interface JoltInterface {

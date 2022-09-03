@@ -174,7 +174,10 @@
 				// Create physics body
 				var pos = threeObject.position;
 				var creation_settings = new Jolt.BodyCreationSettings(shape, new Jolt.Vec3(pos.x, pos.y, pos.z), new Jolt.Quat(0, 0, 0, 1), Jolt.Dynamic, Jolt.MOVING);
-				threeObject.userData.bodyId = bodyInterface.CreateAndAddBody(creation_settings, Jolt.Activate).GetIndexAndSequenceNumber();
+				creation_settings.mRestitution = 0.5;
+				var body = bodyInterface.CreateBody(creation_settings);
+				bodyInterface.AddBody(body.GetID(), Jolt.Activate);
+				threeObject.userData.body = body;
 
 				scene.add(threeObject);
 				dynamicObjects.push(threeObject);
@@ -217,14 +220,12 @@
 				// Step the physics world
 				jolt.Step(deltaTime, numSteps, 1);
 
-				var p = new Jolt.Vec3();
-				var q = new Jolt.Quat();
-
 			    // Update objects
-			    for (var i = 0, il = dynamicObjects.length; i < il; i++) {
-			    	var objThree = dynamicObjects[i];
-					var bodyId = new Jolt.BodyID(objThree.userData.bodyId);
-					bodyInterface.GetPositionAndRotation(bodyId, p, q);
+				for (var i = 0, il = dynamicObjects.length; i < il; i++) {
+					var objThree = dynamicObjects[i];
+					var body = dynamicObjects[i].userData.body;
+					var p = body.GetPosition();
+					var q = body.GetRotation();
 					objThree.position.set(p.GetX(), p.GetY(), p.GetZ());
 					objThree.quaternion.set(q.GetX(), q.GetY(), q.GetZ(), q.GetW());
 			    }
