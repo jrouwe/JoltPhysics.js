@@ -4,19 +4,7 @@
 		<title>JoltPhysics.js demo</title>
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
-		<style>
-			body {
-				text-align: center;
-				margin: 0px;
-				overflow: hidden;
-			}
-
-			#info {
-				position: absolute;
-				top: 0px; width: 100%;
-				padding: 5px;
-			}
-		</style>
+		<link rel="stylesheet" type="text/css" href="style.css">
 	</head>
 	<body>
 		<div id="container">Loading...</div>
@@ -27,200 +15,96 @@
 		<script src="js/three/OrbitControls.js"></script>
 		<script src="js/three/Detector.js"></script>
 		<script src="js/three/stats.min.js"></script>
+		<script src="js/example.js"></script>
 
 		<script>
 
-		Jolt().then(function(Jolt) {
+			Jolt().then(function (Jolt) {
 
-			// Detects webgl
-			if (!Detector.webgl) {
-				Detector.addGetWebGLMessage();
-				document.getElementById('container').innerHTML = "";
-			}
+				// List of objects spawned
+				var dynamicObjects = [];
 
-			// Graphics variables
-			var container, stats;
-			var camera, controls, scene, renderer;
-			var clock = new THREE.Clock();
+				// Spawning variables
+				var objectTimePeriod = 0.25;
+				var timeNextSpawn = time + objectTimePeriod;
+				var maxNumObjects = 100;
 
-			// Physics variables
-			var jolt;
-			var physicsSystem;
-			var bodyInterface;
-			var dynamicObjects = [];
+				// Initialize this example
+				initExample(onUpdate);
 
-			// Spawning variables
-			var time = 0;
-			var objectTimePeriod = 0.25;
-			var timeNextSpawn = time + objectTimePeriod;
-			var maxNumObjects = 100;
+				// Create a basic floor
+				createFloor();
 
-			// Main code
-			init();
-			animate();
+				function generateObject() {
 
-			function init() {
+					var numTypes = 3;
+					var objectType = Math.ceil(Math.random() * numTypes);
 
-				initGraphics();
+					var threeObject = null;
+					var shape = null;
 
-				initPhysics();
-			}
+					var material = new THREE.MeshPhongMaterial({ color: Math.floor(Math.random() * (1 << 24)) });
 
-			function initGraphics() {
+					switch (objectType) {
+						case 1:
+							// Sphere
+							var radius = 1 + Math.random();
+							threeObject = new THREE.Mesh(new THREE.SphereGeometry(radius, 20, 20), material);
+							shape = new Jolt.SphereShape(radius, null);
+							break;
 
-				container = document.getElementById('container');
+						case 2:
+							// Box
+							var sx = 1 + Math.random();
+							var sy = 1 + Math.random();
+							var sz = 1 + Math.random();
+							threeObject = new THREE.Mesh(new THREE.BoxGeometry(sx, sy, sz, 1, 1, 1), material);
+							shape = new Jolt.BoxShape(new Jolt.Vec3(sx * 0.5, sy * 0.5, sz * 0.5), 0.002, null);
+							break;
 
-				renderer = new THREE.WebGLRenderer();
-				renderer.setClearColor(0xbfd1e5);
-				renderer.setPixelRatio(window.devicePixelRatio);
-				renderer.setSize(window.innerWidth, window.innerHeight);
+						case 3:
+							// Cylinder
+							var radius = 1 + Math.random();
+							var height = 1 + Math.random();
+							threeObject = new THREE.Mesh(new THREE.CylinderGeometry(radius, radius, height, 20, 1), material);
+							shape = new Jolt.CylinderShape(height * 0.5, radius, 0.002, null);
+							break;
+					}
 
-				camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.2, 2000);
-				camera.position.set(0, 10, 25);
-				camera.lookAt(new THREE.Vector3(0, 0, 0));
+					// Position visual mesh
+					threeObject.position.set((Math.random() - 0.5) * 25, 10, (Math.random() - 0.5) * 25);
 
-				scene = new THREE.Scene();
+					// Create physics body
+					var pos = threeObject.position;
+					var creation_settings = new Jolt.BodyCreationSettings(shape, new Jolt.Vec3(pos.x, pos.y, pos.z), new Jolt.Quat(0, 0, 0, 1), Jolt.Dynamic, Jolt.MOVING);
+					creation_settings.mRestitution = 0.5;
+					var body = bodyInterface.CreateBody(creation_settings);
+					bodyInterface.AddBody(body.GetID(), Jolt.Activate);
+					threeObject.userData.body = body;
 
-				var dirLight = new THREE.DirectionalLight(0xffffff, 1);
-				dirLight.position.set(10, 10, 5);
-				scene.add(dirLight);
-
-				controls = new THREE.OrbitControls(camera);
-
-				container.innerHTML = "";
-				container.appendChild(renderer.domElement);
-
-				stats = new Stats();
-				stats.domElement.style.position = 'absolute';
-				stats.domElement.style.top = '0px';
-				container.appendChild(stats.domElement);
-
-				window.addEventListener('resize', onWindowResize, false);
-			}
-
-			function onWindowResize() {
-
-				camera.aspect = window.innerWidth / window.innerHeight;
-				camera.updateProjectionMatrix();
-
-				renderer.setSize(window.innerWidth, window.innerHeight);
-			}
-
-			function initPhysics() {
-
-				// Initialize Jolt
-				jolt = new Jolt.JoltInterface();
-				physicsSystem = jolt.GetPhysicsSystem();
-				bodyInterface = physicsSystem.GetBodyInterface();
-
-				// Create floor
-				scene.add(new THREE.Mesh(new THREE.BoxGeometry(100, 1, 100, 1, 1, 1), new THREE.MeshPhongMaterial({ color: 0xC7C7C7 })));
-
-				// Create corresponding physics object
-				var shape = new Jolt.BoxShape(new Jolt.Vec3(50, 0.5, 50), 0.001, null);
-				var creation_settings = new Jolt.BodyCreationSettings(shape, new Jolt.Vec3(0, 0, 0), new Jolt.Quat(0, 0, 0, 1), Jolt.Static, Jolt.NON_MOVING);
-				bodyInterface.CreateAndAddBody(creation_settings, Jolt.DontActivate);
-			}
-
-			function generateObject() {
-
-				var numTypes = 3;
-				var objectType = Math.ceil(Math.random() * numTypes);
-
-				var threeObject = null;
-				var shape = null;
-
-				var material = new THREE.MeshPhongMaterial({ color: Math.floor(Math.random() * (1 << 24)) });
-
-				switch (objectType) {
-					case 1:
-						// Sphere
-						var radius = 1 + Math.random();
-						threeObject = new THREE.Mesh(new THREE.SphereGeometry(radius, 20, 20), material);
-						shape = new Jolt.SphereShape(radius, null);
-						break;
-
-					case 2:
-						// Box
-						var sx = 1 + Math.random();
-						var sy = 1 + Math.random();
-						var sz = 1 + Math.random();
-						threeObject = new THREE.Mesh(new THREE.BoxGeometry(sx, sy, sz, 1, 1, 1), material);
-						shape = new Jolt.BoxShape(new Jolt.Vec3(sx * 0.5, sy * 0.5, sz * 0.5), 0.002, null);
-						break;
-
-					case 3:
-						// Cylinder
-						var radius = 1 + Math.random();
-						var height = 1 + Math.random();
-						threeObject = new THREE.Mesh(new THREE.CylinderGeometry(radius, radius, height, 20, 1), material);
-						shape = new Jolt.CylinderShape(height * 0.5, radius, 0.002, null);
-						break;
+					scene.add(threeObject);
+					dynamicObjects.push(threeObject);
 				}
 
-				// Position visual mesh
-				threeObject.position.set((Math.random() - 0.5) * 25, 10, (Math.random() - 0.5) * 25);
+				function onUpdate(time, deltaTime) {
 
-				// Create physics body
-				var pos = threeObject.position;
-				var creation_settings = new Jolt.BodyCreationSettings(shape, new Jolt.Vec3(pos.x, pos.y, pos.z), new Jolt.Quat(0, 0, 0, 1), Jolt.Dynamic, Jolt.MOVING);
-				creation_settings.mRestitution = 0.5;
-				var body = bodyInterface.CreateBody(creation_settings);
-				bodyInterface.AddBody(body.GetID(), Jolt.Activate);
-				threeObject.userData.body = body;
+					// Check if its time to spawn a new object
+					if (dynamicObjects.length < maxNumObjects && time > timeNextSpawn) {
+						generateObject();
+						timeNextSpawn = time + objectTimePeriod;
+					}
 
-				scene.add(threeObject);
-				dynamicObjects.push(threeObject);
-			}
-
-			function animate() {
-
-				requestAnimationFrame(animate);
-
-				render();
-				stats.update();
-			}
-
-			function render() {
-
-				var deltaTime = clock.getDelta();
-
-				if (dynamicObjects.length < maxNumObjects && time > timeNextSpawn) {
-					generateObject();
-					timeNextSpawn = time + objectTimePeriod;
+					// Update object transforms
+					for (var i = 0, il = dynamicObjects.length; i < il; i++) {
+						var objThree = dynamicObjects[i];
+						var body = dynamicObjects[i].userData.body;
+						var p = body.GetPosition();
+						var q = body.GetRotation();
+						objThree.position.set(p.GetX(), p.GetY(), p.GetZ());
+						objThree.quaternion.set(q.GetX(), q.GetY(), q.GetZ(), q.GetW());
+					}
 				}
-
-				updatePhysics(deltaTime);
-
-				controls.update(deltaTime);
-
-				renderer.render(scene, camera);
-
-				time += deltaTime;
-			}
-
-			function updatePhysics(deltaTime) {
-
-				// Don't go below 30 Hz to prevent spiral of death
-				deltaTime = Math.min(deltaTime, 1.0 / 30.0);
-
-				// When running below 55 Hz, do 2 steps instead of 1
-				var numSteps = deltaTime > 1.0 / 55.0 ? 2 : 1;
-
-				// Step the physics world
-				jolt.Step(deltaTime, numSteps, 1);
-
-				// Update objects
-				for (var i = 0, il = dynamicObjects.length; i < il; i++) {
-					var objThree = dynamicObjects[i];
-					var body = dynamicObjects[i].userData.body;
-					var p = body.GetPosition();
-					var q = body.GetRotation();
-					objThree.position.set(p.GetX(), p.GetY(), p.GetZ());
-					objThree.quaternion.set(q.GetX(), q.GetY(), q.GetZ(), q.GetW());
-				}
-			}
-		});
+			});
 
 		</script>
 	</body>
