@@ -37,7 +37,7 @@
 
 				function generateObject() {
 
-					var numTypes = 3;
+					var numTypes = 4;
 					var objectType = Math.ceil(Math.random() * numTypes);
 
 					var threeObject = null;
@@ -48,7 +48,7 @@
 					switch (objectType) {
 						case 1:
 							// Sphere
-							var radius = 1 + Math.random();
+							var radius = 0.5 + Math.random();
 							threeObject = new THREE.Mesh(new THREE.SphereGeometry(radius, 20, 20), material);
 							shape = new Jolt.SphereShape(radius, null);
 							break;
@@ -64,19 +64,28 @@
 
 						case 3:
 							// Cylinder
-							var radius = 1 + Math.random();
+							var radius = 0.5 + Math.random();
 							var height = 1 + Math.random();
 							threeObject = new THREE.Mesh(new THREE.CylinderGeometry(radius, radius, height, 20, 1), material);
 							shape = new Jolt.CylinderShape(height * 0.5, radius, 0.002, null);
 							break;
+
+						case 4:
+							// Capsule
+							var radius = 0.5 + Math.random();
+							var height = 1 + Math.random();
+							threeObject = new THREE.Mesh(new THREE.CapsuleGeometry(radius, height, 20, 10), material);
+							shape = new Jolt.CapsuleShape(height * 0.5, radius, null);
+							break;
 					}
 
-					// Position visual mesh
+					// Position and rotate visual mesh
 					threeObject.position.set((Math.random() - 0.5) * 25, 10, (Math.random() - 0.5) * 25);
+					threeObject.quaternion.random();
 
 					// Create physics body
-					var pos = threeObject.position;
-					var creation_settings = new Jolt.BodyCreationSettings(shape, new Jolt.Vec3(pos.x, pos.y, pos.z), new Jolt.Quat(0, 0, 0, 1), Jolt.Dynamic, Jolt.MOVING);
+					var pos = threeObject.position, rot = threeObject.quaternion;
+					var creation_settings = new Jolt.BodyCreationSettings(shape, new Jolt.Vec3(pos.x, pos.y, pos.z), new Jolt.Quat(rot.x, rot.y, rot.z, rot.w), Jolt.Dynamic, Jolt.MOVING);
 					creation_settings.mRestitution = 0.5;
 					var body = bodyInterface.CreateBody(creation_settings);
 					bodyInterface.AddBody(body.GetID(), Jolt.Activate);

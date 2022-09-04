@@ -73,6 +73,13 @@ interface CylinderShape {
 CylinderShape implements Shape;
 
 [Prefix="JPH::"]
+interface CapsuleShape {
+	void CapsuleShape(float inHalfHeight, float inRadius, PhysicsMaterial inMaterial);
+};
+
+CapsuleShape implements Shape;
+
+[Prefix="JPH::"]
 interface BodyID {
 	void BodyID();
 	void BodyID([Const, Ref] BodyID inID);
