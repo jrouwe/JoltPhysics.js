@@ -1,59 +1,49 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <title>JoltPhysics.js demo</title>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
-        <style>
-            body {
-                color: #61443e;
-                font-family:Monospace;
-                font-size:13px;
-                text-align:center;
+	<head>
+		<title>JoltPhysics.js demo</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<style>
+			body {
+				text-align: center;
+				margin: 0px;
+				overflow: hidden;
+			}
 
-                background-color: #bfd1e5;
-                margin: 0px;
-                overflow: hidden;
-            }
-
-            #info {
-                position: absolute;
-                top: 0px; width: 100%;
-                padding: 5px;
-            }
-
-            a {
-                color: #a06851;
-            }
-
-        </style>
-    </head>
-    <body>
-        <div id="container"><br /><br /><br /><br /><br />Loading...</div>
-        <div id="info">JoltPhysics.js demo</div>
+			#info {
+				position: absolute;
+				top: 0px; width: 100%;
+				padding: 5px;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="container">Loading...</div>
+		<div id="info">JoltPhysics.js demo</div>
 
 		<script src="js/jolt.js"></script>
-        <script src="js/three/three.min.js"></script>
-        <script src="js/three/OrbitControls.js"></script>
-        <script src="js/three/Detector.js"></script>
-        <script src="js/three/stats.min.js"></script>
+		<script src="js/three/three.min.js"></script>
+		<script src="js/three/OrbitControls.js"></script>
+		<script src="js/three/Detector.js"></script>
+		<script src="js/three/stats.min.js"></script>
 
-        <script>
+		<script>
 
 		Jolt().then(function(Jolt) {
 
 			// Detects webgl
-            if (!Detector.webgl) {
-                Detector.addGetWebGLMessage();
-                document.getElementById('container').innerHTML = "";
-            }
+			if (!Detector.webgl) {
+				Detector.addGetWebGLMessage();
+				document.getElementById('container').innerHTML = "";
+			}
 
 			// Graphics variables
-            var container, stats;
-            var camera, controls, scene, renderer;
-            var clock = new THREE.Clock();
+			var container, stats;
+			var camera, controls, scene, renderer;
+			var clock = new THREE.Clock();
 
-            // Physics variables
+			// Physics variables
 			var jolt;
 			var physicsSystem;
 			var bodyInterface;
@@ -62,59 +52,59 @@
 			// Spawning variables
 			var time = 0;
 			var objectTimePeriod = 0.25;
-            var timeNextSpawn = time + objectTimePeriod;
-            var maxNumObjects = 100;
+			var timeNextSpawn = time + objectTimePeriod;
+			var maxNumObjects = 100;
 
 			// Main code
-            init();
-            animate();
+			init();
+			animate();
 
-            function init() {
+			function init() {
 
 				initGraphics();
 
 				initPhysics();
-            }
+			}
 
-            function initGraphics() {
+			function initGraphics() {
 
 				container = document.getElementById('container');
 
-                renderer = new THREE.WebGLRenderer();
+				renderer = new THREE.WebGLRenderer();
 				renderer.setClearColor(0xbfd1e5);
-                renderer.setPixelRatio(window.devicePixelRatio);
-                renderer.setSize(window.innerWidth, window.innerHeight);
+				renderer.setPixelRatio(window.devicePixelRatio);
+				renderer.setSize(window.innerWidth, window.innerHeight);
 
-                camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.2, 2000);
+				camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.2, 2000);
 				camera.position.set(0, 10, 25);
-                camera.lookAt(new THREE.Vector3(0, 0, 0));
+				camera.lookAt(new THREE.Vector3(0, 0, 0));
 
-                scene = new THREE.Scene();
+				scene = new THREE.Scene();
 
-                var dirLight = new THREE.DirectionalLight(0xffffff, 1);
-                dirLight.position.set(10, 10, 5);
-                scene.add(dirLight);
+				var dirLight = new THREE.DirectionalLight(0xffffff, 1);
+				dirLight.position.set(10, 10, 5);
+				scene.add(dirLight);
 
-                controls = new THREE.OrbitControls(camera);
+				controls = new THREE.OrbitControls(camera);
 
-                container.innerHTML = "";
-                container.appendChild(renderer.domElement);
+				container.innerHTML = "";
+				container.appendChild(renderer.domElement);
 
-                stats = new Stats();
-                stats.domElement.style.position = 'absolute';
-                stats.domElement.style.top = '0px';
-                container.appendChild(stats.domElement);
+				stats = new Stats();
+				stats.domElement.style.position = 'absolute';
+				stats.domElement.style.top = '0px';
+				container.appendChild(stats.domElement);
 
-                window.addEventListener('resize', onWindowResize, false);
-            }
+				window.addEventListener('resize', onWindowResize, false);
+			}
 
-            function onWindowResize() {
+			function onWindowResize() {
 
-                camera.aspect = window.innerWidth / window.innerHeight;
-                camera.updateProjectionMatrix();
+				camera.aspect = window.innerWidth / window.innerHeight;
+				camera.updateProjectionMatrix();
 
-                renderer.setSize(window.innerWidth, window.innerHeight);
-            }
+				renderer.setSize(window.innerWidth, window.innerHeight);
+			}
 
 			function initPhysics() {
 
@@ -130,15 +120,15 @@
 				var shape = new Jolt.BoxShape(new Jolt.Vec3(50, 0.5, 50), 0.001, null);
 				var creation_settings = new Jolt.BodyCreationSettings(shape, new Jolt.Vec3(0, 0, 0), new Jolt.Quat(0, 0, 0, 1), Jolt.Static, Jolt.NON_MOVING);
 				bodyInterface.CreateAndAddBody(creation_settings, Jolt.DontActivate);
-            }
+			}
 
-            function generateObject() {
+			function generateObject() {
 
-            	var numTypes = 3;
+				var numTypes = 3;
 				var objectType = Math.ceil(Math.random() * numTypes);
 
-            	var threeObject = null;
-            	var shape = null;
+				var threeObject = null;
+				var shape = null;
 
 				var material = new THREE.MeshPhongMaterial({ color: Math.floor(Math.random() * (1 << 24)) });
 
@@ -181,35 +171,35 @@
 
 				scene.add(threeObject);
 				dynamicObjects.push(threeObject);
-            }
+			}
 
-            function animate() {
+			function animate() {
 
-                requestAnimationFrame(animate);
+				requestAnimationFrame(animate);
 
-                render();
-                stats.update();
-            }
+				render();
+				stats.update();
+			}
 
-            function render() {
+			function render() {
 
-            	var deltaTime = clock.getDelta();
+				var deltaTime = clock.getDelta();
 
-            	if (dynamicObjects.length < maxNumObjects && time > timeNextSpawn) {
-            		generateObject();
-            		timeNextSpawn = time + objectTimePeriod;
-            	}
+				if (dynamicObjects.length < maxNumObjects && time > timeNextSpawn) {
+					generateObject();
+					timeNextSpawn = time + objectTimePeriod;
+				}
 
-            	updatePhysics(deltaTime);
+				updatePhysics(deltaTime);
 
-                controls.update(deltaTime);
+				controls.update(deltaTime);
 
-                renderer.render(scene, camera);
+				renderer.render(scene, camera);
 
-                time += deltaTime;
-            }
+				time += deltaTime;
+			}
 
-            function updatePhysics(deltaTime) {
+			function updatePhysics(deltaTime) {
 
 				// Don't go below 30 Hz to prevent spiral of death
 				deltaTime = Math.min(deltaTime, 1.0 / 30.0);
@@ -220,7 +210,7 @@
 				// Step the physics world
 				jolt.Step(deltaTime, numSteps, 1);
 
-			    // Update objects
+				// Update objects
 				for (var i = 0, il = dynamicObjects.length; i < il; i++) {
 					var objThree = dynamicObjects[i];
 					var body = dynamicObjects[i].userData.body;
@@ -228,11 +218,10 @@
 					var q = body.GetRotation();
 					objThree.position.set(p.GetX(), p.GetY(), p.GetZ());
 					objThree.quaternion.set(q.GetX(), q.GetY(), q.GetZ(), q.GetW());
-			    }
+				}
 			}
 		});
 
-        </script>
-
-    </body>
+		</script>
+	</body>
 </html>
