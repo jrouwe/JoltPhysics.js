@@ -9,6 +9,7 @@
 #include "Jolt/Physics/Collision/Shape/BoxShape.h"
 #include "Jolt/Physics/Collision/Shape/CapsuleShape.h"
 #include "Jolt/Physics/Collision/Shape/CylinderShape.h"
+#include "Jolt/Physics/Collision/Shape/ConvexHullShape.h"
 #include "Jolt/Physics/Body/BodyInterface.h"
 #include "Jolt/Physics/Body/BodyCreationSettings.h"
 
@@ -16,6 +17,10 @@
 
 using namespace JPH;
 using namespace std;
+
+// Types that need to be exposed to JavaScript
+using JPHString = String;
+using ArrayVec3 = Array<Vec3>;
 
 // Callback for traces
 static void TraceImpl(const char *inFMT, ...)
@@ -179,4 +184,59 @@ private:
 	JobSystemThreadPool		mJobSystem { cMaxPhysicsJobs, cMaxPhysicsBarriers, (int)thread::hardware_concurrency() - 1 };
 	BPLayerInterfaceImpl	mBPLayerInterface;
 	PhysicsSystem			mPhysicsSystem;
+};
+
+/// Helper class to extract triangles from the shape
+class ShapeGetTriangles
+{
+public:
+							ShapeGetTriangles(const Shape *inShape, const AABox &inBox, Vec3Arg inPositionCOM, QuatArg inRotation, Vec3Arg inScale)
+	{
+		Shape::GetTrianglesContext context;
+		inShape->GetTrianglesStart(context, inBox, inPositionCOM, inRotation, inScale);
+		size_t cur_tri_pos = 0;
+		size_t cur_mat_pos = 0;
+		const size_t cBlockSize = 8096;
+		for (;;)
+		{
+			size_t tri_left = (mVertices.size() - cur_tri_pos) / 3;
+			if (tri_left < Shape::cGetTrianglesMinTrianglesRequested)
+			{
+				mVertices.resize(mVertices.size() + 3 * cBlockSize);
+				mMaterials.resize(mMaterials.size() + cBlockSize);
+				tri_left = (mVertices.size() - cur_tri_pos) / 3;
+			}
+
+			int count = inShape->GetTrianglesNext(context, tri_left, mVertices.data() + cur_tri_pos, mMaterials.data() + cur_mat_pos);
+			if (count == 0)
+			{
+				mVertices.resize(cur_tri_pos);
+				mMaterials.resize(cur_mat_pos);
+				break;
+			}
+
+			cur_tri_pos += 3 * count;
+			cur_mat_pos += count;
+		}
+	}
+
+	int						GetNumTriangles() const
+	{
+		return (int)mMaterials.size();
+	}
+
+	void					GetVertices(int inTriangle, Float3 &outV1, Float3 &outV2, Float3 &outV3) const
+	{
+		int tri_start = inTriangle * 3;
+		outV1 = mVertices[tri_start], outV2 = mVertices[tri_start + 1], outV3 = mVertices[tri_start + 2];
+	}
+		
+	const PhysicsMaterial *	GetMaterial(int inTriangle) const
+	{
+		return mMaterials[inTriangle];
+	}
+	
+private:
+	Array<Float3>			mVertices;
+	Array<const PhysicsMaterial *>	mMaterials;
 };

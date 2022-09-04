@@ -37,7 +37,7 @@
 
 				function generateObject() {
 
-					var numTypes = 4;
+					var numTypes = 5;
 					var objectType = Math.ceil(Math.random() * numTypes);
 
 					var threeObject = null;
@@ -76,6 +76,38 @@
 							var height = 1 + Math.random();
 							threeObject = new THREE.Mesh(new THREE.CapsuleGeometry(radius, height, 20, 10), material);
 							shape = new Jolt.CapsuleShape(height * 0.5, radius, null);
+							break;
+
+						case 5:
+							// Convex hull
+							var hull = new Jolt.ConvexHullShapeSettings;
+							for (var p = 0; p < 10; ++p)
+								hull.mPoints.push_back(new Jolt.Vec3(-0.5 + 2 * Math.random(), -0.5 + 2 * Math.random(), -0.5 + 2 * Math.random()));
+							shape = hull.Create().Get();
+
+							// Get triangle data
+							var triContext = new Jolt.ShapeGetTriangles(shape, Jolt.AABox.prototype.sBiggest(), shape.GetCenterOfMass(), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(1, 1, 1));
+							var num_tris = triContext.GetNumTriangles();
+
+							// Convert to three mesh
+							const geometry = new THREE.BufferGeometry();
+							const vertices = new Float32Array(num_tris * 3 * 3);
+							var vtxIdx = 0;
+							var tmpVertex = [ new Jolt.Float3(), new Jolt.Float3(), new Jolt.Float3() ];
+							for (var t = 0; t < num_tris; t++) {
+								triContext.GetVertices(t, tmpVertex[0], tmpVertex[1], tmpVertex[2]);
+								for (var vtx = 0; vtx < 3; vtx++) {
+									vertices[vtxIdx] = tmpVertex[vtx].x;
+									vtxIdx++;
+									vertices[vtxIdx] = tmpVertex[vtx].y;
+									vtxIdx++;
+									vertices[vtxIdx] = tmpVertex[vtx].z;
+									vtxIdx++;
+								}								
+							}
+							geometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
+							geometry.computeVertexNormals();
+							threeObject = new THREE.Mesh(geometry, material)
 							break;
 					}
 

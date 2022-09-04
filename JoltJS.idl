@@ -1,3 +1,13 @@
+interface JPHString {
+	[Const] DOMString c_str(); // TODO: This is not a nice way to get a string from an interface
+};
+
+interface ArrayVec3 {
+	long size();
+	[Ref] Vec3 at(long inIndex);
+	void push_back([Const, Ref] Vec3 inValue);
+};
+
 enum Layers {
 	"Layers::MOVING",
 	"Layers::NON_MOVING"
@@ -19,36 +29,123 @@ enum EActivation {
 	"EActivation::DontActivate"
 };
 
+enum EShapeType {
+	"EShapeType::Convex",
+	"EShapeType::Compound",
+	"EShapeType::Decorated",
+	"EShapeType::Mesh",
+	"EShapeType::HeightField"
+};
+
+enum EShapeSubType {
+	"EShapeSubType::Sphere",
+	"EShapeSubType::Box",
+	"EShapeSubType::Triangle",
+	"EShapeSubType::Capsule",
+	"EShapeSubType::TaperedCapsule",
+	"EShapeSubType::Cylinder",
+	"EShapeSubType::ConvexHull",
+	"EShapeSubType::StaticCompound",
+	"EShapeSubType::MutableCompound",
+	"EShapeSubType::RotatedTranslated",
+	"EShapeSubType::Scaled",
+	"EShapeSubType::OffsetCenterOfMass",
+	"EShapeSubType::Mesh",
+	"EShapeSubType::HeightField"
+};
+
 [Prefix="JPH::"]
 interface Vec3 {
-  void Vec3();
-  void Vec3(float inX, float inY, float inZ);
-  float Length();
-  float GetX();
-  float GetY();
-  float GetZ();
-  void SetX(float inX);
-  void SetY(float inY);
-  void SetZ(float inZ);
+	void Vec3();
+	void Vec3(float inX, float inY, float inZ);
+	[Value] static Vec3 sZero();
+	float Length();
+	float GetX();
+	float GetY();
+	float GetZ();
+	void SetX(float inX);
+	void SetY(float inY);
+	void SetZ(float inZ);
 };
 
 [Prefix="JPH::"]
 interface Quat {
-  void Quat();
-  void Quat(float inX, float inY, float inZ, float inW);
-  float Length();
-  float GetX();
-  float GetY();
-  float GetZ();
-  float GetW();
+	void Quat();
+	void Quat(float inX, float inY, float inZ, float inW);
+	[Value] static Quat sIdentity();
+	float Length();
+	float GetX();
+	float GetY();
+	float GetZ();
+	float GetW();
+};
+
+[Prefix="JPH::"]
+interface Float3 {
+	void Float3(float inX, float inY, float inZ);	
+	attribute float x;
+	attribute float y;
+	attribute float z;
+};
+
+[Prefix="JPH::"]
+interface Mat44 {
+	[Value] static Mat44 sRotationTranslation([Const, Ref] Quat inRotation, [Const, Ref] Vec3 inTranslation);
+	[Value] Vec3 GetAxisX();
+	[Value] Vec3 GetAxisY();
+	[Value] Vec3 GetAxisZ();
+	[Value] Quat GetQuaternion();
+	[Value] Vec3 GetTranslation();
+};
+
+[Prefix="JPH::"]
+interface AABox {
+	void AABox([Const, Ref] Vec3 inMin, [Const, Ref] Vec3 inMax);
+	[Value] static AABox sBiggest();
+	[Value] attribute Vec3 mMin;
+	[Value] attribute Vec3 mMax;
 };
 
 [Prefix="JPH::"]
 interface PhysicsMaterial {
 };
 
+[Prefix="JPH::Shape::"]
+interface GetTrianglesContext {	
+};
+
+[Prefix="JPH::Shape::"]
+interface ShapeResult {
+	boolean IsValid();
+	boolean HasError();
+	[Const, Ref] JPHString GetError();
+	Shape Get();
+};
+
+[Prefix="JPH::"]
+interface ShapeSettings {
+	[Value] ShapeResult Create();
+	attribute unsigned long long mUserData;
+};
+
 [Prefix="JPH::"]
 interface Shape {
+	EShapeType GetType();
+	EShapeSubType GetSubType();
+	boolean MustBeStatic();
+	[Value] AABox GetLocalBounds();
+	[Value] AABox GetWorldSpaceBounds([Const, Ref] Mat44 inCenterOfMassTransform, [Const, Ref] Vec3 inScale);
+	[Value] Vec3 GetCenterOfMass();
+	long long GetUserData();
+	void SetUserData(long long inUserData);
+};
+
+interface ShapeGetTriangles
+{
+	void ShapeGetTriangles(Shape inShape, [Const, Ref] AABox inBox, [Const, Ref] Vec3 inPositionCOM, [Const, Ref] Quat inRotation, [Const, Ref] Vec3 inScale);
+	long GetNumTriangles();
+	void GetVertices(long inTriangle, [Ref] Float3 outV1, [Ref] Float3 outV2, [Ref] Float3 outV3); // TODO: Not a very efficient interface, need to figure out how to handle a Float32Array on the C++ side
+	[Const] PhysicsMaterial GetMaterial(long inTriangle);
 };
 
 [Prefix="JPH::"]
@@ -78,6 +175,23 @@ interface CapsuleShape {
 };
 
 CapsuleShape implements Shape;
+
+[Prefix="JPH::"]
+interface ConvexHullShapeSettings {
+	void ConvexHullShapeSettings();
+	[Value] attribute ArrayVec3 mPoints;
+	attribute float mMaxConvexRadius;
+	attribute float mMaxErrorConvexRadius;
+	attribute float mHullTolerance;
+};
+
+ConvexHullShapeSettings implements ShapeSettings;
+
+[Prefix="JPH::"]
+interface ConvexHullShape {
+};
+
+ConvexHullShape implements Shape;
 
 [Prefix="JPH::"]
 interface BodyID {
