@@ -1,6 +1,6 @@
 # JoltPhysics.js
 
-This project enables using Jolt Physics in JavaScript.
+This project enables using [Jolt Physics](https://github.com/jrouwe/JoltPhysics) in JavaScript.
 
 [Click here for a demo](http://htmlpreview.github.io/?https://github.com/jrouwe/JoltPhysics.js/blob/main/Examples/falling_shapes.html).
 
