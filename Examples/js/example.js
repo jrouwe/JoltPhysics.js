@@ -24,8 +24,6 @@ function onWindowResize() {
 
 function initGraphics() {
 
-	container = document.getElementById('container');
-
 	renderer = new THREE.WebGLRenderer();
 	renderer.setClearColor(0xbfd1e5);
 	renderer.setPixelRatio(window.devicePixelRatio);
@@ -43,7 +41,6 @@ function initGraphics() {
 
 	controls = new THREE.OrbitControls(camera, container);
 
-	container.innerHTML = "";
 	container.appendChild(renderer.domElement);
 
 	stats = new Stats();
@@ -75,17 +72,19 @@ function updatePhysics(deltaTime) {
 }
 
 function initExample(updateFunction) {
-	// Detects webgl
-	if (!Detector.webgl) {
-		Detector.addGetWebGLMessage();
-		document.getElementById('container').innerHTML = "";
+	container = document.getElementById('container');
+	container.innerHTML = "";
+
+	if (WebGL.isWebGLAvailable()) {
+		onExampleUpdate = updateFunction;
+
+		initGraphics();
+		initPhysics();
+		renderExample();
+	} else {
+		const warning = WebGL.getWebGLErrorMessage();
+		container.appendChild(warning);
 	}
-
-	onExampleUpdate = updateFunction;
-
-	initGraphics();
-	initPhysics();
-	renderExample();
 }
 
 function renderExample() {
