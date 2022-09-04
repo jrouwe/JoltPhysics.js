@@ -41,7 +41,7 @@ function initGraphics() {
 	dirLight.position.set(10, 10, 5);
 	scene.add(dirLight);
 
-	controls = new THREE.OrbitControls(camera);
+	controls = new THREE.OrbitControls(camera, container);
 
 	container.innerHTML = "";
 	container.appendChild(renderer.domElement);
