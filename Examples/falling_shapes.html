@@ -87,24 +87,12 @@
 
 							// Get triangle data
 							var triContext = new Jolt.ShapeGetTriangles(shape, Jolt.AABox.prototype.sBiggest(), shape.GetCenterOfMass(), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(1, 1, 1));
-							var num_tris = triContext.GetNumTriangles();
 
-							// Convert to three mesh
+							// Get a view on the triangle data (does not make a copy)
+							var vertices = new Float32Array(Jolt.HEAPF32.buffer, triContext.GetVerticesData(), triContext.GetVerticesSize());
+
+							// Create a three object
 							const geometry = new THREE.BufferGeometry();
-							const vertices = new Float32Array(num_tris * 3 * 3);
-							var vtxIdx = 0;
-							var tmpVertex = [ new Jolt.Float3(), new Jolt.Float3(), new Jolt.Float3() ];
-							for (var t = 0; t < num_tris; t++) {
-								triContext.GetVertices(t, tmpVertex[0], tmpVertex[1], tmpVertex[2]);
-								for (var vtx = 0; vtx < 3; vtx++) {
-									vertices[vtxIdx] = tmpVertex[vtx].x;
-									vtxIdx++;
-									vertices[vtxIdx] = tmpVertex[vtx].y;
-									vtxIdx++;
-									vertices[vtxIdx] = tmpVertex[vtx].z;
-									vtxIdx++;
-								}								
-							}
 							geometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
 							geometry.computeVertexNormals();
 							threeObject = new THREE.Mesh(geometry, material)

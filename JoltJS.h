@@ -192,31 +192,35 @@ class ShapeGetTriangles
 public:
 							ShapeGetTriangles(const Shape *inShape, const AABox &inBox, Vec3Arg inPositionCOM, QuatArg inRotation, Vec3Arg inScale)
 	{
+		const size_t cBlockSize = 8096;
+
+		// Start iterating triangles
 		Shape::GetTrianglesContext context;
 		inShape->GetTrianglesStart(context, inBox, inPositionCOM, inRotation, inScale);
-		size_t cur_tri_pos = 0;
-		size_t cur_mat_pos = 0;
-		const size_t cBlockSize = 8096;
+
+		size_t cur_pos = 0;
 		for (;;)
 		{
-			size_t tri_left = (mVertices.size() - cur_tri_pos) / 3;
+			// Ensure we have space to get more triangles
+			size_t tri_left = mMaterials.size() - cur_pos;
 			if (tri_left < Shape::cGetTrianglesMinTrianglesRequested)
 			{
 				mVertices.resize(mVertices.size() + 3 * cBlockSize);
 				mMaterials.resize(mMaterials.size() + cBlockSize);
-				tri_left = (mVertices.size() - cur_tri_pos) / 3;
+				tri_left = mMaterials.size() - cur_pos;
 			}
 
-			int count = inShape->GetTrianglesNext(context, tri_left, mVertices.data() + cur_tri_pos, mMaterials.data() + cur_mat_pos);
+			// Fetch next batch
+			int count = inShape->GetTrianglesNext(context, tri_left, mVertices.data() + 3 * cur_pos, mMaterials.data() + cur_pos);
 			if (count == 0)
 			{
-				mVertices.resize(cur_tri_pos);
-				mMaterials.resize(cur_mat_pos);
+				// We're done
+				mVertices.resize(3 * cur_pos);
+				mMaterials.resize(cur_pos);
 				break;
 			}
 
-			cur_tri_pos += 3 * count;
-			cur_mat_pos += count;
+			cur_pos += count;
 		}
 	}
 
@@ -225,10 +229,14 @@ public:
 		return (int)mMaterials.size();
 	}
 
-	void					GetVertices(int inTriangle, Float3 &outV1, Float3 &outV2, Float3 &outV3) const
+	int						GetVerticesSize() const
 	{
-		int tri_start = inTriangle * 3;
-		outV1 = mVertices[tri_start], outV2 = mVertices[tri_start + 1], outV3 = mVertices[tri_start + 2];
+		return (int)mVertices.size() * sizeof(Float3);
+	}
+
+	const void *			GetVerticesData() const
+	{
+		return mVertices.data();
 	}
 		
 	const PhysicsMaterial *	GetMaterial(int inTriangle) const

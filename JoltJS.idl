@@ -111,10 +111,6 @@ interface PhysicsMaterial {
 };
 
 [Prefix="JPH::Shape::"]
-interface GetTrianglesContext {	
-};
-
-[Prefix="JPH::Shape::"]
 interface ShapeResult {
 	boolean IsValid();
 	boolean HasError();
@@ -144,7 +140,8 @@ interface ShapeGetTriangles
 {
 	void ShapeGetTriangles(Shape inShape, [Const, Ref] AABox inBox, [Const, Ref] Vec3 inPositionCOM, [Const, Ref] Quat inRotation, [Const, Ref] Vec3 inScale);
 	long GetNumTriangles();
-	void GetVertices(long inTriangle, [Ref] Float3 outV1, [Ref] Float3 outV2, [Ref] Float3 outV3); // TODO: Not a very efficient interface, need to figure out how to handle a Float32Array on the C++ side
+	long GetVerticesSize();
+	[Const] any GetVerticesData();
 	[Const] PhysicsMaterial GetMaterial(long inTriangle);
 };
 
