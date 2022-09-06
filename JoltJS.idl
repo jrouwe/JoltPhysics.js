@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2022 Jorrit Rouwe
+// SPDX-License-Identifier: MIT
+
 interface JPHString {
 	[Const] DOMString c_str(); // TODO: This is not a nice way to get a string from an interface
 };

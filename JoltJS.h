@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2022 Jorrit Rouwe
+// SPDX-License-Identifier: MIT
+
 #include "Jolt/Jolt.h"
 #include "Jolt/Math/Vec3.h"
 #include "Jolt/Math/Quat.h"
