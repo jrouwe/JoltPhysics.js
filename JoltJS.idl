@@ -149,25 +149,53 @@ interface ShapeGetTriangles
 };
 
 [Prefix="JPH::"]
+interface SphereShapeSettings {
+	void SphereShapeSettings(float inRadius, [Const] PhysicsMaterial inMaterial);
+};
+
+SphereShapeSettings implements ShapeSettings;
+
+[Prefix="JPH::"]
 interface SphereShape {
-	void SphereShape(float inRadius, PhysicsMaterial inMaterial);
+	void SphereShape(float inRadius, [Const] PhysicsMaterial inMaterial);
 };
 
 SphereShape implements Shape;
 
 [Prefix="JPH::"]
+interface BoxShapeSettings {
+	void BoxShapeSettings([Ref] Vec3 inHalfExtent, float inConvexRadius, [Const] PhysicsMaterial inMaterial);
+};
+
+BoxShapeSettings implements ShapeSettings;
+
+[Prefix="JPH::"]
 interface BoxShape {
-	void BoxShape([Ref] Vec3 inHalfExtent, float inConvexRadius, PhysicsMaterial inMaterial);
+	void BoxShape([Ref] Vec3 inHalfExtent, float inConvexRadius, [Const] PhysicsMaterial inMaterial);
 };
 
 BoxShape implements Shape;
 
 [Prefix="JPH::"]
+interface CylinderShapeSettings {
+	void CylinderShapeSettings(float inHalfHeight, float inRadius, float inConvexRadius, [Const] PhysicsMaterial inMaterial);
+};
+
+CylinderShapeSettings implements ShapeSettings;
+
+[Prefix="JPH::"]
 interface CylinderShape {
-	void CylinderShape(float inHalfHeight, float inRadius, float inConvexRadius, PhysicsMaterial inMaterial);
+	void CylinderShape(float inHalfHeight, float inRadius, float inConvexRadius, [Const] PhysicsMaterial inMaterial);
 };
 
 CylinderShape implements Shape;
+
+[Prefix="JPH::"]
+interface CapsuleShapeSettings {
+	void CapsuleShapeSettings(float inHalfHeight, float inRadius, PhysicsMaterial inMaterial);
+};
+
+CapsuleShapeSettings implements ShapeSettings;
 
 [Prefix="JPH::"]
 interface CapsuleShape {
@@ -175,6 +203,19 @@ interface CapsuleShape {
 };
 
 CapsuleShape implements Shape;
+
+[Prefix="JPH::"]
+interface TaperedCapsuleShapeSettings {
+	void TaperedCapsuleShapeSettings(float inHalfHeightOfTaperedCylinder, float inTopRadius, float inBottomRadius, [Const] PhysicsMaterial inMaterial);
+};
+
+TaperedCapsuleShapeSettings implements ShapeSettings;
+
+[Prefix="JPH::"]
+interface TaperedCapsuleShape {
+};
+
+TaperedCapsuleShape implements Shape;
 
 [Prefix="JPH::"]
 interface ConvexHullShapeSettings {

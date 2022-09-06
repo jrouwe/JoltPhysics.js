@@ -37,7 +37,7 @@
 
 				function generateObject() {
 
-					var numTypes = 5;
+					var numTypes = 6;
 					var objectType = Math.ceil(Math.random() * numTypes);
 
 					var threeObject = null;
@@ -79,24 +79,34 @@
 							break;
 
 						case 5:
+							// Tapered capsule
+							var topRadius = 0.1 + Math.random();
+							var bottomRadius = 0.5 + Math.random();
+							var height = topRadius + bottomRadius + Math.random();
+							shape = new Jolt.TaperedCapsuleShapeSettings(0.5 * height, topRadius, bottomRadius, null).Create().Get();
+							break;
+
+						case 6:
 							// Convex hull
 							var hull = new Jolt.ConvexHullShapeSettings;
 							for (var p = 0; p < 10; ++p)
 								hull.mPoints.push_back(new Jolt.Vec3(-0.5 + 2 * Math.random(), -0.5 + 2 * Math.random(), -0.5 + 2 * Math.random()));
 							shape = hull.Create().Get();
-
-							// Get triangle data
-							var triContext = new Jolt.ShapeGetTriangles(shape, Jolt.AABox.prototype.sBiggest(), shape.GetCenterOfMass(), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(1, 1, 1));
-
-							// Get a view on the triangle data (does not make a copy)
-							var vertices = new Float32Array(Jolt.HEAPF32.buffer, triContext.GetVerticesData(), triContext.GetVerticesSize());
-
-							// Create a three object
-							const geometry = new THREE.BufferGeometry();
-							geometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
-							geometry.computeVertexNormals();
-							threeObject = new THREE.Mesh(geometry, material)
 							break;
+					}
+
+					if (threeObject == null) {
+						// Get triangle data
+						var triContext = new Jolt.ShapeGetTriangles(shape, Jolt.AABox.prototype.sBiggest(), shape.GetCenterOfMass(), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(1, 1, 1));
+
+						// Get a view on the triangle data (does not make a copy)
+						var vertices = new Float32Array(Jolt.HEAPF32.buffer, triContext.GetVerticesData(), triContext.GetVerticesSize());
+
+						// Create a three object
+						const geometry = new THREE.BufferGeometry();
+						geometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
+						geometry.computeVertexNormals();
+						threeObject = new THREE.Mesh(geometry, material)						
 					}
 
 					// Position and rotate visual mesh

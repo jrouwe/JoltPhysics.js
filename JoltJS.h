@@ -11,6 +11,7 @@
 #include "Jolt/Physics/Collision/Shape/SphereShape.h"
 #include "Jolt/Physics/Collision/Shape/BoxShape.h"
 #include "Jolt/Physics/Collision/Shape/CapsuleShape.h"
+#include "Jolt/Physics/Collision/Shape/TaperedCapsuleShape.h"
 #include "Jolt/Physics/Collision/Shape/CylinderShape.h"
 #include "Jolt/Physics/Collision/Shape/ConvexHullShape.h"
 #include "Jolt/Physics/Body/BodyInterface.h"
@@ -155,10 +156,10 @@ public:
 		RegisterTypes();
 		
 		// Init the physics system
-		const uint cMaxBodies = 1024;
-		const uint cNumBodyMutexes = 0;
-		const uint cMaxBodyPairs = 1024;
-		const uint cMaxContactConstraints = 1024;
+		constexpr uint cMaxBodies = 10240;
+		constexpr uint cNumBodyMutexes = 0;
+		constexpr uint cMaxBodyPairs = 65536;
+		constexpr uint cMaxContactConstraints = 10240;
 		mPhysicsSystem.Init(cMaxBodies, cNumBodyMutexes, cMaxBodyPairs, cMaxContactConstraints, mBPLayerInterface, MyBroadPhaseCanCollide, MyObjectCanCollide);
 	}
 
@@ -237,7 +238,7 @@ public:
 		return (int)mVertices.size() * sizeof(Float3);
 	}
 
-	const void *			GetVerticesData() const
+	const Float3 *			GetVerticesData() const
 	{
 		return mVertices.data();
 	}
