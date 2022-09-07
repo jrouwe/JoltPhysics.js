@@ -76,6 +76,7 @@ interface Quat {
 	void Quat();
 	void Quat(float inX, float inY, float inZ, float inW);
 	[Value] static Quat sIdentity();
+	[Value] static Quat sRotation([Const, Ref] Vec3 inRotation, float inAngle);
 	float Length();
 	float GetX();
 	float GetY();
@@ -216,6 +217,20 @@ interface TaperedCapsuleShape {
 };
 
 TaperedCapsuleShape implements Shape;
+
+[Prefix="JPH::"]
+interface StaticCompoundShapeSettings {
+	void StaticCompoundShapeSettings();
+	void AddShape([Const, Ref] Vec3 inPosition, [Const, Ref] Quat inRotation, [Const] ShapeSettings inShape, unsigned long inUserData);
+};
+
+StaticCompoundShapeSettings implements ShapeSettings;
+
+[Prefix="JPH::"]
+interface StaticCompoundShape {
+};
+
+StaticCompoundShape implements Shape;
 
 [Prefix="JPH::"]
 interface ConvexHullShapeSettings {

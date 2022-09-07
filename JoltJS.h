@@ -14,6 +14,8 @@
 #include "Jolt/Physics/Collision/Shape/TaperedCapsuleShape.h"
 #include "Jolt/Physics/Collision/Shape/CylinderShape.h"
 #include "Jolt/Physics/Collision/Shape/ConvexHullShape.h"
+#include "Jolt/Physics/Collision/Shape/StaticCompoundShape.h"
+#include "Jolt/Physics/Collision/CollisionCollectorImpl.h"
 #include "Jolt/Physics/Body/BodyInterface.h"
 #include "Jolt/Physics/Body/BodyCreationSettings.h"
 
@@ -198,33 +200,42 @@ public:
 	{
 		const size_t cBlockSize = 8096;
 
-		// Start iterating triangles
-		Shape::GetTrianglesContext context;
-		inShape->GetTrianglesStart(context, inBox, inPositionCOM, inRotation, inScale);
+		// First collect all leaf shapes
+		AllHitCollisionCollector<TransformedShapeCollector> collector;
+		inShape->CollectTransformedShapes(inBox, inPositionCOM, inRotation, inScale, SubShapeIDCreator(), collector, { });
 
 		size_t cur_pos = 0;
-		for (;;)
+
+		// Iterate the leaf shapes
+		for (const TransformedShape &ts : collector.mHits)
 		{
-			// Ensure we have space to get more triangles
-			size_t tri_left = mMaterials.size() - cur_pos;
-			if (tri_left < Shape::cGetTrianglesMinTrianglesRequested)
-			{
-				mVertices.resize(mVertices.size() + 3 * cBlockSize);
-				mMaterials.resize(mMaterials.size() + cBlockSize);
-				tri_left = mMaterials.size() - cur_pos;
-			}
+			// Start iterating triangles
+			Shape::GetTrianglesContext context;
+			ts.GetTrianglesStart(context, inBox);
 
-			// Fetch next batch
-			int count = inShape->GetTrianglesNext(context, tri_left, mVertices.data() + 3 * cur_pos, mMaterials.data() + cur_pos);
-			if (count == 0)
+			for (;;)
 			{
-				// We're done
-				mVertices.resize(3 * cur_pos);
-				mMaterials.resize(cur_pos);
-				break;
-			}
+				// Ensure we have space to get more triangles
+				size_t tri_left = mMaterials.size() - cur_pos;
+				if (tri_left < Shape::cGetTrianglesMinTrianglesRequested)
+				{
+					mVertices.resize(mVertices.size() + 3 * cBlockSize);
+					mMaterials.resize(mMaterials.size() + cBlockSize);
+					tri_left = mMaterials.size() - cur_pos;
+				}
 
-			cur_pos += count;
+				// Fetch next batch
+				int count = ts.GetTrianglesNext(context, tri_left, mVertices.data() + 3 * cur_pos, mMaterials.data() + cur_pos);
+				if (count == 0)
+				{
+					// We're done
+					mVertices.resize(3 * cur_pos);
+					mMaterials.resize(cur_pos);
+					break;
+				}
+
+				cur_pos += count;
+			}
 		}
 	}
 
