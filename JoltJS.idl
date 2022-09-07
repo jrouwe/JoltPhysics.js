@@ -279,6 +279,21 @@ interface OffsetCenterOfMassShape {
 OffsetCenterOfMassShape implements Shape;
 
 [Prefix="JPH::"]
+interface RotatedTranslatedShapeSettings {
+	void RotatedTranslatedShapeSettings([Ref, Const] Vec3 inPosition, [Ref, Const] Quat inRotation, ShapeSettings inShape);
+	[Value] attribute Vec3 mPosition;
+	[Value] attribute Quat mRotation;
+};
+
+RotatedTranslatedShapeSettings implements ShapeSettings;
+
+[Prefix="JPH::"]
+interface RotatedTranslatedShape {
+};
+
+RotatedTranslatedShape implements Shape;
+
+[Prefix="JPH::"]
 interface BodyID {
 	void BodyID();
 	void BodyID([Const, Ref] BodyID inID);
