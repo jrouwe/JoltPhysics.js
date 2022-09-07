@@ -250,6 +250,35 @@ interface ConvexHullShape {
 ConvexHullShape implements Shape;
 
 [Prefix="JPH::"]
+interface ScaledShapeSettings {
+	void ScaledShapeSettings(ShapeSettings inShape, [Ref, Const] Vec3 inScale);
+	[Value] attribute Vec3 mScale;
+};
+
+ScaledShapeSettings implements ShapeSettings;
+
+[Prefix="JPH::"]
+interface ScaledShape {
+	void ScaledShape(Shape inShape, [Ref, Const] Vec3 inScale);
+};
+
+ScaledShape implements Shape;
+
+[Prefix="JPH::"]
+interface OffsetCenterOfMassShapeSettings {
+	void OffsetCenterOfMassShapeSettings([Ref, Const] Vec3 inOffset, ShapeSettings inShape);
+	[Value] attribute Vec3 mOffset;
+};
+
+OffsetCenterOfMassShapeSettings implements ShapeSettings;
+
+[Prefix="JPH::"]
+interface OffsetCenterOfMassShape {
+};
+
+OffsetCenterOfMassShape implements Shape;
+
+[Prefix="JPH::"]
 interface BodyID {
 	void BodyID();
 	void BodyID([Const, Ref] BodyID inID);
