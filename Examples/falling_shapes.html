@@ -35,6 +35,9 @@
 				// Create a basic floor
 				createFloor();
 
+				// Create example mesh
+				createMeshFloor(30, 1, 4, -5, 5, 0);
+
 				function generateObject() {
 
 					let numTypes = 8;
@@ -119,26 +122,15 @@
 							threeObject = new THREE.Mesh(new THREE.SphereGeometry(radius, 20, 20), material);
 							shape = new Jolt.OffsetCenterOfMassShapeSettings(new Jolt.Vec3(0, -0.1 * radius, 0), new Jolt.SphereShapeSettings(radius, null)).Create().Get();
 							break;
-							
 						}
 					}
 
-					if (threeObject == null) {
-						// Get triangle data
-						let triContext = new Jolt.ShapeGetTriangles(shape, Jolt.AABox.prototype.sBiggest(), shape.GetCenterOfMass(), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(1, 1, 1));
-
-						// Get a view on the triangle data (does not make a copy)
-						let vertices = new Float32Array(Jolt.HEAPF32.buffer, triContext.GetVerticesData(), triContext.GetVerticesSize());
-
-						// Create a three object
-						let geometry = new THREE.BufferGeometry();
-						geometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
-						geometry.computeVertexNormals();
-						threeObject = new THREE.Mesh(geometry, material)
-					}
+					// Optionally create mesh
+					if (threeObject == null)
+						threeObject = getThreeMeshForShape(shape, material);
 
 					// Position and rotate visual mesh
-					threeObject.position.set((Math.random() - 0.5) * 25, 10, (Math.random() - 0.5) * 25);
+					threeObject.position.set((Math.random() - 0.5) * 25, 15, (Math.random() - 0.5) * 25);
 					threeObject.quaternion.random();
 
 					// Create physics body

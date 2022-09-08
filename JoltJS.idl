@@ -9,6 +9,7 @@ interface ArrayVec3 {
 	long size();
 	[Ref] Vec3 at(long inIndex);
 	void push_back([Const, Ref] Vec3 inValue);
+	void reserve(unsigned long inSize);
 };
 
 enum Layers {
@@ -43,7 +44,6 @@ enum EShapeType {
 enum EShapeSubType {
 	"EShapeSubType::Sphere",
 	"EShapeSubType::Box",
-	"EShapeSubType::Triangle",
 	"EShapeSubType::Capsule",
 	"EShapeSubType::TaperedCapsule",
 	"EShapeSubType::Cylinder",
@@ -112,6 +112,57 @@ interface AABox {
 
 [Prefix="JPH::"]
 interface PhysicsMaterial {
+	void PhysicsMaterial();
+};
+
+[Prefix="JPH::"]
+interface PhysicsMaterialList {
+	void PhysicsMaterialList();
+	[Const] PhysicsMaterial at(long inIndex);
+	void push_back(PhysicsMaterial inMaterial);
+	void reserve(unsigned long inSize);
+};
+
+[Prefix="JPH::"]
+interface Triangle {
+	void Triangle();
+	void Triangle([Const, Ref] Vec3 inV1, [Const, Ref] Vec3 inV2, [Const, Ref] Vec3 inV3);
+
+	[Value] attribute Float3[] mV;
+	attribute unsigned long mMaterialIndex;
+};
+
+[Prefix="JPH::"]
+interface TriangleList {
+	void TriangleList();
+	[Value] Triangle at(long inIndex);
+	void push_back([Const, Ref] Triangle inTriangle);
+	void reserve(unsigned long inSize);
+};
+
+[Prefix="JPH::"]
+interface VertexList {
+	void VertexList();
+	[Value] Float3 at(long inIndex);
+	void push_back([Const, Ref] Float3 inVertex);
+	void reserve(unsigned long inSize);
+};
+
+[Prefix="JPH::"]
+interface IndexedTriangle {
+	void IndexedTriangle();
+	void IndexedTriangle(unsigned long inI1, unsigned long inI2, unsigned long inI3, unsigned long inMaterialIndex);
+
+	attribute unsigned long[] mIdx;
+	attribute unsigned long mMaterialIndex;
+};
+
+[Prefix="JPH::"]
+interface IndexedTriangleList {
+	void IndexedTriangleList();
+	[Value] IndexedTriangle at(long inIndex);
+	void push_back([Const, Ref] IndexedTriangle inTriangle);
+	void reserve(unsigned long inSize);
 };
 
 [Prefix="JPH::Shape::"]
@@ -292,6 +343,20 @@ interface RotatedTranslatedShape {
 };
 
 RotatedTranslatedShape implements Shape;
+
+[Prefix="JPH::"]
+interface MeshShapeSettings {
+	void MeshShapeSettings([Ref, Const] TriangleList inTriangleList, [Ref, Const] PhysicsMaterialList inMaterialList);
+	void MeshShapeSettings([Ref, Const] VertexList inVertices, [Ref, Const] IndexedTriangleList inTriangles, [Ref, Const] PhysicsMaterialList inMaterialList);	
+};
+
+MeshShapeSettings  implements ShapeSettings;
+
+[Prefix="JPH::"]
+interface MeshShape {
+};
+
+MeshShape implements Shape;
 
 [Prefix="JPH::"]
 interface BodyID {
