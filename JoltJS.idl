@@ -59,6 +59,11 @@ enum EShapeSubType {
 	"EShapeSubType::HeightField"
 };
 
+enum EConstraintSpace {
+	"EConstraintSpace::LocalToBodyCOM",
+	"EConstraintSpace::WorldSpace"
+};
+
 [Prefix="JPH::"]
 interface Vec3 {
 	void Vec3();
@@ -417,13 +422,107 @@ interface MeshShapeSettings {
 	void MeshShapeSettings([Ref, Const] VertexList inVertices, [Ref, Const] IndexedTriangleList inTriangles, [Ref, Const] PhysicsMaterialList inMaterialList);	
 };
 
-MeshShapeSettings  implements ShapeSettings;
+MeshShapeSettings implements ShapeSettings;
 
 [Prefix="JPH::"]
 interface MeshShape {
 };
 
 MeshShape implements Shape;
+
+// Constraint
+[Prefix="JPH::"]
+interface ConstraintSettings {
+	attribute boolean mEnabled;
+	attribute long mNumVelocityStepsOverride;
+	attribute long mNumPositionStepsOverride;
+};
+
+[Prefix="JPH::"]
+interface Constraint {
+	void SetEnabled(boolean inEnabled);
+	boolean GetEnabled();
+};
+
+// Two body constraint
+[Prefix="JPH::"]
+interface TwoBodyConstraintSettings {
+	Constraint Create([Ref] Body inBody1, [Ref] Body inBody2);
+};
+
+TwoBodyConstraintSettings implements ConstraintSettings;
+
+[Prefix="JPH::"]
+interface TwoBodyConstraint {
+	Body GetBody1();
+	Body GetBody2();
+};
+
+TwoBodyConstraint implements Constraint;
+
+// Fixed constraint
+[Prefix="JPH::"]
+interface FixedConstraintSettings {
+	void FixedConstraintSettings();
+	
+	attribute EConstraintSpace mSpace;
+	attribute boolean mAutoDetectPoint;
+	[Value] attribute Vec3 mPoint1;
+	[Value] attribute Vec3 mAxisX1;
+	[Value] attribute Vec3 mAxisY1;
+	[Value] attribute Vec3 mPoint2;
+	[Value] attribute Vec3 mAxisX2;
+	[Value] attribute Vec3 mAxisY2;
+};
+
+FixedConstraintSettings implements TwoBodyConstraintSettings;
+
+// Distance constraint
+[Prefix="JPH::"]
+interface DistanceConstraintSettings {
+	void DistanceConstraintSettings();
+	
+	attribute EConstraintSpace mSpace;
+	[Value] attribute Vec3 mPoint1;
+	[Value] attribute Vec3 mPoint2;
+	attribute float mMinDistance;
+	attribute float mMaxDistance;
+	attribute float mFrequency;
+	attribute float mDamping;
+};
+
+DistanceConstraintSettings implements TwoBodyConstraintSettings;
+
+// Point constraint
+[Prefix="JPH::"]
+interface PointConstraintSettings {
+	void PointConstraintSettings();
+	
+	attribute EConstraintSpace mSpace;
+	[Value] attribute Vec3 mPoint1;
+	[Value] attribute Vec3 mPoint2;
+};
+
+PointConstraintSettings implements TwoBodyConstraintSettings;
+
+// Hinge constraint
+[Prefix="JPH::"]
+interface HingeConstraintSettings {
+	void HingeConstraintSettings();
+	
+	attribute EConstraintSpace mSpace;
+	[Value] attribute Vec3 mPoint1;
+	[Value] attribute Vec3 mHingeAxis1;
+	[Value] attribute Vec3 mNormalAxis1;
+	[Value] attribute Vec3 mPoint2;
+	[Value] attribute Vec3 mHingeAxis2;
+	[Value] attribute Vec3 mNormalAxis2;
+	attribute float mLimitsMin;
+	attribute float mLimitsMax;
+	attribute float mMaxFrictionTorque;
+};
+
+HingeConstraintSettings implements TwoBodyConstraintSettings;
 
 [Prefix="JPH::"]
 interface BodyID {
@@ -531,6 +630,8 @@ interface PhysicsSystem {
 	unsigned long GetNumBodies();
 	unsigned long GetNumActiveBodies();
 	unsigned long GetMaxBodies();
+	void AddConstraint(Constraint inConstraint);
+	void RemoveConstraint(Constraint inConstraint);
 };
 
 [Prefix="JPH::"]

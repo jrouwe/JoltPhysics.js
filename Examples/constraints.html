@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>JoltPhysics.js demo</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<link rel="stylesheet" type="text/css" href="style.css">
+	</head>
+	<body>
+		<div id="container">Loading...</div>
+		<div id="info">JoltPhysics.js demo</div>
+
+		<script src="js/jolt.js"></script>
+		<script src="js/three/three.min.js"></script>
+		<script src="js/three/OrbitControls.js"></script>
+		<script src="js/three/WebGL.js"></script>
+		<script src="js/three/stats.min.js"></script>
+		<script src="js/example.js"></script>
+
+		<script>
+
+			Jolt().then(function (Jolt) {
+
+				// Initialize this example
+				initExample(onUpdate);
+
+				// Better position the camera
+				camera.position.set(10, 30, 30);
+
+				// Create a basic floor
+				createFloor();
+
+				let material = new THREE.MeshPhongMaterial({ color: 0xff0000 });
+				let boxGeom = new THREE.BoxGeometry(1, 1, 1, 1, 1, 1);
+				let shape = new Jolt.BoxShape(new Jolt.Vec3(0.5, 0.5, 0.5), 0.002, null);
+				let creationSettings = new Jolt.BodyCreationSettings(shape, new Jolt.Vec3(-15, 20, 0), Jolt.Quat.prototype.sIdentity(), Jolt.Dynamic, Jolt.MOVING);
+
+				function createBody(creationSettings, z) {
+					creationSettings.mMotionType = z == 0 ? Jolt.Static : Jolt.Dynamic;
+					creationSettings.mObjectLayer = z == 0 ? Jolt.NON_MOVING : Jolt.MOVING;
+					creationSettings.mPosition.SetZ(z);
+
+					let body = bodyInterface.CreateBody(creationSettings);
+					let threeObject = new THREE.Mesh(boxGeom, material);
+					addToScene(threeObject, body);
+
+					return body;
+				}
+
+				// Fixed constraint
+				{
+					let constraintSettings = new Jolt.FixedConstraintSettings();
+					constraintSettings.mAutoDetectPoint = true;
+					let prevBody = null;
+
+					for (let z = 0; z < 10; ++z) {
+						let body = createBody(creationSettings, z);
+
+						if (prevBody != null) {
+							physicsSystem.AddConstraint(constraintSettings.Create(prevBody, body));
+						}
+
+						prevBody = body;
+					}
+				}
+
+				// Point constraint
+				creationSettings.mPosition.SetX(creationSettings.mPosition.GetX() + 5);
+				{
+					let constraintSettings = new Jolt.PointConstraintSettings();
+					constraintSettings.mPoint1 = constraintSettings.mPoint2 = creationSettings.mPosition;
+					let prevBody = null;
+
+					for (let z = 0; z < 10; ++z) {
+						let body = createBody(creationSettings, z);
+
+						if (prevBody != null) {
+							constraintSettings.mPoint1.SetZ(z - 0.5);
+							constraintSettings.mPoint2.SetZ(z - 0.5);
+							physicsSystem.AddConstraint(constraintSettings.Create(prevBody, body));
+						}
+
+						prevBody = body;
+					}
+				}
+
+				// Distance constraint
+				creationSettings.mPosition.SetX(creationSettings.mPosition.GetX() + 5);
+				{
+					let constraintSettings = new Jolt.DistanceConstraintSettings();
+					constraintSettings.mPoint1 = constraintSettings.mPoint2 = creationSettings.mPosition;
+					constraintSettings.mMinDistance = 0;
+					constraintSettings.mMaxDistance = 1;
+					let prevBody = null;
+
+					for (let z = 0; z < 10; ++z) {
+						let body = createBody(creationSettings, z);
+
+						if (prevBody != null) {
+							constraintSettings.mPoint1.SetZ(z - 0.5);
+							constraintSettings.mPoint2.SetZ(z - 0.5);
+							physicsSystem.AddConstraint(constraintSettings.Create(prevBody, body));
+						}
+
+						prevBody = body;
+					}
+				}
+
+				// Hinge constraint
+				creationSettings.mPosition.SetX(creationSettings.mPosition.GetX() + 5);
+				{
+					let constraintSettings = new Jolt.HingeConstraintSettings();
+					constraintSettings.mPoint1 = constraintSettings.mPoint2 = new Jolt.Vec3(creationSettings.mPosition.GetX(), creationSettings.mPosition.GetY() - 0.5, creationSettings.mPosition.GetZ());
+					constraintSettings.mHingeAxis1 = constraintSettings.mHingeAxis2 = new Jolt.Vec3(1, 0, 0);
+					constraintSettings.mNormalAxis1 = constraintSettings.mNormalAxis2 = new Jolt.Vec3(0, 1, 0);
+					
+					let prevBody = null;
+
+					for (let z = 0; z < 10; ++z) {
+						let body = createBody(creationSettings, z);
+
+						if (prevBody != null) {
+							constraintSettings.mPoint1.SetZ(z - 0.5);
+							constraintSettings.mPoint2.SetZ(z - 0.5);
+							physicsSystem.AddConstraint(constraintSettings.Create(prevBody, body));
+						}
+
+						prevBody = body;
+					}
+				}
+
+				function onUpdate(time, deltaTime) {
+					// Nothing for this test
+				}
+			});
+
+		</script>
+	</body>
+</html>

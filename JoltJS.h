@@ -20,6 +20,10 @@
 #include "Jolt/Physics/Collision/Shape/RotatedTranslatedShape.h"
 #include "Jolt/Physics/Collision/Shape/MeshShape.h"
 #include "Jolt/Physics/Collision/CollisionCollectorImpl.h"
+#include "Jolt/Physics/Constraints/FixedConstraint.h"
+#include "Jolt/Physics/Constraints/PointConstraint.h"
+#include "Jolt/Physics/Constraints/DistanceConstraint.h"
+#include "Jolt/Physics/Constraints/HingeConstraint.h"
 #include "Jolt/Physics/Body/BodyInterface.h"
 #include "Jolt/Physics/Body/BodyCreationSettings.h"
 

@@ -133,9 +133,9 @@
 
 					// Create physics body
 					let pos = threeObject.position, rot = threeObject.quaternion;
-					let creation_settings = new Jolt.BodyCreationSettings(shape, new Jolt.Vec3(pos.x, pos.y, pos.z), new Jolt.Quat(rot.x, rot.y, rot.z, rot.w), Jolt.Dynamic, Jolt.MOVING);
-					creation_settings.mRestitution = 0.5;
-					let body = bodyInterface.CreateBody(creation_settings);
+					let creationSettings = new Jolt.BodyCreationSettings(shape, new Jolt.Vec3(pos.x, pos.y, pos.z), new Jolt.Quat(rot.x, rot.y, rot.z, rot.w), Jolt.Dynamic, Jolt.MOVING);
+					creationSettings.mRestitution = 0.5;
+					let body = bodyInterface.CreateBody(creationSettings);
 
 					addToScene(threeObject, body);
 				}
