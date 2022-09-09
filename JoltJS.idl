@@ -560,6 +560,27 @@ interface SliderConstraintSettings {
 
 SliderConstraintSettings implements TwoBodyConstraintSettings;
 
+// Swing twist constraint
+[Prefix="JPH::"]
+interface SwingTwistConstraintSettings {
+	void SwingTwistConstraintSettings();
+	
+	attribute EConstraintSpace mSpace;
+	[Value] attribute Vec3 mPosition1;
+	[Value] attribute Vec3 mTwistAxis1;
+	[Value] attribute Vec3 mPlaneAxis1;
+	[Value] attribute Vec3 mPosition2;
+	[Value] attribute Vec3 mTwistAxis2;
+	[Value] attribute Vec3 mPlaneAxis2;
+	attribute float mNormalHalfConeAngle;
+	attribute float mPlaneHalfConeAngle;
+	attribute float mTwistMinAngle;
+	attribute float mTwistMaxAngle;
+	attribute float mMaxFrictionTorque;
+};
+
+SwingTwistConstraintSettings implements TwoBodyConstraintSettings;
+
 [Prefix="JPH::"]
 interface BodyID {
 	void BodyID();

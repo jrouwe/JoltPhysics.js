@@ -96,7 +96,8 @@ function renderExample() {
 
 	var deltaTime = clock.getDelta();
 
-	onExampleUpdate(time, deltaTime);
+	if (onExampleUpdate != null)
+		onExampleUpdate(time, deltaTime);
 
 	// Update object transforms
 	for (let i = 0, il = dynamicObjects.length; i < il; i++) {
