@@ -559,6 +559,32 @@ interface MotionProperties {
 };
 
 [Prefix="JPH::"]
+interface GroupFilter {
+};
+
+[Prefix="JPH::"]
+interface GroupFilterTable {
+	void GroupFilterTable(unsigned long inNumGroups);
+	void DisableCollision(unsigned long inSubGroup1, unsigned long inSubGroup2);
+	void EnableCollision(unsigned long inSubGroup1, unsigned long inSubGroup2);
+	boolean IsCollisionEnabled(unsigned long inSubGroup1, unsigned long inSubGroup2);
+};
+
+GroupFilterTable implements GroupFilter;
+
+[Prefix="JPH::"]
+interface CollisionGroup {
+	void CollisionGroup();
+	void CollisionGroup(GroupFilter inFilter, unsigned long inGroupID, unsigned long inSubGroupID);
+	void SetGroupFilter(GroupFilter inFilter);
+	[Const] GroupFilter GetGroupFilter();
+	void SetGroupID(unsigned long inGroupID);
+	unsigned long GetGroupID();
+	void SetSubGroupID(unsigned long inSubGroupID);
+	void GetSubGroupID();
+};
+
+[Prefix="JPH::"]
 interface Body {
 	[Value] BodyID GetID();
 	boolean IsActive();
@@ -571,6 +597,7 @@ interface Body {
 	void SetIsSensor(boolean inIsSensor);
 	boolean IsSensor();
 	unsigned long GetObjectLayer();
+	[Ref] CollisionGroup GetCollisionGroup();
 	boolean GetAllowSleeping();
 	void SetAllowSleeping(boolean inAllow);
 	float GetFriction();
@@ -644,6 +671,7 @@ interface BodyCreationSettings {
 	[Value] attribute Vec3 mAngularVelocity;
 	attribute long long mUserData;
 	attribute short mObjectLayer;
+	[Value] attribute CollisionGroup mCollisionGroup;
 	attribute EMotionType mMotionType;
 	attribute boolean mAllowDynamicOrKinematic;
 	attribute boolean mIsSensor;

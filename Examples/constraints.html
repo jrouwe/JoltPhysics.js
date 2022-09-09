@@ -30,15 +30,22 @@
 				// Create a basic floor
 				createFloor();
 
+				// Create group filter that filters out collisions between body N and N + 1 in the same chain
+				let filter = new Jolt.GroupFilterTable(10);
+				for (let z = 0; z < 10; ++z)
+					filter.DisableCollision(z, z + 1);
+
 				let material = new THREE.MeshPhongMaterial({ color: 0xff0000 });
 				let boxGeom = new THREE.BoxGeometry(1, 1, 1, 1, 1, 1);
 				let shape = new Jolt.BoxShape(new Jolt.Vec3(0.5, 0.5, 0.5), 0.002, null);
 				let creationSettings = new Jolt.BodyCreationSettings(shape, new Jolt.Vec3(-15, 20, 0), Jolt.Quat.prototype.sIdentity(), Jolt.Dynamic, Jolt.MOVING);
+				creationSettings.mCollisionGroup.SetGroupFilter(filter);
 
 				function createBody(creationSettings, z) {
 					creationSettings.mMotionType = z == 0 ? Jolt.Static : Jolt.Dynamic;
 					creationSettings.mObjectLayer = z == 0 ? Jolt.NON_MOVING : Jolt.MOVING;
 					creationSettings.mPosition.SetZ(z);
+					creationSettings.mCollisionGroup.SetSubGroupID(z);
 
 					let body = bodyInterface.CreateBody(creationSettings);
 					let threeObject = new THREE.Mesh(boxGeom, material);
@@ -48,6 +55,7 @@
 				}
 
 				// Fixed constraint
+				creationSettings.mCollisionGroup.SetGroupID(0);
 				{
 					let constraintSettings = new Jolt.FixedConstraintSettings();
 					constraintSettings.mAutoDetectPoint = true;
@@ -65,6 +73,7 @@
 				}
 
 				// Point constraint
+				creationSettings.mCollisionGroup.SetGroupID(creationSettings.mCollisionGroup.GetGroupID() + 1);
 				creationSettings.mPosition.SetX(creationSettings.mPosition.GetX() + 5);
 				{
 					let constraintSettings = new Jolt.PointConstraintSettings();
@@ -85,6 +94,7 @@
 				}
 
 				// Distance constraint
+				creationSettings.mCollisionGroup.SetGroupID(creationSettings.mCollisionGroup.GetGroupID() + 1);
 				creationSettings.mPosition.SetX(creationSettings.mPosition.GetX() + 5);
 				{
 					let constraintSettings = new Jolt.DistanceConstraintSettings();
@@ -107,6 +117,7 @@
 				}
 
 				// Hinge constraint
+				creationSettings.mCollisionGroup.SetGroupID(creationSettings.mCollisionGroup.GetGroupID() + 1);
 				creationSettings.mPosition.SetX(creationSettings.mPosition.GetX() + 5);
 				{
 					let constraintSettings = new Jolt.HingeConstraintSettings();
