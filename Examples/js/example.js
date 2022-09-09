@@ -11,6 +11,9 @@ var jolt;
 var physicsSystem;
 var bodyInterface;
 
+// List of objects spawned
+var dynamicObjects = [];
+
 // The update function
 var onExampleUpdate;
 
@@ -95,6 +98,16 @@ function renderExample() {
 
 	onExampleUpdate(time, deltaTime);
 
+	// Update object transforms
+	for (let i = 0, il = dynamicObjects.length; i < il; i++) {
+		let objThree = dynamicObjects[i];
+		let body = dynamicObjects[i].userData.body;
+		let p = body.GetPosition();
+		let q = body.GetRotation();
+		objThree.position.set(p.GetX(), p.GetY(), p.GetZ());
+		objThree.quaternion.set(q.GetX(), q.GetY(), q.GetZ(), q.GetW());
+	}
+
 	time += deltaTime;
 
 	updatePhysics(deltaTime);
@@ -106,14 +119,25 @@ function renderExample() {
 	stats.update();
 }
 
+function addToScene(threeObject, body) {
+	bodyInterface.AddBody(body.GetID(), Jolt.Activate);
+
+	threeObject.userData.body = body;
+
+	scene.add(threeObject);
+	dynamicObjects.push(threeObject);
+}
+
 function createFloor() {
-	// Create floor
-	scene.add(new THREE.Mesh(new THREE.BoxGeometry(100, 1, 100, 1, 1, 1), new THREE.MeshPhongMaterial({ color: 0xC7C7C7 })));
+	// Create floor mesh
+	let threeObject = new THREE.Mesh(new THREE.BoxGeometry(100, 1, 100, 1, 1, 1), new THREE.MeshPhongMaterial({ color: 0xC7C7C7 }));
 
 	// Create corresponding physics object
 	var shape = new Jolt.BoxShape(new Jolt.Vec3(50, 0.5, 50), 0.001, null);
 	var creation_settings = new Jolt.BodyCreationSettings(shape, new Jolt.Vec3(0, 0, 0), new Jolt.Quat(0, 0, 0, 1), Jolt.Static, Jolt.NON_MOVING);
-	bodyInterface.CreateAndAddBody(creation_settings, Jolt.DontActivate);
+	let body = bodyInterface.CreateBody(creation_settings);
+
+	addToScene(threeObject, body);
 }
 
 function getThreeMeshForShape(shape, material) {
@@ -123,7 +147,7 @@ function getThreeMeshForShape(shape, material) {
 	// Get a view on the triangle data (does not make a copy)
 	let vertices = new Float32Array(Jolt.HEAPF32.buffer, triContext.GetVerticesData(), triContext.GetVerticesSize());
 
-	// Create a three object
+	// Create a three mesh
 	let geometry = new THREE.BufferGeometry();
 	geometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
 	geometry.computeVertexNormals();
@@ -164,10 +188,11 @@ function createMeshFloor(n, cell_size, max_height, posX, posY, posZ) {
 
 	// Create body
 	let creation_settings = new Jolt.BodyCreationSettings(shape, new Jolt.Vec3(posX, posY, posZ), new Jolt.Quat(0, 0, 0, 1), Jolt.Static, Jolt.NON_MOVING);
-	bodyInterface.CreateAndAddBody(creation_settings, Jolt.DontActivate);
+	let body = bodyInterface.CreateBody(creation_settings);
 
 	// Create corresponding three mesh
 	let threeObject = getThreeMeshForShape(shape, new THREE.MeshPhongMaterial({ color: 0xC7C7C7 }));
 	threeObject.position.set(posX, posY, posZ);
-	scene.add(threeObject);
+
+	addToScene(threeObject, body);
 }
