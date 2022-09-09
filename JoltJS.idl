@@ -75,6 +75,7 @@ interface Vec3 {
 	[Operator="[]"] float GetComponent(unsigned long inCoordinate);
 	float Length();
 	[Value] Vec3 Normalized();
+	[Value] Vec3 GetNormalizedPerpendicular();
 	float GetX();
 	float GetY();
 	float GetZ();
@@ -523,6 +524,41 @@ interface HingeConstraintSettings {
 };
 
 HingeConstraintSettings implements TwoBodyConstraintSettings;
+
+// Cone constraint
+[Prefix="JPH::"]
+interface ConeConstraintSettings {
+	void ConeConstraintSettings();
+	
+	attribute EConstraintSpace mSpace;
+	[Value] attribute Vec3 mPoint1;
+	[Value] attribute Vec3 mTwistAxis1;
+	[Value] attribute Vec3 mPoint2;
+	[Value] attribute Vec3 mTwistAxis2;
+	attribute float mHalfConeAngle;
+};
+
+ConeConstraintSettings implements TwoBodyConstraintSettings;
+
+// Slider constraint
+[Prefix="JPH::"]
+interface SliderConstraintSettings {
+	void SliderConstraintSettings();
+	
+	attribute EConstraintSpace mSpace;
+	attribute boolean mAutoDetectPoint;
+	[Value] attribute Vec3 mPoint1;
+	[Value] attribute Vec3 mSliderAxis1;
+	[Value] attribute Vec3 mNormalAxis1;
+	[Value] attribute Vec3 mPoint2;
+	[Value] attribute Vec3 mSliderAxis2;
+	[Value] attribute Vec3 mNormalAxis2;
+	attribute float mLimitsMin;
+	attribute float mLimitsMax;
+	attribute float mMaxFrictionForce;
+};
+
+SliderConstraintSettings implements TwoBodyConstraintSettings;
 
 [Prefix="JPH::"]
 interface BodyID {

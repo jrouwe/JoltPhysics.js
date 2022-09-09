@@ -25,6 +25,8 @@
 #include "Jolt/Physics/Constraints/PointConstraint.h"
 #include "Jolt/Physics/Constraints/DistanceConstraint.h"
 #include "Jolt/Physics/Constraints/HingeConstraint.h"
+#include "Jolt/Physics/Constraints/ConeConstraint.h"
+#include "Jolt/Physics/Constraints/SliderConstraint.h"
 #include "Jolt/Physics/Body/BodyInterface.h"
 #include "Jolt/Physics/Body/BodyCreationSettings.h"
 
