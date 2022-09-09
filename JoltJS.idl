@@ -10,6 +10,7 @@ interface ArrayVec3 {
 	[Ref] Vec3 at(long inIndex);
 	void push_back([Const, Ref] Vec3 inValue);
 	void reserve(unsigned long inSize);
+	void resize(unsigned long inSize);
 };
 
 enum Layers {
@@ -119,8 +120,9 @@ interface PhysicsMaterial {
 interface PhysicsMaterialList {
 	void PhysicsMaterialList();
 	[Const] PhysicsMaterial at(long inIndex);
-	void push_back(PhysicsMaterial inMaterial);
+	void push_back([Const] PhysicsMaterial inMaterial);
 	void reserve(unsigned long inSize);
+	void resize(unsigned long inSize);
 };
 
 [Prefix="JPH::"]
@@ -135,17 +137,19 @@ interface Triangle {
 [Prefix="JPH::"]
 interface TriangleList {
 	void TriangleList();
-	[Value] Triangle at(long inIndex);
+	[Ref] Triangle at(long inIndex);
 	void push_back([Const, Ref] Triangle inTriangle);
 	void reserve(unsigned long inSize);
+	void resize(unsigned long inSize);
 };
 
 [Prefix="JPH::"]
 interface VertexList {
 	void VertexList();
-	[Value] Float3 at(long inIndex);
+	[Ref] Float3 at(long inIndex);
 	void push_back([Const, Ref] Float3 inVertex);
 	void reserve(unsigned long inSize);
+	void resize(unsigned long inSize);
 };
 
 [Prefix="JPH::"]
@@ -160,9 +164,10 @@ interface IndexedTriangle {
 [Prefix="JPH::"]
 interface IndexedTriangleList {
 	void IndexedTriangleList();
-	[Value] IndexedTriangle at(long inIndex);
+	[Ref] IndexedTriangle at(long inIndex);
 	void push_back([Const, Ref] IndexedTriangle inTriangle);
 	void reserve(unsigned long inSize);
+	void resize(unsigned long inSize);
 };
 
 [Prefix="JPH::Shape::"]

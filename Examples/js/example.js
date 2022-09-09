@@ -30,7 +30,7 @@ function initGraphics() {
 	renderer.setSize(window.innerWidth, window.innerHeight);
 
 	camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.2, 2000);
-	camera.position.set(0, 10, 25);
+	camera.position.set(0, 15, 30);
 	camera.lookAt(new THREE.Vector3(0, 0, 0));
 
 	scene = new THREE.Scene();
@@ -134,8 +134,7 @@ function createMeshFloor(n, cell_size, max_height, posX, posY, posZ) {
 	// Create regular grid of triangles
 	let height = function (x, y) { return Math.sin(x / 2) * Math.cos(y / 3); };
 	let triangles = new Jolt.TriangleList;
-	let tempTri = new Jolt.Triangle;
-	triangles.reserve(n * n * 2);
+	triangles.resize(n * n * 2);
 	for (let x = 0; x < n; ++x)
 		for (let z = 0; z < n; ++z) {
 			let center = n * cell_size / 2;
@@ -145,15 +144,21 @@ function createMeshFloor(n, cell_size, max_height, posX, posY, posZ) {
 			let x2 = x1 + cell_size;
 			let z2 = z1 + cell_size;
 
-			let v1 = tempTri.get_mV(0), v2 = tempTri.get_mV(1), v3 = tempTri.get_mV(2);
-			v1.x = x1, v1.y = height(x, z), v1.z = z1;
-			v2.x = x1, v2.y = height(x, z + 1), v2.z = z2;
-			v3.x = x2, v3.y = height(x + 1, z + 1), v3.z = z2;
-			triangles.push_back(tempTri);
+			{
+				let t = triangles.at((x * n + z) * 2);
+				let v1 = t.get_mV(0), v2 = t.get_mV(1), v3 = t.get_mV(2);
+				v1.x = x1, v1.y = height(x, z), v1.z = z1;
+				v2.x = x1, v2.y = height(x, z + 1), v2.z = z2;
+				v3.x = x2, v3.y = height(x + 1, z + 1), v3.z = z2;
+			}
 
-			v2.x = v3.x, v2.y = v3.y, v2.z = v3.z;
-			v3.x = x2, v3.y = height(x + 1, z), v3.z = z1;
-			triangles.push_back(tempTri);
+			{
+				let t = triangles.at((x * n + z) * 2 + 1);
+				let v1 = t.get_mV(0), v2 = t.get_mV(1), v3 = t.get_mV(2);
+				v1.x = x1, v1.y = height(x, z), v1.z = z1;
+				v2.x = x2, v2.y = height(x + 1, z + 1), v2.z = z2;
+				v3.x = x2, v3.y = height(x + 1, z), v3.z = z1;
+			}
 		}
 	let shape = new Jolt.MeshShapeSettings(triangles, null).Create().Get();
 
