@@ -2,7 +2,7 @@
 
 This project enables using [Jolt Physics](https://github.com/jrouwe/JoltPhysics) in JavaScript.
 
-# Demos
+## Demos
 
 * [Falling Shapes Demo - Shows supported shape types](http://htmlpreview.github.io/?https://github.com/jrouwe/JoltPhysics.js/blob/main/Examples/falling_shapes.html).
 * [Constraints Demo - Shows supported constraint types](http://htmlpreview.github.io/?https://github.com/jrouwe/JoltPhysics.js/blob/main/Examples/constraints.html).
