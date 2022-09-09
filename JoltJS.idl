@@ -3,6 +3,7 @@
 
 interface JPHString {
 	[Const] DOMString c_str(); // TODO: This is not a nice way to get a string from an interface
+	unsigned long size();
 };
 
 interface ArrayVec3 {
@@ -63,13 +64,19 @@ interface Vec3 {
 	void Vec3();
 	void Vec3(float inX, float inY, float inZ);
 	[Value] static Vec3 sZero();
+	[Value] static Vec3 sAxisX();
+	[Value] static Vec3 sAxisY();
+	[Value] static Vec3 sAxisZ();
+	[Operator="[]"] float GetComponent(unsigned long inCoordinate);
 	float Length();
+	[Value] Vec3 Normalized();
 	float GetX();
 	float GetY();
 	float GetZ();
 	void SetX(float inX);
 	void SetY(float inY);
 	void SetZ(float inZ);
+	void SetComponent(unsigned long inCoordinate, float inValue);
 };
 
 [Prefix="JPH::"]
@@ -79,6 +86,7 @@ interface Quat {
 	[Value] static Quat sIdentity();
 	[Value] static Quat sRotation([Const, Ref] Vec3 inRotation, float inAngle);
 	float Length();
+	[Value] Quat Normalized();
 	float GetX();
 	float GetY();
 	float GetZ();
@@ -88,6 +96,7 @@ interface Quat {
 [Prefix="JPH::"]
 interface Float3 {
 	void Float3(float inX, float inY, float inZ);	
+
 	attribute float x;
 	attribute float y;
 	attribute float z;
@@ -95,18 +104,21 @@ interface Float3 {
 
 [Prefix="JPH::"]
 interface Mat44 {
+	[Value] static Mat44 sIdentity();
 	[Value] static Mat44 sRotationTranslation([Const, Ref] Quat inRotation, [Const, Ref] Vec3 inTranslation);
 	[Value] Vec3 GetAxisX();
 	[Value] Vec3 GetAxisY();
 	[Value] Vec3 GetAxisZ();
+	[Value] Mat44 GetRotation();
 	[Value] Quat GetQuaternion();
 	[Value] Vec3 GetTranslation();
 };
 
 [Prefix="JPH::"]
 interface AABox {
-	void AABox([Const, Ref] Vec3 inMin, [Const, Ref] Vec3 inMax);
+	void AABox([Const, Ref] Vec3 inMin, [Const, Ref] Vec3 inMax);	
 	[Value] static AABox sBiggest();
+	
 	[Value] attribute Vec3 mMin;
 	[Value] attribute Vec3 mMax;
 };
@@ -178,9 +190,11 @@ interface ShapeResult {
 	Shape Get();
 };
 
+// Shape
 [Prefix="JPH::"]
 interface ShapeSettings {
 	[Value] ShapeResult Create();
+
 	attribute unsigned long long mUserData;
 };
 
@@ -205,75 +219,133 @@ interface ShapeGetTriangles
 	[Const] PhysicsMaterial GetMaterial(long inTriangle);
 };
 
+// Convex shape
+[Prefix="JPH::"]
+interface ConvexShapeSettings {
+	[Const] attribute PhysicsMaterial mMaterial;
+	attribute float mDensity;
+};
+
+ConvexShapeSettings implements ShapeSettings;
+
+[Prefix="JPH::"]
+interface ConvexShape {
+	float GetDensity();
+	void SetDensity(float inDensity);
+};
+
+ConvexShape implements Shape;
+
+// Sphere
 [Prefix="JPH::"]
 interface SphereShapeSettings {
 	void SphereShapeSettings(float inRadius, [Const] PhysicsMaterial inMaterial);
+
+	attribute float mRadius;
 };
 
-SphereShapeSettings implements ShapeSettings;
+SphereShapeSettings implements ConvexShapeSettings;
 
 [Prefix="JPH::"]
 interface SphereShape {
 	void SphereShape(float inRadius, [Const] PhysicsMaterial inMaterial);
 };
 
-SphereShape implements Shape;
+SphereShape implements ConvexShape;
 
+// Box
 [Prefix="JPH::"]
 interface BoxShapeSettings {
 	void BoxShapeSettings([Ref] Vec3 inHalfExtent, float inConvexRadius, [Const] PhysicsMaterial inMaterial);
+
+	[Value] attribute Vec3 mHalfExtent;
+	attribute float mConvexRadius;
 };
 
-BoxShapeSettings implements ShapeSettings;
+BoxShapeSettings implements ConvexShapeSettings;
 
 [Prefix="JPH::"]
 interface BoxShape {
 	void BoxShape([Ref] Vec3 inHalfExtent, float inConvexRadius, [Const] PhysicsMaterial inMaterial);
 };
 
-BoxShape implements Shape;
+BoxShape implements ConvexShape;
 
+// Cylinder
 [Prefix="JPH::"]
 interface CylinderShapeSettings {
 	void CylinderShapeSettings(float inHalfHeight, float inRadius, float inConvexRadius, [Const] PhysicsMaterial inMaterial);
+
+	attribute float mHalfHeight;
+	attribute float mRadius;
+	attribute float mConvexRadius;
 };
 
-CylinderShapeSettings implements ShapeSettings;
+CylinderShapeSettings implements ConvexShapeSettings;
 
 [Prefix="JPH::"]
 interface CylinderShape {
 	void CylinderShape(float inHalfHeight, float inRadius, float inConvexRadius, [Const] PhysicsMaterial inMaterial);
 };
 
-CylinderShape implements Shape;
+CylinderShape implements ConvexShape;
 
+// Capsule
 [Prefix="JPH::"]
 interface CapsuleShapeSettings {
 	void CapsuleShapeSettings(float inHalfHeight, float inRadius, PhysicsMaterial inMaterial);
+
+	attribute float mRadius;
+	attribute float mHalfHeightOfCylinder;
 };
 
-CapsuleShapeSettings implements ShapeSettings;
+CapsuleShapeSettings implements ConvexShapeSettings;
 
 [Prefix="JPH::"]
 interface CapsuleShape {
 	void CapsuleShape(float inHalfHeight, float inRadius, PhysicsMaterial inMaterial);
 };
 
-CapsuleShape implements Shape;
+CapsuleShape implements ConvexShape;
 
+// Tapered capsule
 [Prefix="JPH::"]
 interface TaperedCapsuleShapeSettings {
 	void TaperedCapsuleShapeSettings(float inHalfHeightOfTaperedCylinder, float inTopRadius, float inBottomRadius, [Const] PhysicsMaterial inMaterial);
+
+	attribute float mHalfHeightOfTaperedCylinder;
+	attribute float mTopRadius;
+	attribute float mBottomRadius;
 };
 
-TaperedCapsuleShapeSettings implements ShapeSettings;
+TaperedCapsuleShapeSettings implements ConvexShapeSettings;
 
 [Prefix="JPH::"]
 interface TaperedCapsuleShape {
 };
 
-TaperedCapsuleShape implements Shape;
+TaperedCapsuleShape implements ConvexShape;
 
+// Convex hull
+[Prefix="JPH::"]
+interface ConvexHullShapeSettings {
+	void ConvexHullShapeSettings();
+	
+	[Value] attribute ArrayVec3 mPoints;
+	attribute float mMaxConvexRadius;
+	attribute float mMaxErrorConvexRadius;
+	attribute float mHullTolerance;
+};
+
+ConvexHullShapeSettings implements ConvexShapeSettings;
+
+[Prefix="JPH::"]
+interface ConvexHullShape {
+};
+
+ConvexHullShape implements ConvexShape;
+
+// Static compound
 [Prefix="JPH::"]
 interface StaticCompoundShapeSettings {
 	void StaticCompoundShapeSettings();
@@ -288,26 +360,11 @@ interface StaticCompoundShape {
 
 StaticCompoundShape implements Shape;
 
-[Prefix="JPH::"]
-interface ConvexHullShapeSettings {
-	void ConvexHullShapeSettings();
-	[Value] attribute ArrayVec3 mPoints;
-	attribute float mMaxConvexRadius;
-	attribute float mMaxErrorConvexRadius;
-	attribute float mHullTolerance;
-};
-
-ConvexHullShapeSettings implements ShapeSettings;
-
-[Prefix="JPH::"]
-interface ConvexHullShape {
-};
-
-ConvexHullShape implements Shape;
-
+// Scaled shape
 [Prefix="JPH::"]
 interface ScaledShapeSettings {
 	void ScaledShapeSettings(ShapeSettings inShape, [Ref, Const] Vec3 inScale);
+	
 	[Value] attribute Vec3 mScale;
 };
 
@@ -320,9 +377,11 @@ interface ScaledShape {
 
 ScaledShape implements Shape;
 
+// Offset COM
 [Prefix="JPH::"]
 interface OffsetCenterOfMassShapeSettings {
 	void OffsetCenterOfMassShapeSettings([Ref, Const] Vec3 inOffset, ShapeSettings inShape);
+	
 	[Value] attribute Vec3 mOffset;
 };
 
@@ -334,9 +393,11 @@ interface OffsetCenterOfMassShape {
 
 OffsetCenterOfMassShape implements Shape;
 
+// Rotated translated
 [Prefix="JPH::"]
 interface RotatedTranslatedShapeSettings {
 	void RotatedTranslatedShapeSettings([Ref, Const] Vec3 inPosition, [Ref, Const] Quat inRotation, ShapeSettings inShape);
+	
 	[Value] attribute Vec3 mPosition;
 	[Value] attribute Quat mRotation;
 };
@@ -349,6 +410,7 @@ interface RotatedTranslatedShape {
 
 RotatedTranslatedShape implements Shape;
 
+// Mesh shape
 [Prefix="JPH::"]
 interface MeshShapeSettings {
 	void MeshShapeSettings([Ref, Const] TriangleList inTriangleList, [Ref, Const] PhysicsMaterialList inMaterialList);
@@ -367,31 +429,114 @@ MeshShape implements Shape;
 interface BodyID {
 	void BodyID();
 	void BodyID([Const, Ref] BodyID inID);
+	unsigned long GetIndex();
+	unsigned long GetIndexAndSequenceNumber();
+};
+
+[Prefix="JPH::"]
+interface MotionProperties {
+	EMotionQuality GetMotionQuality();
+	void SetMotionQuality(EMotionQuality inQuality);
+	[Value] Vec3 GetLinearVelocity();
+	void SetLinearVelocity([Const, Ref] Vec3 inVelocity);
+	void SetLinearVelocityClamped([Const, Ref] Vec3 inVelocity);
+	[Value] Vec3 GetAngularVelocity();
+	void SetAngularVelocity([Const, Ref] Vec3 inVelocity);
+	void SetAngularVelocityClamped([Const, Ref] Vec3 inVelocity);
+	void MoveKinematic([Const, Ref] Vec3 inPosition, [Const, Ref] Quat inRotation, float inDeltaTime);
+	float GetMaxLinearVelocity();
+	void SetMaxLinearVelocity(float inVelocity);
+	float GetMaxAngularVelocity();
+	void SetMaxAngularVelocity(float inVelocity);
+	float GetLinearDamping();
+	void SetLinearDamping(float inDamping);	
+	float GetAngularDamping();
+	void SetAngularDamping(float inDamping);
+	float GetInverseMass();
+	void SetInverseMass(float inInvM);
+	[Value] Vec3 GetInverseInertiaDiagonal();
+	[Value] Quat GetInertiaRotation();
+	void SetInverseInertia([Const, Ref] Vec3 inInvI, [Const, Ref] Quat inRotation);
 };
 
 [Prefix="JPH::"]
 interface Body {
 	[Value] BodyID GetID();
+	boolean IsActive();
+	boolean IsStatic();
+	boolean IsKinematic();
+	boolean IsDynamic();
+	boolean CanBeKinematicOrDynamic();
+	EMotionType GetMotionType();
+	void SetMotionType(EMotionType inMotionType);
+	void SetIsSensor(boolean inIsSensor);
+	boolean IsSensor();
+	unsigned long GetObjectLayer();
+	boolean GetAllowSleeping();
+	void SetAllowSleeping(boolean inAllow);
+	float GetFriction();
+	void SetFriction(float inFriction);
+	float GetRestitution();
+	void SetRestitution(float inRestitution);
+	[Value] Vec3 GetLinearVelocity();
+	void SetLinearVelocity([Const, Ref] Vec3 inVelocity);
+	void SetLinearVelocityClamped([Const, Ref] Vec3 inVelocity);
+	[Value] Vec3 GetAngularVelocity();
+	void SetAngularVelocity([Const, Ref] Vec3 inVelocity);
+	void SetAngularVelocityClamped([Const, Ref] Vec3 inVelocity);
+	void AddForce([Const, Ref] Vec3 inForce);
+	void AddForce([Const, Ref] Vec3 inForce, [Const, Ref] Vec3 inPosition);
+	void AddTorque([Const, Ref] Vec3 inTorque);
+	void AddImpulse([Const, Ref] Vec3 inImpulse);
+	void AddImpulse([Const, Ref] Vec3 inImpulse, [Const, Ref] Vec3 inPosition);
+	void MoveKinematic([Const, Ref] Vec3 inPosition, [Const, Ref] Quat inRotation, float inDeltaTime);
+	boolean IsInBroadPhase();
+	[Const] Shape GetShape();
 	[Value] Vec3 GetPosition();
 	[Value] Quat GetRotation();
+	[Value] Mat44 GetWorldTransform();
+	[Value] Vec3 GetCenterOfMassPosition();
+	[Value] Mat44 GetCenterOfMassTransform();
+	[Value] AABox GetWorldSpaceBounds();
+	MotionProperties GetMotionProperties();
 };
 
 [Prefix="JPH::"]
 interface BodyInterface {
 	Body CreateBody([Const, Ref] BodyCreationSettings inSettings);
+	void DestroyBody([Const, Ref] BodyID inBodyID);
 	void AddBody([Const, Ref] BodyID inBodyID, EActivation inActivationMode);
+	void RemoveBody([Const, Ref] BodyID inBodyID);
+	boolean IsAdded([Const, Ref] BodyID inBodyID);
 	[Value] BodyID CreateAndAddBody([Const, Ref] BodyCreationSettings inSettings, EActivation inActivationMode);
-	[Const] void GetPositionAndRotation([Const, Ref] BodyID inBodyID, [Ref] Vec3 outPosition, [Ref] Quat outRotation);
+	[Const] Shape GetShape([Const, Ref] BodyID inBodyID);
+	void SetShape([Const, Ref] BodyID inBodyID, [Const] Shape inShape, boolean inUpdateMassProperties, EActivation inActivationMode);
+	void SetObjectLayer([Const, Ref] BodyID inBodyID, unsigned long inLayer);
+	unsigned long GetObjectLayer([Const, Ref] BodyID inBodyID);
+	void SetPositionAndRotation([Const, Ref] BodyID inBodyID, [Const, Ref] Vec3 inPosition, [Const, Ref] Quat inRotation, EActivation inActivationMode);
+	void SetPositionAndRotationWhenChanged([Const, Ref] BodyID inBodyID, [Const, Ref] Vec3 inPosition, [Const, Ref] Quat inRotation, EActivation inActivationMode);
+	void GetPositionAndRotation([Const, Ref] BodyID inBodyID, [Ref] Vec3 outPosition, [Ref] Quat outRotation);
+	void SetPosition([Const, Ref] BodyID inBodyID, [Const, Ref] Vec3 inPosition, EActivation inActivationMode);
+	[Value] Vec3 GetPosition([Const, Ref] BodyID inBodyID);
+	void SetRotation([Const, Ref] BodyID inBodyID, [Const, Ref] Quat inRotation, EActivation inActivationMode);
+	[Value] Quat GetRotation([Const, Ref] BodyID inBodyID);
+	void MoveKinematic([Const, Ref] BodyID inBodyID, [Const, Ref] Vec3 inPosition, [Const, Ref] Quat inRotation, float inDeltaTime);
 };
 
 [Prefix="JPH::"]
 interface PhysicsSystem {
 	[Ref] BodyInterface GetBodyInterface();
+	void SetGravity([Const, Ref] Vec3 inGravity);
+	[Value] Vec3 GetGravity();
+	unsigned long GetNumBodies();
+	unsigned long GetNumActiveBodies();
+	unsigned long GetMaxBodies();
 };
 
 [Prefix="JPH::"]
 interface BodyCreationSettings {
 	void BodyCreationSettings([Const] Shape inShape, [Ref] Vec3 inPosition, [Ref] Quat inRotation, EMotionType inMotionType, unsigned short inObjectLayer);
+	
 	[Value] attribute Vec3 mPosition;
 	[Value] attribute Quat mRotation;
 	[Value] attribute Vec3 mLinearVelocity;
