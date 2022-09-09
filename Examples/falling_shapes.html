@@ -21,9 +21,6 @@
 
 			Jolt().then(function (Jolt) {
 
-				// List of objects spawned
-				var dynamicObjects = [];
-
 				// Spawning variables
 				var objectTimePeriod = 0.25;
 				var timeNextSpawn = time + objectTimePeriod;
@@ -35,114 +32,119 @@
 				// Create a basic floor
 				createFloor();
 
+				// Create example mesh
+				createMeshFloor(30, 1, 4, 0, 5, 0);
+
 				function generateObject() {
 
-					var numTypes = 5;
-					var objectType = Math.ceil(Math.random() * numTypes);
+					let numTypes = 8;
+					let objectType = Math.ceil(Math.random() * numTypes);
 
-					var threeObject = null;
-					var shape = null;
+					let threeObject = null;
+					let shape = null;
 
-					var material = new THREE.MeshPhongMaterial({ color: Math.floor(Math.random() * (1 << 24)) });
+					let colors = [0xff0000, 0xd9b1a3, 0x4d4139, 0xccad33, 0xf2ff40, 0x00ff00, 0x165943, 0x567371, 0x80d5ff, 0x69778c, 0xbeb6f2, 0x7159b3, 0x73004d, 0xd90074, 0xff8091, 0xbf3030, 0x592400, 0xa66c29, 0xb3aa86, 0x296600, 0x00e600, 0x66ccaa, 0x00eeff, 0x3d9df2, 0x000e33, 0x3d00e6, 0xb300a7, 0xff80d5, 0x330d17, 0x59332d, 0xff8c40, 0x33210d, 0x403c00, 0x89d96c, 0x0d3312, 0x0d3330, 0x005c73, 0x0066ff, 0x334166, 0x1b0066, 0x4d3949, 0xbf8faf, 0x59000c]
+					let material = new THREE.MeshPhongMaterial({ color: colors[objectType - 1] });
 
 					switch (objectType) {
-						case 1:
+						case 1: {
 							// Sphere
-							var radius = 0.5 + Math.random();
+							let radius = 0.5 + Math.random();
 							threeObject = new THREE.Mesh(new THREE.SphereGeometry(radius, 20, 20), material);
 							shape = new Jolt.SphereShape(radius, null);
 							break;
+						}
 
-						case 2:
+						case 2: {
 							// Box
-							var sx = 1 + Math.random();
-							var sy = 1 + Math.random();
-							var sz = 1 + Math.random();
+							let sx = 1 + Math.random();
+							let sy = 1 + Math.random();
+							let sz = 1 + Math.random();
 							threeObject = new THREE.Mesh(new THREE.BoxGeometry(sx, sy, sz, 1, 1, 1), material);
 							shape = new Jolt.BoxShape(new Jolt.Vec3(sx * 0.5, sy * 0.5, sz * 0.5), 0.002, null);
 							break;
+						}
 
-						case 3:
+						case 3: {
 							// Cylinder
-							var radius = 0.5 + Math.random();
-							var height = 1 + Math.random();
+							let radius = 0.5 + Math.random();
+							let height = 1 + Math.random();
 							threeObject = new THREE.Mesh(new THREE.CylinderGeometry(radius, radius, height, 20, 1), material);
 							shape = new Jolt.CylinderShape(height * 0.5, radius, 0.002, null);
 							break;
+						}
 
-						case 4:
+						case 4: {
 							// Capsule
-							var radius = 0.5 + Math.random();
-							var height = 1 + Math.random();
+							let radius = 0.5 + Math.random();
+							let height = 1 + Math.random();
 							threeObject = new THREE.Mesh(new THREE.CapsuleGeometry(radius, height, 20, 10), material);
 							shape = new Jolt.CapsuleShape(height * 0.5, radius, null);
 							break;
+						}
 
-						case 5:
+						case 5: {
+							// Tapered capsule
+							let topRadius = 0.1 + Math.random();
+							let bottomRadius = 0.5 + Math.random();
+							let height = topRadius + bottomRadius + Math.random();
+							shape = new Jolt.TaperedCapsuleShapeSettings(0.5 * height, topRadius, bottomRadius, null).Create().Get();
+							break;
+						}
+
+						case 6: {
 							// Convex hull
-							var hull = new Jolt.ConvexHullShapeSettings;
-							for (var p = 0; p < 10; ++p)
+							let hull = new Jolt.ConvexHullShapeSettings;
+							for (let p = 0; p < 10; ++p)
 								hull.mPoints.push_back(new Jolt.Vec3(-0.5 + 2 * Math.random(), -0.5 + 2 * Math.random(), -0.5 + 2 * Math.random()));
 							shape = hull.Create().Get();
-
-							// Get triangle data
-							var triContext = new Jolt.ShapeGetTriangles(shape, Jolt.AABox.prototype.sBiggest(), shape.GetCenterOfMass(), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(1, 1, 1));
-							var num_tris = triContext.GetNumTriangles();
-
-							// Convert to three mesh
-							const geometry = new THREE.BufferGeometry();
-							const vertices = new Float32Array(num_tris * 3 * 3);
-							var vtxIdx = 0;
-							var tmpVertex = [ new Jolt.Float3(), new Jolt.Float3(), new Jolt.Float3() ];
-							for (var t = 0; t < num_tris; t++) {
-								triContext.GetVertices(t, tmpVertex[0], tmpVertex[1], tmpVertex[2]);
-								for (var vtx = 0; vtx < 3; vtx++) {
-									vertices[vtxIdx] = tmpVertex[vtx].x;
-									vtxIdx++;
-									vertices[vtxIdx] = tmpVertex[vtx].y;
-									vtxIdx++;
-									vertices[vtxIdx] = tmpVertex[vtx].z;
-									vtxIdx++;
-								}								
-							}
-							geometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
-							geometry.computeVertexNormals();
-							threeObject = new THREE.Mesh(geometry, material)
 							break;
+						}
+
+						case 7: {
+							// Compound shape
+							let shape_settings = new Jolt.StaticCompoundShapeSettings();
+							let l = 1.0 + Math.random();
+							let r2 = 0.5 + 0.5 * Math.random();
+							let r1 = 0.5 * r2;
+							shape_settings.AddShape(new Jolt.Vec3(-l, 0, 0), Jolt.Quat.prototype.sIdentity(), new Jolt.SphereShapeSettings(r2));
+							shape_settings.AddShape(new Jolt.Vec3(l, 0, 0), Jolt.Quat.prototype.sIdentity(), new Jolt.SphereShapeSettings(r2));
+							shape_settings.AddShape(new Jolt.Vec3(0, 0, 0), Jolt.Quat.prototype.sRotation(new Jolt.Vec3(0, 0, 1), 0.5 * Math.PI), new Jolt.CapsuleShapeSettings(l, r1));
+							shape = shape_settings.Create().Get();
+							break;
+						}
+
+						case 8: {
+							// Sphere with COM offset
+							let radius = 0.5;
+							threeObject = new THREE.Mesh(new THREE.SphereGeometry(radius, 20, 20), material);
+							shape = new Jolt.OffsetCenterOfMassShapeSettings(new Jolt.Vec3(0, -0.1 * radius, 0), new Jolt.SphereShapeSettings(radius, null)).Create().Get();
+							break;
+						}
 					}
 
+					// Optionally create mesh
+					if (threeObject == null)
+						threeObject = getThreeMeshForShape(shape, material);
+
 					// Position and rotate visual mesh
-					threeObject.position.set((Math.random() - 0.5) * 25, 10, (Math.random() - 0.5) * 25);
+					threeObject.position.set((Math.random() - 0.5) * 25, 15, (Math.random() - 0.5) * 25);
 					threeObject.quaternion.random();
 
 					// Create physics body
-					var pos = threeObject.position, rot = threeObject.quaternion;
-					var creation_settings = new Jolt.BodyCreationSettings(shape, new Jolt.Vec3(pos.x, pos.y, pos.z), new Jolt.Quat(rot.x, rot.y, rot.z, rot.w), Jolt.Dynamic, Jolt.MOVING);
-					creation_settings.mRestitution = 0.5;
-					var body = bodyInterface.CreateBody(creation_settings);
-					bodyInterface.AddBody(body.GetID(), Jolt.Activate);
-					threeObject.userData.body = body;
+					let pos = threeObject.position, rot = threeObject.quaternion;
+					let creationSettings = new Jolt.BodyCreationSettings(shape, new Jolt.Vec3(pos.x, pos.y, pos.z), new Jolt.Quat(rot.x, rot.y, rot.z, rot.w), Jolt.Dynamic, Jolt.MOVING);
+					creationSettings.mRestitution = 0.5;
+					let body = bodyInterface.CreateBody(creationSettings);
 
-					scene.add(threeObject);
-					dynamicObjects.push(threeObject);
+					addToScene(threeObject, body);
 				}
 
 				function onUpdate(time, deltaTime) {
-
 					// Check if its time to spawn a new object
 					if (dynamicObjects.length < maxNumObjects && time > timeNextSpawn) {
 						generateObject();
 						timeNextSpawn = time + objectTimePeriod;
-					}
-
-					// Update object transforms
-					for (var i = 0, il = dynamicObjects.length; i < il; i++) {
-						var objThree = dynamicObjects[i];
-						var body = dynamicObjects[i].userData.body;
-						var p = body.GetPosition();
-						var q = body.GetRotation();
-						objThree.position.set(p.GetX(), p.GetY(), p.GetZ());
-						objThree.quaternion.set(q.GetX(), q.GetY(), q.GetZ(), q.GetW());
 					}
 				}
 			});

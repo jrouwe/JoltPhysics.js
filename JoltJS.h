@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2022 Jorrit Rouwe
+// SPDX-License-Identifier: MIT
+
 #include "Jolt/Jolt.h"
 #include "Jolt/Math/Vec3.h"
 #include "Jolt/Math/Quat.h"
@@ -8,8 +11,23 @@
 #include "Jolt/Physics/Collision/Shape/SphereShape.h"
 #include "Jolt/Physics/Collision/Shape/BoxShape.h"
 #include "Jolt/Physics/Collision/Shape/CapsuleShape.h"
+#include "Jolt/Physics/Collision/Shape/TaperedCapsuleShape.h"
 #include "Jolt/Physics/Collision/Shape/CylinderShape.h"
 #include "Jolt/Physics/Collision/Shape/ConvexHullShape.h"
+#include "Jolt/Physics/Collision/Shape/StaticCompoundShape.h"
+#include "Jolt/Physics/Collision/Shape/ScaledShape.h"
+#include "Jolt/Physics/Collision/Shape/OffsetCenterOfMassShape.h"
+#include "Jolt/Physics/Collision/Shape/RotatedTranslatedShape.h"
+#include "Jolt/Physics/Collision/Shape/MeshShape.h"
+#include "Jolt/Physics/Collision/CollisionCollectorImpl.h"
+#include "Jolt/Physics/Collision/GroupFilterTable.h"
+#include "Jolt/Physics/Constraints/FixedConstraint.h"
+#include "Jolt/Physics/Constraints/PointConstraint.h"
+#include "Jolt/Physics/Constraints/DistanceConstraint.h"
+#include "Jolt/Physics/Constraints/HingeConstraint.h"
+#include "Jolt/Physics/Constraints/ConeConstraint.h"
+#include "Jolt/Physics/Constraints/SliderConstraint.h"
+#include "Jolt/Physics/Constraints/SwingTwistConstraint.h"
 #include "Jolt/Physics/Body/BodyInterface.h"
 #include "Jolt/Physics/Body/BodyCreationSettings.h"
 
@@ -152,10 +170,10 @@ public:
 		RegisterTypes();
 		
 		// Init the physics system
-		const uint cMaxBodies = 1024;
-		const uint cNumBodyMutexes = 0;
-		const uint cMaxBodyPairs = 1024;
-		const uint cMaxContactConstraints = 1024;
+		constexpr uint cMaxBodies = 10240;
+		constexpr uint cNumBodyMutexes = 0;
+		constexpr uint cMaxBodyPairs = 65536;
+		constexpr uint cMaxContactConstraints = 10240;
 		mPhysicsSystem.Init(cMaxBodies, cNumBodyMutexes, cMaxBodyPairs, cMaxContactConstraints, mBPLayerInterface, MyBroadPhaseCanCollide, MyObjectCanCollide);
 	}
 
@@ -192,31 +210,44 @@ class ShapeGetTriangles
 public:
 							ShapeGetTriangles(const Shape *inShape, const AABox &inBox, Vec3Arg inPositionCOM, QuatArg inRotation, Vec3Arg inScale)
 	{
-		Shape::GetTrianglesContext context;
-		inShape->GetTrianglesStart(context, inBox, inPositionCOM, inRotation, inScale);
-		size_t cur_tri_pos = 0;
-		size_t cur_mat_pos = 0;
 		const size_t cBlockSize = 8096;
-		for (;;)
+
+		// First collect all leaf shapes
+		AllHitCollisionCollector<TransformedShapeCollector> collector;
+		inShape->CollectTransformedShapes(inBox, inPositionCOM, inRotation, inScale, SubShapeIDCreator(), collector, { });
+
+		size_t cur_pos = 0;
+
+		// Iterate the leaf shapes
+		for (const TransformedShape &ts : collector.mHits)
 		{
-			size_t tri_left = (mVertices.size() - cur_tri_pos) / 3;
-			if (tri_left < Shape::cGetTrianglesMinTrianglesRequested)
-			{
-				mVertices.resize(mVertices.size() + 3 * cBlockSize);
-				mMaterials.resize(mMaterials.size() + cBlockSize);
-				tri_left = (mVertices.size() - cur_tri_pos) / 3;
-			}
+			// Start iterating triangles
+			Shape::GetTrianglesContext context;
+			ts.GetTrianglesStart(context, inBox);
 
-			int count = inShape->GetTrianglesNext(context, tri_left, mVertices.data() + cur_tri_pos, mMaterials.data() + cur_mat_pos);
-			if (count == 0)
+			for (;;)
 			{
-				mVertices.resize(cur_tri_pos);
-				mMaterials.resize(cur_mat_pos);
-				break;
-			}
+				// Ensure we have space to get more triangles
+				size_t tri_left = mMaterials.size() - cur_pos;
+				if (tri_left < Shape::cGetTrianglesMinTrianglesRequested)
+				{
+					mVertices.resize(mVertices.size() + 3 * cBlockSize);
+					mMaterials.resize(mMaterials.size() + cBlockSize);
+					tri_left = mMaterials.size() - cur_pos;
+				}
 
-			cur_tri_pos += 3 * count;
-			cur_mat_pos += count;
+				// Fetch next batch
+				int count = ts.GetTrianglesNext(context, tri_left, mVertices.data() + 3 * cur_pos, mMaterials.data() + cur_pos);
+				if (count == 0)
+				{
+					// We're done
+					mVertices.resize(3 * cur_pos);
+					mMaterials.resize(cur_pos);
+					break;
+				}
+
+				cur_pos += count;
+			}
 		}
 	}
 
@@ -225,10 +256,14 @@ public:
 		return (int)mMaterials.size();
 	}
 
-	void					GetVertices(int inTriangle, Float3 &outV1, Float3 &outV2, Float3 &outV3) const
+	int						GetVerticesSize() const
 	{
-		int tri_start = inTriangle * 3;
-		outV1 = mVertices[tri_start], outV2 = mVertices[tri_start + 1], outV3 = mVertices[tri_start + 2];
+		return (int)mVertices.size() * sizeof(Float3);
+	}
+
+	const Float3 *			GetVerticesData() const
+	{
+		return mVertices.data();
 	}
 		
 	const PhysicsMaterial *	GetMaterial(int inTriangle) const
