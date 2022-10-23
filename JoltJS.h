@@ -152,12 +152,21 @@ static bool MyBroadPhaseCanCollide(ObjectLayer inLayer1, BroadPhaseLayer inLayer
 	}
 }
 
+/// Settings to pass to constructor
+class JoltSettings
+{
+public:
+	uint					mMaxBodies = 10240;
+	uint					mMaxBodyPairs = 65536;
+	uint					mMaxContactConstraints = 10240;
+};
+
 /// Main API for JavaScript
 class JoltInterface
 {
 public:
 	/// Constructor
-							JoltInterface()
+							JoltInterface(const JoltSettings &inSettings)
 	{
 		// Install callbacks
 		Trace = TraceImpl;
@@ -170,11 +179,8 @@ public:
 		RegisterTypes();
 		
 		// Init the physics system
-		constexpr uint cMaxBodies = 10240;
 		constexpr uint cNumBodyMutexes = 0;
-		constexpr uint cMaxBodyPairs = 65536;
-		constexpr uint cMaxContactConstraints = 10240;
-		mPhysicsSystem.Init(cMaxBodies, cNumBodyMutexes, cMaxBodyPairs, cMaxContactConstraints, mBPLayerInterface, MyBroadPhaseCanCollide, MyObjectCanCollide);
+		mPhysicsSystem.Init(inSettings.mMaxBodies, cNumBodyMutexes, inSettings.mMaxBodyPairs, inSettings.mMaxContactConstraints, mBPLayerInterface, MyBroadPhaseCanCollide, MyObjectCanCollide);
 	}
 
 	/// Destructor

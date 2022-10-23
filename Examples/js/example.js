@@ -57,7 +57,8 @@ function initGraphics() {
 function initPhysics() {
 
 	// Initialize Jolt
-	jolt = new Jolt.JoltInterface();
+	settings = new Jolt.JoltSettings();
+	jolt = new Jolt.JoltInterface(settings);
 	physicsSystem = jolt.GetPhysicsSystem();
 	bodyInterface = physicsSystem.GetBodyInterface();
 }
@@ -135,7 +136,7 @@ function createFloor() {
 
 	// Create corresponding physics object
 	var shape = new Jolt.BoxShape(new Jolt.Vec3(50, 0.5, 50), 0.001, null);
-	var creation_settings = new Jolt.BodyCreationSettings(shape, new Jolt.Vec3(0, 0, 0), new Jolt.Quat(0, 0, 0, 1), Jolt.Static, Jolt.NON_MOVING);
+	var creation_settings = new Jolt.BodyCreationSettings(shape, new Jolt.Vec3(0, -0.5, 0), new Jolt.Quat(0, 0, 0, 1), Jolt.Static, Jolt.NON_MOVING);
 	let body = bodyInterface.CreateBody(creation_settings);
 
 	addToScene(threeObject, body);

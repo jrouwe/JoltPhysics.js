@@ -704,6 +704,9 @@ interface BodyInterface {
 	void SetRotation([Const, Ref] BodyID inBodyID, [Const, Ref] Quat inRotation, EActivation inActivationMode);
 	[Value] Quat GetRotation([Const, Ref] BodyID inBodyID);
 	void MoveKinematic([Const, Ref] BodyID inBodyID, [Const, Ref] Vec3 inPosition, [Const, Ref] Quat inRotation, float inDeltaTime);
+	void ActivateBody([Const, Ref] BodyID inBodyID);
+	void DeactivateBody([Const, Ref] BodyID inBodyID);
+	boolean IsActive([Const, Ref] BodyID inBodyID);
 };
 
 [Prefix="JPH::"]
@@ -743,8 +746,16 @@ interface BodyCreationSettings {
 	attribute float mGravityFactor;
 };
 
+interface JoltSettings {
+	void JoltSettings();
+
+	attribute unsigned long mMaxBodies;
+	attribute unsigned long mMaxBodyPairs;
+	attribute unsigned long mMaxContactConstraints;
+};
+
 interface JoltInterface {
-	void JoltInterface();
+	void JoltInterface([Const, Ref] JoltSettings inSettings);
 	void Step(float inDeltaTime, long inCollisionSteps, long inIntegrationSubSteps);
 	PhysicsSystem GetPhysicsSystem();
 };
