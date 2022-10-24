@@ -135,7 +135,7 @@ function createFloor() {
 	let threeObject = new THREE.Mesh(new THREE.BoxGeometry(100, 1, 100, 1, 1, 1), new THREE.MeshPhongMaterial({ color: 0xC7C7C7 }));
 
 	// Create corresponding physics object
-	var shape = new Jolt.BoxShape(new Jolt.Vec3(50, 0.5, 50), 0.001, null);
+	var shape = new Jolt.BoxShape(new Jolt.Vec3(50, 0.5, 50), 0.05, null);
 	var creation_settings = new Jolt.BodyCreationSettings(shape, new Jolt.Vec3(0, -0.5, 0), new Jolt.Quat(0, 0, 0, 1), Jolt.Static, Jolt.NON_MOVING);
 	let body = bodyInterface.CreateBody(creation_settings);
 

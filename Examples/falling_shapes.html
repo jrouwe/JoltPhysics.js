@@ -61,7 +61,7 @@
 							let sy = 1 + Math.random();
 							let sz = 1 + Math.random();
 							threeObject = new THREE.Mesh(new THREE.BoxGeometry(sx, sy, sz, 1, 1, 1), material);
-							shape = new Jolt.BoxShape(new Jolt.Vec3(sx * 0.5, sy * 0.5, sz * 0.5), 0.002, null);
+							shape = new Jolt.BoxShape(new Jolt.Vec3(sx * 0.5, sy * 0.5, sz * 0.5), 0.05, null);
 							break;
 						}
 
@@ -70,7 +70,7 @@
 							let radius = 0.5 + Math.random();
 							let height = 1 + Math.random();
 							threeObject = new THREE.Mesh(new THREE.CylinderGeometry(radius, radius, height, 20, 1), material);
-							shape = new Jolt.CylinderShape(height * 0.5, radius, 0.002, null);
+							shape = new Jolt.CylinderShape(height * 0.5, radius, 0.05, null);
 							break;
 						}
 
