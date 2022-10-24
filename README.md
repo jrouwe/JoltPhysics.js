@@ -6,6 +6,7 @@ This project enables using [Jolt Physics](https://github.com/jrouwe/JoltPhysics)
 
 * [Falling Shapes Demo - Shows supported shape types](http://htmlpreview.github.io/?https://github.com/jrouwe/JoltPhysics.js/blob/main/Examples/falling_shapes.html).
 * [Constraints Demo - Shows supported constraint types](http://htmlpreview.github.io/?https://github.com/jrouwe/JoltPhysics.js/blob/main/Examples/constraints.html).
+* [Stress Test Demo - Shows big pile of blocks](http://htmlpreview.github.io/?https://github.com/jrouwe/JoltPhysics.js/blob/main/Examples/stress_test.html).
 
 ## Using
 
