@@ -19,7 +19,7 @@ set(TARGET_HELLO_WORLD OFF)
 set(TARGET_PERFORMANCE_TEST OFF)
 set(TARGET_SAMPLES OFF)
 
-# Build Distribution by default
+# Build Distribution by default but can be set to Debug too
 set(CMAKE_BUILD_TYPE Distribution CACHE STRING "Build Type")
 
 # Default is 64*1024*1024 = 64MB
@@ -33,7 +33,6 @@ set(EMCC_ARGS
   --post-js glue.js
   --post-js ${JOLT_ONLOAD_FILE}
   --closure=1
-  -O3
   -s ALLOW_MEMORY_GROWTH=${ALLOW_MEMORY_GROWTH}
   -s ALLOW_TABLE_GROWTH=1
   -s EXPORT_NAME="Jolt"
@@ -41,6 +40,17 @@ set(EMCC_ARGS
   -s NO_EXIT_RUNTIME=1
   -s NO_FILESYSTEM=1
   -s TOTAL_MEMORY=${TOTAL_MEMORY})
+
+if ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
+	set(EMCC_ARGS 
+		${EMCC_ARGS} 
+		-g
+		-s ASSERTIONS)
+else()
+	set(EMCC_ARGS 
+		${EMCC_ARGS} 
+		-O3)
+endif()
 
 set(EMCC_JS_ARGS ${EMCC_ARGS}
   -s AGGRESSIVE_VARIABLE_ELIMINATION=1
@@ -58,6 +68,23 @@ set(EMCC_GLUE_ARGS
   -I${JOLT_SRC_DIR}
   -std=c++17
   -include ${JOLT_HEADER_FILE})
+
+# Can't find a way to automatically inherit settings set by target_compile_definitions, so hardcoding defines here
+if ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
+	set(EMCC_GLUE_ARGS
+		${EMCC_GLUE_ARGS}
+		-DJPH_DEBUG_RENDERER -DJPH_PROFILE_ENABLED -D_DEBUG)
+elseif ("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
+	set(EMCC_GLUE_ARGS
+		${EMCC_GLUE_ARGS}
+		-DJPH_DEBUG_RENDERER -DJPH_PROFILE_ENABLED -DNDEBUG)
+elseif ("${CMAKE_BUILD_TYPE}" STREQUAL "Distribution")
+	set(EMCC_GLUE_ARGS
+		${EMCC_GLUE_ARGS}
+		-DNDEBUG)
+else()
+	message("Unknown CMAKE_BUILD_TYPE")
+endif()
 
 #######################################
 project("JoltPhysics.js")
