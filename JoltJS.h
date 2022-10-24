@@ -159,6 +159,7 @@ public:
 	uint					mMaxBodies = 10240;
 	uint					mMaxBodyPairs = 65536;
 	uint					mMaxContactConstraints = 10240;
+	uint					mTempAllocatorSize = 16 * 1024 * 1024;
 };
 
 /// Main API for JavaScript
@@ -177,6 +178,9 @@ public:
 
 		// Register all Jolt physics types
 		RegisterTypes();
+
+		// Init temp allocator
+		mTempAllocator = new TempAllocatorImpl(inSettings.mTempAllocatorSize);
 		
 		// Init the physics system
 		constexpr uint cNumBodyMutexes = 0;
@@ -186,7 +190,8 @@ public:
 	/// Destructor
 							~JoltInterface()
 	{
-		// Destroy the factory
+		// Destroy subsystems
+		delete mTempAllocator;
 		delete Factory::sInstance;
 		Factory::sInstance = nullptr;
 	}
@@ -194,7 +199,7 @@ public:
 	/// Step the world
 	void					Step(float inDeltaTime, int inCollisionSteps, int inIntegrationSubSteps)
 	{
-		mPhysicsSystem.Update(inDeltaTime, inCollisionSteps, inIntegrationSubSteps, &mTempAllocator, &mJobSystem);
+		mPhysicsSystem.Update(inDeltaTime, inCollisionSteps, inIntegrationSubSteps, mTempAllocator, &mJobSystem);
 	}
 
 	/// Access to the physics system
@@ -204,7 +209,7 @@ public:
 	}
 
 private:
-	TempAllocatorImpl		mTempAllocator { 10 * 1024 * 1024 };
+	TempAllocatorImpl *		mTempAllocator;
 	JobSystemThreadPool		mJobSystem { cMaxPhysicsJobs, cMaxPhysicsBarriers, (int)thread::hardware_concurrency() - 1 };
 	BPLayerInterfaceImpl	mBPLayerInterface;
 	PhysicsSystem			mPhysicsSystem;
