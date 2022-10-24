@@ -159,7 +159,7 @@ public:
 	uint					mMaxBodies = 10240;
 	uint					mMaxBodyPairs = 65536;
 	uint					mMaxContactConstraints = 10240;
-	uint					mTempAllocatorSize = 16 * 1024 * 1024;
+	uint					mTempAllocatorSize = 10 * 1024 * 1024;
 };
 
 /// Main API for JavaScript
