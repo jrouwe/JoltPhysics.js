@@ -32,7 +32,7 @@
 
 				// Create group filter that filters out collisions between body N and N + 1 in the same chain
 				let filter = new Jolt.GroupFilterTable(10);
-				for (let z = 0; z < 10; ++z)
+				for (let z = 0; z < 9; ++z)
 					filter.DisableCollision(z, z + 1);
 
 				let material = new THREE.MeshPhongMaterial({ color: 0xff0000 });
