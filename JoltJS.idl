@@ -592,7 +592,6 @@ interface BodyID {
 [Prefix="JPH::"]
 interface MotionProperties {
 	EMotionQuality GetMotionQuality();
-	void SetMotionQuality(EMotionQuality inQuality);
 	[Value] Vec3 GetLinearVelocity();
 	void SetLinearVelocity([Const, Ref] Vec3 inVelocity);
 	void SetLinearVelocityClamped([Const, Ref] Vec3 inVelocity);
@@ -707,6 +706,8 @@ interface BodyInterface {
 	void ActivateBody([Const, Ref] BodyID inBodyID);
 	void DeactivateBody([Const, Ref] BodyID inBodyID);
 	boolean IsActive([Const, Ref] BodyID inBodyID);
+	void SetMotionType([Const, Ref] BodyID inBodyID, EMotionType inMotionType, EActivation inActivationMode);
+	void SetMotionQuality([Const, Ref] BodyID inBodyID, EMotionQuality inMotionQuality);
 };
 
 [Prefix="JPH::"]

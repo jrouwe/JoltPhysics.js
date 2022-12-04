@@ -234,7 +234,7 @@ public:
 		{
 			// Start iterating triangles
 			Shape::GetTrianglesContext context;
-			ts.GetTrianglesStart(context, inBox);
+			ts.GetTrianglesStart(context, inBox, RVec3::sZero());
 
 			for (;;)
 			{
