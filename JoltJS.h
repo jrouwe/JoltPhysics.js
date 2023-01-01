@@ -75,18 +75,22 @@ enum class Layers
 	NUM_LAYERS = 2
 };
 
-// Function that determines if two object layers can collide
-static bool MyObjectCanCollide(ObjectLayer inObject1, ObjectLayer inObject2)
+/// Class that determines if two object layers can collide
+class ObjectLayerPairFilterImpl : public ObjectLayerPairFilter
 {
-	switch (inObject1)
+public:
+	virtual bool					ShouldCollide(ObjectLayer inObject1, ObjectLayer inObject2) const override
 	{
-	case (int)Layers::NON_MOVING:
-		return inObject2 == (int)Layers::MOVING; // Non moving only collides with moving
-	case (int)Layers::MOVING:
-		return true; // Moving collides with everything
-	default:
-		JPH_ASSERT(false);
-		return false;
+		switch (inObject1)
+		{
+		case (int)Layers::NON_MOVING:
+			return inObject2 == (int)Layers::MOVING; // Non moving only collides with moving
+		case (int)Layers::MOVING:
+			return true; // Moving collides with everything
+		default:
+			JPH_ASSERT(false);
+			return false;
+		}
 	}
 };
 
@@ -137,20 +141,24 @@ private:
 	BroadPhaseLayer					mObjectToBroadPhase[(int)Layers::NUM_LAYERS];
 };
 
-// Function that determines if two broadphase layers can collide
-static bool MyBroadPhaseCanCollide(ObjectLayer inLayer1, BroadPhaseLayer inLayer2)
+/// Class that determines if an object layer can collide with a broadphase layer
+class ObjectVsBroadPhaseLayerFilterImpl : public ObjectVsBroadPhaseLayerFilter
 {
-	switch (inLayer1)
+public:
+	virtual bool					ShouldCollide(ObjectLayer inLayer1, BroadPhaseLayer inLayer2) const override
 	{
-	case (int)Layers::NON_MOVING:
-		return inLayer2 == BroadPhaseLayers::MOVING;
-	case (int)Layers::MOVING:
-		return true;	
-	default:
-		JPH_ASSERT(false);
-		return false;
+		switch (inLayer1)
+		{
+		case (int)Layers::NON_MOVING:
+			return inLayer2 == BroadPhaseLayers::MOVING;
+		case (int)Layers::MOVING:
+			return true;	
+		default:
+			JPH_ASSERT(false);
+			return false;
+		}
 	}
-}
+};
 
 /// Settings to pass to constructor
 class JoltSettings
@@ -184,7 +192,7 @@ public:
 		
 		// Init the physics system
 		constexpr uint cNumBodyMutexes = 0;
-		mPhysicsSystem.Init(inSettings.mMaxBodies, cNumBodyMutexes, inSettings.mMaxBodyPairs, inSettings.mMaxContactConstraints, mBPLayerInterface, MyBroadPhaseCanCollide, MyObjectCanCollide);
+		mPhysicsSystem.Init(inSettings.mMaxBodies, cNumBodyMutexes, inSettings.mMaxBodyPairs, inSettings.mMaxContactConstraints, mBPLayerInterface, mObjectVsBroadPhaseLayerFilter, mObjectVsObjectLayerFilter);
 	}
 
 	/// Destructor
@@ -212,6 +220,8 @@ private:
 	TempAllocatorImpl *		mTempAllocator;
 	JobSystemThreadPool		mJobSystem { cMaxPhysicsJobs, cMaxPhysicsBarriers, (int)thread::hardware_concurrency() - 1 };
 	BPLayerInterfaceImpl	mBPLayerInterface;
+	ObjectVsBroadPhaseLayerFilterImpl mObjectVsBroadPhaseLayerFilter;
+	ObjectLayerPairFilterImpl mObjectVsObjectLayerFilter;
 	PhysicsSystem			mPhysicsSystem;
 };
 
