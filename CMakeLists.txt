@@ -10,17 +10,26 @@ set(JOLT_FRONT_MATTER_FILE ${CMAKE_CURRENT_SOURCE_DIR}/front-matter.js)
 set(JOLT_HEADER_FILE ${CMAKE_CURRENT_SOURCE_DIR}/JoltJS.h)
 set(JOLT_IDL_FILE ${CMAKE_CURRENT_SOURCE_DIR}/JoltJS.idl)
 set(JOLT_ONLOAD_FILE ${CMAKE_CURRENT_SOURCE_DIR}/onload.js)
-set(JOLT_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/JoltPhysics/)
 set(OUTPUT_FOLDER ${CMAKE_CURRENT_SOURCE_DIR}/Examples/js/)
 
-# Disable sample applications
-set(TARGET_UNIT_TESTS OFF)
-set(TARGET_HELLO_WORLD OFF)
-set(TARGET_PERFORMANCE_TEST OFF)
-set(TARGET_SAMPLES OFF)
+# The configurations we support
+set(CMAKE_CONFIGURATION_TYPES "Debug;Release;Distribution")
 
-# Build Distribution by default but can be set to Debug too
-set(CMAKE_BUILD_TYPE Distribution CACHE STRING "Build Type")
+# No floating point exception checking
+set(FLOATING_POINT_EXCEPTIONS_ENABLED OFF)
+
+# Turn off LTO
+set(INTERPROCEDURAL_OPTIMIZATION OFF)
+
+# Include Jolt
+include(FetchContent)
+FetchContent_Declare(
+        JoltPhysics
+        GIT_REPOSITORY "https://github.com/jrouwe/JoltPhysics"
+        GIT_TAG "17de06d4e84cbf788281610af310a02262ed9efb"
+		SOURCE_SUBDIR "Build"
+)
+FetchContent_MakeAvailable(JoltPhysics)
 
 # Default is 64*1024*1024 = 64MB
 set(TOTAL_MEMORY 67108864 CACHE STRING "Total Memory")
@@ -65,7 +74,7 @@ set(EMCC_WASM_ARGS ${EMCC_ARGS}
 
 set(EMCC_GLUE_ARGS
   -c
-  -I${JOLT_SRC_DIR}
+  -I${JoltPhysics_SOURCE_DIR}/..
   -std=c++17
   -include ${JOLT_HEADER_FILE})
 
@@ -83,12 +92,11 @@ elseif ("${CMAKE_BUILD_TYPE}" STREQUAL "Distribution")
 		${EMCC_GLUE_ARGS}
 		-DNDEBUG)
 else()
-	message("Unknown CMAKE_BUILD_TYPE")
+	message("Unknown CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
 endif()
 
 #######################################
 project("JoltPhysics.js")
-add_subdirectory(JoltPhysics/Build EXCLUDE_FROM_ALL)
 
 #######################################
 add_custom_command(

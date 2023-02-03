@@ -20,8 +20,7 @@ This project has only been compiled under Linux.
 
 * Install [emscripten](https://emscripten.org/) and ensure that its environment variables have been setup
 * Install [cmake](https://cmake.org/)
-* Ensure you clone this project with its submodules: `git clone --recursive https://github.com/jrouwe/JoltPhysics.js.git`
-* Run ./build.sh
+* Run ```./build.sh``` for the optimized build or ```./build.sh Debug``` for the debug build
 
 ## Credits
 
