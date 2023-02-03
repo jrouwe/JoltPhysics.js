@@ -21,6 +21,9 @@ set(FLOATING_POINT_EXCEPTIONS_ENABLED OFF)
 # Turn off LTO
 set(INTERPROCEDURAL_OPTIMIZATION OFF)
 
+# Turn on symbols
+set(GENERATE_DEBUG_SYMBOLS ON)
+
 # Include Jolt
 include(FetchContent)
 FetchContent_Declare(
