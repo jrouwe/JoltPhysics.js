@@ -186,7 +186,7 @@ function createMeshFloor(n, cell_size, max_height, posX, posY, posZ) {
 				v3.x = x2, v3.y = height(x + 1, z), v3.z = z1;
 			}
 		}
-	let shape = new Jolt.MeshShapeSettings(triangles, null).Create().Get();
+	let shape = new Jolt.MeshShapeSettings(triangles, new Jolt.PhysicsMaterialList).Create().Get();
 
 	// Create body
 	let creation_settings = new Jolt.BodyCreationSettings(shape, new Jolt.Vec3(posX, posY, posZ), new Jolt.Quat(0, 0, 0, 1), Jolt.Static, Jolt.NON_MOVING);
