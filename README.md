@@ -4,13 +4,13 @@ This project enables using [Jolt Physics](https://github.com/jrouwe/JoltPhysics)
 
 ## Demos
 
-* [Falling Shapes Demo - Shows supported shape types](http://htmlpreview.github.io/?https://github.com/jrouwe/JoltPhysics.js/blob/main/Examples/falling_shapes.html).
-* [Constraints Demo - Shows supported constraint types](http://htmlpreview.github.io/?https://github.com/jrouwe/JoltPhysics.js/blob/main/Examples/constraints.html).
-* [Stress Test Demo - Shows big pile of blocks](http://htmlpreview.github.io/?https://github.com/jrouwe/JoltPhysics.js/blob/main/Examples/stress_test.html).
+* [Falling Shapes Demo - Shows supported shape types](https://jrouwe.nl/jolt/examples/falling_shapes.html).
+* [Constraints Demo - Shows supported constraint types](https://jrouwe.nl/jolt/examples/constraints.html).
+* [Stress Test Demo - Shows big pile of blocks](https://jrouwe.nl/jolt/examples/stress_test.html).
 
 ## Using
 
-A precompiled version of the library is [here](Examples/js/jolt.js). See [falling_shapes.html](Examples/falling_shapes.html) for an example on how to use the library.
+The library comes in 2 flavours: [a JavaScript version](https://jrouwe.nl/jolt/examples/js/jolt.js) and [a WASM version](https://jrouwe.nl/jolt/examples/js/jolt.wasm.js). See [falling_shapes.html](Examples/falling_shapes.html) for an example on how to use the library.
 
 Not all of the Jolt interface has been exposed yet. If you need something, just add it to JoltJS.idl and JoltJS.h and send a pull request.
 
