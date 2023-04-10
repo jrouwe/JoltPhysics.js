@@ -29,7 +29,7 @@ include(FetchContent)
 FetchContent_Declare(
         JoltPhysics
         GIT_REPOSITORY "https://github.com/jrouwe/JoltPhysics"
-        GIT_TAG "17de06d4e84cbf788281610af310a02262ed9efb"
+        GIT_TAG "4e457165ee019fb9002b53ffa9a5f95b99b22113"
 		SOURCE_SUBDIR "Build"
 )
 FetchContent_MakeAvailable(JoltPhysics)
@@ -51,6 +51,7 @@ set(EMCC_ARGS
   -s MODULARIZE=1
   -s NO_EXIT_RUNTIME=1
   -s NO_FILESYSTEM=1
+  -s TOTAL_STACK=1048576
   -s TOTAL_MEMORY=${TOTAL_MEMORY})
 
 if ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")

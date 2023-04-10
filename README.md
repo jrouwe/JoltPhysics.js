@@ -22,6 +22,12 @@ This project has only been compiled under Linux.
 * Install [cmake](https://cmake.org/)
 * Run ```./build.sh``` for the optimized build or ```./build.sh Debug``` for the debug build
 
+## Running
+
+By default the examples use the WASM version of Jolt. This requires serving the html file using a web server rather than opening the html file directly. Use e.g. [serve](https://www.npmjs.com/package/serve) to quickly host the file.
+
+If you need to debug the C++ code take a look at [WASM debugging](https://developer.chrome.com/blog/wasm-debugging-2020/).
+
 ## Credits
 
 This project was started from the [Ammo.js](https://github.com/kripken/ammo.js) code, but little remains of it as the Jolt Physics API is very different from the Bullet API.

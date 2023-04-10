@@ -8,5 +8,5 @@ else
 	shift
 fi
 
-cmake -B Build -DCMAKE_BUILD_TYPE=$BUILD_TYPE
-cmake --build Build -j`nproc`
+cmake -B Build/$BUILD_TYPE -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+cmake --build Build/$BUILD_TYPE -j`nproc`
