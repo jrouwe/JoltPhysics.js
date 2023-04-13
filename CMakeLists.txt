@@ -9,8 +9,7 @@ set(WEBIDL_BINDER_SCRIPT ${EMSCRIPTEN_ROOT}/tools/webidl_binder.py)
 set(JOLT_FRONT_MATTER_FILE ${CMAKE_CURRENT_SOURCE_DIR}/front-matter.js)
 set(JOLT_HEADER_FILE ${CMAKE_CURRENT_SOURCE_DIR}/JoltJS.h)
 set(JOLT_IDL_FILE ${CMAKE_CURRENT_SOURCE_DIR}/JoltJS.idl)
-set(JOLT_ONLOAD_FILE ${CMAKE_CURRENT_SOURCE_DIR}/onload.js)
-set(OUTPUT_FOLDER ${CMAKE_CURRENT_SOURCE_DIR}/Examples/js/)
+set(OUTPUT_FOLDER ${CMAKE_CURRENT_SOURCE_DIR}/Build/)
 
 # The configurations we support
 set(CMAKE_CONFIGURATION_TYPES "Debug;Release;Distribution")
@@ -43,10 +42,11 @@ set(ALLOW_MEMORY_GROWTH 0 CACHE STRING "Allow Memory Growth")
 set(EMCC_ARGS
   --extern-pre-js ${JOLT_FRONT_MATTER_FILE}
   --post-js glue.js
-  --post-js ${JOLT_ONLOAD_FILE}
   --closure=1
   -s ALLOW_MEMORY_GROWTH=${ALLOW_MEMORY_GROWTH}
   -s ALLOW_TABLE_GROWTH=1
+  -s ENVIRONMENT='web,node'
+  -s EXPORT_ES6=1
   -s EXPORT_NAME="Jolt"
   -s MODULARIZE=1
   -s NO_EXIT_RUNTIME=1
@@ -75,6 +75,9 @@ set(EMCC_JS_ARGS ${EMCC_ARGS}
 set(EMCC_WASM_ARGS ${EMCC_ARGS}
   -s BINARYEN_IGNORE_IMPLICIT_TRAPS=1
   -s WASM=1)
+
+set(EMCC_WASM_COMPAT_ARGS ${EMCC_WASM_ARGS}
+  -s SINGLE_FILE=1)
 
 set(EMCC_GLUE_ARGS
   -c
@@ -120,18 +123,27 @@ add_custom_target(jolt-bindings ALL DEPENDS glue.js glue.o)
 
 #######################################
 add_custom_command(
-  OUTPUT ${OUTPUT_FOLDER}jolt.js
-  COMMAND emcc glue.o $<TARGET_FILE:Jolt> ${EMCC_JS_ARGS} -o ${OUTPUT_FOLDER}jolt.js
-  DEPENDS jolt-bindings ${JOLT_FRONT_MATTER_FILE} ${JOLT_ONLOAD_FILE} ${JOLT_TARGETS} ${JOLT_IDL_FILE} ${JOLT_HEADER_FILE}
+  OUTPUT ${OUTPUT_FOLDER}jolt-physics.js
+  COMMAND emcc glue.o $<TARGET_FILE:Jolt> ${EMCC_JS_ARGS} -o ${OUTPUT_FOLDER}jolt-physics.js
+  DEPENDS jolt-bindings ${JOLT_FRONT_MATTER_FILE} ${JOLT_TARGETS} ${JOLT_IDL_FILE} ${JOLT_HEADER_FILE}
   COMMENT "Building JoltPhysics.js javascript"
   VERBATIM)
-add_custom_target(jolt-javascript ALL DEPENDS ${OUTPUT_FOLDER}jolt.js)
+add_custom_target(jolt-javascript ALL DEPENDS ${OUTPUT_FOLDER}jolt-physics.js)
 
 #######################################
 add_custom_command(
-  OUTPUT ${OUTPUT_FOLDER}jolt.wasm.js ${OUTPUT_FOLDER}jolt.wasm.wasm
-  COMMAND emcc glue.o $<TARGET_FILE:Jolt> ${EMCC_WASM_ARGS} -o ${OUTPUT_FOLDER}jolt.wasm.js
-  DEPENDS jolt-bindings ${JOLT_FRONT_MATTER_FILE} ${JOLT_ONLOAD_FILE} ${JOLT_TARGETS} ${JOLT_IDL_FILE} ${JOLT_HEADER_FILE}
+  OUTPUT ${OUTPUT_FOLDER}jolt-physics.wasm.js ${OUTPUT_FOLDER}jolt-physics.wasm.wasm
+  COMMAND emcc glue.o $<TARGET_FILE:Jolt> ${EMCC_WASM_ARGS} -o ${OUTPUT_FOLDER}jolt-physics.wasm.js
+  DEPENDS jolt-bindings ${JOLT_FRONT_MATTER_FILE} ${JOLT_TARGETS} ${JOLT_IDL_FILE} ${JOLT_HEADER_FILE}
   COMMENT "Building JoltPhysics.js webassembly"
   VERBATIM)
-add_custom_target(jolt-wasm ALL DEPENDS ${OUTPUT_FOLDER}jolt.wasm.js ${OUTPUT_FOLDER}jolt.wasm.wasm)
+add_custom_target(jolt-wasm ALL DEPENDS ${OUTPUT_FOLDER}jolt-physics.wasm.js ${OUTPUT_FOLDER}jolt-physics.wasm.wasm)
+
+#######################################
+add_custom_command(
+  OUTPUT ${OUTPUT_FOLDER}jolt-physics.wasm-compat.js
+  COMMAND emcc glue.o $<TARGET_FILE:Jolt> ${EMCC_WASM_COMPAT_ARGS} -o ${OUTPUT_FOLDER}jolt-physics.wasm-compat.js
+  DEPENDS jolt-bindings ${JOLT_FRONT_MATTER_FILE} ${JOLT_TARGETS} ${JOLT_IDL_FILE} ${JOLT_HEADER_FILE}
+  COMMENT "Building JoltPhysics.js compat webassembly"
+  VERBATIM)
+add_custom_target(jolt-wasm-compat ALL DEPENDS ${OUTPUT_FOLDER}jolt-physics.wasm-compat.js)

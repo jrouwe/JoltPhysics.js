@@ -10,16 +10,19 @@
 		<div id="container">Loading...</div>
 		<div id="info">JoltPhysics.js demo</div>
 
-		<script src="js/jolt.wasm.js"></script>
 		<script src="js/three/three.min.js"></script>
 		<script src="js/three/OrbitControls.js"></script>
 		<script src="js/three/WebGL.js"></script>
 		<script src="js/three/stats.min.js"></script>
 		<script src="js/example.js"></script>
 
-		<script>
+		<script type="module">
+			import initJolt from './js/jolt-physics.wasm-compat.js';
 
-			Jolt().then(function (Jolt) {
+			let threeObject;
+
+			initJolt().then(function (Jolt) {
+				window.Jolt = Jolt;
 
 				let towerHeight = 11;
 
