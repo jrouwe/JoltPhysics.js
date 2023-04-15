@@ -8,7 +8,9 @@ else
 	shift
 fi
 
+rm -rf ./dist
 mkdir dist
+
 cmake -B Build/$BUILD_TYPE -DCMAKE_BUILD_TYPE=$BUILD_TYPE
 cmake --build Build/$BUILD_TYPE -j`nproc`
 
