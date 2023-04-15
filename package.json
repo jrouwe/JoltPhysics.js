@@ -1,28 +1,28 @@
 {
   "name": "jolt-physics",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "A WebAssembly port of JoltPhysics, a rigid body physics and collision detection library, suitable for games and VR applications",
   "type": "module",
-  "main": "Build/jolt-physics.wasm-compat.js",
-  "types": "Build/jolt-physics.wasm-compat.d.ts",
+  "main": "dist/jolt-physics.wasm-compat.js",
+  "types": "dist/jolt-physics.wasm-compat.d.ts",
   "exports": {
     ".": {
-      "default": "./Build/jolt-physics.wasm-compat.js",
-      "types": "./Build/jolt-physics.wasm-compat.d.ts"
+      "default": "./dist/jolt-physics.wasm-compat.js",
+      "types": "./dist/jolt-physics.wasm-compat.d.ts"
     },
     "./wasm": {
-      "default": "./Build/jolt-physics.wasm.js",
-      "types": "./Build/jolt-physics.wasm.d.ts"
+      "default": "./dist/jolt-physics.wasm.js",
+      "types": "./dist/jolt-physics.wasm.d.ts"
     },
     "./wasm-compat": {
-      "default": "./Build/jolt-physics.wasm-compat.js",
-      "types": "./Build/jolt-physics.wasm-compat.d.ts"
+      "default": "./dist/jolt-physics.wasm-compat.js",
+      "types": "./dist/jolt-physics.wasm-compat.d.ts"
     },
     "./asm": {
-      "default": "./Build/jolt-physics.js",
-      "types": "./Build/jolt-physics.d.ts"
+      "default": "./dist/jolt-physics.js",
+      "types": "./dist/jolt-physics.d.ts"
     },
-    "./jolt-physics.wasm.wasm": "./Build/jolt-physics.wasm.wasm",
+    "./jolt-physics.wasm.wasm": "./dist/jolt-physics.wasm.wasm",
     "./package.json": "./package.json"
   },
   "scripts": {
@@ -36,14 +36,14 @@
   "files": [
     "README.md",
     "LICENSE",
-    "./Build/jolt-physics.js",
-    "./Build/jolt-physics.d.ts",
-    "./Build/jolt-physics.wasm-compat.js",
-    "./Build/jolt-physics.wasm-compat.d.ts",
-    "./Build/jolt-physics.wasm.js",
-    "./Build/jolt-physics.wasm.d.ts",
-    "./Build/jolt-physics.wasm.wasm",
-    "./Build/types.d.ts",
+    "./dist/jolt-physics.js",
+    "./dist/jolt-physics.d.ts",
+    "./dist/jolt-physics.wasm-compat.js",
+    "./dist/jolt-physics.wasm-compat.d.ts",
+    "./dist/jolt-physics.wasm.js",
+    "./dist/jolt-physics.wasm.d.ts",
+    "./dist/jolt-physics.wasm.wasm",
+    "./dist/types.d.ts",
     "asm",
     "wasm",
     "wasm-compat"

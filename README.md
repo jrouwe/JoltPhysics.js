@@ -46,10 +46,10 @@ You can also import esm bundles with unpkg:
 ```html
 <script type="module">
     // import latest
-    import Jolt from 'https://www.unpkg.com/jolt-physics/Build/jolt-physics.wasm-compat.js';
+    import Jolt from 'https://www.unpkg.com/jolt-physics/dist/jolt-physics.wasm-compat.js';
 
     // or import a specific version
-    import Jolt from 'https://www.unpkg.com/jolt-physics@0.0.1/Build/jolt-physics.wasm-compat.js';
+    import Jolt from 'https://www.unpkg.com/jolt-physics@0.0.2/dist/jolt-physics.wasm-compat.js';
 </script>
 ```
 
