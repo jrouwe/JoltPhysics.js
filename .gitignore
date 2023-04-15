@@ -1,4 +1,3 @@
 Build/
-/Examples/js/jolt.wasm.js
-/Examples/js/jolt.wasm.wasm
-/Examples/js/jolt.js
+node_modules
+Examples/js/jolt-physics.wasm-compat.js

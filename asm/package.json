@@ -1,0 +1,5 @@
+{
+  "type": "module",
+  "main": "../Build/jolt-physics.js",
+  "types": "../Build/jolt-physics.d.ts"
+}

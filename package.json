@@ -1,0 +1,66 @@
+{
+  "name": "jolt-physics",
+  "version": "0.0.1",
+  "description": "A WebAssembly port of JoltPhysics, a rigid body physics and collision detection library, suitable for games and VR applications",
+  "type": "module",
+  "main": "Build/jolt-physics.wasm-compat.js",
+  "types": "Build/jolt-physics.wasm-compat.d.ts",
+  "exports": {
+    ".": {
+      "default": "./Build/jolt-physics.wasm-compat.js",
+      "types": "./Build/jolt-physics.wasm-compat.d.ts"
+    },
+    "./wasm": {
+      "default": "./Build/jolt-physics.wasm.js",
+      "types": "./Build/jolt-physics.wasm.d.ts"
+    },
+    "./wasm-compat": {
+      "default": "./Build/jolt-physics.wasm-compat.js",
+      "types": "./Build/jolt-physics.wasm-compat.d.ts"
+    },
+    "./asm": {
+      "default": "./Build/jolt-physics.js",
+      "types": "./Build/jolt-physics.d.ts"
+    },
+    "./jolt-physics.wasm.wasm": "./Build/jolt-physics.wasm.wasm",
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "build": "sh build.sh",
+    "examples": "http-server ./Examples"
+  },
+  "homepage": "https://github.com/jrouwe/JoltPhysics.js",
+  "repository": "https://github.com/jrouwe/JoltPhysics.js.git",
+  "author": "jrouwe",
+  "license": "MIT",
+  "files": [
+    "README.md",
+    "LICENSE",
+    "./Build/jolt-physics.js",
+    "./Build/jolt-physics.d.ts",
+    "./Build/jolt-physics.wasm-compat.js",
+    "./Build/jolt-physics.wasm-compat.d.ts",
+    "./Build/jolt-physics.wasm.js",
+    "./Build/jolt-physics.wasm.d.ts",
+    "./Build/jolt-physics.wasm.wasm",
+    "./Build/types.d.ts",
+    "asm",
+    "wasm",
+    "wasm-compat"
+  ],
+  "keywords": [
+    "physics",
+    "physics-engine",
+    "physics-simulation",
+    "simulation",
+    "game-engine",
+    "vr",
+    "game-development",
+    "webassembly",
+    "wasm"
+  ],
+  "devDependencies": {
+    "http-server": "^14.1.1",
+    "webidl-dts-gen": "^1.0.2"
+  }
+}
