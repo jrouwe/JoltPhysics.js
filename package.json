@@ -61,6 +61,6 @@
   ],
   "devDependencies": {
     "http-server": "^14.1.1",
-    "webidl-dts-gen": "^1.0.2"
+    "webidl-dts-gen": "^1.1.1"
   }
 }
