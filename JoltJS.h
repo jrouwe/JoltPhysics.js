@@ -270,6 +270,10 @@ public:
 				cur_pos += count;
 			}
 		}
+
+		// Free excess memory
+		mVertices.shrink_to_fit();
+		mMaterials.shrink_to_fit();
 	}
 
 	int						GetNumTriangles() const

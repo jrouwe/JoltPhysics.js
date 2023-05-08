@@ -147,12 +147,17 @@ function getThreeMeshForShape(shape, material) {
 	let triContext = new Jolt.ShapeGetTriangles(shape, Jolt.AABox.prototype.sBiggest(), shape.GetCenterOfMass(), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(1, 1, 1));
 
 	// Get a view on the triangle data (does not make a copy)
-	let vertices = new Float32Array(Jolt.HEAPF32.buffer, triContext.GetVerticesData(), triContext.GetVerticesSize());
+	let vertices = new Float32Array(Jolt.HEAPF32.buffer, triContext.GetVerticesData(), triContext.GetVerticesSize() / Float32Array.BYTES_PER_ELEMENT);
+
+	// Now move the triangle data to a buffer and clone it so that we can free the memory from the C++ heap (which could be limited in size)
+	let buffer = new THREE.BufferAttribute(vertices, 3).clone();
+	Jolt.destroy(triContext);
 
 	// Create a three mesh
 	let geometry = new THREE.BufferGeometry();
-	geometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
+	geometry.setAttribute('position', buffer);
 	geometry.computeVertexNormals();
+
 	return new THREE.Mesh(geometry, material);
 }
 
