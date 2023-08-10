@@ -205,9 +205,9 @@ public:
 	}
 
 	/// Step the world
-	void					Step(float inDeltaTime, int inCollisionSteps, int inIntegrationSubSteps)
+	void					Step(float inDeltaTime, int inCollisionSteps)
 	{
-		mPhysicsSystem.Update(inDeltaTime, inCollisionSteps, inIntegrationSubSteps, mTempAllocator, &mJobSystem);
+		mPhysicsSystem.Update(inDeltaTime, inCollisionSteps, mTempAllocator, &mJobSystem);
 	}
 
 	/// Access to the physics system

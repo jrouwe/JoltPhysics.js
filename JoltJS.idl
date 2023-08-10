@@ -19,6 +19,11 @@ enum Layers {
 	"Layers::NON_MOVING"
 };
 
+enum EBodyType {
+	"EBodyType::RigidBody",
+	"EBodyType::SoftBody"
+};
+
 enum EMotionType {
 	"EMotionType::Static",
 	"EMotionType::Kinematic",
@@ -62,6 +67,11 @@ enum EShapeSubType {
 enum EConstraintSpace {
 	"EConstraintSpace::LocalToBodyCOM",
 	"EConstraintSpace::WorldSpace"
+};
+
+enum ESpringMode {
+	"ESpringMode::FrequencyAndDamping",
+	"ESpringMode::StiffnessAndDamping",
 };
 
 [Prefix="JPH::"]
@@ -478,6 +488,17 @@ interface FixedConstraintSettings {
 
 FixedConstraintSettings implements TwoBodyConstraintSettings;
 
+// Spring settings
+[Prefix="JPH::"]
+interface SpringSettings {
+	void SpringSettings();
+	
+	attribute ESpringMode mMode;
+	attribute float mFrequency;
+	attribute float mStiffness;
+	attribute float mDamping;
+};
+
 // Distance constraint
 [Prefix="JPH::"]
 interface DistanceConstraintSettings {
@@ -488,8 +509,7 @@ interface DistanceConstraintSettings {
 	[Value] attribute Vec3 mPoint2;
 	attribute float mMinDistance;
 	attribute float mMaxDistance;
-	attribute float mFrequency;
-	attribute float mDamping;
+	[Value] attribute SpringSettings mLimitsSpringSettings;
 };
 
 DistanceConstraintSettings implements TwoBodyConstraintSettings;
@@ -716,7 +736,7 @@ interface PhysicsSystem {
 	void SetGravity([Const, Ref] Vec3 inGravity);
 	[Value] Vec3 GetGravity();
 	unsigned long GetNumBodies();
-	unsigned long GetNumActiveBodies();
+	unsigned long GetNumActiveBodies(EBodyType inBodyType);
 	unsigned long GetMaxBodies();
 	void AddConstraint(Constraint inConstraint);
 	void RemoveConstraint(Constraint inConstraint);
@@ -757,6 +777,6 @@ interface JoltSettings {
 
 interface JoltInterface {
 	void JoltInterface([Const, Ref] JoltSettings inSettings);
-	void Step(float inDeltaTime, long inCollisionSteps, long inIntegrationSubSteps);
+	void Step(float inDeltaTime, long inCollisionSteps);
 	PhysicsSystem GetPhysicsSystem();
 };

@@ -72,7 +72,7 @@ function updatePhysics(deltaTime) {
 	var numSteps = deltaTime > 1.0 / 55.0 ? 2 : 1;
 
 	// Step the physics world
-	jolt.Step(deltaTime, numSteps, 1);
+	jolt.Step(deltaTime, numSteps);
 }
 
 function initExample(updateFunction) {
