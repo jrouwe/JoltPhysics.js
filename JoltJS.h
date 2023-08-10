@@ -30,6 +30,8 @@
 #include "Jolt/Physics/Constraints/SwingTwistConstraint.h"
 #include "Jolt/Physics/Body/BodyInterface.h"
 #include "Jolt/Physics/Body/BodyCreationSettings.h"
+#include "Jolt/Physics/SoftBody/SoftBodyCreationSettings.h"
+#include "Jolt/Physics/SoftBody/SoftBodySharedSettings.h"
 
 #include <iostream>
 
@@ -39,6 +41,14 @@ using namespace std;
 // Types that need to be exposed to JavaScript
 using JPHString = String;
 using ArrayVec3 = Array<Vec3>;
+using SoftBodySharedSettingsVertex = SoftBodySharedSettings::Vertex;
+using SoftBodySharedSettingsFace = SoftBodySharedSettings::Face;
+using SoftBodySharedSettingsEdge = SoftBodySharedSettings::Edge;
+using SoftBodySharedSettingsVolume = SoftBodySharedSettings::Volume;
+using ArraySoftBodySharedSettingsVertex = Array<SoftBodySharedSettingsVertex>;
+using ArraySoftBodySharedSettingsFace = Array<SoftBodySharedSettingsFace>;
+using ArraySoftBodySharedSettingsEdge = Array<SoftBodySharedSettingsEdge>;
+using ArraySoftBodySharedSettingsVolume = Array<SoftBodySharedSettingsVolume>;
 
 // Callback for traces
 static void TraceImpl(const char *inFMT, ...)

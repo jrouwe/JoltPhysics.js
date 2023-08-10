@@ -74,6 +74,12 @@ enum ESpringMode {
 	"ESpringMode::StiffnessAndDamping",
 };
 
+enum EOverrideMassProperties {
+	"EOverrideMassProperties::CalculateMassAndInertia",
+	"EOverrideMassProperties::CalculateInertia",
+	"EOverrideMassProperties::MassAndInertiaProvided"
+};
+
 [Prefix="JPH::"]
 interface Vec3 {
 	void Vec3();
@@ -668,6 +674,7 @@ interface Body {
 	boolean IsKinematic();
 	boolean IsDynamic();
 	boolean CanBeKinematicOrDynamic();
+	EBodyType GetBodyType();
 	EMotionType GetMotionType();
 	void SetMotionType(EMotionType inMotionType);
 	void SetIsSensor(boolean inIsSensor);
@@ -706,11 +713,13 @@ interface Body {
 [Prefix="JPH::"]
 interface BodyInterface {
 	Body CreateBody([Const, Ref] BodyCreationSettings inSettings);
+	Body CreateSoftBody([Const, Ref] SoftBodyCreationSettings inSettings);
 	void DestroyBody([Const, Ref] BodyID inBodyID);
 	void AddBody([Const, Ref] BodyID inBodyID, EActivation inActivationMode);
 	void RemoveBody([Const, Ref] BodyID inBodyID);
 	boolean IsAdded([Const, Ref] BodyID inBodyID);
 	[Value] BodyID CreateAndAddBody([Const, Ref] BodyCreationSettings inSettings, EActivation inActivationMode);
+	[Value] BodyID CreateAndAddSoftBody([Const, Ref] SoftBodyCreationSettings inSettings, EActivation inActivationMode);
 	[Const] Shape GetShape([Const, Ref] BodyID inBodyID);
 	void SetShape([Const, Ref] BodyID inBodyID, [Const] Shape inShape, boolean inUpdateMassProperties, EActivation inActivationMode);
 	void SetObjectLayer([Const, Ref] BodyID inBodyID, unsigned long inLayer);
@@ -743,6 +752,14 @@ interface PhysicsSystem {
 };
 
 [Prefix="JPH::"]
+interface MassProperties {
+	void MassProperties();
+
+	attribute float mMass;
+	[Value] attribute Mat44 mInertia;
+};
+
+[Prefix="JPH::"]
 interface BodyCreationSettings {
 	void BodyCreationSettings([Const] Shape inShape, [Ref] Vec3 inPosition, [Ref] Quat inRotation, EMotionType inMotionType, unsigned short inObjectLayer);
 	
@@ -765,6 +782,107 @@ interface BodyCreationSettings {
 	attribute float mMaxLinearVelocity;
 	attribute float mMaxAngularVelocity;
 	attribute float mGravityFactor;
+	attribute EOverrideMassProperties mOverrideMassProperties;
+	attribute float mInertiaMultiplier;
+	[Value] attribute MassProperties mMassPropertiesOverride;
+};
+
+interface SoftBodySharedSettingsVertex {
+	void SoftBodySharedSettingsVertex();
+
+	[Value] attribute Float3 mPosition;
+	[Value] attribute Float3 mVelocity;
+	attribute float mInvMass;
+};
+
+interface SoftBodySharedSettingsFace {
+	void SoftBodySharedSettingsFace(unsigned long inVertex1, unsigned long inVertex2, unsigned long inVertex3, unsigned long inMaterialIndex);
+
+	attribute unsigned long[] mVertex;
+	attribute unsigned long mMaterialIndex;
+};
+
+interface SoftBodySharedSettingsEdge {
+	void SoftBodySharedSettingsEdge(unsigned long inVertex1, unsigned long inVertex2, float inCompliance);
+
+	attribute unsigned long[] mVertex;
+	attribute float mRestLength;
+	attribute float mCompliance;
+};
+
+interface SoftBodySharedSettingsVolume {
+	void SoftBodySharedSettingsVolume(unsigned long inVertex1, unsigned long inVertex2, unsigned long inVertex3, unsigned long inVertex4, float inCompliance);
+
+	attribute unsigned long[] mVertex;
+	attribute float mSixRestVolume;
+	attribute float mCompliance;
+};
+
+interface ArraySoftBodySharedSettingsVertex {
+	long size();
+	[Ref] SoftBodySharedSettingsVertex at(long inIndex);
+	void push_back([Const, Ref] SoftBodySharedSettingsVertex inValue);
+	void reserve(unsigned long inSize);
+	void resize(unsigned long inSize);
+};
+
+interface ArraySoftBodySharedSettingsFace {
+	long size();
+	[Ref] SoftBodySharedSettingsFace at(long inIndex);
+	void push_back([Const, Ref] SoftBodySharedSettingsFace inValue);
+	void reserve(unsigned long inSize);
+	void resize(unsigned long inSize);
+};
+
+interface ArraySoftBodySharedSettingsEdge {
+	long size();
+	[Ref] SoftBodySharedSettingsEdge at(long inIndex);
+	void push_back([Const, Ref] SoftBodySharedSettingsEdge inValue);
+	void reserve(unsigned long inSize);
+	void resize(unsigned long inSize);
+};
+
+interface ArraySoftBodySharedSettingsVolume {
+	long size();
+	[Ref] SoftBodySharedSettingsVolume at(long inIndex);
+	void push_back([Const, Ref] SoftBodySharedSettingsVolume inValue);
+	void reserve(unsigned long inSize);
+	void resize(unsigned long inSize);
+};
+
+[Prefix="JPH::"]
+interface SoftBodySharedSettings {
+	void SoftBodySharedSettings();
+
+	void AddFace([Const, Ref] SoftBodySharedSettingsFace inFace);
+	void CalculateEdgeLengths();
+	void CalculateVolumeConstraintVolumes();
+
+	[Value] attribute ArraySoftBodySharedSettingsVertex mVertices;
+	[Value] attribute ArraySoftBodySharedSettingsFace mFaces;
+	[Value] attribute ArraySoftBodySharedSettingsEdge mEdgeConstraints;
+	[Value] attribute ArraySoftBodySharedSettingsVolume mVolumeConstraints;
+	[Value] attribute PhysicsMaterialList mMaterials;
+};
+
+[Prefix="JPH::"]
+interface SoftBodyCreationSettings {
+	void SoftBodyCreationSettings([Const] SoftBodySharedSettings inSettings, [Ref] Vec3 inPosition, [Ref] Quat inRotation, unsigned short inObjectLayer);
+	
+	[Value] attribute Vec3 mPosition;
+	[Value] attribute Quat mRotation;
+	attribute long long mUserData;
+	attribute short mObjectLayer;
+	[Value] attribute CollisionGroup mCollisionGroup;
+	attribute unsigned long mNumIterations;
+	attribute float mLinearDamping;
+	attribute float mMaxLinearVelocity;
+	attribute float mRestitution;
+	attribute float mFriction;
+	attribute float mPressure;
+	attribute float mGravityFactor;
+	attribute boolean mUpdatePosition;
+	attribute boolean mMakeRotationIdentity;
 };
 
 interface JoltSettings {

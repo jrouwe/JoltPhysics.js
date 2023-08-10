@@ -108,6 +108,9 @@ function renderExample() {
 		let q = body.GetRotation();
 		objThree.position.set(p.GetX(), p.GetY(), p.GetZ());
 		objThree.quaternion.set(q.GetX(), q.GetY(), q.GetZ(), q.GetW());
+
+		if (body.GetBodyType() == Jolt.SoftBody)
+			objThree.geometry = createMeshForShape(body.GetShape());
 	}
 
 	time += deltaTime;
@@ -142,7 +145,7 @@ function createFloor() {
 	addToScene(threeObject, body);
 }
 
-function getThreeMeshForShape(shape, material) {
+function createMeshForShape(shape) {
 	// Get triangle data
 	let triContext = new Jolt.ShapeGetTriangles(shape, Jolt.AABox.prototype.sBiggest(), shape.GetCenterOfMass(), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(1, 1, 1));
 
@@ -157,6 +160,13 @@ function getThreeMeshForShape(shape, material) {
 	let geometry = new THREE.BufferGeometry();
 	geometry.setAttribute('position', buffer);
 	geometry.computeVertexNormals();
+
+	return geometry;
+}
+
+function getThreeMeshForShape(shape, material) {
+
+	let geometry = createMeshForShape(shape);
 
 	return new THREE.Mesh(geometry, material);
 }

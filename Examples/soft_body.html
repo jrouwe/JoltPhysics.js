@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>JoltPhysics.js demo</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<link rel="stylesheet" type="text/css" href="style.css">
+	</head>
+	<body>
+		<div id="container">Loading...</div>
+		<div id="info">JoltPhysics.js demo</div>
+
+		<script src="js/three/three.min.js"></script>
+		<script src="js/three/OrbitControls.js"></script>
+		<script src="js/three/WebGL.js"></script>
+		<script src="js/three/stats.min.js"></script>
+		<script src="js/example.js"></script>
+
+		<script type="module">
+			import initJolt from './js/jolt-physics.wasm-compat.js';
+
+			let threeObject;
+
+			initJolt().then(function (Jolt) {
+				window.Jolt = Jolt;
+
+				let towerHeight = 11;
+				let gridSize = 40;
+				let gridSpacing = 0.5;
+				let offset = -0.5 * gridSpacing * (gridSize - 1);
+				let compliance = 0.00001;
+
+				// Function to get the vertex index of a point on the cloth
+				let vertex_index = function (inX, inY) {
+						return inX + inY * gridSize;
+					};
+
+				// Initialize this example
+				initExample(null);
+
+				// Create a basic floor
+				createFloor();
+
+				// Create shared settings
+				let shared_settings = new Jolt.SoftBodySharedSettings;
+
+				// Create vertices
+				let v = new Jolt.SoftBodySharedSettingsVertex;
+				for (let y = 0; y < gridSize; ++y)
+					for (let x = 0; x < gridSize; ++x) {
+						v.mPosition = new Jolt.Float3(offset + x * gridSpacing, 0.0, offset + y * gridSpacing);
+						shared_settings.mVertices.push_back(v);
+					}
+
+				// Fixate corners
+				shared_settings.mVertices.at(vertex_index(0, 0)).mInvMass = 0.0;
+				shared_settings.mVertices.at(vertex_index(gridSize - 1, 0)).mInvMass = 0.0;
+				shared_settings.mVertices.at(vertex_index(0, gridSize - 1)).mInvMass = 0.0;
+				shared_settings.mVertices.at(vertex_index(gridSize - 1, gridSize - 1)).mInvMass = 0.0;
+
+				// Create edges
+				for (let y = 0; y < gridSize; ++y)
+					for (let x = 0; x < gridSize; ++x) {
+						let v0 = vertex_index(x, y);
+						if (x < gridSize - 1) {
+							let v1 = vertex_index(x + 1, y);
+							shared_settings.mEdgeConstraints.push_back(new Jolt.SoftBodySharedSettingsEdge(v0, v1, compliance));
+						}
+						if (y < gridSize - 1) {
+							let v1 = vertex_index(x, y + 1);
+							shared_settings.mEdgeConstraints.push_back(new Jolt.SoftBodySharedSettingsEdge(v0, v1, compliance));
+						}
+						if (x < gridSize - 1 && y < gridSize - 1) {
+							let v1 = vertex_index(x + 1, y + 1);
+							shared_settings.mEdgeConstraints.push_back(new Jolt.SoftBodySharedSettingsEdge(v0, v1, compliance));
+
+							v0 = vertex_index(x + 1, y);
+							v1 = vertex_index(x, y + 1);
+							shared_settings.mEdgeConstraints.push_back(new Jolt.SoftBodySharedSettingsEdge(v0, v1, compliance));
+						}
+					}
+				shared_settings.CalculateEdgeLengths();
+
+				// Create faces
+				for (let y = 0; y < gridSize - 1; ++y)
+					for (let x = 0; x < gridSize - 1; ++x) {
+						let v0 = vertex_index(x, y);
+						let v1 = vertex_index(x, y + 1);
+						let v2 = vertex_index(x + 1, y + 1);
+						shared_settings.AddFace(new Jolt.SoftBodySharedSettingsFace(v0, v1, v2, 0));
+
+						v1 = vertex_index(x + 1, y + 1);
+						v2 = vertex_index(x + 1, y);
+						shared_settings.AddFace(new Jolt.SoftBodySharedSettingsFace(v0, v1, v2, 0));
+					}
+
+				// Create soft body
+				let body_creation_settings = new Jolt.SoftBodyCreationSettings(shared_settings, new Jolt.Vec3(0, 10, 0), Jolt.Quat.prototype.sIdentity());
+				body_creation_settings.mObjectLayer = Jolt.MOVING;
+				body_creation_settings.mUpdatePosition = false;
+				let body = bodyInterface.CreateSoftBody(body_creation_settings);
+
+				let threeObject = getThreeMeshForShape(body.GetShape(), new THREE.MeshPhongMaterial({ color: 0xffffff }));
+				threeObject.position.set(0, 10, 0);
+
+				addToScene(threeObject, body);
+
+				let colors = [0xff0000, 0xd9b1a3, 0x4d4139, 0xccad33, 0xf2ff40, 0x00ff00, 0x165943, 0x567371, 0x80d5ff, 0x69778c, 0xbeb6f2, 0x7159b3, 0x73004d, 0xd90074, 0xff8091, 0xbf3030, 0x592400, 0xa66c29, 0xb3aa86, 0x296600, 0x00e600, 0x66ccaa, 0x00eeff, 0x3d9df2, 0x000e33, 0x3d00e6, 0xb300a7, 0xff80d5, 0x330d17, 0x59332d, 0xff8c40, 0x33210d, 0x403c00, 0x89d96c, 0x0d3312, 0x0d3330, 0x005c73, 0x0066ff, 0x334166, 0x1b0066, 0x4d3949, 0xbf8faf, 0x59000c]
+
+				// Create spheres to fall on soft body
+				for (let s = 0; s < 10; ++s) {
+					let x = 2.0 * Math.random();
+					let z = 2.0 * Math.random();
+					let radius = 0.75;
+					let material = new THREE.MeshPhongMaterial({ color: colors[s] });
+					let threeObject = new THREE.Mesh(new THREE.SphereGeometry(radius, 20, 20), material);
+					let shape = new Jolt.SphereShape(radius, null);
+					let creationSettings = new Jolt.BodyCreationSettings(shape, new Jolt.Vec3(x, 15 + 2.0 * radius * s, z), Jolt.Quat.prototype.sIdentity(), Jolt.Dynamic, Jolt.MOVING);
+					creationSettings.mOverrideMassProperties = Jolt.CalculateInertia;
+					creationSettings.mMassPropertiesOverride.mMass = 100.0;
+					let body = bodyInterface.CreateBody(creationSettings);
+
+					addToScene(threeObject, body);
+				}
+			});
+
+		</script>
+	</body>
+</html>
