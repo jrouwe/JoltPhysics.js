@@ -154,6 +154,8 @@ function createFloor() {
 	let body = bodyInterface.CreateBody(creation_settings);
 
 	addToScene(threeObject, body);
+
+	return body;
 }
 
 function createMeshForShape(shape) {

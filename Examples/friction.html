@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>JoltPhysics.js demo</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<link rel="stylesheet" type="text/css" href="style.css">
+	</head>
+	<body>
+		<div id="container">Loading...</div>
+		<div id="info">JoltPhysics.js demo</div>
+
+		<script src="js/three/three.min.js"></script>
+		<script src="js/three/OrbitControls.js"></script>
+		<script src="js/three/WebGL.js"></script>
+		<script src="js/three/stats.min.js"></script>
+		<script src="js/example.js"></script>
+
+		<script type="module">
+			import initJolt from './js/jolt-physics.wasm-compat.js';
+
+			initJolt().then(function (Jolt) {
+				window.Jolt = Jolt;
+
+				// Initialize this example
+				initExample(null);
+
+				// Create a basic floor
+				let floor = createFloor();
+				floor.SetFriction(1.0);
+
+				// Create objects with increasing friction
+				for (let i = 0; i < 10; i++) {
+
+					// Position and rotate visual mesh
+					let material = new THREE.MeshPhongMaterial({ color: 0x00ffff });
+					let threeObject = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1, 1, 1, 1), material);
+					threeObject.position.set(-10.0 + 2.0 * i, 0.5, 0);
+
+					// Create physics body
+					let pos = threeObject.position;
+					let shape = new Jolt.BoxShape(new Jolt.Vec3(0.5, 0.5, 0.5), 0.05, null);
+					let creationSettings = new Jolt.BodyCreationSettings(shape, new Jolt.Vec3(pos.x, pos.y, pos.z), new Jolt.Quat.prototype.sIdentity(), Jolt.Dynamic, Jolt.MOVING);
+					creationSettings.mFriction = 0.1 * i;
+					let body = bodyInterface.CreateBody(creationSettings);
+
+					// Apply an impulse to make the body move
+					body.AddImpulse(new Jolt.Vec3(0, 0, 10000.0));
+
+					addToScene(threeObject, body);
+				}
+			});
+
+		</script>
+	</body>
+</html>
