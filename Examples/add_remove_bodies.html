@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>JoltPhysics.js demo</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<link rel="stylesheet" type="text/css" href="style.css">
+	</head>
+	<body>
+		<div id="container">Loading...</div>
+		<div id="info">JoltPhysics.js demo</div>
+
+		<script src="js/three/three.min.js"></script>
+		<script src="js/three/OrbitControls.js"></script>
+		<script src="js/three/WebGL.js"></script>
+		<script src="js/three/stats.min.js"></script>
+		<script src="js/example.js"></script>
+
+		<script type="module">
+			import initJolt from './js/jolt-physics.wasm-compat.js';
+
+			initJolt().then(function (Jolt) {
+				window.Jolt = Jolt;
+
+				// Spawning variables
+				var objectTimePeriod = 0.01;
+				var timeNextSpawn = time + objectTimePeriod;
+
+				// Initialize this example
+				initExample(onUpdate);
+
+				// Create a basic floor
+				createFloor();
+
+				function generateObject() {
+
+					// Position and rotate visual mesh
+					let material = new THREE.MeshPhongMaterial({ color: 0x00ffff });
+					let threeObject = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1, 1, 1, 1), material);
+					threeObject.position.set((Math.random() - 0.5) * 25, 15, (Math.random() - 0.5) * 25);
+					threeObject.quaternion.random();
+
+					// Create physics body
+					let pos = threeObject.position, rot = threeObject.quaternion;
+					let shape = new Jolt.BoxShape(new Jolt.Vec3(0.5, 0.5, 0.5), 0.05, null);
+					let creationSettings = new Jolt.BodyCreationSettings(shape, new Jolt.Vec3(pos.x, pos.y, pos.z), new Jolt.Quat(rot.x, rot.y, rot.z, rot.w), Jolt.Dynamic, Jolt.MOVING);
+					creationSettings.mRestitution = 0.5;
+					let body = bodyInterface.CreateBody(creationSettings);
+
+					addToScene(threeObject, body);
+
+					if (dynamicObjects.length > 200)
+						removeFromScene(dynamicObjects[1]); // Leave the floor alone
+				}
+
+				function onUpdate(time, deltaTime) {
+					// Check if its time to spawn a new object
+					if (time > timeNextSpawn) {
+						generateObject();
+						timeNextSpawn = time + objectTimePeriod;
+					}
+				}
+			});
+
+		</script>
+	</body>
+</html>

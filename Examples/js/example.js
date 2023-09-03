@@ -133,6 +133,17 @@ function addToScene(threeObject, body) {
 	dynamicObjects.push(threeObject);
 }
 
+function removeFromScene(threeObject) {
+	let id = threeObject.userData.body.GetID();
+	bodyInterface.RemoveBody(id);
+	bodyInterface.DestroyBody(id);
+	delete threeObject.userData.body;
+
+	scene.remove(threeObject);
+	let idx = dynamicObjects.indexOf(threeObject);
+	dynamicObjects.splice(idx, 1);
+}
+
 function createFloor() {
 	// Create floor mesh
 	let threeObject = new THREE.Mesh(new THREE.BoxGeometry(100, 1, 100, 1, 1, 1), new THREE.MeshPhongMaterial({ color: 0xC7C7C7 }));
