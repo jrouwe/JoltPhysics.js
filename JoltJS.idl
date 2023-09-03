@@ -737,6 +737,9 @@ interface BodyInterface {
 	boolean IsActive([Const, Ref] BodyID inBodyID);
 	void SetMotionType([Const, Ref] BodyID inBodyID, EMotionType inMotionType, EActivation inActivationMode);
 	void SetMotionQuality([Const, Ref] BodyID inBodyID, EMotionQuality inMotionQuality);
+	void AddImpulse([Const, Ref] BodyID inBodyID, [Const, Ref] Vec3 inImpulse);
+	void AddImpulse([Const, Ref] BodyID inBodyID, [Const, Ref] Vec3 inImpulse, [Const, Ref] Vec3 inPosition);
+	void AddAngularImpulse([Const, Ref] BodyID inBodyID, [Const, Ref] Vec3 inAngularImpulse);
 };
 
 [Prefix="JPH::"]
