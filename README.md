@@ -8,6 +8,7 @@ This project enables using [Jolt Physics](https://github.com/jrouwe/JoltPhysics)
 * [Constraints Demo - Shows supported constraint types](https://jrouwe.nl/jolt/examples/constraints.html).
 * [Soft Body Demo - Shows a soft body cloth](https://jrouwe.nl/jolt/examples/soft_body.html).
 * [Stress Test Demo - Shows big pile of blocks](https://jrouwe.nl/jolt/examples/stress_test.html).
+* [2D Funnel - Shows how to limit bodies in a 2D plane](https://jrouwe.nl/jolt/examples/2d_funnel.html).
 
 ## Using
 
@@ -50,7 +51,7 @@ You can also import esm bundles with unpkg:
     import Jolt from 'https://www.unpkg.com/jolt-physics/dist/jolt-physics.wasm-compat.js';
 
     // or import a specific version
-    import Jolt from 'https://www.unpkg.com/jolt-physics@0.0.6/dist/jolt-physics.wasm-compat.js';
+    import Jolt from 'https://www.unpkg.com/jolt-physics@0.0.7/dist/jolt-physics.wasm-compat.js';
 </script>
 ```
 

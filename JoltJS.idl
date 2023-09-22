@@ -80,6 +80,16 @@ enum EOverrideMassProperties {
 	"EOverrideMassProperties::MassAndInertiaProvided"
 };
 
+enum EAllowedDOFs {
+	"EAllowedDOFs::TranslationX",
+	"EAllowedDOFs::TranslationY",
+	"EAllowedDOFs::TranslationZ",
+	"EAllowedDOFs::RotationX",
+	"EAllowedDOFs::RotationY",
+	"EAllowedDOFs::RotationZ",
+	"EAllowedDOFs::Plane2D"
+};
+
 [Prefix="JPH::"]
 interface Vec3 {
 	void Vec3();
@@ -774,6 +784,7 @@ interface BodyCreationSettings {
 	attribute short mObjectLayer;
 	[Value] attribute CollisionGroup mCollisionGroup;
 	attribute EMotionType mMotionType;
+	attribute EAllowedDOFs mAllowedDOFs;
 	attribute boolean mAllowDynamicOrKinematic;
 	attribute boolean mIsSensor;
 	attribute EMotionQuality mMotionQuality;

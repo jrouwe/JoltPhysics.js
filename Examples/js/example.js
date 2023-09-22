@@ -158,6 +158,33 @@ function createFloor() {
 	return body;
 }
 
+function createBox(position, rotation, halfExtent, motionType, layer) {
+	let shape = new Jolt.BoxShape(halfExtent, 0.05, null);
+	let creationSettings = new Jolt.BodyCreationSettings(shape, position, rotation, motionType, layer);
+	let body = bodyInterface.CreateBody(creationSettings);
+
+	threeObject = new THREE.Mesh(new THREE.BoxGeometry(halfExtent.GetX() * 2, halfExtent.GetY() * 2, halfExtent.GetZ() * 2), new THREE.MeshPhongMaterial({ color: 0xffffff }));
+	threeObject.position.set(position.GetX(), position.GetY(), position.GetZ());
+	threeObject.rotation.set(rotation.GetX(), rotation.GetY(), rotation.GetZ(), rotation.GetW());
+
+	addToScene(threeObject, body);
+
+	return body;
+}
+
+function createSphere(position, radius, motionType, layer) {
+	let shape = new Jolt.SphereShape(radius, null);
+	let creationSettings = new Jolt.BodyCreationSettings(shape, position, Jolt.Quat.prototype.sIdentity(), motionType, layer);
+	let body = bodyInterface.CreateBody(creationSettings);
+
+	threeObject = new THREE.Mesh(new THREE.SphereGeometry(radius), new THREE.MeshPhongMaterial({ color: 0xffffff }));
+	threeObject.position.set(position.GetX(), position.GetY(), position.GetZ());
+
+	addToScene(threeObject, body);
+
+	return body;
+}
+
 function createMeshForShape(shape) {
 	// Get triangle data
 	let triContext = new Jolt.ShapeGetTriangles(shape, Jolt.AABox.prototype.sBiggest(), shape.GetCenterOfMass(), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(1, 1, 1));

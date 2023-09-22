@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>JoltPhysics.js demo</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<link rel="stylesheet" type="text/css" href="style.css">
+	</head>
+	<body>
+		<div id="container">Loading...</div>
+		<div id="info">JoltPhysics.js demo</div>
+
+		<script src="js/three/three.min.js"></script>
+		<script src="js/three/OrbitControls.js"></script>
+		<script src="js/three/WebGL.js"></script>
+		<script src="js/three/stats.min.js"></script>
+		<script src="js/example.js"></script>
+
+		<script type="module">
+			import initJolt from './js/jolt-physics.wasm-compat.js';
+
+			let threeObject;
+
+			initJolt().then(function (Jolt) {
+				window.Jolt = Jolt;
+
+				// Initialize this example
+				initExample(null);
+
+				// Create a basic floor
+				createFloor();
+
+				createBox(new Jolt.Vec3(-12, 8, -5), Jolt.Quat.prototype.sRotation(new Jolt.Vec3(0, 0, 1), 0.2 * Math.PI), new Jolt.Vec3(0.1, 10, 1), Jolt.Static, Jolt.NON_MOVING);
+				createBox(new Jolt.Vec3(12, 8, -5), Jolt.Quat.prototype.sRotation(new Jolt.Vec3(0, 0, 1), -0.2 * Math.PI), new Jolt.Vec3(0.1, 10, 1), Jolt.Static, Jolt.NON_MOVING);
+
+				let shape = new Jolt.SphereShape(0.5, null);
+				let creationSettings = new Jolt.BodyCreationSettings(shape, new Jolt.Vec3(0, 0, 0), Jolt.Quat.prototype.sIdentity(), Jolt.Dynamic, Jolt.MOVING);
+				creationSettings.mAllowedDOFs = Jolt.Plane2D;
+
+				for (let x = 0; x < 20; ++x)
+					for (let y = 0; y < 10; ++y) { 
+						creationSettings.mPosition = new Jolt.Vec3(-10 + x, 10 + y, -5)
+						let body = bodyInterface.CreateBody(creationSettings);
+
+						threeObject = new THREE.Mesh(new THREE.SphereGeometry(0.5), new THREE.MeshPhongMaterial({ color: 0xffffff }));
+						threeObject.position.set(creationSettings.mPosition.GetX(), creationSettings.mPosition.GetY(), creationSettings.mPosition.GetZ());
+
+						addToScene(threeObject, body);
+					}
+			});
+
+		</script>
+	</body>
+</html>
