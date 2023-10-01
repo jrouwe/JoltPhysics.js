@@ -33,6 +33,7 @@
 #include "Jolt/Physics/Body/BodyCreationSettings.h"
 #include "Jolt/Physics/SoftBody/SoftBodyCreationSettings.h"
 #include "Jolt/Physics/SoftBody/SoftBodySharedSettings.h"
+#include "Jolt/Physics/Character/CharacterVirtual.h"
 
 #include <iostream>
 
@@ -50,6 +51,7 @@ using ArraySoftBodySharedSettingsVertex = Array<SoftBodySharedSettingsVertex>;
 using ArraySoftBodySharedSettingsFace = Array<SoftBodySharedSettingsFace>;
 using ArraySoftBodySharedSettingsEdge = Array<SoftBodySharedSettingsEdge>;
 using ArraySoftBodySharedSettingsVolume = Array<SoftBodySharedSettingsVolume>;
+using EGroundState = CharacterBase::EGroundState;
 
 // Callback for traces
 static void TraceImpl(const char *inFMT, ...)
@@ -225,6 +227,24 @@ public:
 	PhysicsSystem *			GetPhysicsSystem()
 	{
 		return &mPhysicsSystem;
+	}
+
+	/// Access to the temp allocator
+	TempAllocator *			GetTempAllocator()
+	{
+		return mTempAllocator;
+	}
+
+	/// Access the default object layer pair filter
+	ObjectLayerPairFilter *GetObjectLayerPairFilter()
+	{
+		return &mObjectVsObjectLayerFilter;
+	}
+
+	/// Access the default object vs broadphase layer filter
+	ObjectVsBroadPhaseLayerFilter *GetObjectVsBroadPhaseLayerFilter()
+	{
+		return &mObjectVsBroadPhaseLayerFilter;
 	}
 
 private:

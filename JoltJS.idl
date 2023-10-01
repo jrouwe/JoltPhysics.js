@@ -99,6 +99,18 @@ enum EStateRecorderState {
 	"EStateRecorderState::All"
 };
 
+enum EBackFaceMode {
+	"EBackFaceMode::IgnoreBackFaces",
+	"EBackFaceMode::CollideWithBackFaces"
+};
+
+enum EGroundState {
+	"EGroundState::OnGround",
+	"EGroundState::OnSteepGround",
+	"EGroundState::NotSupported",
+	"EGroundState::InAir"
+};
+
 [Prefix="JPH::"]
 interface Vec3 {
 	void Vec3();
@@ -162,6 +174,16 @@ interface AABox {
 	
 	[Value] attribute Vec3 mMin;
 	[Value] attribute Vec3 mMax;
+};
+
+[Prefix="JPH::"]
+interface Plane {
+	void Plane([Const, Ref] Vec3 inNormal, float inConstant);	
+
+	[Value] Vec3 GetNormal();
+	void SetNormal([Const, Ref] Vec3 inNormal);
+	float GetConstant();
+	void SetConstant(float inConstant);
 };
 
 [Prefix="JPH::"]
@@ -698,7 +720,7 @@ interface Body {
 	void SetMotionType(EMotionType inMotionType);
 	void SetIsSensor(boolean inIsSensor);
 	boolean IsSensor();
-	unsigned long GetObjectLayer();
+	unsigned short GetObjectLayer();
 	[Ref] CollisionGroup GetCollisionGroup();
 	boolean GetAllowSleeping();
 	void SetAllowSleeping(boolean inAllow);
@@ -741,8 +763,8 @@ interface BodyInterface {
 	[Value] BodyID CreateAndAddSoftBody([Const, Ref] SoftBodyCreationSettings inSettings, EActivation inActivationMode);
 	[Const] Shape GetShape([Const, Ref] BodyID inBodyID);
 	void SetShape([Const, Ref] BodyID inBodyID, [Const] Shape inShape, boolean inUpdateMassProperties, EActivation inActivationMode);
-	void SetObjectLayer([Const, Ref] BodyID inBodyID, unsigned long inLayer);
-	unsigned long GetObjectLayer([Const, Ref] BodyID inBodyID);
+	void SetObjectLayer([Const, Ref] BodyID inBodyID, unsigned short inLayer);
+	unsigned short GetObjectLayer([Const, Ref] BodyID inBodyID);
 	void SetPositionAndRotation([Const, Ref] BodyID inBodyID, [Const, Ref] Vec3 inPosition, [Const, Ref] Quat inRotation, EActivation inActivationMode);
 	void SetPositionAndRotationWhenChanged([Const, Ref] BodyID inBodyID, [Const, Ref] Vec3 inPosition, [Const, Ref] Quat inRotation, EActivation inActivationMode);
 	void GetPositionAndRotation([Const, Ref] BodyID inBodyID, [Ref] Vec3 outPosition, [Ref] Quat outRotation);
@@ -777,6 +799,23 @@ interface StateRecorderImpl {
 StateRecorderImpl implements StateRecorder;
 
 [Prefix="JPH::"]
+interface BodyLockInterface {
+	Body TryGetBody([Const, Ref] BodyID inBodyID);
+};
+
+[Prefix="JPH::"]
+interface BodyLockInterfaceNoLock {
+};
+
+BodyLockInterfaceNoLock implements BodyLockInterface;
+
+[Prefix="JPH::"]
+interface BodyLockInterfaceLocking {
+};
+
+BodyLockInterfaceLocking implements BodyLockInterface;
+
+[Prefix="JPH::"]
 interface PhysicsSystem {
 	[Ref] BodyInterface GetBodyInterface();
 	void SetGravity([Const, Ref] Vec3 inGravity);
@@ -786,6 +825,8 @@ interface PhysicsSystem {
 	unsigned long GetMaxBodies();
 	void AddConstraint(Constraint inConstraint);
 	void RemoveConstraint(Constraint inConstraint);
+	[Const, Ref] BodyLockInterfaceNoLock GetBodyLockInterfaceNoLock();
+	[Const, Ref] BodyLockInterfaceLocking GetBodyLockInterface();
 
 	void SaveState([Ref] StateRecorder inStream, optional EStateRecorderState inState = "EStateRecorderState::All");
 	boolean	RestoreState([Ref] StateRecorder inStream);
@@ -808,7 +849,7 @@ interface BodyCreationSettings {
 	[Value] attribute Vec3 mLinearVelocity;
 	[Value] attribute Vec3 mAngularVelocity;
 	attribute long long mUserData;
-	attribute short mObjectLayer;
+	attribute unsigned short mObjectLayer;
 	[Value] attribute CollisionGroup mCollisionGroup;
 	attribute EMotionType mMotionType;
 	attribute EAllowedDOFs mAllowedDOFs;
@@ -913,7 +954,7 @@ interface SoftBodyCreationSettings {
 	[Value] attribute Vec3 mPosition;
 	[Value] attribute Quat mRotation;
 	attribute long long mUserData;
-	attribute short mObjectLayer;
+	attribute unsigned short mObjectLayer;
 	[Value] attribute CollisionGroup mCollisionGroup;
 	attribute unsigned long mNumIterations;
 	attribute float mLinearDamping;
@@ -925,6 +966,162 @@ interface SoftBodyCreationSettings {
 	attribute boolean mUpdatePosition;
 	attribute boolean mMakeRotationIdentity;
 };
+
+[Prefix="JPH::"]
+interface CharacterBaseSettings {
+	[Value] attribute Vec3 mUp;
+	[Value] attribute Plane mSupportingVolume;
+	attribute float mMaxSlopeAngle;
+	[Const] attribute Shape mShape;
+};
+
+[Prefix="JPH::"]
+interface CharacterVirtualSettings {
+	attribute float mMass;
+	attribute float mMaxStrength;
+	[Value] attribute Vec3 mShapeOffset;
+	attribute EBackFaceMode mBackFaceMode;
+	attribute float mPredictiveContactDistance;
+	attribute unsigned long mMaxCollisionIterations;
+	attribute unsigned long mMaxConstraintIterations;
+	attribute float mMinTimeRemaining;
+	attribute float mCollisionTolerance;
+	attribute float mCharacterPadding;
+	attribute unsigned long mMaxNumHits;
+	attribute float mHitReductionCosMaxAngle;
+	attribute float mPenetrationRecoverySpeed;
+};
+
+CharacterVirtualSettings implements CharacterBaseSettings;
+
+[Prefix="JPH::CharacterVirtual::"]
+interface ExtendedUpdateSettings {
+	[Value] attribute Vec3 mStickToFloorStepDown;
+	[Value] attribute Vec3 mWalkStairsStepUp;
+	attribute float mWalkStairsMinStepForward;
+	attribute float mWalkStairsStepForwardTest;
+	attribute float mWalkStairsCosAngleForwardContact;
+	[Value] attribute Vec3 mWalkStairsStepDownExtra;
+};
+
+[Prefix="JPH::"]
+interface TempAllocator {
+};
+
+[Prefix="JPH::"]
+interface BroadPhaseLayerFilter {
+};
+
+[Prefix="JPH::"]
+interface ObjectVsBroadPhaseLayerFilter {
+};
+
+[Prefix="JPH::"]
+interface DefaultBroadPhaseLayerFilter {
+	void DefaultBroadPhaseLayerFilter([Const, Ref] ObjectVsBroadPhaseLayerFilter inFilter, unsigned short inObjectLayer);
+};
+
+DefaultBroadPhaseLayerFilter implements ObjectLayerFilter;
+
+[Prefix="JPH::"]
+interface ObjectLayerFilter {
+};
+
+[Prefix="JPH::"]
+interface ObjectLayerPairFilter {
+};
+
+[Prefix="JPH::"]
+interface DefaultObjectLayerFilter {
+	void DefaultObjectLayerFilter([Const, Ref] ObjectLayerPairFilter inFilter, unsigned short inObjectLayer);
+};
+
+DefaultObjectLayerFilter implements ObjectLayerFilter;
+
+[Prefix="JPH::"]
+interface SpecifiedObjectLayerFilter {
+	void SpecifiedObjectLayerFilter(unsigned short inObjectLayer);
+};
+
+SpecifiedObjectLayerFilter implements ObjectLayerFilter;
+
+[Prefix="JPH::"]
+interface BodyFilter {
+};
+
+[Prefix="JPH::"]
+interface IgnoreSingleBodyFilter {
+	void IgnoreSingleBodyFilter([Const, Ref] BodyID inBodyID);
+};
+
+IgnoreSingleBodyFilter implements BodyFilter;
+
+[Prefix="JPH::"]
+interface IgnoreMultipleBodiesFilter {
+	void Clear();
+	void Reserve(unsigned long inSize);
+	void IgnoreBody([Const, Ref] BodyID inBodyID);
+};
+
+IgnoreMultipleBodiesFilter implements BodyFilter;
+
+[Prefix="JPH::"]
+interface ShapeFilter {
+};
+
+[Prefix="JPH::"]
+interface CharacterBase {
+	void SetMaxSlopeAngle(float inMaxSlopeAngle);
+	float GetCosMaxSlopeAngle();
+	void SetUp([Const, Ref] Vec3 inUp);
+	[Value] Vec3 GetUp();
+	[Const] Shape GetShape();
+	EGroundState GetGroundState();
+	boolean IsSupported();
+	[Value] Vec3 GetGroundPosition();
+	[Value] Vec3 GetGroundNormal();
+	[Value] Vec3 GetGroundVelocity();
+	[Const] PhysicsMaterial GetGroundMaterial();
+	[Value] BodyID GetGroundBodyID();
+};
+
+[Prefix="JPH::"]
+interface CharacterVirtual {
+	void CharacterVirtual([Const] CharacterVirtualSettings inSettings, [Ref] Vec3 inPosition, [Ref] Quat inRotation, PhysicsSystem inSystem);
+	[Value] Vec3 GetLinearVelocity();
+	void SetLinearVelocity([Const, Ref] Vec3 inLinearVelocity);
+	[Value] Vec3 GetPosition();
+	void SetPosition([Const, Ref] Vec3 inPosition);
+	[Value] Quat GetRotation();
+	void SetRotation([Const, Ref] Quat inRotation);
+	[Value] Mat44 GetWorldTransform();
+	[Value] Mat44 GetCenterOfMassTransform();
+	float GetMass();
+	void SetMass(float inMass);
+	float GetMaxStrength();
+	void SetMaxStrength(float inMaxStrength);
+	float GetPenetrationRecoverySpeed();
+	void SetPenetrationRecoverySpeed(float inSpeed);
+	float GetCharacterPadding();
+	unsigned long GetMaxNumHits();
+	void SetMaxNumHits(unsigned long inMaxHits);
+	float GetHitReductionCosMaxAngle();
+	void SetHitReductionCosMaxAngle(float inCosMaxAngle);
+	boolean GetMaxHitsExceeded();
+	[Value] Vec3 GetShapeOffset();
+	void SetShapeOffset([Const, Ref] Vec3 inShapeOffset);
+	[Value] Vec3 CancelVelocityTowardsSteepSlopes([Const, Ref] Vec3 inDesiredVelocity);
+	void Update(float inDeltaTime, [Const, Ref] Vec3 inGravity, [Const, Ref] BroadPhaseLayerFilter inBroadPhaseLayerFilter, [Const, Ref] ObjectLayerFilter inObjectLayerFilter, [Const, Ref] BodyFilter inBodyFilter, [Const, Ref] ShapeFilter inShapeFilter, [Ref] TempAllocator inAllocator);
+	boolean CanWalkStairs([Const, Ref] Vec3 inLinearVelocity);
+	boolean WalkStairs(float inDeltaTime, [Const, Ref] Vec3 inStepUp, [Const, Ref] Vec3 inStepForward, [Const, Ref] Vec3 inStepForwardTest, [Const, Ref] Vec3 inStepDownExtra, [Const, Ref] BroadPhaseLayerFilter inBroadPhaseLayerFilter, [Const, Ref] ObjectLayerFilter inObjectLayerFilter, [Const, Ref] BodyFilter inBodyFilter, [Const, Ref] ShapeFilter inShapeFilter, [Ref] TempAllocator inAllocator);
+	boolean StickToFloor([Const, Ref] Vec3 inStepDown, [Const, Ref] BroadPhaseLayerFilter inBroadPhaseLayerFilter, [Const, Ref] ObjectLayerFilter inObjectLayerFilter, [Const, Ref] BodyFilter inBodyFilter, [Const, Ref] ShapeFilter inShapeFilter, [Ref] TempAllocator inAllocator);
+	void ExtendedUpdate(float inDeltaTime, [Const, Ref] Vec3 inGravity, [Const, Ref] ExtendedUpdateSettings inSettings, [Const, Ref] BroadPhaseLayerFilter inBroadPhaseLayerFilter, [Const, Ref] ObjectLayerFilter inObjectLayerFilter, [Const, Ref] BodyFilter inBodyFilter, [Const, Ref] ShapeFilter inShapeFilter, [Ref] TempAllocator inAllocator);
+	void RefreshContacts([Const, Ref] BroadPhaseLayerFilter inBroadPhaseLayerFilter, [Const, Ref] ObjectLayerFilter inObjectLayerFilter, [Const, Ref] BodyFilter inBodyFilter, [Const, Ref] ShapeFilter inShapeFilter, [Ref] TempAllocator inAllocator);
+	void UpdateGroundVelocity();
+	boolean SetShape([Const] Shape inShape, float inMaxPenetrationDepth, [Const, Ref] BroadPhaseLayerFilter inBroadPhaseLayerFilter, [Const, Ref] ObjectLayerFilter inObjectLayerFilter, [Const, Ref] BodyFilter inBodyFilter, [Const, Ref] ShapeFilter inShapeFilter, [Ref] TempAllocator inAllocator);
+};
+
+CharacterVirtual implements CharacterBase;
 
 interface JoltSettings {
 	void JoltSettings();
@@ -938,4 +1135,7 @@ interface JoltInterface {
 	void JoltInterface([Const, Ref] JoltSettings inSettings);
 	void Step(float inDeltaTime, long inCollisionSteps);
 	PhysicsSystem GetPhysicsSystem();
+	TempAllocator GetTempAllocator();
+	ObjectLayerPairFilter GetObjectLayerPairFilter();
+	ObjectVsBroadPhaseLayerFilter GetObjectVsBroadPhaseLayerFilter();
 };
