@@ -90,6 +90,15 @@ enum EAllowedDOFs {
 	"EAllowedDOFs::Plane2D"
 };
 
+enum EStateRecorderState {
+	"EStateRecorderState::None",
+	"EStateRecorderState::Global",
+	"EStateRecorderState::Bodies",
+	"EStateRecorderState::Contacts",
+	"EStateRecorderState::Constraints",
+	"EStateRecorderState::All"
+};
+
 [Prefix="JPH::"]
 interface Vec3 {
 	void Vec3();
@@ -753,6 +762,21 @@ interface BodyInterface {
 };
 
 [Prefix="JPH::"]
+interface StateRecorder {
+	void SetValidating(boolean inValidating);
+	boolean	IsValidating();
+};
+
+[Prefix="JPH::"]
+interface StateRecorderImpl {
+	void StateRecorderImpl();
+	void Rewind();
+	boolean	IsEqual([Ref] StateRecorderImpl inReference);
+};
+
+StateRecorderImpl implements StateRecorder;
+
+[Prefix="JPH::"]
 interface PhysicsSystem {
 	[Ref] BodyInterface GetBodyInterface();
 	void SetGravity([Const, Ref] Vec3 inGravity);
@@ -762,6 +786,9 @@ interface PhysicsSystem {
 	unsigned long GetMaxBodies();
 	void AddConstraint(Constraint inConstraint);
 	void RemoveConstraint(Constraint inConstraint);
+
+	void SaveState([Ref] StateRecorder inStream, optional EStateRecorderState inState = "EStateRecorderState::All");
+	boolean	RestoreState([Ref] StateRecorder inStream);
 };
 
 [Prefix="JPH::"]

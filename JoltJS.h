@@ -8,6 +8,7 @@
 #include "Jolt/RegisterTypes.h"
 #include "Jolt/Core/JobSystemThreadPool.h"
 #include "Jolt/Physics/PhysicsSystem.h"
+#include "Jolt/Physics/StateRecorderImpl.h"
 #include "Jolt/Physics/Collision/Shape/SphereShape.h"
 #include "Jolt/Physics/Collision/Shape/BoxShape.h"
 #include "Jolt/Physics/Collision/Shape/CapsuleShape.h"
