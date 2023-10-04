@@ -55,7 +55,7 @@
 			const sEnableWalkStairs = true;
 			const sEnableStickToFloor = true;
 
-			const sShapeType = 'Box';
+			const sShapeType = 'Capsule';
 			let mStandingShape;
 			let mCrouchingShape;
 			let mThreeStandingGeometry;
@@ -65,7 +65,7 @@
 			let mAllowSliding = false;
 
 			const geometry = new THREE.BoxGeometry(1, 1, 1);
-			const material = new THREE.MeshBasicMaterial({ color: 0xffff00 });
+			const material = new THREE.MeshPhongMaterial({ color: 0xffff00 });
 			let mThreeCharacter = new THREE.Mesh(geometry, material);
 			let mDesiredVelocity = new THREE.Vector3();
 
@@ -93,24 +93,24 @@
 						mStandingShape = new Jolt.RotatedTranslatedShapeSettings(inPositionStanding, inRotation, new Jolt.CapsuleShapeSettings(0.5 * cCharacterHeightStanding, cCharacterRadiusStanding)).Create().Get();
 						mCrouchingShape = new Jolt.RotatedTranslatedShapeSettings(inPositionCrouching, inRotation, new Jolt.CapsuleShapeSettings(0.5 * cCharacterHeightCrouching, cCharacterRadiusCrouching)).Create().Get();
 
-						mThreeStandingGeometry = new THREE.CapsuleGeometry(cCharacterHeightStanding, cCharacterRadiusStanding, 4, 8).translate(0, 0.5 * cCharacterHeightStanding + cCharacterRadiusStanding, 0);
-						mThreeCrouchingGeometry = new THREE.CapsuleGeometry(cCharacterHeightCrouching, cCharacterRadiusCrouching, 4, 8).translate(0, 0.5 * cCharacterHeightCrouching + cCharacterRadiusCrouching, 0);
+						mThreeStandingGeometry = new THREE.CapsuleGeometry(cCharacterRadiusStanding, cCharacterHeightStanding, 4, 8).translate(0, 0.5 * cCharacterHeightStanding + cCharacterRadiusStanding, 0);
+						mThreeCrouchingGeometry = new THREE.CapsuleGeometry(cCharacterRadiusCrouching, cCharacterHeightCrouching, 4, 8).translate(0, 0.5 * cCharacterHeightCrouching + cCharacterRadiusCrouching, 0);
 						break;
 
 					case 'Cylinder':
 						mStandingShape = new Jolt.RotatedTranslatedShapeSettings(inPositionStanding, inRotation, new Jolt.CylinderShapeSettings(0.5 * cCharacterHeightStanding + cCharacterRadiusStanding, cCharacterRadiusStanding)).Create().Get();
 						mCrouchingShape = new Jolt.RotatedTranslatedShapeSettings(inPositionCrouching, inRotation, new Jolt.CylinderShapeSettings(0.5 * cCharacterHeightCrouching + cCharacterRadiusCrouching, cCharacterRadiusCrouching)).Create().Get();
 
-						mThreeStandingGeometry = new THREE.CylinderGeometry(cCharacterRadiusStanding, cCharacterRadiusStanding, 3 * cCharacterHeightStanding, 8, 4).translate(0, 0.5 * cCharacterHeightStanding + cCharacterRadiusStanding, 0);
-						mThreeCrouchingGeometry = new THREE.CylinderGeometry(cCharacterRadiusStanding, cCharacterRadiusStanding, 3 * cCharacterHeightCrouching, 8, 4).translate(0, 0.5 * cCharacterHeightCrouching + cCharacterRadiusCrouching, 0);
+						mThreeStandingGeometry = new THREE.CylinderGeometry(cCharacterRadiusStanding, cCharacterRadiusStanding, 2 * cCharacterRadiusStanding + cCharacterHeightStanding, 8, 4).translate(0, 0.5 * cCharacterHeightStanding + cCharacterRadiusStanding, 0);
+						mThreeCrouchingGeometry = new THREE.CylinderGeometry(cCharacterRadiusCrouching, cCharacterRadiusCrouching, 2 * cCharacterRadiusCrouching + cCharacterHeightCrouching, 8, 4).translate(0, 0.5 * cCharacterHeightCrouching + cCharacterRadiusCrouching, 0);
 						break;
 
 					case 'Box':
 						mStandingShape = new Jolt.RotatedTranslatedShapeSettings(inPositionStanding, inRotation, new Jolt.BoxShapeSettings(new Jolt.Vec3(cCharacterRadiusStanding, 0.5 * cCharacterHeightStanding + cCharacterRadiusStanding, cCharacterRadiusStanding))).Create().Get();
 						mCrouchingShape = new Jolt.RotatedTranslatedShapeSettings(inPositionCrouching, inRotation, new Jolt.BoxShapeSettings(new Jolt.Vec3(cCharacterRadiusCrouching, 0.5 * cCharacterHeightCrouching + cCharacterRadiusCrouching, cCharacterRadiusCrouching))).Create().Get();
 
-						mThreeStandingGeometry = new THREE.BoxGeometry(cCharacterRadiusStanding, 3 * cCharacterHeightStanding, cCharacterRadiusStanding).translate(0, 0.5 * cCharacterHeightStanding + cCharacterRadiusStanding, 0);
-						mThreeCrouchingGeometry = new THREE.BoxGeometry(cCharacterRadiusStanding, 3 * cCharacterHeightCrouching, cCharacterRadiusCrouching).translate(0, 0.5 * cCharacterHeightCrouching + cCharacterRadiusCrouching, 0);
+						mThreeStandingGeometry = new THREE.BoxGeometry(2 * cCharacterRadiusStanding, 2 * cCharacterRadiusStanding + cCharacterHeightStanding, 2 * cCharacterRadiusStanding).translate(0, 0.5 * cCharacterHeightStanding + cCharacterRadiusStanding, 0);
+						mThreeCrouchingGeometry = new THREE.BoxGeometry(2 * cCharacterRadiusStanding, 2 * cCharacterRadiusCrouching + cCharacterHeightCrouching, 2 * cCharacterRadiusCrouching).translate(0, 0.5 * cCharacterHeightCrouching + cCharacterRadiusCrouching, 0);
 						break;
 				}
 			}
