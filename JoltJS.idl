@@ -130,6 +130,7 @@ interface Vec3 {
 	void SetY(float inY);
 	void SetZ(float inZ);
 	void SetComponent(unsigned long inCoordinate, float inValue);
+	boolean IsNearZero(optional float inMaxDistSq);
 };
 
 [Prefix="JPH::"]
@@ -820,10 +821,41 @@ interface BodyLockInterfaceLocking {
 BodyLockInterfaceLocking implements BodyLockInterface;
 
 [Prefix="JPH::"]
+interface PhysicsSettings {
+	attribute long mMaxInFlightBodyPairs;
+	attribute long mStepListenersBatchSize;
+	attribute long mStepListenerBatchesPerJob;
+	attribute float mBaumgarte;
+	attribute float mSpeculativeContactDistance;
+	attribute float mPenetrationSlop;
+	attribute float mLinearCastThreshold;
+	attribute float mLinearCastMaxPenetration;
+	attribute float mManifoldToleranceSq;
+	attribute float mMaxPenetrationDistance;
+	attribute float mBodyPairCacheMaxDeltaPositionSq;
+	attribute float mBodyPairCacheCosMaxDeltaRotationDiv2;
+	attribute float mContactNormalCosMaxDeltaRotation;
+	attribute float mContactPointPreserveLambdaMaxDistSq;
+	attribute long mNumVelocitySteps;
+	attribute long mNumPositionSteps;
+	attribute float mMinVelocityForRestitution;
+	attribute float mTimeBeforeSleep;
+	attribute float mPointVelocitySleepThreshold;
+	attribute boolean mDeterministicSimulation;
+	attribute boolean mConstraintWarmStart;
+	attribute boolean mUseBodyPairContactCache;
+	attribute boolean mUseManifoldReduction;
+	attribute boolean mUseLargeIslandSplitter;
+	attribute boolean mAllowSleeping;
+	attribute boolean mCheckActiveEdges;
+};
+
+[Prefix="JPH::"]
 interface PhysicsSystem {
 	[Ref] BodyInterface GetBodyInterface();
 	void SetGravity([Const, Ref] Vec3 inGravity);
 	[Value] Vec3 GetGravity();
+	[Const, Value] PhysicsSettings GetPhysicsSettings();
 	unsigned long GetNumBodies();
 	unsigned long GetNumActiveBodies(EBodyType inBodyType);
 	unsigned long GetMaxBodies();
@@ -999,6 +1031,32 @@ interface CharacterVirtualSettings {
 
 CharacterVirtualSettings implements CharacterBaseSettings;
 
+[Prefix="JPH::"]
+interface SubShapeID {
+	[Const] long GetValue();
+	void SetValue(long inValue);
+};
+
+[Prefix="JPH::"]
+interface CharacterContactSettings
+{
+	attribute boolean mCanPushCharacter;
+	attribute boolean mCanReceiveImpulses;
+};
+
+[Prefix="JPH::"]
+interface CharacterContactListener {
+};
+
+[JSImplementation="CharacterContactListener"]
+interface CharacterContactListenerJS {
+	void CharacterContactListenerJS();
+	void OnAdjustBodyVelocity([Const] CharacterVirtual inCharacter, [Const, Ref] Body inBody2, [Ref] Vec3 ioLinearVelocity, [Ref] Vec3 ioAngularVelocity);
+	boolean OnContactValidate([Const] CharacterVirtual inCharacter, [Const, Ref] BodyID inBodyID2, [Const, Ref] SubShapeID inSubShapeID2);
+	void OnContactAdded([Const] CharacterVirtual inCharacter, [Const, Ref] BodyID inBodyID2, [Const, Ref] SubShapeID inSubShapeID2, [Ref] Vec3 inContactPosition, [Ref] Vec3 inContactNormal, [Ref] CharacterContactSettings ioSettings);
+	void OnContactSolve([Const] CharacterVirtual inCharacter, [Const, Ref] BodyID inBodyID2, [Const, Ref] SubShapeID inSubShapeID2, [Ref] Vec3 inContactPosition, [Ref] Vec3 inContactNormal, [Ref] Vec3 inContactVelocity, [Const] PhysicsMaterial inContactMaterial, [Ref] Vec3 inCharacterVelocity, [Ref] Vec3 ioNewCharacterVelocity);
+};
+
 [Prefix="JPH::CharacterVirtual::"]
 interface ExtendedUpdateSettings {
 	void ExtendedUpdateSettings();
@@ -1096,6 +1154,9 @@ interface CharacterBase {
 [Prefix="JPH::"]
 interface CharacterVirtual {
 	void CharacterVirtual([Const] CharacterVirtualSettings inSettings, [Ref] Vec3 inPosition, [Ref] Quat inRotation, PhysicsSystem inSystem);
+		/// Set the contact listener
+	void SetListener(CharacterContactListener inListener);
+	CharacterContactListener GetListener();
 	[Value] Vec3 GetLinearVelocity();
 	void SetLinearVelocity([Const, Ref] Vec3 inLinearVelocity);
 	[Value] Vec3 GetPosition();

@@ -47,7 +47,7 @@
 			// Character movement properties
 			const sControlMovementDuringJump = true;					///< If false the character cannot change movement direction in mid air
 			const sCharacterSpeed = 6.0;
-			const sJumpSpeed = 8.0;
+			const sJumpSpeed = 15.0;
 
 			const sEnableCharacterInertia = true;
 
@@ -122,6 +122,50 @@
 						break;
 				}
 			}
+
+
+			const mLavaObject = createBox(new Jolt.Vec3(0, -50, 0), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(1000, 2, 1000), Jolt.Static, Jolt.NON_MOVING);
+			const mLavaObjectId = mLavaObject.GetID().GetIndexAndSequenceNumber();
+			threeObject.material = new THREE.MeshPhongMaterial({ color: 0xCC2222 });
+
+			const mConveyorBeltObject = createBox(new Jolt.Vec3(0, 0, -10), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(10, 0.25, 2), Jolt.Static, Jolt.NON_MOVING);
+			const mConveyorBeltObjectId = mConveyorBeltObject.GetID().GetIndexAndSequenceNumber();
+			threeObject.material = new THREE.MeshPhongMaterial({ color: 0x2222CC });
+
+			const characterContactListener = new Jolt.CharacterContactListenerJS();
+			characterContactListener.OnAdjustBodyVelocity = (inCharacter, inBody2, ioLinearVelocity, ioAngularVelocity) => {
+				inBody2 = Jolt.wrapPointer(inBody2, Jolt.Body);
+				ioLinearVelocity = Jolt.wrapPointer(ioLinearVelocity, Jolt.Vec3);
+				// Apply artificial velocity to the character when standing on the conveyor belt
+				if (inBody2.GetID().GetIndexAndSequenceNumber() == mConveyorBeltObjectId) {
+					ioLinearVelocity.SetX(ioLinearVelocity.GetX()+5);
+				}
+			}
+			characterContactListener.OnContactValidate = (inCharacter, inBodyID2, inSubShapeID2) => {
+				inBodyID2 = Jolt.wrapPointer(inBodyID2, Jolt.BodyID);
+				// Teleport the user back to the origin if they fall off the platform
+				if(inBodyID2.GetIndexAndSequenceNumber() == mLavaObjectId) {
+					mCharacter.SetPosition(new Jolt.Vec3(0, 10, 0));
+				}
+				return true;
+			}
+			characterContactListener.OnContactAdded = (inCharacter, inBodyID2, inSubShapeID2, inContactPosition, inContactNormal, ioSettings) => {
+
+			}
+			characterContactListener.OnContactSolve = (inCharacter, inBodyID2, inSubShapeID2, inContactPosition, inContactNormal, inContactVelocity, inContactMaterial, inCharacterVelocity, ioNewCharacterVelocity) => {
+				// Don't allow the player to slide down static not-too-steep surfaces when not actively moving and when not on a moving platform
+				inCharacter = Jolt.wrapPointer(inCharacter, Jolt.CharacterVirtual);
+				inContactVelocity = Jolt.wrapPointer(inContactVelocity, Jolt.Vec3); 
+				ioNewCharacterVelocity = Jolt.wrapPointer(ioNewCharacterVelocity, Jolt.Vec3);
+				inContactNormal = Jolt.wrapPointer(inContactNormal, Jolt.Vec3);
+				if (!mAllowSliding && inContactVelocity.IsNearZero() && !inCharacter.IsSlopeTooSteep(inContactNormal)) {
+					ioNewCharacterVelocity.SetX(0);
+					ioNewCharacterVelocity.SetY(0);
+					ioNewCharacterVelocity.SetZ(0);
+				}
+			}
+
+
 			const initalize = () => {
 				initShape();
 				const settings = new Jolt.CharacterVirtualSettings();
@@ -134,6 +178,7 @@
 				settings.mPredictiveContactDistance = sPredictiveContactDistance;
 				settings.mSupportingVolume = new Jolt.Plane(Jolt.Vec3.prototype.sAxisY(), -cCharacterRadiusStanding);
 				mCharacter = new Jolt.CharacterVirtual(settings, Jolt.Vec3.prototype.sZero(), Jolt.Quat.prototype.sIdentity(), physicsSystem);
+				mCharacter.SetListener(characterContactListener);
 
 				mThreeCharacter.geometry = mThreeStandingGeometry;
 				mThreeCharacter.userData.body = mCharacter;
@@ -200,7 +245,7 @@
 				const gravity = wrapVec3(physicsSystem.GetGravity());
 
 				let new_velocity;
-				const moving_towards_ground = (current_vertical_velocity.x - ground_velocity.y) < 0.1;
+				const moving_towards_ground = (current_vertical_velocity.y - ground_velocity.y) < 0.1;
 				if (mCharacter.GetGroundState() == Jolt.OnGround	// If on ground
 					&& (sEnableCharacterInertia ?
 						moving_towards_ground													// Inertia enabled: And not moving away from ground
@@ -258,7 +303,6 @@
 			// Create a basic floor
 			createFloor();
 
-
 			createBox(new Jolt.Vec3(-45, 1, 0), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(0.5, 2, 45), Jolt.Static, Jolt.NON_MOVING);
 			createBox(new Jolt.Vec3(45, 1, 0), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(0.5, 2, 45), Jolt.Static, Jolt.NON_MOVING);
 
@@ -299,7 +343,10 @@
 			onExampleUpdate = (time, deltaTime) => {
 				setCrouched(input.crouched);
 				camera.getWorldQuaternion(cameraRotation);
-				handleInput(input.direction.clone().applyQuaternion(cameraRotation), input.jump, input.switchStance, deltaTime);
+				const cameraDirectionV = input.direction.clone().applyQuaternion(cameraRotation);
+				cameraDirectionV.y = 0;
+				cameraDirectionV.normalize().multiplyScalar(2);
+				handleInput(cameraDirectionV, input.jump, input.switchStance, deltaTime);
 
 				const oldPosition = wrapVec3(mCharacter.GetPosition());
 				prePhysicsUpdate(deltaTime)
@@ -312,13 +359,13 @@
 			function onDocumentKeyDown(event) {
 				var keyCode = event.which;
 				if (keyCode == 87) {
-					input.direction.z = -2;
+					input.direction.z = -1;
 				} else if (keyCode == 83) {
-					input.direction.z = 2;
+					input.direction.z = 1;
 				} else if (keyCode == 65) {
-					input.direction.x = -2;
+					input.direction.x = -1;
 				} else if (keyCode == 68) {
-					input.direction.x = 2;
+					input.direction.x = 1;
 				} else if (keyCode == 32) {
 					input.jump = true;
 				} else if (keyCode == 17) {
@@ -347,7 +394,7 @@
 				initShape();
 				setCrouched(input.crouched, true);
 			})
-
+			physicsSystem.SetGravity(new Jolt.Vec3(0, -25, 0))
 			renderExample();
 		});
 
