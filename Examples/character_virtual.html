@@ -10,7 +10,14 @@
 
 <body>
 	<div id="container">Loading...</div>
-	<div id="info">JoltPhysics.js demo</div>
+	<div id="info">JoltPhysics.js demo<br />
+		<select id="collision-shape">
+			<option value="Capsule">Capsule</option>
+			<option value="Cylinder">Cylinder</option>
+			<option value="Box">Box</option>
+		</select>
+	</div>
+ 
 
 	<script src="js/three/three.min.js"></script>
 	<script src="js/three/OrbitControls.js"></script>
@@ -34,13 +41,13 @@
 
 			const cCharacterHeightStanding = 2;
 			const cCharacterRadiusStanding = 1;
-			const cCharacterHeightCrouching = 0.8;
-			const cCharacterRadiusCrouching = 0.3;
+			const cCharacterHeightCrouching = 1;
+			const cCharacterRadiusCrouching = 0.8;
 
 			// Character movement properties
 			const sControlMovementDuringJump = true;					///< If false the character cannot change movement direction in mid air
 			const sCharacterSpeed = 6.0;
-			const sJumpSpeed = 4.0;
+			const sJumpSpeed = 8.0;
 
 			const sEnableCharacterInertia = true;
 
@@ -55,13 +62,14 @@
 			const sEnableWalkStairs = true;
 			const sEnableStickToFloor = true;
 
-			const sShapeType = 'Capsule';
+			let sShapeType = 'Capsule';
 			let mStandingShape;
 			let mCrouchingShape;
 			let mThreeStandingGeometry;
 			let mThreeCrouchingGeometry;
 
 			let mCharacter;
+			let mIsCrouched = false;
 			let mAllowSliding = false;
 
 			const geometry = new THREE.BoxGeometry(1, 1, 1);
@@ -130,6 +138,7 @@
 				mThreeCharacter.geometry = mThreeStandingGeometry;
 				mThreeCharacter.userData.body = mCharacter;
 
+				controls.target = mThreeCharacter.position;
 				scene.add(mThreeCharacter);
 				dynamicObjects.push(mThreeCharacter);
 			}
@@ -222,10 +231,13 @@
 				}
 
 				mCharacter.SetLinearVelocity(new Jolt.Vec3(new_velocity.x, new_velocity.y, new_velocity.z));
+			}
 
-				if (inSwitchStance) {
+			const setCrouched = (crouched, forceUpdate) => {
+				if (crouched != mIsCrouched || forceUpdate) {
+					mIsCrouched = crouched;
 					let newShape;
-					if (mCharacter.GetShape() == mStandingShape) {
+					if (mIsCrouched) {
 						newShape = mCrouchingShape;
 						mThreeCharacter.geometry = mThreeCrouchingGeometry;
 					} else {
@@ -280,12 +292,19 @@
 			const input = {
 				direction: new THREE.Vector3(),
 				jump: false,
-				switchStance: false
+				crouched: false
 			}
 
+			const cameraRotation = new THREE.Quaternion();
 			onExampleUpdate = (time, deltaTime) => {
-				handleInput(input.direction.clone(), input.jump, input.switchStance, deltaTime);
+				setCrouched(input.crouched);
+				camera.getWorldQuaternion(cameraRotation);
+				handleInput(input.direction.clone().applyQuaternion(cameraRotation), input.jump, input.switchStance, deltaTime);
+
+				const oldPosition = wrapVec3(mCharacter.GetPosition());
 				prePhysicsUpdate(deltaTime)
+				const newdPosition = wrapVec3(mCharacter.GetPosition());
+				camera.position.add(newdPosition.sub(oldPosition));
 			}
 
 			document.addEventListener("keydown", onDocumentKeyDown, false);
@@ -302,6 +321,8 @@
 					input.direction.x = 2;
 				} else if (keyCode == 32) {
 					input.jump = true;
+				} else if (keyCode == 17) {
+					input.crouched = true;
 				}
 			};
 			function onDocumentKeyUp(event) {
@@ -316,8 +337,16 @@
 					input.direction.x = 0;
 				} else if (keyCode == 32) {
 					input.jump = false;
+				} else if (keyCode == 17) {
+					input.crouched = false;
 				}
 			};
+			const mCollisionShapeEle = document.getElementById('collision-shape');
+			mCollisionShapeEle.addEventListener('change', () => {
+				sShapeType = mCollisionShapeEle.value;
+				initShape();
+				setCrouched(input.crouched, true);
+			})
 
 			renderExample();
 		});
