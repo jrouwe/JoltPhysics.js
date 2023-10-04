@@ -140,10 +140,14 @@ interface Quat {
 	[Value] static Quat sRotation([Const, Ref] Vec3 inRotation, float inAngle);
 	float Length();
 	[Value] Quat Normalized();
+	[Value] static Quat sEulerAngles([Const, Ref] Vec3 input);
 	float GetX();
 	float GetY();
 	float GetZ();
 	float GetW();
+	[Const, Value] Vec3 RotateAxisX();
+	[Const, Value] Vec3 RotateAxisY();
+	[Const, Value] Vec3 RotateAxisZ();
 };
 
 [Prefix="JPH::"]
@@ -319,7 +323,7 @@ SphereShape implements ConvexShape;
 // Box
 [Prefix="JPH::"]
 interface BoxShapeSettings {
-	void BoxShapeSettings([Ref] Vec3 inHalfExtent, float inConvexRadius, [Const] PhysicsMaterial inMaterial);
+	void BoxShapeSettings([Ref] Vec3 inHalfExtent, optional float inConvexRadius, [Const] optional PhysicsMaterial inMaterial);
 
 	[Value] attribute Vec3 mHalfExtent;
 	attribute float mConvexRadius;
@@ -329,7 +333,7 @@ BoxShapeSettings implements ConvexShapeSettings;
 
 [Prefix="JPH::"]
 interface BoxShape {
-	void BoxShape([Ref] Vec3 inHalfExtent, float inConvexRadius, [Const] PhysicsMaterial inMaterial);
+	void BoxShape([Ref] Vec3 inHalfExtent, optional float inConvexRadius, [Const] optional PhysicsMaterial inMaterial);
 };
 
 BoxShape implements ConvexShape;
@@ -337,7 +341,7 @@ BoxShape implements ConvexShape;
 // Cylinder
 [Prefix="JPH::"]
 interface CylinderShapeSettings {
-	void CylinderShapeSettings(float inHalfHeight, float inRadius, float inConvexRadius, [Const] PhysicsMaterial inMaterial);
+	void CylinderShapeSettings(float inHalfHeight, float inRadius, optional float inConvexRadius, [Const] optional PhysicsMaterial inMaterial);
 
 	attribute float mHalfHeight;
 	attribute float mRadius;
@@ -348,7 +352,7 @@ CylinderShapeSettings implements ConvexShapeSettings;
 
 [Prefix="JPH::"]
 interface CylinderShape {
-	void CylinderShape(float inHalfHeight, float inRadius, float inConvexRadius, [Const] PhysicsMaterial inMaterial);
+	void CylinderShape(float inHalfHeight, float inRadius, float inConvexRadius, [Const] optional PhysicsMaterial inMaterial);
 };
 
 CylinderShape implements ConvexShape;
@@ -356,7 +360,7 @@ CylinderShape implements ConvexShape;
 // Capsule
 [Prefix="JPH::"]
 interface CapsuleShapeSettings {
-	void CapsuleShapeSettings(float inHalfHeight, float inRadius, PhysicsMaterial inMaterial);
+	void CapsuleShapeSettings(float inHalfHeight, float inRadius, optional PhysicsMaterial inMaterial);
 
 	attribute float mRadius;
 	attribute float mHalfHeightOfCylinder;
@@ -366,7 +370,7 @@ CapsuleShapeSettings implements ConvexShapeSettings;
 
 [Prefix="JPH::"]
 interface CapsuleShape {
-	void CapsuleShape(float inHalfHeight, float inRadius, PhysicsMaterial inMaterial);
+	void CapsuleShape(float inHalfHeight, float inRadius, optional PhysicsMaterial inMaterial);
 };
 
 CapsuleShape implements ConvexShape;
@@ -977,6 +981,7 @@ interface CharacterBaseSettings {
 
 [Prefix="JPH::"]
 interface CharacterVirtualSettings {
+	void CharacterVirtualSettings();
 	attribute float mMass;
 	attribute float mMaxStrength;
 	[Value] attribute Vec3 mShapeOffset;
@@ -996,6 +1001,7 @@ CharacterVirtualSettings implements CharacterBaseSettings;
 
 [Prefix="JPH::CharacterVirtual::"]
 interface ExtendedUpdateSettings {
+	void ExtendedUpdateSettings();
 	[Value] attribute Vec3 mStickToFloorStepDown;
 	[Value] attribute Vec3 mWalkStairsStepUp;
 	attribute float mWalkStairsMinStepForward;
@@ -1047,6 +1053,7 @@ SpecifiedObjectLayerFilter implements ObjectLayerFilter;
 
 [Prefix="JPH::"]
 interface BodyFilter {
+	void BodyFilter();
 };
 
 [Prefix="JPH::"]
@@ -1067,6 +1074,7 @@ IgnoreMultipleBodiesFilter implements BodyFilter;
 
 [Prefix="JPH::"]
 interface ShapeFilter {
+	void ShapeFilter();
 };
 
 [Prefix="JPH::"]
