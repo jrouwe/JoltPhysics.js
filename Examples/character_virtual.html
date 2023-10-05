@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<title>JoltPhysics.js demo</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+	<link rel="stylesheet" type="text/css" href="style.css">
+</head>
+
+<body>
+	<div id="container">Loading...</div>
+	<div id="info">JoltPhysics.js demo - WASD to move, Space to jump, Left Ctrl to crouch<br/>
+		<select id="collision-shape">
+			<option value="Capsule">Capsule</option>
+			<option value="Cylinder">Cylinder</option>
+			<option value="Box">Box</option>
+		</select>
+	</div>
+ 
+
+	<script src="js/three/three.min.js"></script>
+	<script src="js/three/OrbitControls.js"></script>
+	<script src="js/three/WebGL.js"></script>
+	<script src="js/three/stats.min.js"></script>
+	<script src="js/example.js"></script>
+
+	<script type="module">
+		import initJolt from './js/jolt-physics.wasm-compat.js';
+		const JPH_PI = 3.14159265358979323846;
+		const DegreesToRadians = (deg) => deg * (JPH_PI / 180.0);
+
+		initJolt().then(function (Jolt) {
+			window.Jolt = Jolt;
+
+			Jolt.Vec3.prototype.toString = function () { return `(${this.GetX()},${this.GetY()},${this.GetZ()})` }
+			Jolt.AABox.prototype.toString = function () { return `[${this.mMax.toString()},${this.mMin.toString()}]` }
+
+			window.getThreeBoundingBox = objThree => { const box = new THREE.Box3(); objThree.geometry.computeBoundingBox(); return box.copy(objThree.geometry.boundingBox).applyMatrix4(objThree.matrixWorld); }
+
+			// Initialize this example
+			container = document.getElementById('container');
+			container.innerHTML = "";
+			initPhysics();
+			initGraphics();
+
+			const cCharacterHeightStanding = 2;
+			const cCharacterRadiusStanding = 1;
+			const cCharacterHeightCrouching = 1;
+			const cCharacterRadiusCrouching = 0.8;
+
+			// Character movement properties
+			const sControlMovementDuringJump = true;					///< If false the character cannot change movement direction in mid air
+			const sCharacterSpeed = 6.0;
+			const sJumpSpeed = 15.0;
+
+			const sEnableCharacterInertia = true;
+
+			const sBackFaceMode = Jolt.CollideWithBackFaces;
+			const sUpRotationX = 0;
+			const sUpRotationZ = 0;
+			const sMaxSlopeAngle = DegreesToRadians(45.0);
+			const sMaxStrength = 100.0;
+			const sCharacterPadding = 0.02;
+			const sPenetrationRecoverySpeed = 1.0;
+			const sPredictiveContactDistance = 0.1;
+			const sEnableWalkStairs = true;
+			const sEnableStickToFloor = true;
+
+			let sShapeType = 'Capsule';
+			let mStandingShape;
+			let mCrouchingShape;
+			let mThreeStandingGeometry;
+			let mThreeCrouchingGeometry;
+
+			let mCharacter;
+			let mIsCrouched = false;
+			let mAllowSliding = false;
+
+			const geometry = new THREE.BoxGeometry(1, 1, 1);
+			const material = new THREE.MeshPhongMaterial({ color: 0xffff00 });
+			let mThreeCharacter = new THREE.Mesh(geometry, material);
+			let mDesiredVelocity = new THREE.Vector3();
+
+			const update_settings = new Jolt.ExtendedUpdateSettings();
+
+			const objectVsBroadPhaseLayerFilter = jolt.GetObjectVsBroadPhaseLayerFilter();
+			const objectLayerPairFilter = jolt.GetObjectLayerPairFilter();
+
+
+			const movingBPFilter = new Jolt.DefaultBroadPhaseLayerFilter(objectVsBroadPhaseLayerFilter, Jolt.MOVING);
+			const movingLayerFilter = new Jolt.DefaultObjectLayerFilter(objectLayerPairFilter, Jolt.MOVING);
+			const bodyFilter = new Jolt.BodyFilter();
+			const shapeFilter = new Jolt.ShapeFilter();
+
+			const wrapVec3 = (joltVec3) => new THREE.Vector3(joltVec3.GetX(), joltVec3.GetY(), joltVec3.GetZ());
+			const wrapQuat = (q) => new THREE.Quaternion(q.GetX(), q.GetY(), q.GetZ(), q.GetW());
+
+			const initShape = () => {
+				const inPositionStanding = new Jolt.Vec3(0, 0.5 * cCharacterHeightStanding + cCharacterRadiusStanding, 0);
+				const inPositionCrouching = new Jolt.Vec3(0, 0.5 * cCharacterHeightCrouching + cCharacterRadiusCrouching, 0);
+				const inRotation = Jolt.Quat.prototype.sIdentity();
+
+				switch (sShapeType) {
+					case 'Capsule':
+						mStandingShape = new Jolt.RotatedTranslatedShapeSettings(inPositionStanding, inRotation, new Jolt.CapsuleShapeSettings(0.5 * cCharacterHeightStanding, cCharacterRadiusStanding)).Create().Get();
+						mCrouchingShape = new Jolt.RotatedTranslatedShapeSettings(inPositionCrouching, inRotation, new Jolt.CapsuleShapeSettings(0.5 * cCharacterHeightCrouching, cCharacterRadiusCrouching)).Create().Get();
+
+						mThreeStandingGeometry = new THREE.CapsuleGeometry(cCharacterRadiusStanding, cCharacterHeightStanding, 4, 8).translate(0, 0.5 * cCharacterHeightStanding + cCharacterRadiusStanding, 0);
+						mThreeCrouchingGeometry = new THREE.CapsuleGeometry(cCharacterRadiusCrouching, cCharacterHeightCrouching, 4, 8).translate(0, 0.5 * cCharacterHeightCrouching + cCharacterRadiusCrouching, 0);
+						break;
+
+					case 'Cylinder':
+						mStandingShape = new Jolt.RotatedTranslatedShapeSettings(inPositionStanding, inRotation, new Jolt.CylinderShapeSettings(0.5 * cCharacterHeightStanding + cCharacterRadiusStanding, cCharacterRadiusStanding)).Create().Get();
+						mCrouchingShape = new Jolt.RotatedTranslatedShapeSettings(inPositionCrouching, inRotation, new Jolt.CylinderShapeSettings(0.5 * cCharacterHeightCrouching + cCharacterRadiusCrouching, cCharacterRadiusCrouching)).Create().Get();
+
+						mThreeStandingGeometry = new THREE.CylinderGeometry(cCharacterRadiusStanding, cCharacterRadiusStanding, 2 * cCharacterRadiusStanding + cCharacterHeightStanding, 8, 4).translate(0, 0.5 * cCharacterHeightStanding + cCharacterRadiusStanding, 0);
+						mThreeCrouchingGeometry = new THREE.CylinderGeometry(cCharacterRadiusCrouching, cCharacterRadiusCrouching, 2 * cCharacterRadiusCrouching + cCharacterHeightCrouching, 8, 4).translate(0, 0.5 * cCharacterHeightCrouching + cCharacterRadiusCrouching, 0);
+						break;
+
+					case 'Box':
+						mStandingShape = new Jolt.RotatedTranslatedShapeSettings(inPositionStanding, inRotation, new Jolt.BoxShapeSettings(new Jolt.Vec3(cCharacterRadiusStanding, 0.5 * cCharacterHeightStanding + cCharacterRadiusStanding, cCharacterRadiusStanding))).Create().Get();
+						mCrouchingShape = new Jolt.RotatedTranslatedShapeSettings(inPositionCrouching, inRotation, new Jolt.BoxShapeSettings(new Jolt.Vec3(cCharacterRadiusCrouching, 0.5 * cCharacterHeightCrouching + cCharacterRadiusCrouching, cCharacterRadiusCrouching))).Create().Get();
+
+						mThreeStandingGeometry = new THREE.BoxGeometry(2 * cCharacterRadiusStanding, 2 * cCharacterRadiusStanding + cCharacterHeightStanding, 2 * cCharacterRadiusStanding).translate(0, 0.5 * cCharacterHeightStanding + cCharacterRadiusStanding, 0);
+						mThreeCrouchingGeometry = new THREE.BoxGeometry(2 * cCharacterRadiusStanding, 2 * cCharacterRadiusCrouching + cCharacterHeightCrouching, 2 * cCharacterRadiusCrouching).translate(0, 0.5 * cCharacterHeightCrouching + cCharacterRadiusCrouching, 0);
+						break;
+				}
+			}
+
+
+			const mLavaObject = createBox(new Jolt.Vec3(0, -50, 0), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(1000, 2, 1000), Jolt.Static, Jolt.NON_MOVING);
+			const mLavaObjectId = mLavaObject.GetID().GetIndexAndSequenceNumber();
+			threeObject.material = new THREE.MeshPhongMaterial({ color: 0xCC2222 });
+
+			const mConveyorBeltObject = createBox(new Jolt.Vec3(0, 0, -10), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(10, 0.25, 2), Jolt.Static, Jolt.NON_MOVING);
+			const mConveyorBeltObjectId = mConveyorBeltObject.GetID().GetIndexAndSequenceNumber();
+			threeObject.material = new THREE.MeshPhongMaterial({ color: 0x2222CC });
+
+			const characterContactListener = new Jolt.CharacterContactListenerJS();
+			characterContactListener.OnAdjustBodyVelocity = (inCharacter, inBody2, ioLinearVelocity, ioAngularVelocity) => {
+				inBody2 = Jolt.wrapPointer(inBody2, Jolt.Body);
+				ioLinearVelocity = Jolt.wrapPointer(ioLinearVelocity, Jolt.Vec3);
+				// Apply artificial velocity to the character when standing on the conveyor belt
+				if (inBody2.GetID().GetIndexAndSequenceNumber() == mConveyorBeltObjectId) {
+					ioLinearVelocity.SetX(ioLinearVelocity.GetX() + 5);
+				}
+			}
+			characterContactListener.OnContactValidate = (inCharacter, inBodyID2, inSubShapeID2) => {
+				inBodyID2 = Jolt.wrapPointer(inBodyID2, Jolt.BodyID);
+				// Teleport the user back to the origin if they fall off the platform
+				if (inBodyID2.GetIndexAndSequenceNumber() == mLavaObjectId) {
+					mCharacter.SetPosition(new Jolt.Vec3(0, 10, 0));
+				}
+				return true;
+			}
+			characterContactListener.OnContactAdded = (inCharacter, inBodyID2, inSubShapeID2, inContactPosition, inContactNormal, ioSettings) => {
+			}
+			characterContactListener.OnContactSolve = (inCharacter, inBodyID2, inSubShapeID2, inContactPosition, inContactNormal, inContactVelocity, inContactMaterial, inCharacterVelocity, ioNewCharacterVelocity) => {
+				// Don't allow the player to slide down static not-too-steep surfaces when not actively moving and when not on a moving platform
+				inCharacter = Jolt.wrapPointer(inCharacter, Jolt.CharacterVirtual);
+				inContactVelocity = Jolt.wrapPointer(inContactVelocity, Jolt.Vec3);
+				ioNewCharacterVelocity = Jolt.wrapPointer(ioNewCharacterVelocity, Jolt.Vec3);
+				inContactNormal = Jolt.wrapPointer(inContactNormal, Jolt.Vec3);
+				if (!mAllowSliding && inContactVelocity.IsNearZero() && !inCharacter.IsSlopeTooSteep(inContactNormal)) {
+					ioNewCharacterVelocity.SetX(0);
+					ioNewCharacterVelocity.SetY(0);
+					ioNewCharacterVelocity.SetZ(0);
+				}
+			}
+
+
+			const initalize = () => {
+				initShape();
+				const settings = new Jolt.CharacterVirtualSettings();
+				settings.mMass = 1000;
+				settings.mMaxSlopeAngle = sMaxSlopeAngle;
+				settings.mMaxStrength = sMaxStrength;
+				settings.mShape = mStandingShape;
+				settings.mBackFaceMode = sBackFaceMode;
+				settings.mCharacterPadding = sCharacterPadding;
+				settings.mPenetrationRecoverySpeed = sPenetrationRecoverySpeed;
+				settings.mPredictiveContactDistance = sPredictiveContactDistance;
+				settings.mSupportingVolume = new Jolt.Plane(Jolt.Vec3.prototype.sAxisY(), -cCharacterRadiusStanding);
+				mCharacter = new Jolt.CharacterVirtual(settings, Jolt.Vec3.prototype.sZero(), Jolt.Quat.prototype.sIdentity(), physicsSystem);
+				mCharacter.SetListener(characterContactListener);
+
+				mThreeCharacter.geometry = mThreeStandingGeometry;
+				mThreeCharacter.userData.body = mCharacter;
+
+				controls.target = mThreeCharacter.position;
+				scene.add(mThreeCharacter);
+			}
+
+			const prePhysicsUpdate = (mDeltaTime) => {
+				const characterUp = wrapVec3(mCharacter.GetUp());
+				if (!sEnableStickToFloor) {
+					update_settings.mStickToFloorStepDown = Jolt.Vec3.prototype.sZero();
+				}
+				else {
+					const vec = characterUp.clone().multiplyScalar(-update_settings.mStickToFloorStepDown.Length());
+					update_settings.mStickToFloorStepDown = new Jolt.Vec3(vec.x, vec.y, vec.z);
+				}
+
+				if (!sEnableWalkStairs) {
+					update_settings.mWalkStairsStepUp = Jolt.Vec3.prototype.sZero();
+				}
+				else {
+					const vec = characterUp.clone().multiplyScalar(update_settings.mWalkStairsStepUp.Length());
+					update_settings.mWalkStairsStepUp = new Jolt.Vec3(vec.x, vec.y, vec.z);
+				}
+				characterUp.multiplyScalar(-physicsSystem.GetGravity().Length());
+				mCharacter.ExtendedUpdate(mDeltaTime,
+					new Jolt.Vec3(characterUp.x, characterUp.y, characterUp.z),
+					update_settings,
+					movingBPFilter,
+					movingLayerFilter,
+					bodyFilter,
+					shapeFilter,
+					jolt.GetTempAllocator());
+
+				const characterPosition = wrapVec3(mCharacter.GetPosition());
+				mThreeCharacter.position.copy(characterPosition);
+			}
+
+			const handleInput = (inMovementDirection /* Vector3 */, inJump, inSwitchStance, inDeltaTime) => {
+				const player_controls_horizontal_velocity = sControlMovementDuringJump || mCharacter.IsSupported();
+				if (player_controls_horizontal_velocity) {
+					// True if the player intended to move
+					mAllowSliding = !(inMovementDirection.length() < 1.0e-12);
+					// Smooth the player input
+					if (sEnableCharacterInertia) {
+						mDesiredVelocity.multiplyScalar(0.75).add(inMovementDirection.multiplyScalar(0.25 * sCharacterSpeed))
+					} else {
+						mDesiredVelocity.copy(inMovementDirection).multiplyScalar(sCharacterSpeed);
+					}
+				}
+				else {
+					// While in air we allow sliding
+					mAllowSliding = true;
+				}
+				const character_up_rotation = Jolt.Quat.prototype.sEulerAngles(new Jolt.Vec3(sUpRotationX, 0, sUpRotationZ));
+				mCharacter.SetUp(character_up_rotation.RotateAxisY());
+				mCharacter.SetRotation(character_up_rotation);
+				const upRotation = wrapQuat(character_up_rotation);
+
+				mCharacter.UpdateGroundVelocity();
+				const characterUp = wrapVec3(mCharacter.GetUp());
+				const linearVelocity = wrapVec3(mCharacter.GetLinearVelocity());
+				const current_vertical_velocity = characterUp.clone().multiplyScalar(linearVelocity.dot(characterUp));
+				const ground_velocity = wrapVec3(mCharacter.GetGroundVelocity());
+				const gravity = wrapVec3(physicsSystem.GetGravity());
+
+				let new_velocity;
+				const moving_towards_ground = (current_vertical_velocity.y - ground_velocity.y) < 0.1;
+				if (mCharacter.GetGroundState() == Jolt.OnGround	// If on ground
+					&& (sEnableCharacterInertia ?
+						moving_towards_ground													// Inertia enabled: And not moving away from ground
+						: !mCharacter.IsSlopeTooSteep(mCharacter.GetGroundNormal())))			// Inertia disabled: And not on a slope that is too steep
+				{
+					// Assume velocity of ground when on ground
+					new_velocity = ground_velocity;
+
+					// Jump
+					if (inJump && moving_towards_ground)
+						new_velocity.add(characterUp.multiplyScalar(sJumpSpeed));
+				}
+				else
+					new_velocity = current_vertical_velocity.clone();
+
+
+				// Gravity
+				new_velocity.add(gravity.multiplyScalar(inDeltaTime).applyQuaternion(upRotation));
+
+				if (player_controls_horizontal_velocity) {
+					// Player input
+					new_velocity.add(mDesiredVelocity.clone().applyQuaternion(upRotation));
+				}
+				else {
+					// Preserve horizontal velocity
+					const current_horizontal_velocity = linearVelocity.sub(current_vertical_velocity);
+					new_velocity.add(current_horizontal_velocity);
+				}
+
+				mCharacter.SetLinearVelocity(new Jolt.Vec3(new_velocity.x, new_velocity.y, new_velocity.z));
+			}
+
+			const setCrouched = (crouched, forceUpdate) => {
+				if (crouched != mIsCrouched || forceUpdate) {
+					mIsCrouched = crouched;
+					let newShape;
+					if (mIsCrouched) {
+						newShape = mCrouchingShape;
+						mThreeCharacter.geometry = mThreeCrouchingGeometry;
+					} else {
+						newShape = mStandingShape;
+						mThreeCharacter.geometry = mThreeStandingGeometry;
+					}
+					mCharacter.SetShape(newShape,
+						1.5 * physicsSystem.GetPhysicsSettings().mPenetrationSlop,
+						movingBPFilter,
+						movingLayerFilter,
+						bodyFilter,
+						shapeFilter,
+						jolt.GetTempAllocator());
+				}
+			}
+
+
+			// Create a basic floor
+			createFloor();
+
+			createBox(new Jolt.Vec3(-45, 1, 0), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(0.5, 2, 45), Jolt.Static, Jolt.NON_MOVING);
+			createBox(new Jolt.Vec3(45, 1, 0), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(0.5, 2, 45), Jolt.Static, Jolt.NON_MOVING);
+
+			let stepHeight = 0.3;
+			for (let i = 1; i < 10; i++) {
+				createBox(new Jolt.Vec3(15, i * stepHeight - 0.5 + stepHeight / 2, -20 - i * 3), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(2, stepHeight / 2, 2), Jolt.Static, Jolt.NON_MOVING);
+			}
+			stepHeight = 0.4;
+			for (let i = 1; i < 10; i++) {
+				createBox(new Jolt.Vec3(20, i * stepHeight - 0.5 + stepHeight / 2, -20 - i * 3), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(2, stepHeight / 2, 2), Jolt.Static, Jolt.NON_MOVING);
+			}
+			stepHeight = 0.5;
+			for (let i = 1; i < 10; i++) {
+				createBox(new Jolt.Vec3(25, i * stepHeight - 0.5 + stepHeight / 2, -20 - i * 3), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(2, stepHeight / 2, 2), Jolt.Static, Jolt.NON_MOVING);
+			}
+			stepHeight = 0.6;
+			for (let i = 1; i < 10; i++) {
+				createBox(new Jolt.Vec3(30, i * stepHeight - 0.5 + stepHeight / 2, -20 - i * 3), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(2, stepHeight / 2, 2), Jolt.Static, Jolt.NON_MOVING);
+			}
+			stepHeight = 0.7;
+			for (let i = 1; i < 10; i++) {
+				createBox(new Jolt.Vec3(35, i * stepHeight - 0.5 + stepHeight / 2, -20 - i * 3), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(2, stepHeight / 2, 2), Jolt.Static, Jolt.NON_MOVING);
+			}
+
+			for (let i = 0; i < 10; i++) {
+				createBox(new Jolt.Vec3(-40 + 5 * i, 2, -25), Jolt.Quat.prototype.sRotation(new Jolt.Vec3(1, 0, 0), DegreesToRadians(70 - i * 5.0)), new Jolt.Vec3(2.5, 0.6, 8), Jolt.Static, Jolt.NON_MOVING);
+			}
+
+
+			{
+				//Create a push-able block
+				const boxSize = 1.5;
+				let material = new THREE.MeshPhongMaterial({ color: 0x00ffff });
+				let threeObject = new THREE.Mesh(new THREE.BoxGeometry(boxSize, boxSize, boxSize, 1, 1, 1), material);
+				threeObject.position.set(-10.0, 5.0, 10.0);
+
+				// Create physics body
+				let pos = threeObject.position;
+				let shape = new Jolt.BoxShape(new Jolt.Vec3(boxSize / 2, boxSize / 2, boxSize / 2));
+				let creationSettings = new Jolt.BodyCreationSettings(shape, new Jolt.Vec3(pos.x, pos.y, pos.z),
+					new Jolt.Quat.prototype.sIdentity(), Jolt.Dynamic, Jolt.MOVING);
+				creationSettings.mFriction = 0.1;
+				creationSettings.mOverrideMassProperties = Jolt.CalculateInertia;
+				creationSettings.mMassPropertiesOverride.mMass = 1;
+				let body = bodyInterface.CreateBody(creationSettings);
+				addToScene(threeObject, body);
+			}
+
+			initalize();
+
+			const input = {
+				direction: new THREE.Vector3(),
+				jump: false,
+				crouched: false
+			}
+
+			const cameraRotation = new THREE.Quaternion();
+			onExampleUpdate = (time, deltaTime) => {
+				setCrouched(input.crouched);
+				camera.getWorldQuaternion(cameraRotation);
+				const cameraDirectionV = input.direction.clone().applyQuaternion(cameraRotation);
+				cameraDirectionV.y = 0;
+				cameraDirectionV.normalize().multiplyScalar(2);
+				handleInput(cameraDirectionV, input.jump, input.switchStance, deltaTime);
+
+				const oldPosition = wrapVec3(mCharacter.GetPosition());
+				prePhysicsUpdate(deltaTime)
+				const newdPosition = wrapVec3(mCharacter.GetPosition());
+				camera.position.add(newdPosition.sub(oldPosition));
+			}
+
+			document.addEventListener("keydown", onDocumentKeyDown, false);
+			document.addEventListener("keyup", onDocumentKeyUp, false);
+			function onDocumentKeyDown(event) {
+				var keyCode = event.which;
+				if (keyCode == 87) {
+					input.direction.z = -1;
+				} else if (keyCode == 83) {
+					input.direction.z = 1;
+				} else if (keyCode == 65) {
+					input.direction.x = -1;
+				} else if (keyCode == 68) {
+					input.direction.x = 1;
+				} else if (keyCode == 32) {
+					input.jump = true;
+				} else if (keyCode == 17) {
+					input.crouched = true;
+				}
+			};
+			function onDocumentKeyUp(event) {
+				var keyCode = event.which;
+				if (keyCode == 87) {
+					input.direction.z = 0;
+				} else if (keyCode == 83) {
+					input.direction.z = 0;
+				} else if (keyCode == 65) {
+					input.direction.x = 0;
+				} else if (keyCode == 68) {
+					input.direction.x = 0;
+				} else if (keyCode == 32) {
+					input.jump = false;
+				} else if (keyCode == 17) {
+					input.crouched = false;
+				}
+			};
+			const mCollisionShapeEle = document.getElementById('collision-shape');
+			mCollisionShapeEle.addEventListener('change', () => {
+				sShapeType = mCollisionShapeEle.value;
+				initShape();
+				setCrouched(input.crouched, true);
+			})
+			physicsSystem.SetGravity(new Jolt.Vec3(0, -25, 0))
+			renderExample();
+		});
+
+	</script>
+</body>
+
+</html>
