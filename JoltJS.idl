@@ -141,7 +141,7 @@ interface Quat {
 	[Value] static Quat sRotation([Const, Ref] Vec3 inRotation, float inAngle);
 	float Length();
 	[Value] Quat Normalized();
-	[Value] static Quat sEulerAngles([Const, Ref] Vec3 input);
+	[Value] static Quat sEulerAngles([Const, Ref] Vec3 inInput);
 	float GetX();
 	float GetY();
 	float GetZ();
@@ -856,6 +856,7 @@ interface PhysicsSystem {
 	void SetGravity([Const, Ref] Vec3 inGravity);
 	[Value] Vec3 GetGravity();
 	[Const, Value] PhysicsSettings GetPhysicsSettings();
+	void SetPhysicsSettings([Const, Ref] PhysicsSettings inPhysicsSettings);
 	unsigned long GetNumBodies();
 	unsigned long GetNumActiveBodies(EBodyType inBodyType);
 	unsigned long GetMaxBodies();
@@ -1014,6 +1015,7 @@ interface CharacterBaseSettings {
 [Prefix="JPH::"]
 interface CharacterVirtualSettings {
 	void CharacterVirtualSettings();
+	
 	attribute float mMass;
 	attribute float mMaxStrength;
 	[Value] attribute Vec3 mShapeOffset;
@@ -1056,8 +1058,8 @@ interface CharacterContactListenerEm {
 	void OnContactAdded([Const] CharacterVirtual inCharacter, [Const, Ref] BodyID inBodyID2, [Const, Ref] SubShapeID inSubShapeID2, Vec3 inContactPosition, Vec3 inContactNormal, [Ref] CharacterContactSettings ioSettings);
 	void OnContactSolve([Const] CharacterVirtual inCharacter, [Const, Ref] BodyID inBodyID2, [Const, Ref] SubShapeID inSubShapeID2, Vec3 inContactPosition, Vec3 inContactNormal, Vec3 inContactVelocity, [Const] PhysicsMaterial inContactMaterial, Vec3 inCharacterVelocity, [Ref] Vec3 ioNewCharacterVelocity);
 };
-CharacterContactListenerEm implements CharacterContactListener;
 
+CharacterContactListenerEm implements CharacterContactListener;
 
 [JSImplementation="CharacterContactListenerEm"]
 interface CharacterContactListenerJS {
@@ -1071,6 +1073,7 @@ interface CharacterContactListenerJS {
 [Prefix="JPH::CharacterVirtual::"]
 interface ExtendedUpdateSettings {
 	void ExtendedUpdateSettings();
+	
 	[Value] attribute Vec3 mStickToFloorStepDown;
 	[Value] attribute Vec3 mWalkStairsStepUp;
 	attribute float mWalkStairsMinStepForward;

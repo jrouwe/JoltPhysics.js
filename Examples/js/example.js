@@ -109,7 +109,7 @@ function renderExample() {
 		objThree.position.set(p.GetX(), p.GetY(), p.GetZ());
 		objThree.quaternion.set(q.GetX(), q.GetY(), q.GetZ(), q.GetW());
 
-		if (body.GetBodyType && body.GetBodyType() == Jolt.SoftBody)
+		if (body.GetBodyType() == Jolt.SoftBody)
 			objThree.geometry = createMeshForShape(body.GetShape());
 	}
 

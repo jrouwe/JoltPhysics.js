@@ -10,7 +10,7 @@
 
 <body>
 	<div id="container">Loading...</div>
-	<div id="info">JoltPhysics.js demo<br />
+	<div id="info">JoltPhysics.js demo - WASD to move, Space to jump, Left Ctrl to crouch<br/>
 		<select id="collision-shape">
 			<option value="Capsule">Capsule</option>
 			<option value="Cylinder">Cylinder</option>
@@ -143,24 +143,23 @@
 				ioLinearVelocity = Jolt.wrapPointer(ioLinearVelocity, Jolt.Vec3);
 				// Apply artificial velocity to the character when standing on the conveyor belt
 				if (inBody2.GetID().GetIndexAndSequenceNumber() == mConveyorBeltObjectId) {
-					ioLinearVelocity.SetX(ioLinearVelocity.GetX()+5);
+					ioLinearVelocity.SetX(ioLinearVelocity.GetX() + 5);
 				}
 			}
 			characterContactListener.OnContactValidate = (inCharacter, inBodyID2, inSubShapeID2) => {
 				inBodyID2 = Jolt.wrapPointer(inBodyID2, Jolt.BodyID);
 				// Teleport the user back to the origin if they fall off the platform
-				if(inBodyID2.GetIndexAndSequenceNumber() == mLavaObjectId) {
+				if (inBodyID2.GetIndexAndSequenceNumber() == mLavaObjectId) {
 					mCharacter.SetPosition(new Jolt.Vec3(0, 10, 0));
 				}
 				return true;
 			}
 			characterContactListener.OnContactAdded = (inCharacter, inBodyID2, inSubShapeID2, inContactPosition, inContactNormal, ioSettings) => {
-
 			}
 			characterContactListener.OnContactSolve = (inCharacter, inBodyID2, inSubShapeID2, inContactPosition, inContactNormal, inContactVelocity, inContactMaterial, inCharacterVelocity, ioNewCharacterVelocity) => {
 				// Don't allow the player to slide down static not-too-steep surfaces when not actively moving and when not on a moving platform
 				inCharacter = Jolt.wrapPointer(inCharacter, Jolt.CharacterVirtual);
-				inContactVelocity = Jolt.wrapPointer(inContactVelocity, Jolt.Vec3); 
+				inContactVelocity = Jolt.wrapPointer(inContactVelocity, Jolt.Vec3);
 				ioNewCharacterVelocity = Jolt.wrapPointer(ioNewCharacterVelocity, Jolt.Vec3);
 				inContactNormal = Jolt.wrapPointer(inContactNormal, Jolt.Vec3);
 				if (!mAllowSliding && inContactVelocity.IsNearZero() && !inCharacter.IsSlopeTooSteep(inContactNormal)) {
@@ -191,7 +190,6 @@
 
 				controls.target = mThreeCharacter.position;
 				scene.add(mThreeCharacter);
-				dynamicObjects.push(mThreeCharacter);
 			}
 
 			const prePhysicsUpdate = (mDeltaTime) => {
@@ -220,6 +218,9 @@
 					bodyFilter,
 					shapeFilter,
 					jolt.GetTempAllocator());
+
+				const characterPosition = wrapVec3(mCharacter.GetPosition());
+				mThreeCharacter.position.copy(characterPosition);
 			}
 
 			const handleInput = (inMovementDirection /* Vector3 */, inJump, inSwitchStance, inDeltaTime) => {
@@ -338,24 +339,24 @@
 			}
 
 
-		{
-					//Create a push-able block
-					const boxSize = 1.5;
-					let material = new THREE.MeshPhongMaterial({ color: 0x00ffff });
-					let threeObject = new THREE.Mesh(new THREE.BoxGeometry(boxSize, boxSize, boxSize, 1, 1, 1), material);
-					threeObject.position.set(-10.0, 5.0, 10.0);
+			{
+				//Create a push-able block
+				const boxSize = 1.5;
+				let material = new THREE.MeshPhongMaterial({ color: 0x00ffff });
+				let threeObject = new THREE.Mesh(new THREE.BoxGeometry(boxSize, boxSize, boxSize, 1, 1, 1), material);
+				threeObject.position.set(-10.0, 5.0, 10.0);
 
-					// Create physics body
-					let pos = threeObject.position;
-					let shape = new Jolt.BoxShape(new Jolt.Vec3(boxSize/2, boxSize/2, boxSize/2));
-					let creationSettings = new Jolt.BodyCreationSettings(shape, new Jolt.Vec3(pos.x, pos.y, pos.z),
-						new Jolt.Quat.prototype.sIdentity(), Jolt.Dynamic, Jolt.MOVING);
-					creationSettings.mFriction = 0.1;
-					creationSettings.mOverrideMassProperties = Jolt.CalculateInertia;
-					creationSettings.mMassPropertiesOverride.mMass = 1;
-					let body = bodyInterface.CreateBody(creationSettings);
-					addToScene(threeObject, body);
-		}
+				// Create physics body
+				let pos = threeObject.position;
+				let shape = new Jolt.BoxShape(new Jolt.Vec3(boxSize / 2, boxSize / 2, boxSize / 2));
+				let creationSettings = new Jolt.BodyCreationSettings(shape, new Jolt.Vec3(pos.x, pos.y, pos.z),
+					new Jolt.Quat.prototype.sIdentity(), Jolt.Dynamic, Jolt.MOVING);
+				creationSettings.mFriction = 0.1;
+				creationSettings.mOverrideMassProperties = Jolt.CalculateInertia;
+				creationSettings.mMassPropertiesOverride.mMass = 1;
+				let body = bodyInterface.CreateBody(creationSettings);
+				addToScene(threeObject, body);
+			}
 
 			initalize();
 

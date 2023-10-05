@@ -332,17 +332,22 @@ private:
 	Array<const PhysicsMaterial *>	mMaterials;
 };
 
-
-class CharacterContactListenerEm: public CharacterContactListener {
+/// A wrapper around CharacterContactListener that is compatible with JavaScript
+class CharacterContactListenerEm: public CharacterContactListener
+{
 public:
-	virtual void OnContactAdded(const CharacterVirtual *inCharacter, const BodyID &inBodyID2, const SubShapeID &inSubShapeID2, Vec3* inContactPosition, Vec3* inContactNormal, CharacterContactSettings &ioSettings) = 0;
-	virtual void OnContactSolve(const CharacterVirtual *inCharacter, const BodyID &inBodyID2, const SubShapeID &inSubShapeID2, Vec3* inContactPosition, Vec3* inContactNormal, Vec3* inContactVelocity, const PhysicsMaterial *inContactMaterial, Vec3* inCharacterVelocity, Vec3 &ioNewCharacterVelocity) = 0;
+	// JavaScript compatible virtual functions
+	virtual void			OnContactAdded(const CharacterVirtual *inCharacter, const BodyID &inBodyID2, const SubShapeID &inSubShapeID2, Vec3 *inContactPosition, Vec3 *inContactNormal, CharacterContactSettings &ioSettings) = 0;
+	virtual void			OnContactSolve(const CharacterVirtual *inCharacter, const BodyID &inBodyID2, const SubShapeID &inSubShapeID2, Vec3 *inContactPosition, Vec3 *inContactNormal, Vec3 *inContactVelocity, const PhysicsMaterial *inContactMaterial, Vec3 *inCharacterVelocity, Vec3 &ioNewCharacterVelocity) = 0;
 
-	void OnContactAdded(const CharacterVirtual *inCharacter, const BodyID &inBodyID2, const SubShapeID &inSubShapeID2, RVec3Arg inContactPosition, Vec3Arg inContactNormal, CharacterContactSettings &ioSettings) { 
+	// Functions that call the JavaScript compatible virtual functions
+	void					OnContactAdded(const CharacterVirtual *inCharacter, const BodyID &inBodyID2, const SubShapeID &inSubShapeID2, RVec3Arg inContactPosition, Vec3Arg inContactNormal, CharacterContactSettings &ioSettings)
+	{ 
 		OnContactAdded(inCharacter, inBodyID2, inSubShapeID2, &inContactPosition, &inContactNormal, ioSettings);
 	}
-	void OnContactSolve(const CharacterVirtual *inCharacter, const BodyID &inBodyID2, const SubShapeID &inSubShapeID2, RVec3Arg inContactPosition, Vec3Arg inContactNormal, Vec3Arg inContactVelocity, const PhysicsMaterial *inContactMaterial, Vec3Arg inCharacterVelocity, Vec3 &ioNewCharacterVelocity) { 
+
+	void					OnContactSolve(const CharacterVirtual *inCharacter, const BodyID &inBodyID2, const SubShapeID &inSubShapeID2, RVec3Arg inContactPosition, Vec3Arg inContactNormal, Vec3Arg inContactVelocity, const PhysicsMaterial *inContactMaterial, Vec3Arg inCharacterVelocity, Vec3 &ioNewCharacterVelocity)
+	{ 
 		OnContactSolve(inCharacter, inBodyID2, inSubShapeID2, &inContactPosition, &inContactNormal, &inContactVelocity, inContactMaterial, &inCharacterVelocity, ioNewCharacterVelocity);
 	}
-
 };
