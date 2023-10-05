@@ -33,6 +33,11 @@
 		initJolt().then(function (Jolt) {
 			window.Jolt = Jolt;
 
+			Jolt.Vec3.prototype.toString = function () { return `(${this.GetX()},${this.GetY()},${this.GetZ()})` }
+			Jolt.AABox.prototype.toString = function () { return `[${this.mMax.toString()},${this.mMin.toString()}]` }
+
+			window.getThreeBoundingBox = objThree => { const box = new THREE.Box3(); objThree.geometry.computeBoundingBox(); return box.copy(objThree.geometry.boundingBox).applyMatrix4(objThree.matrixWorld); }
+
 			// Initialize this example
 			container = document.getElementById('container');
 			container.innerHTML = "";
@@ -169,6 +174,7 @@
 			const initalize = () => {
 				initShape();
 				const settings = new Jolt.CharacterVirtualSettings();
+				settings.mMass = 1000;
 				settings.mMaxSlopeAngle = sMaxSlopeAngle;
 				settings.mMaxStrength = sMaxStrength;
 				settings.mShape = mStandingShape;
@@ -330,6 +336,26 @@
 			for (let i = 0; i < 10; i++) {
 				createBox(new Jolt.Vec3(-40 + 5 * i, 2, -25), Jolt.Quat.prototype.sRotation(new Jolt.Vec3(1, 0, 0), DegreesToRadians(70 - i * 5.0)), new Jolt.Vec3(2.5, 0.6, 8), Jolt.Static, Jolt.NON_MOVING);
 			}
+
+
+		{
+					//Create a push-able block
+					const boxSize = 1.5;
+					let material = new THREE.MeshPhongMaterial({ color: 0x00ffff });
+					let threeObject = new THREE.Mesh(new THREE.BoxGeometry(boxSize, boxSize, boxSize, 1, 1, 1), material);
+					threeObject.position.set(-10.0, 5.0, 10.0);
+
+					// Create physics body
+					let pos = threeObject.position;
+					let shape = new Jolt.BoxShape(new Jolt.Vec3(boxSize/2, boxSize/2, boxSize/2));
+					let creationSettings = new Jolt.BodyCreationSettings(shape, new Jolt.Vec3(pos.x, pos.y, pos.z),
+						new Jolt.Quat.prototype.sIdentity(), Jolt.Dynamic, Jolt.MOVING);
+					creationSettings.mFriction = 0.1;
+					creationSettings.mOverrideMassProperties = Jolt.CalculateInertia;
+					creationSettings.mMassPropertiesOverride.mMass = 1;
+					let body = bodyInterface.CreateBody(creationSettings);
+					addToScene(threeObject, body);
+		}
 
 			initalize();
 
