@@ -20,14 +20,12 @@
 			import initJolt from './js/jolt-physics.wasm-compat.js';
 
 			initJolt().then(function (Jolt) {
-				window.Jolt = Jolt;
-
 				// Spawning variables
 				var objectTimePeriod = 0.01;
 				var timeNextSpawn = time + objectTimePeriod;
 
 				// Initialize this example
-				initExample(onUpdate);
+				initExample(Jolt, onUpdate);
 
 				// Create a basic floor
 				createFloor();

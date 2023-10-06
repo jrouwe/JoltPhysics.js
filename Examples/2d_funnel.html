@@ -20,10 +20,8 @@
 			import initJolt from './js/jolt-physics.wasm-compat.js';
 
 			initJolt().then(function (Jolt) {
-				window.Jolt = Jolt;
-
 				// Initialize this example
-				initExample(null);
+				initExample(Jolt, null);
 
 				// Create a basic floor
 				createFloor();

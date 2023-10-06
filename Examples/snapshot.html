@@ -34,11 +34,7 @@
 		<script type="module">
 			import initJolt from './js/jolt-physics.wasm-compat.js';
 
-			let threeObject;
-
 			initJolt().then(function (Jolt) {
-				window.Jolt = Jolt;
-
 				const snapshots = [];
 				const buttons = [document.getElementById('tick-0'), document.getElementById('tick-1'), document.getElementById('tick-2'), document.getElementById('tick-3')]
 				buttons.forEach((e, i) => {
@@ -55,7 +51,7 @@
 				})
 
 				// Initialize this example
-				initExample((time, deltaTime) => {
+				initExample(Jolt, (time, deltaTime) => {
 					// Create 4 snapshots with 1 second intervals
 					const i = parseInt(time) - 1;
 					if (buttons[i] && buttons[i].isSet == false) {

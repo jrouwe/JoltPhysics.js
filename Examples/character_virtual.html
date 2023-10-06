@@ -28,15 +28,10 @@
 		import initJolt from './js/jolt-physics.wasm-compat.js';
 
 		initJolt().then(function (Jolt) {
-			window.Jolt = Jolt;
-
 			window.getThreeBoundingBox = objThree => { const box = new THREE.Box3(); objThree.geometry.computeBoundingBox(); return box.copy(objThree.geometry.boundingBox).applyMatrix4(objThree.matrixWorld); }
 
 			// Initialize this example
-			container = document.getElementById('container');
-			container.innerHTML = "";
-			initPhysics();
-			initGraphics();
+			initExample(Jolt, null);
 
 			const cCharacterHeightStanding = 2;
 			const cCharacterRadiusStanding = 1;

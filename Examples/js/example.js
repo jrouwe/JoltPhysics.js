@@ -85,7 +85,9 @@ function updatePhysics(deltaTime) {
 	jolt.Step(deltaTime, numSteps);
 }
 
-function initExample(updateFunction) {
+function initExample(Jolt, updateFunction) {
+	window.Jolt = Jolt;
+
 	container = document.getElementById('container');
 	container.innerHTML = "";
 
