@@ -19,8 +19,6 @@
 		<script type="module">
 			import initJolt from './js/jolt-physics.wasm-compat.js';
 
-			let threeObject;
-
 			initJolt().then(function (Jolt) {
 				window.Jolt = Jolt;
 
@@ -44,25 +42,18 @@
 
 					for (let x = -baseOffset; x <= baseOffset; x++) {
 						for (let z = -baseOffset; z <= baseOffset; z++) {
-
-							threeObject = new THREE.Mesh(geometry, material);
-							threeObject.position.set(x, y + 0.5, z);
-
 							creationSettings.mPosition = new Jolt.Vec3(x, y + 0.5, z);
 							let body = bodyInterface.CreateBody(creationSettings);
 
-							addToScene(threeObject, body);
+							addToScene(body, 0xffffff);
 						}
 					}
 				}
 
 				// Create block to fall on scene
 				shape = new Jolt.BoxShape(new Jolt.Vec3(1, 1, 1), 0.05, null);
-				threeObject = new THREE.Mesh(new THREE.BoxGeometry(2, 2, 2), material);
-				threeObject.position.set(0, 20, 0);
-
 				let body = bodyInterface.CreateBody(new Jolt.BodyCreationSettings(shape, new Jolt.Vec3(0, 20, 0), Jolt.Quat.prototype.sIdentity(), Jolt.Dynamic, Jolt.MOVING));
-				addToScene(threeObject, body);
+				addToScene(body, 0xff0000);
 			});
 
 		</script>

@@ -83,11 +83,7 @@
 					for (let y = 0; y < 10; ++y) {
 						creationSettings.mPosition = new Jolt.Vec3(-10 + x, 15 + y, -5)
 						let body = bodyInterface.CreateBody(creationSettings);
-
-						threeObject = new THREE.Mesh(new THREE.SphereGeometry(0.5), new THREE.MeshPhongMaterial({ color: 0xffffff }));
-						threeObject.position.set(creationSettings.mPosition.GetX(), creationSettings.mPosition.GetY(), creationSettings.mPosition.GetZ());
-
-						addToScene(threeObject, body);
+						addToScene(body, 0xff0000);
 					}
 
 				// Lower gravity so it is easier to see the difference between the snapshots

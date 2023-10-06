@@ -18,7 +18,6 @@
 		</select>
 	</div>
  
-
 	<script src="js/three/three.min.js"></script>
 	<script src="js/three/OrbitControls.js"></script>
 	<script src="js/three/WebGL.js"></script>
@@ -27,14 +26,9 @@
 
 	<script type="module">
 		import initJolt from './js/jolt-physics.wasm-compat.js';
-		const JPH_PI = 3.14159265358979323846;
-		const DegreesToRadians = (deg) => deg * (JPH_PI / 180.0);
 
 		initJolt().then(function (Jolt) {
 			window.Jolt = Jolt;
-
-			Jolt.Vec3.prototype.toString = function () { return `(${this.GetX()},${this.GetY()},${this.GetZ()})` }
-			Jolt.AABox.prototype.toString = function () { return `[${this.mMax.toString()},${this.mMin.toString()}]` }
 
 			window.getThreeBoundingBox = objThree => { const box = new THREE.Box3(); objThree.geometry.computeBoundingBox(); return box.copy(objThree.geometry.boundingBox).applyMatrix4(objThree.matrixWorld); }
 
@@ -93,9 +87,6 @@
 			const bodyFilter = new Jolt.BodyFilter();
 			const shapeFilter = new Jolt.ShapeFilter();
 
-			const wrapVec3 = (joltVec3) => new THREE.Vector3(joltVec3.GetX(), joltVec3.GetY(), joltVec3.GetZ());
-			const wrapQuat = (q) => new THREE.Quaternion(q.GetX(), q.GetY(), q.GetZ(), q.GetW());
-
 			const initShape = () => {
 				const inPositionStanding = new Jolt.Vec3(0, 0.5 * cCharacterHeightStanding + cCharacterRadiusStanding, 0);
 				const inPositionCrouching = new Jolt.Vec3(0, 0.5 * cCharacterHeightCrouching + cCharacterRadiusCrouching, 0);
@@ -129,13 +120,11 @@
 			}
 
 
-			const mLavaObject = createBox(new Jolt.Vec3(0, -50, 0), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(1000, 2, 1000), Jolt.Static, Jolt.NON_MOVING);
+			const mLavaObject = createBox(new Jolt.Vec3(0, -50, 0), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(1000, 2, 1000), Jolt.Static, Jolt.NON_MOVING, 0xcc2222);
 			const mLavaObjectId = mLavaObject.GetID().GetIndexAndSequenceNumber();
-			threeObject.material = new THREE.MeshPhongMaterial({ color: 0xCC2222 });
 
-			const mConveyorBeltObject = createBox(new Jolt.Vec3(0, 0, -10), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(10, 0.25, 2), Jolt.Static, Jolt.NON_MOVING);
+			const mConveyorBeltObject = createBox(new Jolt.Vec3(0, 0, -10), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(10, 0.25, 2), Jolt.Static, Jolt.NON_MOVING, 0x2222cc);
 			const mConveyorBeltObjectId = mConveyorBeltObject.GetID().GetIndexAndSequenceNumber();
-			threeObject.material = new THREE.MeshPhongMaterial({ color: 0x2222CC });
 
 			const characterContactListener = new Jolt.CharacterContactListenerJS();
 			characterContactListener.OnAdjustBodyVelocity = (inCharacter, inBody2, ioLinearVelocity, ioAngularVelocity) => {
@@ -219,8 +208,7 @@
 					shapeFilter,
 					jolt.GetTempAllocator());
 
-				const characterPosition = wrapVec3(mCharacter.GetPosition());
-				mThreeCharacter.position.copy(characterPosition);
+				mThreeCharacter.position.copy(wrapVec3(mCharacter.GetPosition()));
 			}
 
 			const handleInput = (inMovementDirection /* Vector3 */, inJump, inSwitchStance, inDeltaTime) => {
@@ -340,22 +328,16 @@
 
 
 			{
-				//Create a push-able block
-				const boxSize = 1.5;
-				let material = new THREE.MeshPhongMaterial({ color: 0x00ffff });
-				let threeObject = new THREE.Mesh(new THREE.BoxGeometry(boxSize, boxSize, boxSize, 1, 1, 1), material);
-				threeObject.position.set(-10.0, 5.0, 10.0);
-
-				// Create physics body
-				let pos = threeObject.position;
-				let shape = new Jolt.BoxShape(new Jolt.Vec3(boxSize / 2, boxSize / 2, boxSize / 2));
-				let creationSettings = new Jolt.BodyCreationSettings(shape, new Jolt.Vec3(pos.x, pos.y, pos.z),
+				// Create a push-able block
+				const boxHalfExtent = 0.75;
+				let shape = new Jolt.BoxShape(new Jolt.Vec3(boxHalfExtent, boxHalfExtent, boxHalfExtent));
+				let creationSettings = new Jolt.BodyCreationSettings(shape, new Jolt.Vec3(-10.0, 5.0, 10.0),
 					new Jolt.Quat.prototype.sIdentity(), Jolt.Dynamic, Jolt.MOVING);
 				creationSettings.mFriction = 0.1;
 				creationSettings.mOverrideMassProperties = Jolt.CalculateInertia;
 				creationSettings.mMassPropertiesOverride.mMass = 1;
 				let body = bodyInterface.CreateBody(creationSettings);
-				addToScene(threeObject, body);
+				addToScene(body, 0x00ffff);
 			}
 
 			initalize();
@@ -427,5 +409,4 @@
 
 	</script>
 </body>
-
 </html>

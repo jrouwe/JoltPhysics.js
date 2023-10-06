@@ -317,6 +317,7 @@ SphereShapeSettings implements ConvexShapeSettings;
 [Prefix="JPH::"]
 interface SphereShape {
 	void SphereShape(float inRadius, [Const] PhysicsMaterial inMaterial);
+	float GetRadius();
 };
 
 SphereShape implements ConvexShape;
@@ -335,6 +336,7 @@ BoxShapeSettings implements ConvexShapeSettings;
 [Prefix="JPH::"]
 interface BoxShape {
 	void BoxShape([Ref] Vec3 inHalfExtent, optional float inConvexRadius, [Const] optional PhysicsMaterial inMaterial);
+	[Value] Vec3 GetHalfExtent();
 };
 
 BoxShape implements ConvexShape;
@@ -354,6 +356,8 @@ CylinderShapeSettings implements ConvexShapeSettings;
 [Prefix="JPH::"]
 interface CylinderShape {
 	void CylinderShape(float inHalfHeight, float inRadius, float inConvexRadius, [Const] optional PhysicsMaterial inMaterial);
+	float GetRadius();
+	float GetHalfHeight();
 };
 
 CylinderShape implements ConvexShape;
@@ -372,6 +376,8 @@ CapsuleShapeSettings implements ConvexShapeSettings;
 [Prefix="JPH::"]
 interface CapsuleShape {
 	void CapsuleShape(float inHalfHeight, float inRadius, optional PhysicsMaterial inMaterial);
+	float GetRadius();
+	float GetHalfHeightOfCylinder();
 };
 
 CapsuleShape implements ConvexShape;

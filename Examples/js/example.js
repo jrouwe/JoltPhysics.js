@@ -17,6 +17,15 @@ var dynamicObjects = [];
 // The update function
 var onExampleUpdate;
 
+const DegreesToRadians = (deg) => deg * (Math.PI / 180.0);
+
+const wrapVec3 = (v) => new THREE.Vector3(v.GetX(), v.GetY(), v.GetZ());
+const wrapQuat = (q) => new THREE.Quaternion(q.GetX(), q.GetY(), q.GetZ(), q.GetW());
+
+function getRandomQuat() {
+	return Jolt.Quat.prototype.sRotation(new Jolt.Vec3(0.001 + Math.random(), Math.random(), Math.random()).Normalized(), 2 * Math.PI * Math.random());
+}
+
 function onWindowResize() {
 
 	camera.aspect = window.innerWidth / window.innerHeight;
@@ -61,12 +70,13 @@ function initPhysics() {
 	jolt = new Jolt.JoltInterface(settings);
 	physicsSystem = jolt.GetPhysicsSystem();
 	bodyInterface = physicsSystem.GetBodyInterface();
+
+	// Helper functions
+	Jolt.Vec3.prototype.toString = function () { return `(${this.GetX()}, ${this.GetY()}, ${this.GetZ()})` }
+	Jolt.AABox.prototype.toString = function () { return `[${this.mMax.toString()}, ${this.mMin.toString()}]` }
 }
 
 function updatePhysics(deltaTime) {
-
-	// Don't go below 30 Hz to prevent spiral of death
-	deltaTime = Math.min(deltaTime, 1.0 / 30.0);
 
 	// When running below 55 Hz, do 2 steps instead of 1
 	var numSteps = deltaTime > 1.0 / 55.0 ? 2 : 1;
@@ -95,7 +105,9 @@ function renderExample() {
 
 	requestAnimationFrame(renderExample);
 
+	// Don't go below 30 Hz to prevent spiral of death
 	var deltaTime = clock.getDelta();
+	deltaTime = Math.min(deltaTime, 1.0 / 30.0);
 
 	if (onExampleUpdate != null)
 		onExampleUpdate(time, deltaTime);
@@ -103,11 +115,9 @@ function renderExample() {
 	// Update object transforms
 	for (let i = 0, il = dynamicObjects.length; i < il; i++) {
 		let objThree = dynamicObjects[i];
-		let body = dynamicObjects[i].userData.body;
-		let p = body.GetPosition();
-		let q = body.GetRotation();
-		objThree.position.set(p.GetX(), p.GetY(), p.GetZ());
-		objThree.quaternion.set(q.GetX(), q.GetY(), q.GetZ(), q.GetW());
+		let body = objThree.userData.body;
+		objThree.position.copy(wrapVec3(body.GetPosition()));
+		objThree.quaternion.copy(wrapQuat(body.GetRotation()));
 
 		if (body.GetBodyType() == Jolt.SoftBody)
 			objThree.geometry = createMeshForShape(body.GetShape());
@@ -124,9 +134,10 @@ function renderExample() {
 	stats.update();
 }
 
-function addToScene(threeObject, body) {
+function addToScene(body, color) {
 	bodyInterface.AddBody(body.GetID(), Jolt.Activate);
 
+	let threeObject = getThreeObjectForBody(body, color);
 	threeObject.userData.body = body;
 
 	scene.add(threeObject);
@@ -145,43 +156,26 @@ function removeFromScene(threeObject) {
 }
 
 function createFloor() {
-	// Create floor mesh
-	let threeObject = new THREE.Mesh(new THREE.BoxGeometry(100, 1, 100, 1, 1, 1), new THREE.MeshPhongMaterial({ color: 0xC7C7C7 }));
-
-	// Create corresponding physics object
 	var shape = new Jolt.BoxShape(new Jolt.Vec3(50, 0.5, 50), 0.05, null);
 	var creation_settings = new Jolt.BodyCreationSettings(shape, new Jolt.Vec3(0, -0.5, 0), new Jolt.Quat(0, 0, 0, 1), Jolt.Static, Jolt.NON_MOVING);
 	let body = bodyInterface.CreateBody(creation_settings);
-
-	addToScene(threeObject, body);
-
+	addToScene(body, 0xc7c7c7);
 	return body;
 }
 
-function createBox(position, rotation, halfExtent, motionType, layer) {
+function createBox(position, rotation, halfExtent, motionType, layer, color = 0xffffff) {
 	let shape = new Jolt.BoxShape(halfExtent, 0.05, null);
 	let creationSettings = new Jolt.BodyCreationSettings(shape, position, rotation, motionType, layer);
 	let body = bodyInterface.CreateBody(creationSettings);
-
-	threeObject = new THREE.Mesh(new THREE.BoxGeometry(halfExtent.GetX() * 2, halfExtent.GetY() * 2, halfExtent.GetZ() * 2), new THREE.MeshPhongMaterial({ color: 0xffffff }));
-	threeObject.position.set(position.GetX(), position.GetY(), position.GetZ());
-	threeObject.quaternion.set(rotation.GetX(), rotation.GetY(), rotation.GetZ(), rotation.GetW());
-
-	addToScene(threeObject, body);
-
+	addToScene(body, color);
 	return body;
 }
 
-function createSphere(position, radius, motionType, layer) {
+function createSphere(position, radius, motionType, layer, color = 0xffffff) {
 	let shape = new Jolt.SphereShape(radius, null);
 	let creationSettings = new Jolt.BodyCreationSettings(shape, position, Jolt.Quat.prototype.sIdentity(), motionType, layer);
 	let body = bodyInterface.CreateBody(creationSettings);
-
-	threeObject = new THREE.Mesh(new THREE.SphereGeometry(radius), new THREE.MeshPhongMaterial({ color: 0xffffff }));
-	threeObject.position.set(position.GetX(), position.GetY(), position.GetZ());
-
-	addToScene(threeObject, body);
-
+	addToScene(body, color);
 	return body;
 }
 
@@ -204,11 +198,38 @@ function createMeshForShape(shape) {
 	return geometry;
 }
 
-function getThreeMeshForShape(shape, material) {
+function getThreeObjectForBody(body, color) {
+	let material = new THREE.MeshPhongMaterial({ color: color });
 
-	let geometry = createMeshForShape(shape);
+	let threeObject;
+	let shape = body.GetShape();
+	switch (shape.GetSubType()) {
+		case Jolt.Box:
+			let boxShape = Jolt.castObject(shape, Jolt.BoxShape);
+			let extent = wrapVec3(boxShape.GetHalfExtent()).multiplyScalar(2);
+			threeObject = new THREE.Mesh(new THREE.BoxGeometry(extent.x, extent.y, extent.z, 1, 1, 1), material);
+			break;
+		case Jolt.Sphere:
+			let sphereShape = Jolt.castObject(shape, Jolt.SphereShape);
+			threeObject = new THREE.Mesh(new THREE.SphereGeometry(sphereShape.GetRadius(), 32, 32), material);
+			break;
+		case Jolt.Capsule:
+			let capsuleShape = Jolt.castObject(shape, Jolt.CapsuleShape);
+			threeObject = new THREE.Mesh(new THREE.CapsuleGeometry(capsuleShape.GetRadius(), 2 * capsuleShape.GetHalfHeightOfCylinder(), 20, 10), material);
+			break;
+		case Jolt.Cylinder:
+			let cylinderShape = Jolt.castObject(shape, Jolt.CylinderShape);
+			threeObject = new THREE.Mesh(new THREE.CylinderGeometry(cylinderShape.GetRadius(), cylinderShape.GetRadius(), 2 * cylinderShape.GetHalfHeight(), 20, 1), material);
+			break;
+		default:
+			threeObject = new THREE.Mesh(createMeshForShape(shape), material);
+			break;
+	}
 
-	return new THREE.Mesh(geometry, material);
+	threeObject.position.copy(wrapVec3(body.GetPosition()));
+	threeObject.quaternion.copy(wrapQuat(body.GetRotation()));
+
+	return threeObject;
 }
 
 function createMeshFloor(n, cell_size, max_height, posX, posY, posZ) {
@@ -246,10 +267,5 @@ function createMeshFloor(n, cell_size, max_height, posX, posY, posZ) {
 	// Create body
 	let creation_settings = new Jolt.BodyCreationSettings(shape, new Jolt.Vec3(posX, posY, posZ), new Jolt.Quat(0, 0, 0, 1), Jolt.Static, Jolt.NON_MOVING);
 	let body = bodyInterface.CreateBody(creation_settings);
-
-	// Create corresponding three mesh
-	let threeObject = getThreeMeshForShape(shape, new THREE.MeshPhongMaterial({ color: 0xC7C7C7 }));
-	threeObject.position.set(posX, posY, posZ);
-
-	addToScene(threeObject, body);
+	addToScene(body, 0xc7c7c7);
 }

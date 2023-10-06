@@ -36,8 +36,6 @@
 				for (let z = 0; z < 9; ++z)
 					filter.DisableCollision(z, z + 1);
 
-				let material = new THREE.MeshPhongMaterial({ color: 0xff0000 });
-				let boxGeom = new THREE.BoxGeometry(1, 1, 1, 1, 1, 1);
 				let shape = new Jolt.BoxShape(new Jolt.Vec3(0.5, 0.5, 0.5), 0.05, null);
 				let creationSettings = new Jolt.BodyCreationSettings(shape, new Jolt.Vec3(-15, 20, 0), Jolt.Quat.prototype.sIdentity(), Jolt.Dynamic, Jolt.MOVING);
 				creationSettings.mCollisionGroup.SetGroupFilter(filter);
@@ -49,8 +47,7 @@
 					creationSettings.mCollisionGroup.SetSubGroupID(z);
 
 					let body = bodyInterface.CreateBody(creationSettings);
-					let threeObject = new THREE.Mesh(boxGeom, material);
-					addToScene(threeObject, body);
+					addToScene(body, 0xff0000);
 
 					// Add an impulse (gravity is really boring, many constraints look the same)
 					if (z == 9)
