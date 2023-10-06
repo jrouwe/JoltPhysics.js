@@ -10,6 +10,7 @@ This project enables using [Jolt Physics](https://github.com/jrouwe/JoltPhysics)
 * [Stress Test Demo - Shows big pile of blocks](https://jrouwe.nl/jolt/examples/stress_test.html).
 * [2D Funnel - Shows how to limit bodies in a 2D plane](https://jrouwe.nl/jolt/examples/2d_funnel.html).
 * [Character Virtual - Shows how to create a player character](https://jrouwe.nl/jolt/examples/character_virtual.html).
+* [Contact Listener - Shows how to use a contact listener](https://jrouwe.nl/jolt/examples/contact_listener.html).
 
 ## Using
 
@@ -52,7 +53,7 @@ You can also import esm bundles with unpkg:
     import Jolt from 'https://www.unpkg.com/jolt-physics/dist/jolt-physics.wasm-compat.js';
 
     // or import a specific version
-    import Jolt from 'https://www.unpkg.com/jolt-physics@0.0.9/dist/jolt-physics.wasm-compat.js';
+    import Jolt from 'https://www.unpkg.com/jolt-physics@0.0.10/dist/jolt-physics.wasm-compat.js';
 </script>
 ```
 
