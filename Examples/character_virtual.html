@@ -28,8 +28,6 @@
 		import initJolt from './js/jolt-physics.wasm-compat.js';
 
 		initJolt().then(function (Jolt) {
-			window.getThreeBoundingBox = objThree => { const box = new THREE.Box3(); objThree.geometry.computeBoundingBox(); return box.copy(objThree.geometry.boundingBox).applyMatrix4(objThree.matrixWorld); }
-
 			// Initialize this example
 			initExample(Jolt, null);
 
@@ -296,31 +294,18 @@
 			createBox(new Jolt.Vec3(-45, 1, 0), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(0.5, 2, 45), Jolt.Static, Jolt.NON_MOVING);
 			createBox(new Jolt.Vec3(45, 1, 0), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(0.5, 2, 45), Jolt.Static, Jolt.NON_MOVING);
 
-			let stepHeight = 0.3;
-			for (let i = 1; i < 10; i++) {
-				createBox(new Jolt.Vec3(15, i * stepHeight - 0.5 + stepHeight / 2, -20 - i * 3), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(2, stepHeight / 2, 2), Jolt.Static, Jolt.NON_MOVING);
-			}
-			stepHeight = 0.4;
-			for (let i = 1; i < 10; i++) {
-				createBox(new Jolt.Vec3(20, i * stepHeight - 0.5 + stepHeight / 2, -20 - i * 3), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(2, stepHeight / 2, 2), Jolt.Static, Jolt.NON_MOVING);
-			}
-			stepHeight = 0.5;
-			for (let i = 1; i < 10; i++) {
-				createBox(new Jolt.Vec3(25, i * stepHeight - 0.5 + stepHeight / 2, -20 - i * 3), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(2, stepHeight / 2, 2), Jolt.Static, Jolt.NON_MOVING);
-			}
-			stepHeight = 0.6;
-			for (let i = 1; i < 10; i++) {
-				createBox(new Jolt.Vec3(30, i * stepHeight - 0.5 + stepHeight / 2, -20 - i * 3), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(2, stepHeight / 2, 2), Jolt.Static, Jolt.NON_MOVING);
-			}
-			stepHeight = 0.7;
-			for (let i = 1; i < 10; i++) {
-				createBox(new Jolt.Vec3(35, i * stepHeight - 0.5 + stepHeight / 2, -20 - i * 3), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(2, stepHeight / 2, 2), Jolt.Static, Jolt.NON_MOVING);
+			// Stairs
+			for (let j = 0; j < 5; j++) {
+				let stepHeight = 0.3 + 0.1 * j;
+				for (let i = 1; i < 10; i++) {
+					createBox(new Jolt.Vec3(15 + 5 * j, i * stepHeight - 0.5 + stepHeight / 2, -20 - i * 3), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(2, stepHeight / 2, 2), Jolt.Static, Jolt.NON_MOVING);
+				}
 			}
 
+			// Slopes
 			for (let i = 0; i < 10; i++) {
 				createBox(new Jolt.Vec3(-40 + 5 * i, 2, -25), Jolt.Quat.prototype.sRotation(new Jolt.Vec3(1, 0, 0), DegreesToRadians(70 - i * 5.0)), new Jolt.Vec3(2.5, 0.6, 8), Jolt.Static, Jolt.NON_MOVING);
 			}
-
 
 			{
 				// Create a push-able block
@@ -399,7 +384,6 @@
 				setCrouched(input.crouched, true);
 			})
 			physicsSystem.SetGravity(new Jolt.Vec3(0, -25, 0))
-			renderExample();
 		});
 
 	</script>
