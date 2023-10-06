@@ -111,6 +111,13 @@ enum EGroundState {
 	"EGroundState::InAir"
 };
 
+enum ValidateResult {
+	"ValidateResult::AcceptAllContactsForThisBodyPair",
+	"ValidateResult::AcceptContact",
+	"ValidateResult::RejectContact",
+	"ValidateResult::RejectAllContactsForThisBodyPair"
+};
+
 [Prefix="JPH::"]
 interface Vec3 {
 	void Vec3();
@@ -668,6 +675,12 @@ interface BodyID {
 };
 
 [Prefix="JPH::"]
+interface SubShapeID {
+	[Const] long GetValue();
+	void SetValue(long inValue);
+};
+
+[Prefix="JPH::"]
 interface MotionProperties {
 	EMotionQuality GetMotionQuality();
 	[Value] Vec3 GetLinearVelocity();
@@ -857,6 +870,88 @@ interface PhysicsSettings {
 	attribute boolean mCheckActiveEdges;
 };
 
+interface CollideShapeResultFace {
+	long size();
+	[Ref] Vec3 at(long inIndex);
+	void push_back([Const, Ref] Vec3 inValue);
+	void resize(unsigned long inSize);
+};
+
+[Prefix="JPH::"]
+interface CollideShapeResult {
+	[Value] attribute Vec3 mContactPointOn1;
+	[Value] attribute Vec3 mContactPointOn2;
+	[Value] attribute Vec3 mPenetrationAxis;
+	attribute float mPenetrationDepth;
+	[Value] attribute SubShapeID mSubShapeID1;
+	[Value] attribute SubShapeID mSubShapeID2;
+	[Value] attribute BodyID mBodyID2;
+	[Value] attribute CollideShapeResultFace mShape1Face;
+	[Value] attribute CollideShapeResultFace mShape2Face;
+};
+
+[Prefix="JPH::"]
+interface ContactPoints {
+	long size();
+	[Ref] Vec3 at(long inIndex);
+	void push_back([Const, Ref] Vec3 inValue);
+	void resize(unsigned long inSize);
+};
+
+[Prefix="JPH::"]
+interface ContactManifold {
+	[Value] ContactManifold SwapShapes();
+	[Value] Vec3 GetWorldSpaceContactPointOn1(unsigned long inIndex);
+	[Value] Vec3 GetWorldSpaceContactPointOn2(unsigned long inIndex);
+
+	[Value] attribute Vec3 mBaseOffset;
+	[Value] attribute Vec3 mWorldSpaceNormal;
+	attribute float mPenetrationDepth;
+	[Value] attribute SubShapeID mSubShapeID1;
+	[Value] attribute SubShapeID mSubShapeID2;
+	[Value] attribute ContactPoints mRelativeContactPointsOn1;
+	[Value] attribute ContactPoints mRelativeContactPointsOn2;
+};
+
+[Prefix="JPH::"]
+interface ContactSettings {
+	attribute float mCombinedFriction;
+	attribute float mCombinedRestitution;
+	attribute float mInvMassScale1;
+	attribute float mInvInertiaScale1;
+	attribute float mInvMassScale2;
+	attribute float mInvInertiaScale2;
+	attribute boolean mIsSensor;
+	[Value] attribute Vec3 mRelativeLinearSurfaceVelocity;
+	[Value] attribute Vec3 mRelativeAngularSurfaceVelocity;
+};
+
+[Prefix="JPH::"]
+interface SubShapeIDPair {
+	[Value] BodyID GetBody1ID();
+	[Value] SubShapeID GetSubShapeID1();
+	[Value] BodyID GetBody2ID();
+	[Value] SubShapeID GetSubShapeID2();
+};
+
+[Prefix="JPH::"]
+interface ContactListener {
+};
+
+interface ContactListenerEm {
+};
+
+ContactListenerEm implements ContactListener;
+
+[JSImplementation="ContactListenerEm"]
+interface ContactListenerJS {
+	void ContactListenerJS();
+	long OnContactValidate([Const, Ref] Body inBody1, [Const, Ref] Body inBody2, [Const] Vec3 inBaseOffset, [Const, Ref] CollideShapeResult inCollisionResult);
+	void OnContactAdded([Const, Ref] Body inBody1, [Const, Ref] Body inBody2, [Const, Ref] ContactManifold inManifold, [Ref] ContactSettings ioSettings);
+	void OnContactPersisted([Const, Ref] Body inBody1, [Const, Ref] Body inBody2, [Const, Ref] ContactManifold inManifold, [Ref] ContactSettings ioSettings);
+	void OnContactRemoved([Const, Ref] SubShapeIDPair inSubShapePair);
+};
+
 [Prefix="JPH::"]
 interface PhysicsSystem {
 	[Ref] BodyInterface GetBodyInterface();
@@ -869,6 +964,8 @@ interface PhysicsSystem {
 	unsigned long GetMaxBodies();
 	void AddConstraint(Constraint inConstraint);
 	void RemoveConstraint(Constraint inConstraint);
+	void SetContactListener(ContactListener inListener);
+	ContactListener GetContactListener();
 	[Const, Ref] BodyLockInterfaceNoLock GetBodyLockInterfaceNoLock();
 	[Const, Ref] BodyLockInterfaceLocking GetBodyLockInterface();
 
@@ -1040,12 +1137,6 @@ interface CharacterVirtualSettings {
 };
 
 CharacterVirtualSettings implements CharacterBaseSettings;
-
-[Prefix="JPH::"]
-interface SubShapeID {
-	[Const] long GetValue();
-	void SetValue(long inValue);
-};
 
 [Prefix="JPH::"]
 interface CharacterContactSettings

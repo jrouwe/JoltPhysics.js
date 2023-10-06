@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>JoltPhysics.js demo</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<link rel="stylesheet" type="text/css" href="style.css">
+	</head>
+	<body>
+		<div id="container">Loading...</div>
+		<div id="info">JoltPhysics.js demo<br/>
+			<textarea rows="5" cols="60" id="collision-log"></textarea>
+		</div>
+
+		<script src="js/three/three.min.js"></script>
+		<script src="js/three/OrbitControls.js"></script>
+		<script src="js/three/WebGL.js"></script>
+		<script src="js/three/stats.min.js"></script>
+		<script src="js/example.js"></script>
+
+		<script type="module">
+			import initJolt from './js/jolt-physics.wasm-compat.js';
+
+			initJolt().then(function (Jolt) {
+				// Initialize this example
+				initExample(Jolt, null);
+
+				// Create a basic floor
+				createFloor();
+
+				// Create a sphere
+				createSphere(new Jolt.Vec3(0, 3, 0), 1, Jolt.Dynamic, Jolt.MOVING, 0x00ff00);
+
+				// Get the text box
+				var collisionLog = document.getElementById('collision-log');
+
+				// Register contact listener
+				const contactListener = new Jolt.ContactListenerJS();
+				contactListener.OnContactValidate = (inBody1, inBody2, inBaseOffset, inCollideShapeResult) => {
+					inBody1 = Jolt.wrapPointer(inBody1, Jolt.Body);
+					inBody2 = Jolt.wrapPointer(inBody2, Jolt.Body);
+					inCollideShapeResult = Jolt.wrapPointer(inCollideShapeResult, Jolt.CollideShapeResult);
+					collisionLog.value += 'OnContactValidate ' + inBody1.GetID().GetIndex() + ' ' + inBody2.GetID().GetIndex() + ' ' + inCollideShapeResult.mPenetrationAxis.toString() + '\n';
+					return Jolt.AcceptAllContactsForThisBodyPair;
+				};
+				contactListener.OnContactAdded = (inBody1, inBody2, inManifold, ioSettings) => {
+					inBody1 = Jolt.wrapPointer(inBody1, Jolt.Body);
+					inBody2 = Jolt.wrapPointer(inBody2, Jolt.Body);
+					inManifold = Jolt.wrapPointer(inManifold, Jolt.ContactManifold);
+					ioSettings = Jolt.wrapPointer(ioSettings, Jolt.ContactSettings);
+					collisionLog.value += 'OnContactAdded ' + inBody1.GetID().GetIndex() + ' ' + inBody2.GetID().GetIndex() + ' ' + inManifold.mWorldSpaceNormal.toString() + '\n';
+
+					// Override the restitution to 0.5
+					ioSettings.mCombinedRestitution = 0.5;
+				};
+				contactListener.OnContactPersisted = (inBody1, inBody2, inManifold, ioSettings) => {
+					inBody1 = Jolt.wrapPointer(inBody1, Jolt.Body);
+					inBody2 = Jolt.wrapPointer(inBody2, Jolt.Body);
+					inManifold = Jolt.wrapPointer(inManifold, Jolt.ContactManifold);
+					ioSettings = Jolt.wrapPointer(ioSettings, Jolt.ContactSettings);
+					collisionLog.value += 'OnContactPersisted ' + inBody1.GetID().GetIndex() + ' ' + inBody2.GetID().GetIndex() + ' ' + inManifold.mWorldSpaceNormal.toString() + '\n';
+
+					// Override the restitution to 0.5
+					ioSettings.mCombinedRestitution = 0.5;
+				};
+				contactListener.OnContactRemoved = (inSubShapePair) => {
+					inSubShapePair = Jolt.wrapPointer(inSubShapePair, Jolt.SubShapeIDPair);
+					collisionLog.value += 'OnContactRemoved ' + inSubShapePair.GetBody1ID().GetIndex() + ' ' + inSubShapePair.GetBody2ID().GetIndex() + '\n';
+				};
+				physicsSystem.SetContactListener(contactListener);
+			});
+		</script>
+	</body>
+</html>

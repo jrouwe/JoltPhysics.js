@@ -22,6 +22,7 @@
 #include "Jolt/Physics/Collision/Shape/MeshShape.h"
 #include "Jolt/Physics/Collision/CollisionCollectorImpl.h"
 #include "Jolt/Physics/Collision/GroupFilterTable.h"
+#include "Jolt/Physics/Collision/CollideShape.h"
 #include "Jolt/Physics/Constraints/FixedConstraint.h"
 #include "Jolt/Physics/Constraints/PointConstraint.h"
 #include "Jolt/Physics/Constraints/DistanceConstraint.h"
@@ -47,6 +48,7 @@ using SoftBodySharedSettingsVertex = SoftBodySharedSettings::Vertex;
 using SoftBodySharedSettingsFace = SoftBodySharedSettings::Face;
 using SoftBodySharedSettingsEdge = SoftBodySharedSettings::Edge;
 using SoftBodySharedSettingsVolume = SoftBodySharedSettings::Volume;
+using CollideShapeResultFace = CollideShapeResult::Face;
 using ArraySoftBodySharedSettingsVertex = Array<SoftBodySharedSettingsVertex>;
 using ArraySoftBodySharedSettingsFace = Array<SoftBodySharedSettingsFace>;
 using ArraySoftBodySharedSettingsEdge = Array<SoftBodySharedSettingsEdge>;
@@ -332,6 +334,20 @@ private:
 	Array<const PhysicsMaterial *>	mMaterials;
 };
 
+/// A wrapper around ContactListener that is compatible with JavaScript
+class ContactListenerEm: public ContactListener
+{
+public:
+	// JavaScript compatible virtual functions
+	virtual int				OnContactValidate(const Body &inBody1, const Body &inBody2, const RVec3Arg *inBaseOffset, const CollideShapeResult &inCollisionResult) = 0;
+
+	// Functions that call the JavaScript compatible virtual functions
+	virtual ValidateResult	OnContactValidate(const Body &inBody1, const Body &inBody2, RVec3Arg inBaseOffset, const CollideShapeResult &inCollisionResult) override
+	{ 
+		return (ValidateResult)OnContactValidate(inBody1, inBody2, &inBaseOffset, inCollisionResult);
+	}
+};
+
 /// A wrapper around CharacterContactListener that is compatible with JavaScript
 class CharacterContactListenerEm: public CharacterContactListener
 {
@@ -341,12 +357,12 @@ public:
 	virtual void			OnContactSolve(const CharacterVirtual *inCharacter, const BodyID &inBodyID2, const SubShapeID &inSubShapeID2, Vec3 *inContactPosition, Vec3 *inContactNormal, Vec3 *inContactVelocity, const PhysicsMaterial *inContactMaterial, Vec3 *inCharacterVelocity, Vec3 &ioNewCharacterVelocity) = 0;
 
 	// Functions that call the JavaScript compatible virtual functions
-	void					OnContactAdded(const CharacterVirtual *inCharacter, const BodyID &inBodyID2, const SubShapeID &inSubShapeID2, RVec3Arg inContactPosition, Vec3Arg inContactNormal, CharacterContactSettings &ioSettings)
+	virtual void			OnContactAdded(const CharacterVirtual *inCharacter, const BodyID &inBodyID2, const SubShapeID &inSubShapeID2, RVec3Arg inContactPosition, Vec3Arg inContactNormal, CharacterContactSettings &ioSettings) override
 	{ 
 		OnContactAdded(inCharacter, inBodyID2, inSubShapeID2, &inContactPosition, &inContactNormal, ioSettings);
 	}
 
-	void					OnContactSolve(const CharacterVirtual *inCharacter, const BodyID &inBodyID2, const SubShapeID &inSubShapeID2, RVec3Arg inContactPosition, Vec3Arg inContactNormal, Vec3Arg inContactVelocity, const PhysicsMaterial *inContactMaterial, Vec3Arg inCharacterVelocity, Vec3 &ioNewCharacterVelocity)
+	virtual void			OnContactSolve(const CharacterVirtual *inCharacter, const BodyID &inBodyID2, const SubShapeID &inSubShapeID2, RVec3Arg inContactPosition, Vec3Arg inContactNormal, Vec3Arg inContactVelocity, const PhysicsMaterial *inContactMaterial, Vec3Arg inCharacterVelocity, Vec3 &ioNewCharacterVelocity) override
 	{ 
 		OnContactSolve(inCharacter, inBodyID2, inSubShapeID2, &inContactPosition, &inContactNormal, &inContactVelocity, inContactMaterial, &inCharacterVelocity, ioNewCharacterVelocity);
 	}
