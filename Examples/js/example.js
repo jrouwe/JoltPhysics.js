@@ -165,7 +165,7 @@ function createBox(position, rotation, halfExtent, motionType, layer) {
 
 	threeObject = new THREE.Mesh(new THREE.BoxGeometry(halfExtent.GetX() * 2, halfExtent.GetY() * 2, halfExtent.GetZ() * 2), new THREE.MeshPhongMaterial({ color: 0xffffff }));
 	threeObject.position.set(position.GetX(), position.GetY(), position.GetZ());
-	threeObject.rotation.set(rotation.GetX(), rotation.GetY(), rotation.GetZ(), rotation.GetW());
+	threeObject.quaternion.set(rotation.GetX(), rotation.GetY(), rotation.GetZ(), rotation.GetW());
 
 	addToScene(threeObject, body);
 
