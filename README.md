@@ -9,6 +9,7 @@ This project enables using [Jolt Physics](https://github.com/jrouwe/JoltPhysics)
 * [Soft Body Demo - Shows a soft body cloth](https://jrouwe.nl/jolt/examples/soft_body.html).
 * [Stress Test Demo - Shows big pile of blocks](https://jrouwe.nl/jolt/examples/stress_test.html).
 * [2D Funnel - Shows how to limit bodies in a 2D plane](https://jrouwe.nl/jolt/examples/2d_funnel.html).
+* [Character Virtual - Shows how to create a player character](https://jrouwe.nl/jolt/examples/character_virtual.html).
 
 ## Using
 
