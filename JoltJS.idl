@@ -983,6 +983,7 @@ interface SoftBodySharedSettings {
 	void AddFace([Const, Ref] SoftBodySharedSettingsFace inFace);
 	void CalculateEdgeLengths();
 	void CalculateVolumeConstraintVolumes();
+	void Optimize();
 
 	[Value] attribute ArraySoftBodySharedSettingsVertex mVertices;
 	[Value] attribute ArraySoftBodySharedSettingsFace mFaces;
