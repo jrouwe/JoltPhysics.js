@@ -206,20 +206,20 @@ function getThreeObjectForBody(body, color) {
 	let threeObject;
 	let shape = body.GetShape();
 	switch (shape.GetSubType()) {
-		case Jolt.Box:
+		case Jolt.EShapeSubType_Box:
 			let boxShape = Jolt.castObject(shape, Jolt.BoxShape);
 			let extent = wrapVec3(boxShape.GetHalfExtent()).multiplyScalar(2);
 			threeObject = new THREE.Mesh(new THREE.BoxGeometry(extent.x, extent.y, extent.z, 1, 1, 1), material);
 			break;
-		case Jolt.Sphere:
+		case Jolt.EShapeSubType_Sphere:
 			let sphereShape = Jolt.castObject(shape, Jolt.SphereShape);
 			threeObject = new THREE.Mesh(new THREE.SphereGeometry(sphereShape.GetRadius(), 32, 32), material);
 			break;
-		case Jolt.Capsule:
+		case Jolt.EShapeSubType_Capsule:
 			let capsuleShape = Jolt.castObject(shape, Jolt.CapsuleShape);
 			threeObject = new THREE.Mesh(new THREE.CapsuleGeometry(capsuleShape.GetRadius(), 2 * capsuleShape.GetHalfHeightOfCylinder(), 20, 10), material);
 			break;
-		case Jolt.Cylinder:
+		case Jolt.EShapeSubType_Cylinder:
 			let cylinderShape = Jolt.castObject(shape, Jolt.CylinderShape);
 			threeObject = new THREE.Mesh(new THREE.CylinderGeometry(cylinderShape.GetRadius(), cylinderShape.GetRadius(), 2 * cylinderShape.GetHalfHeight(), 20, 1), material);
 			break;

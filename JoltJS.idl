@@ -44,8 +44,16 @@ enum EShapeType {
 	"EShapeType::Convex",
 	"EShapeType::Compound",
 	"EShapeType::Decorated",
-	"EShapeType::Mesh",
-	"EShapeType::HeightField"
+	// Omitting EShapeType::Mesh because of name conflict, use ShapeType instead
+	// Omitting EShapeType::HeightField because of name conflict, use ShapeType instead
+};
+
+enum ShapeType {
+	"ShapeType::EShapeType_Convex",
+	"ShapeType::EShapeType_Compound",
+	"ShapeType::EShapeType_Decorated",
+	"ShapeType::EShapeType_Mesh",
+	"ShapeType::EShapeType_HeightField"
 };
 
 enum EShapeSubType {
@@ -60,8 +68,24 @@ enum EShapeSubType {
 	"EShapeSubType::RotatedTranslated",
 	"EShapeSubType::Scaled",
 	"EShapeSubType::OffsetCenterOfMass",
-	"EShapeSubType::Mesh",
-	"EShapeSubType::HeightField"
+	// Omitting EShapeSubType::Mesh because of name conflict, use ShapeSubType instead
+	// Omitting EShapeSubType::HeightField because of name conflict, use ShapeSubType instead
+};
+
+enum ShapeSubType {
+	"ShapeSubType::EShapeSubType_Sphere",
+	"ShapeSubType::EShapeSubType_Box",
+	"ShapeSubType::EShapeSubType_Capsule",
+	"ShapeSubType::EShapeSubType_TaperedCapsule",
+	"ShapeSubType::EShapeSubType_Cylinder",
+	"ShapeSubType::EShapeSubType_ConvexHull",
+	"ShapeSubType::EShapeSubType_StaticCompound",
+	"ShapeSubType::EShapeSubType_MutableCompound",
+	"ShapeSubType::EShapeSubType_RotatedTranslated",
+	"ShapeSubType::EShapeSubType_Scaled",
+	"ShapeSubType::EShapeSubType_OffsetCenterOfMass",
+	"ShapeSubType::EShapeSubType_Mesh",
+	"ShapeSubType::EShapeSubType_HeightField"
 };
 
 enum EConstraintSpace {
