@@ -4,13 +4,7 @@ This project enables using [Jolt Physics](https://github.com/jrouwe/JoltPhysics)
 
 ## Demos
 
-* [Falling Shapes Demo - Shows supported shape types](https://jrouwe.nl/jolt/examples/falling_shapes.html).
-* [Constraints Demo - Shows supported constraint types](https://jrouwe.nl/jolt/examples/constraints.html).
-* [Soft Body Demo - Shows a soft body cloth](https://jrouwe.nl/jolt/examples/soft_body.html).
-* [Stress Test Demo - Shows big pile of blocks](https://jrouwe.nl/jolt/examples/stress_test.html).
-* [2D Funnel - Shows how to limit bodies in a 2D plane](https://jrouwe.nl/jolt/examples/2d_funnel.html).
-* [Character Virtual - Shows how to create a player character](https://jrouwe.nl/jolt/examples/character_virtual.html).
-* [Contact Listener - Shows how to use a contact listener](https://jrouwe.nl/jolt/examples/contact_listener.html).
+Go to the [demos page](https://jrouwe.github.io/JoltPhysics.js/) to see the project in action.
 
 ## Using
 
