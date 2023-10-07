@@ -1,0 +1,23 @@
+name: Deploy Examples
+
+on:
+  push:
+    branches: [ master ]
+
+# Deploys the examples
+jobs:
+  deploy-examples:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+        
+    - name: Replace URL
+      run: sed -i 's+./js/jolt-physics.wasm-compat.js+https://www.unpkg.com/jolt-physics/dist/jolt-physics.wasm-compat.js+g' ${{github.workspace}}/Examples/*.html
+
+    - name: Deploy
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./Examples
