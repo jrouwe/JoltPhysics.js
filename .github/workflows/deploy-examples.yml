@@ -2,7 +2,7 @@ name: Deploy Examples
 
 on:
   push:
-    branches: [ master ]
+    branches: [ main ]
 
 # Deploys the examples
 jobs:
