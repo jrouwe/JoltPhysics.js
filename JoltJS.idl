@@ -1147,15 +1147,9 @@ interface CharacterContactSettings
 
 [Prefix="JPH::"]
 interface CharacterContactListener {
-	void OnAdjustBodyVelocity([Const] CharacterVirtual inCharacter, [Const, Ref] Body inBody2, [Ref] Vec3 ioLinearVelocity, [Ref] Vec3 ioAngularVelocity);
-	boolean OnContactValidate([Const] CharacterVirtual inCharacter, [Const, Ref] BodyID inBodyID2, [Const, Ref] SubShapeID inSubShapeID2);
-	void OnContactAdded([Const] CharacterVirtual inCharacter, [Const, Ref] BodyID inBodyID2, [Const, Ref] SubShapeID inSubShapeID2, [Ref] Vec3 inContactPosition, [Ref] Vec3 inContactNormal, [Ref] CharacterContactSettings ioSettings);
-	void OnContactSolve([Const] CharacterVirtual inCharacter, [Const, Ref] BodyID inBodyID2, [Const, Ref] SubShapeID inSubShapeID2, [Ref] Vec3 inContactPosition, [Ref] Vec3 inContactNormal, [Ref] Vec3 inContactVelocity, [Const] PhysicsMaterial inContactMaterial, [Ref] Vec3 inCharacterVelocity, [Ref] Vec3 ioNewCharacterVelocity);
 };
 
 interface CharacterContactListenerEm {
-	void OnContactAdded([Const] CharacterVirtual inCharacter, [Const, Ref] BodyID inBodyID2, [Const, Ref] SubShapeID inSubShapeID2, Vec3 inContactPosition, Vec3 inContactNormal, [Ref] CharacterContactSettings ioSettings);
-	void OnContactSolve([Const] CharacterVirtual inCharacter, [Const, Ref] BodyID inBodyID2, [Const, Ref] SubShapeID inSubShapeID2, Vec3 inContactPosition, Vec3 inContactNormal, Vec3 inContactVelocity, [Const] PhysicsMaterial inContactMaterial, Vec3 inCharacterVelocity, [Ref] Vec3 ioNewCharacterVelocity);
 };
 
 CharacterContactListenerEm implements CharacterContactListener;
