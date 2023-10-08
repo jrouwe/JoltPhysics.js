@@ -212,10 +212,55 @@ interface AABox {
 	[Value] attribute Vec3 mMax;
 };
 
+interface OrientedBox {
+	void OrientedBox([Const, Ref] Mat44 inOrientation, [Const, Ref] Vec3 inHalfExtents);
+
+	[Value] attribute Mat44 mOrientation;
+	[Value] attribute Vec3 mHalfExtents;
+};
+
+interface RayCast {
+	void RayCast([Const, Ref] Vec3 inOrigin, [Const, Ref] Vec3 inDirection);
+
+	[Value] attribute Vec3 mOrigin;
+	[Value] attribute Vec3 mDirection;
+};
+
+interface RRayCast {
+	void RRayCast([Const, Ref] Vec3 inOrigin, [Const, Ref] Vec3 inDirection);
+
+	[Value] attribute Vec3 mOrigin;
+	[Value] attribute Vec3 mDirection;
+};
+
+interface AABoxCast {
+	void AABoxCast();
+
+	[Value] attribute AABox mBox;
+	[Value] attribute Vec3 mDirection;
+};
+
+interface ShapeCast {
+	void ShapeCast([Const] Shape inShape, [Const, Ref] Vec3 inScale, [Const, Ref] Mat44 inCenterOfMassStart, [Const, Ref] Vec3 inDirection);
+
+	[Const] readonly attribute Shape mShape;
+	[Const, Value] readonly attribute Vec3 mScale;
+	[Const, Value] readonly attribute Mat44 mCenterOfMassStart;
+	[Const, Value] readonly attribute Vec3 mDirection;
+};
+
+interface RShapeCast {
+	void RShapeCast([Const] Shape inShape, [Const, Ref] Vec3 inScale, [Const, Ref] Mat44 inCenterOfMassStart, [Const, Ref] Vec3 inDirection);
+
+	[Const] readonly attribute Shape mShape;
+	[Const, Value] readonly attribute Vec3 mScale;
+	[Const, Value] readonly attribute Mat44 mCenterOfMassStart;
+	[Const, Value] readonly attribute Vec3 mDirection;
+};
+
 [Prefix="JPH::"]
 interface Plane {
-	void Plane([Const, Ref] Vec3 inNormal, float inConstant);	
-
+	void Plane([Const, Ref] Vec3 inNormal, float inConstant);
 	[Value] Vec3 GetNormal();
 	void SetNormal([Const, Ref] Vec3 inNormal);
 	float GetConstant();
@@ -970,15 +1015,60 @@ ContactListenerEm implements ContactListener;
 [JSImplementation="ContactListenerEm"]
 interface ContactListenerJS {
 	void ContactListenerJS();
-	long OnContactValidate([Const, Ref] Body inBody1, [Const, Ref] Body inBody2, [Const] Vec3 inBaseOffset, [Const, Ref] CollideShapeResult inCollisionResult);
+	long OnContactValidate([Const, Ref] Body inBody1, [Const, Ref] Body inBody2, [Const] Vec3 inBaseOffset, [Const, Ref] CollideShapeResult inCollisionResult); // Return value ValidateResult doesn't work with emscripten
 	void OnContactAdded([Const, Ref] Body inBody1, [Const, Ref] Body inBody2, [Const, Ref] ContactManifold inManifold, [Ref] ContactSettings ioSettings);
 	void OnContactPersisted([Const, Ref] Body inBody1, [Const, Ref] Body inBody2, [Const, Ref] ContactManifold inManifold, [Ref] ContactSettings ioSettings);
 	void OnContactRemoved([Const, Ref] SubShapeIDPair inSubShapePair);
 };
 
+interface RayCastBodyCollector {
+};
+
+interface CollideShapeBodyCollector {
+};
+
+interface CastShapeBodyCollector {
+};
+
+interface BroadPhaseQuery {
+	void CastRay([Const, Ref] RayCast inRay, [Ref] RayCastBodyCollector ioCollector, [Const, Ref] BroadPhaseLayerFilter inBroadPhaseFilter, [Const, Ref] ObjectLayerFilter inObjectLayerFilter);
+	void CollideAABox([Const, Ref] AABox inBox, [Ref] CollideShapeBodyCollector ioCollector, [Const, Ref] BroadPhaseLayerFilter inBroadPhaseFilter, [Const, Ref] ObjectLayerFilter inObjectLayerFilter);
+	void CollideSphere([Const, Ref] Vec3 inCenter, float inRadius, [Ref] CollideShapeBodyCollector ioCollector, [Const, Ref] BroadPhaseLayerFilter inBroadPhaseLayerFilter, [Const, Ref] ObjectLayerFilter inObjectLayerFilter);
+	void CollidePoint([Const, Ref] Vec3 inPoint, [Ref] CollideShapeBodyCollector ioCollector, [Const, Ref] BroadPhaseLayerFilter inBroadPhaseFilter, [Const, Ref] ObjectLayerFilter inObjectLayerFilter);
+	void CollideOrientedBox([Const, Ref] OrientedBox inBox, [Ref] CollideShapeBodyCollector ioCollector, [Const, Ref] BroadPhaseLayerFilter inBroadPhaseFilter, [Const, Ref] ObjectLayerFilter inObjectLayerFilter);
+	void CastAABox([Const, Ref] AABoxCast inBox, [Ref] CastShapeBodyCollector ioCollector, [Const, Ref] BroadPhaseLayerFilter inBroadPhaseFilter, [Const, Ref] ObjectLayerFilter inObjectLayerFilter);
+};
+
+interface RayCastSettings {
+};
+
+interface CastRayCollector {
+};
+
+interface CollidePointCollector {
+};
+
+interface CollideShapeSettings {
+};
+
+interface CollideShapeCollector {
+};
+
+interface ShapeCastSettings {
+};
+
+interface CastShapeCollector {
+};
+
+interface NarrowPhaseQuery {
+	void CastRay([Const, Ref] RRayCast inRay, [Const, Ref] RayCastSettings inRayCastSettings, [Ref] CastRayCollector ioCollector, [Const, Ref] BroadPhaseLayerFilter inBroadPhaseLayerFilter, [Const, Ref] ObjectLayerFilter inObjectLayerFilter, [Const, Ref] BodyFilter inBodyFilter, [Const, Ref] ShapeFilter inShapeFilter);
+	void CollidePoint([Const, Ref] Vec3 inPoint, [Ref] CollidePointCollector ioCollector, [Const, Ref] BroadPhaseLayerFilter inBroadPhaseLayerFilter, [Const, Ref] ObjectLayerFilter inObjectLayerFilter, [Const, Ref] BodyFilter inBodyFilter, [Const, Ref] ShapeFilter inShapeFilter);
+	void CollideShape([Const] Shape inShape, [Const, Ref] Vec3 inShapeScale, [Const, Ref] Mat44 inCenterOfMassTransform, [Const, Ref] CollideShapeSettings inCollideShapeSettings, [Const, Ref] Vec3 inBaseOffset, [Ref] CollideShapeCollector ioCollector, [Const, Ref] BroadPhaseLayerFilter inBroadPhaseLayerFilter, [Const, Ref] ObjectLayerFilter inObjectLayerFilter, [Const, Ref] BodyFilter inBodyFilter, [Const, Ref] ShapeFilter inShapeFilter);
+	void CastShape([Const, Ref] RShapeCast inShapeCast, [Const, Ref] ShapeCastSettings inShapeCastSettings, [Const, Ref] Vec3 inBaseOffset, [Ref] CastShapeCollector ioCollector, [Const, Ref] BroadPhaseLayerFilter inBroadPhaseLayerFilter, [Const, Ref] ObjectLayerFilter inObjectLayerFilter, [Const, Ref] BodyFilter inBodyFilter, [Const, Ref] ShapeFilter inShapeFilter);
+};
+
 [Prefix="JPH::"]
 interface PhysicsSystem {
-	[Ref] BodyInterface GetBodyInterface();
 	void SetGravity([Const, Ref] Vec3 inGravity);
 	[Value] Vec3 GetGravity();
 	[Const, Value] PhysicsSettings GetPhysicsSettings();
@@ -990,9 +1080,14 @@ interface PhysicsSystem {
 	void RemoveConstraint(Constraint inConstraint);
 	void SetContactListener(ContactListener inListener);
 	ContactListener GetContactListener();
+	void OptimizeBroadPhase();
+	[Ref] BodyInterface GetBodyInterface();
+	[Ref] BodyInterface GetBodyInterfaceNoLock();
 	[Const, Ref] BodyLockInterfaceNoLock GetBodyLockInterfaceNoLock();
 	[Const, Ref] BodyLockInterfaceLocking GetBodyLockInterface();
-
+	[Const, Ref] BroadPhaseQuery GetBroadPhaseQuery();
+	[Const, Ref] NarrowPhaseQuery GetNarrowPhaseQuery();
+	[Const, Ref] NarrowPhaseQuery GetNarrowPhaseQueryNoLock();
 	void SaveState([Ref] StateRecorder inStream, optional EStateRecorderState inState = "EStateRecorderState::All");
 	boolean	RestoreState([Ref] StateRecorder inStream);
 };
