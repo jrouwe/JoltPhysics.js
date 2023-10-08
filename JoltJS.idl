@@ -778,6 +778,10 @@ interface ConeConstraintSettings {
 ConeConstraintSettings implements TwoBodyConstraintSettings;
 
 interface ConeConstraint {
+	void SetHalfConeAngle(float inHalfConeAngle);
+	float GetCosHalfConeAngle();
+	[Value] Vec3 GetTotalLambdaPosition();
+	float GetTotalLambdaRotation();
 };
 
 ConeConstraint implements TwoBodyConstraint;
@@ -804,6 +808,26 @@ interface SliderConstraintSettings {
 SliderConstraintSettings implements TwoBodyConstraintSettings;
 
 interface SliderConstraint {
+	float GetCurrentPosition();
+	void SetMaxFrictionForce(float inFrictionForce);
+	float GetMaxFrictionForce();
+	[Ref] MotorSettings GetMotorSettings();
+	void SetMotorState(EMotorState inState);
+	EMotorState GetMotorState();
+	void SetTargetVelocity(float inVelocity);
+	float GetTargetVelocity();
+	void SetTargetPosition(float inPosition);
+	float GetTargetPosition();
+	void SetLimits(float inLimitsMin, float inLimitsMax);
+	float GetLimitsMin();
+	float GetLimitsMax();
+	boolean HasLimits();
+	[Ref] SpringSettings GetLimitsSpringSettings();
+	void SetLimitsSpringSettings([Const, Ref] SpringSettings inLimitsSpringSettings);
+	[Value] Vector2 GetTotalLambdaPosition();
+	float GetTotalLambdaPositionLimits();
+	[Value] Vec3 GetTotalLambdaRotation();
+	float GetTotalLambdaMotor();
 };
 
 SliderConstraint implements TwoBodyConstraint;
@@ -831,6 +855,37 @@ interface SwingTwistConstraintSettings {
 SwingTwistConstraintSettings implements TwoBodyConstraintSettings;
 
 interface SwingTwistConstraint {
+	[Value] Vec3 GetLocalSpacePosition1();
+	[Value] Vec3 GetLocalSpacePosition2();
+	[Value] Quat GetConstraintToBody1();
+	[Value] Quat GetConstraintToBody2();
+	float GetNormalHalfConeAngle();
+	void SetNormalHalfConeAngle(float inAngle);
+	float GetPlaneHalfConeAngle();
+	void SetPlaneHalfConeAngle(float inAngle);
+	float GetTwistMinAngle();
+	void SetTwistMinAngle(float inAngle);
+	float GetTwistMaxAngle();
+	void SetTwistMaxAngle(float inAngle);
+	[Ref] MotorSettings GetSwingMotorSettings();
+	[Ref] MotorSettings GetTwistMotorSettings();
+	void SetMaxFrictionTorque(float inFrictionTorque);
+	float GetMaxFrictionTorque();
+	void SetSwingMotorState(EMotorState inState);
+	EMotorState GetSwingMotorState();
+	void SetTwistMotorState(EMotorState inState);
+	EMotorState GetTwistMotorState();
+	void SetTargetAngularVelocityCS([Const, Ref] Vec3 inAngularVelocity);
+	[Value] Vec3 GetTargetAngularVelocityCS();
+	void SetTargetOrientationCS([Const, Ref] Quat inOrientation);
+	[Value] Quat GetTargetOrientationCS();
+	void SetTargetOrientationBS([Const, Ref] Quat inOrientation);
+	[Value] Quat GetRotationInConstraintSpace();
+	[Value] Vec3 GetTotalLambdaPosition();
+	float GetTotalLambdaTwist();
+	float GetTotalLambdaSwingY();
+	float GetTotalLambdaSwingZ();
+	[Value] Vec3 GetTotalLambdaMotor();
 };
 
 SwingTwistConstraint implements TwoBodyConstraint;
@@ -861,6 +916,33 @@ interface SixDOFConstraintSettings {
 SixDOFConstraintSettings implements TwoBodyConstraintSettings;
 
 interface SixDOFConstraint {
+	void SetTranslationLimits([Const, Ref] Vec3 inLimitMin, [Const, Ref] Vec3 inLimitMax);
+	void SetRotationLimits([Const, Ref] Vec3 inLimitMin, [Const, Ref] Vec3 inLimitMax);
+	float GetLimitsMin(SixDOFConstraintSettings_EAxis inAxis);
+	float GetLimitsMax(SixDOFConstraintSettings_EAxis inAxis);
+	boolean IsFixedAxis(SixDOFConstraintSettings_EAxis inAxis);
+	boolean IsFreeAxis(SixDOFConstraintSettings_EAxis inAxis);
+	[Const, Ref] SpringSettings GetLimitsSpringSettings(SixDOFConstraintSettings_EAxis inAxis);
+	void SetLimitsSpringSettings(SixDOFConstraintSettings_EAxis inAxis, [Const, Ref] SpringSettings inLimitsSpringSettings);
+	void SetMaxFriction(SixDOFConstraintSettings_EAxis inAxis, float inFriction);
+	float GetMaxFriction(SixDOFConstraintSettings_EAxis inAxis);
+	[Value] Quat GetRotationInConstraintSpace();
+	[Ref] MotorSettings GetMotorSettings(SixDOFConstraintSettings_EAxis inAxis);
+	void SetMotorState(SixDOFConstraintSettings_EAxis inAxis, EMotorState inState);
+	EMotorState GetMotorState(SixDOFConstraintSettings_EAxis inAxis);
+	[Value] Vec3 GetTargetVelocityCS();
+	void SetTargetVelocityCS([Const, Ref] Vec3 inVelocity);
+	void SetTargetAngularVelocityCS([Const, Ref] Vec3 inAngularVelocity);
+	[Value] Vec3 GetTargetAngularVelocityCS();
+	[Value] Vec3 GetTargetPositionCS();
+	void SetTargetPositionCS([Const, Ref] Vec3 inPosition);
+	void SetTargetOrientationCS([Const, Ref] Quat inOrientation);
+	[Value] Quat GetTargetOrientationCS();
+	void SetTargetOrientationBS([Const, Ref] Quat inOrientation);
+	[Value] Vec3 GetTotalLambdaPosition();
+	[Value] Vec3 GetTotalLambdaRotation();
+	[Value] Vec3 GetTotalLambdaMotorTranslation();
+	[Value] Vec3 GetTotalLambdaMotorRotation();
 };
 
 SixDOFConstraint implements TwoBodyConstraint;
