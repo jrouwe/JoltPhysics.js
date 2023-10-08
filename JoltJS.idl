@@ -768,6 +768,12 @@ interface MotionProperties {
 interface GroupFilter {
 };
 
+[JSImplementation="GroupFilter"]
+interface GroupFilterJS {
+	void GroupFilterJS();
+	[Const] boolean CanCollide([Const, Ref] CollisionGroup inGroup1, [Const, Ref] CollisionGroup inGroup2);
+};
+
 interface GroupFilterTable {
 	void GroupFilterTable(unsigned long inNumGroups);
 	void DisableCollision(unsigned long inSubGroup1, unsigned long inSubGroup2);
@@ -1448,7 +1454,19 @@ DefaultBroadPhaseLayerFilter implements ObjectLayerFilter;
 interface ObjectLayerFilter {
 };
 
+[JSImplementation="ObjectLayerFilter"]
+interface ObjectLayerFilterJS {
+	void ObjectLayerFilterJS();
+	[Const] boolean ShouldCollide(unsigned short inLayer);
+};
+
 interface ObjectLayerPairFilter {
+};
+
+[JSImplementation="ObjectLayerPairFilter"]
+interface ObjectLayerPairFilterJS {
+	void ObjectLayerPairFilterJS();
+	[Const] boolean ShouldCollide(unsigned short inLayer1, unsigned short inLayer2);
 };
 
 interface DefaultObjectLayerFilter {
@@ -1467,6 +1485,13 @@ interface BodyFilter {
 	void BodyFilter();
 };
 
+[JSImplementation="BodyFilter"]
+interface BodyFilterJS {
+	void BodyFilterJS();
+	[Const] boolean ShouldCollide([Const, Ref] BodyID inBodyID);
+	[Const] boolean ShouldCollideLocked([Const, Ref] Body inBody);
+};
+
 interface IgnoreSingleBodyFilter {
 	void IgnoreSingleBodyFilter([Const, Ref] BodyID inBodyID);
 };
@@ -1483,6 +1508,18 @@ IgnoreMultipleBodiesFilter implements BodyFilter;
 
 interface ShapeFilter {
 	void ShapeFilter();
+};
+
+[JSImplementation="ShapeFilter"]
+interface ShapeFilterJS {
+	void ShapeFilterJS();
+	[Const] boolean ShouldCollide([Const] Shape inShape2, [Const, Ref] SubShapeID inSubShapeIDOfShape2);
+};
+
+[JSImplementation="ShapeFilter"]
+interface ShapeFilterJS2 {
+	void ShapeFilterJS2();
+	[Const] boolean ShouldCollide([Const] Shape inShape1, [Const, Ref] SubShapeID inSubShapeIDOfShape1, [Const] Shape inShape2, [Const, Ref] SubShapeID inSubShapeIDOfShape2);
 };
 
 interface CharacterBase {
