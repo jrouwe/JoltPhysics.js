@@ -82,7 +82,7 @@ set(EMCC_WASM_COMPAT_ARGS ${EMCC_WASM_ARGS}
 set(EMCC_GLUE_ARGS
   -c
   -I${JoltPhysics_SOURCE_DIR}/..
-  -Woverloaded-virtual
+  -Wall
   -std=c++17
   -include ${JOLT_HEADER_FILE})
 

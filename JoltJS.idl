@@ -41,51 +41,27 @@ enum EActivation {
 };
 
 enum EShapeType {
-	"EShapeType::Convex",
-	"EShapeType::Compound",
-	"EShapeType::Decorated",
-	// Omitting EShapeType::Mesh because of name conflict, use ShapeType instead
-	// Omitting EShapeType::HeightField because of name conflict, use ShapeType instead
-};
-
-enum ShapeType {
-	"ShapeType::EShapeType_Convex",
-	"ShapeType::EShapeType_Compound",
-	"ShapeType::EShapeType_Decorated",
-	"ShapeType::EShapeType_Mesh",
-	"ShapeType::EShapeType_HeightField"
+	"EShapeType_Convex",
+	"EShapeType_Compound",
+	"EShapeType_Decorated",
+	"EShapeType_Mesh",
+	"EShapeType_HeightField"
 };
 
 enum EShapeSubType {
-	"EShapeSubType::Sphere",
-	"EShapeSubType::Box",
-	"EShapeSubType::Capsule",
-	"EShapeSubType::TaperedCapsule",
-	"EShapeSubType::Cylinder",
-	"EShapeSubType::ConvexHull",
-	"EShapeSubType::StaticCompound",
-	"EShapeSubType::MutableCompound",
-	"EShapeSubType::RotatedTranslated",
-	"EShapeSubType::Scaled",
-	"EShapeSubType::OffsetCenterOfMass",
-	// Omitting EShapeSubType::Mesh because of name conflict, use ShapeSubType instead
-	// Omitting EShapeSubType::HeightField because of name conflict, use ShapeSubType instead
-};
-
-enum ShapeSubType {
-	"ShapeSubType::EShapeSubType_Sphere",
-	"ShapeSubType::EShapeSubType_Box",
-	"ShapeSubType::EShapeSubType_Capsule",
-	"ShapeSubType::EShapeSubType_TaperedCapsule",
-	"ShapeSubType::EShapeSubType_Cylinder",
-	"ShapeSubType::EShapeSubType_ConvexHull",
-	"ShapeSubType::EShapeSubType_StaticCompound",
-	"ShapeSubType::EShapeSubType_MutableCompound",
-	"ShapeSubType::EShapeSubType_RotatedTranslated",
-	"ShapeSubType::EShapeSubType_Scaled",
-	"ShapeSubType::EShapeSubType_OffsetCenterOfMass",
-	"ShapeSubType::EShapeSubType_Mesh",
-	"ShapeSubType::EShapeSubType_HeightField"
+	"EShapeSubType_Sphere",
+	"EShapeSubType_Box",
+	"EShapeSubType_Capsule",
+	"EShapeSubType_TaperedCapsule",
+	"EShapeSubType_Cylinder",
+	"EShapeSubType_ConvexHull",
+	"EShapeSubType_StaticCompound",
+	"EShapeSubType_MutableCompound",
+	"EShapeSubType_RotatedTranslated",
+	"EShapeSubType_Scaled",
+	"EShapeSubType_OffsetCenterOfMass",
+	"EShapeSubType_Mesh",
+	"EShapeSubType_HeightField"
 };
 
 enum EConstraintSpace {
@@ -152,6 +128,15 @@ enum ECollectFacesMode {
 	"ECollectFacesMode::NoFaces"
 };
 
+enum SixDOFConstraintSettings_EAxis {
+	"SixDOFConstraintSettings_EAxis_TranslationX",
+	"SixDOFConstraintSettings_EAxis_TranslationY",
+	"SixDOFConstraintSettings_EAxis_TranslationZ",
+	"SixDOFConstraintSettings_EAxis_RotationX",
+	"SixDOFConstraintSettings_EAxis_RotationY",
+	"SixDOFConstraintSettings_EAxis_RotationZ"
+};
+
 interface Vec3 {
 	void Vec3();
 	void Vec3(float inX, float inY, float inZ);
@@ -191,7 +176,7 @@ interface Quat {
 };
 
 interface Float3 {
-	void Float3(float inX, float inY, float inZ);	
+	void Float3(float inX, float inY, float inZ);
 
 	attribute float x;
 	attribute float y;
@@ -210,9 +195,9 @@ interface Mat44 {
 };
 
 interface AABox {
-	void AABox([Const, Ref] Vec3 inMin, [Const, Ref] Vec3 inMax);	
+	void AABox([Const, Ref] Vec3 inMin, [Const, Ref] Vec3 inMax);
 	[Value] static AABox sBiggest();
-	
+
 	[Value] attribute Vec3 mMin;
 	[Value] attribute Vec3 mMax;
 };
@@ -384,8 +369,7 @@ interface Shape {
 	void SetUserData(long long inUserData);
 };
 
-interface ShapeGetTriangles
-{
+interface ShapeGetTriangles {
 	void ShapeGetTriangles(Shape inShape, [Const, Ref] AABox inBox, [Const, Ref] Vec3 inPositionCOM, [Const, Ref] Quat inRotation, [Const, Ref] Vec3 inScale);
 	long GetNumTriangles();
 	long GetVerticesSize();
@@ -497,7 +481,7 @@ TaperedCapsuleShape implements ConvexShape;
 // Convex hull
 interface ConvexHullShapeSettings {
 	void ConvexHullShapeSettings();
-	
+
 	[Value] attribute ArrayVec3 mPoints;
 	attribute float mMaxConvexRadius;
 	attribute float mMaxErrorConvexRadius;
@@ -527,7 +511,7 @@ StaticCompoundShape implements Shape;
 // Scaled shape
 interface ScaledShapeSettings {
 	void ScaledShapeSettings(ShapeSettings inShape, [Ref, Const] Vec3 inScale);
-	
+
 	[Value] attribute Vec3 mScale;
 };
 
@@ -542,7 +526,7 @@ ScaledShape implements Shape;
 // Offset COM
 interface OffsetCenterOfMassShapeSettings {
 	void OffsetCenterOfMassShapeSettings([Ref, Const] Vec3 inOffset, ShapeSettings inShape);
-	
+
 	[Value] attribute Vec3 mOffset;
 };
 
@@ -556,7 +540,7 @@ OffsetCenterOfMassShape implements Shape;
 // Rotated translated
 interface RotatedTranslatedShapeSettings {
 	void RotatedTranslatedShapeSettings([Ref, Const] Vec3 inPosition, [Ref, Const] Quat inRotation, ShapeSettings inShape);
-	
+
 	[Value] attribute Vec3 mPosition;
 	[Value] attribute Quat mRotation;
 };
@@ -571,7 +555,7 @@ RotatedTranslatedShape implements Shape;
 // Mesh shape
 interface MeshShapeSettings {
 	void MeshShapeSettings([Ref, Const] TriangleList inTriangleList, [Ref, Const] PhysicsMaterialList inMaterialList);
-	void MeshShapeSettings([Ref, Const] VertexList inVertices, [Ref, Const] IndexedTriangleList inTriangles, [Ref, Const] PhysicsMaterialList inMaterialList);	
+	void MeshShapeSettings([Ref, Const] VertexList inVertices, [Ref, Const] IndexedTriangleList inTriangles, [Ref, Const] PhysicsMaterialList inMaterialList);
 };
 
 MeshShapeSettings implements ShapeSettings;
@@ -610,7 +594,7 @@ TwoBodyConstraint implements Constraint;
 // Fixed constraint
 interface FixedConstraintSettings {
 	void FixedConstraintSettings();
-	
+
 	attribute EConstraintSpace mSpace;
 	attribute boolean mAutoDetectPoint;
 	[Value] attribute Vec3 mPoint1;
@@ -626,17 +610,28 @@ FixedConstraintSettings implements TwoBodyConstraintSettings;
 // Spring settings
 interface SpringSettings {
 	void SpringSettings();
-	
+
 	attribute ESpringMode mMode;
 	attribute float mFrequency;
 	attribute float mStiffness;
 	attribute float mDamping;
 };
 
+// Motor settings
+interface MotorSettings {
+	void MotorSettings();
+
+	[Value] attribute SpringSettings mSpringSettings;
+	attribute float mMinForceLimit;
+	attribute float mMaxForceLimit;
+	attribute float mMinTorqueLimit;
+	attribute float mMaxTorqueLimit;
+};
+
 // Distance constraint
 interface DistanceConstraintSettings {
 	void DistanceConstraintSettings();
-	
+
 	attribute EConstraintSpace mSpace;
 	[Value] attribute Vec3 mPoint1;
 	[Value] attribute Vec3 mPoint2;
@@ -650,7 +645,7 @@ DistanceConstraintSettings implements TwoBodyConstraintSettings;
 // Point constraint
 interface PointConstraintSettings {
 	void PointConstraintSettings();
-	
+
 	attribute EConstraintSpace mSpace;
 	[Value] attribute Vec3 mPoint1;
 	[Value] attribute Vec3 mPoint2;
@@ -661,7 +656,7 @@ PointConstraintSettings implements TwoBodyConstraintSettings;
 // Hinge constraint
 interface HingeConstraintSettings {
 	void HingeConstraintSettings();
-	
+
 	attribute EConstraintSpace mSpace;
 	[Value] attribute Vec3 mPoint1;
 	[Value] attribute Vec3 mHingeAxis1;
@@ -671,7 +666,9 @@ interface HingeConstraintSettings {
 	[Value] attribute Vec3 mNormalAxis2;
 	attribute float mLimitsMin;
 	attribute float mLimitsMax;
+	[Value] attribute SpringSettings mLimitsSpringSettings;
 	attribute float mMaxFrictionTorque;
+	[Value] attribute MotorSettings mMotorSettings;
 };
 
 HingeConstraintSettings implements TwoBodyConstraintSettings;
@@ -679,7 +676,7 @@ HingeConstraintSettings implements TwoBodyConstraintSettings;
 // Cone constraint
 interface ConeConstraintSettings {
 	void ConeConstraintSettings();
-	
+
 	attribute EConstraintSpace mSpace;
 	[Value] attribute Vec3 mPoint1;
 	[Value] attribute Vec3 mTwistAxis1;
@@ -693,7 +690,7 @@ ConeConstraintSettings implements TwoBodyConstraintSettings;
 // Slider constraint
 interface SliderConstraintSettings {
 	void SliderConstraintSettings();
-	
+
 	attribute EConstraintSpace mSpace;
 	attribute boolean mAutoDetectPoint;
 	[Value] attribute Vec3 mPoint1;
@@ -704,7 +701,9 @@ interface SliderConstraintSettings {
 	[Value] attribute Vec3 mNormalAxis2;
 	attribute float mLimitsMin;
 	attribute float mLimitsMax;
+	[Value] attribute SpringSettings mLimitsSpringSettings;
 	attribute float mMaxFrictionForce;
+	[Value] attribute MotorSettings mMotorSettings;
 };
 
 SliderConstraintSettings implements TwoBodyConstraintSettings;
@@ -712,7 +711,7 @@ SliderConstraintSettings implements TwoBodyConstraintSettings;
 // Swing twist constraint
 interface SwingTwistConstraintSettings {
 	void SwingTwistConstraintSettings();
-	
+
 	attribute EConstraintSpace mSpace;
 	[Value] attribute Vec3 mPosition1;
 	[Value] attribute Vec3 mTwistAxis1;
@@ -725,9 +724,36 @@ interface SwingTwistConstraintSettings {
 	attribute float mTwistMinAngle;
 	attribute float mTwistMaxAngle;
 	attribute float mMaxFrictionTorque;
+	[Value] attribute MotorSettings mSwingMotorSettings;
+	[Value] attribute MotorSettings mTwistMotorSettings;
 };
 
 SwingTwistConstraintSettings implements TwoBodyConstraintSettings;
+
+// Six DOF constraint
+interface SixDOFConstraintSettings {
+	void SixDOFConstraintSettings();
+	void MakeFreeAxis(SixDOFConstraintSettings_EAxis inAxis);
+	boolean IsFreeAxis(SixDOFConstraintSettings_EAxis inAxis);
+	void MakeFixedAxis(SixDOFConstraintSettings_EAxis inAxis);
+	boolean IsFixedAxis(SixDOFConstraintSettings_EAxis inAxis);
+	void SetLimitedAxis(SixDOFConstraintSettings_EAxis inAxis, float inMin, float inMax);
+
+	attribute EConstraintSpace mSpace;
+	[Value] attribute Vec3 mPosition1;
+	[Value] attribute Vec3 mAxisX1;
+	[Value] attribute Vec3 mAxisY1;
+	[Value] attribute Vec3 mPosition2;
+	[Value] attribute Vec3 mAxisX2;
+	[Value] attribute Vec3 mAxisY2;
+	attribute float[] mMaxFriction;
+	attribute float[] mLimitMin;
+	attribute float[] mLimitMax;
+	[Value] attribute SpringSettings[] mLimitsSpringSettings;
+	[Value] attribute MotorSettings[] mMotorSettings;
+};
+
+SixDOFConstraintSettings implements TwoBodyConstraintSettings;
 
 interface BodyID {
 	void BodyID();
@@ -755,7 +781,7 @@ interface MotionProperties {
 	float GetMaxAngularVelocity();
 	void SetMaxAngularVelocity(float inVelocity);
 	float GetLinearDamping();
-	void SetLinearDamping(float inDamping);	
+	void SetLinearDamping(float inDamping);
 	float GetAngularDamping();
 	void SetAngularDamping(float inDamping);
 	float GetInverseMass();
@@ -1251,7 +1277,7 @@ interface MassProperties {
 
 interface BodyCreationSettings {
 	void BodyCreationSettings([Const] Shape inShape, [Ref] Vec3 inPosition, [Ref] Quat inRotation, EMotionType inMotionType, unsigned short inObjectLayer);
-	
+
 	[Value] attribute Vec3 mPosition;
 	[Value] attribute Quat mRotation;
 	[Value] attribute Vec3 mLinearVelocity;
@@ -1357,7 +1383,7 @@ interface SoftBodySharedSettings {
 
 interface SoftBodyCreationSettings {
 	void SoftBodyCreationSettings([Const] SoftBodySharedSettings inSettings, [Ref] Vec3 inPosition, [Ref] Quat inRotation, unsigned short inObjectLayer);
-	
+
 	[Value] attribute Vec3 mPosition;
 	[Value] attribute Quat mRotation;
 	attribute long long mUserData;
@@ -1383,7 +1409,7 @@ interface CharacterBaseSettings {
 
 interface CharacterVirtualSettings {
 	void CharacterVirtualSettings();
-	
+
 	attribute float mMass;
 	attribute float mMaxStrength;
 	[Value] attribute Vec3 mShapeOffset;
@@ -1427,7 +1453,7 @@ interface CharacterContactListenerJS {
 [Prefix="CharacterVirtual::"]
 interface ExtendedUpdateSettings {
 	void ExtendedUpdateSettings();
-	
+
 	[Value] attribute Vec3 mStickToFloorStepDown;
 	[Value] attribute Vec3 mWalkStairsStepUp;
 	attribute float mWalkStairsMinStepForward;

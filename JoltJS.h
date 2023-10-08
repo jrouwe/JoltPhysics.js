@@ -36,6 +36,7 @@
 #include "Jolt/Physics/Constraints/ConeConstraint.h"
 #include "Jolt/Physics/Constraints/SliderConstraint.h"
 #include "Jolt/Physics/Constraints/SwingTwistConstraint.h"
+#include "Jolt/Physics/Constraints/SixDOFConstraint.h"
 #include "Jolt/Physics/Body/BodyInterface.h"
 #include "Jolt/Physics/Body/BodyCreationSettings.h"
 #include "Jolt/Physics/SoftBody/SoftBodyCreationSettings.h"
@@ -61,33 +62,36 @@ using ArraySoftBodySharedSettingsEdge = Array<SoftBodySharedSettingsEdge>;
 using ArraySoftBodySharedSettingsVolume = Array<SoftBodySharedSettingsVolume>;
 using EGroundState = CharacterBase::EGroundState;
 
-// Replacement for EShapeType (since emscripten drops EShapeType we get a naming conflict in the Jolt namespace)
-enum class ShapeType
-{
-	EShapeType_Convex = (int)EShapeType::Convex,
-	EShapeType_Compound = (int)EShapeType::Compound,
-	EShapeType_Decorated = (int)EShapeType::Decorated,
-	EShapeType_Mesh = (int)EShapeType::Mesh,
-	EShapeType_HeightField = (int)EShapeType::HeightField
-};
+// Alias for EShapeType values to avoid clashes
+constexpr EShapeType EShapeType_Convex = EShapeType::Convex;
+constexpr EShapeType EShapeType_Compound = EShapeType::Compound;
+constexpr EShapeType EShapeType_Decorated = EShapeType::Decorated;
+constexpr EShapeType EShapeType_Mesh = EShapeType::Mesh;
+constexpr EShapeType EShapeType_HeightField = EShapeType::HeightField;
 
-// Replacement for EShapeSubType (since emscripten drops EShapeSubType we get a naming conflict in the Jolt namespace)
-enum class ShapeSubType
-{
-	EShapeSubType_Sphere = (int)EShapeSubType::Sphere,
-	EShapeSubType_Box = (int)EShapeSubType::Box,
-	EShapeSubType_Capsule = (int)EShapeSubType::Capsule,
-	EShapeSubType_TaperedCapsule = (int)EShapeSubType::TaperedCapsule,
-	EShapeSubType_Cylinder = (int)EShapeSubType::Cylinder,
-	EShapeSubType_ConvexHull = (int)EShapeSubType::ConvexHull,
-	EShapeSubType_StaticCompound = (int)EShapeSubType::StaticCompound,
-	EShapeSubType_MutableCompound = (int)EShapeSubType::MutableCompound,
-	EShapeSubType_RotatedTranslated = (int)EShapeSubType::RotatedTranslated,
-	EShapeSubType_Scaled = (int)EShapeSubType::Scaled,
-	EShapeSubType_OffsetCenterOfMass = (int)EShapeSubType::OffsetCenterOfMass,
-	EShapeSubType_Mesh = (int)EShapeSubType::Mesh,
-	EShapeSubType_HeightField = (int)EShapeSubType::HeightField
-};
+// Alias for EShapeSubType values to avoid clashes
+constexpr EShapeSubType EShapeSubType_Sphere = EShapeSubType::Sphere;
+constexpr EShapeSubType EShapeSubType_Box = EShapeSubType::Box;
+constexpr EShapeSubType EShapeSubType_Capsule = EShapeSubType::Capsule;
+constexpr EShapeSubType EShapeSubType_TaperedCapsule = EShapeSubType::TaperedCapsule;
+constexpr EShapeSubType EShapeSubType_Cylinder = EShapeSubType::Cylinder;
+constexpr EShapeSubType EShapeSubType_ConvexHull = EShapeSubType::ConvexHull;
+constexpr EShapeSubType EShapeSubType_StaticCompound = EShapeSubType::StaticCompound;
+constexpr EShapeSubType EShapeSubType_MutableCompound = EShapeSubType::MutableCompound;
+constexpr EShapeSubType EShapeSubType_RotatedTranslated = EShapeSubType::RotatedTranslated;
+constexpr EShapeSubType EShapeSubType_Scaled = EShapeSubType::Scaled;
+constexpr EShapeSubType EShapeSubType_OffsetCenterOfMass = EShapeSubType::OffsetCenterOfMass;
+constexpr EShapeSubType EShapeSubType_Mesh = EShapeSubType::Mesh;
+constexpr EShapeSubType EShapeSubType_HeightField = EShapeSubType::HeightField;
+
+// Alias for SixDOFConstraintSettings::EAxis to avoid clashes
+using SixDOFConstraintSettings_EAxis = SixDOFConstraintSettings::EAxis;
+constexpr SixDOFConstraintSettings_EAxis SixDOFConstraintSettings_EAxis_TranslationX = SixDOFConstraintSettings_EAxis::TranslationX;
+constexpr SixDOFConstraintSettings_EAxis SixDOFConstraintSettings_EAxis_TranslationY = SixDOFConstraintSettings_EAxis::TranslationY;
+constexpr SixDOFConstraintSettings_EAxis SixDOFConstraintSettings_EAxis_TranslationZ = SixDOFConstraintSettings_EAxis::TranslationZ;
+constexpr SixDOFConstraintSettings_EAxis SixDOFConstraintSettings_EAxis_RotationX = SixDOFConstraintSettings_EAxis::RotationX;
+constexpr SixDOFConstraintSettings_EAxis SixDOFConstraintSettings_EAxis_RotationY = SixDOFConstraintSettings_EAxis::RotationY;
+constexpr SixDOFConstraintSettings_EAxis SixDOFConstraintSettings_EAxis_RotationZ = SixDOFConstraintSettings_EAxis::RotationZ;
 
 // Callback for traces
 static void TraceImpl(const char *inFMT, ...)
@@ -128,7 +132,7 @@ enum class Layers
 class ObjectLayerPairFilterImpl : public ObjectLayerPairFilter
 {
 public:
-	virtual bool					ShouldCollide(ObjectLayer inObject1, ObjectLayer inObject2) const override
+	virtual bool			ShouldCollide(ObjectLayer inObject1, ObjectLayer inObject2) const override
 	{
 		switch (inObject1)
 		{
@@ -156,26 +160,26 @@ namespace BroadPhaseLayers
 class BPLayerInterfaceImpl final : public BroadPhaseLayerInterface
 {
 public:
-									BPLayerInterfaceImpl()
+							BPLayerInterfaceImpl()
 	{
 		// Create a mapping table from object to broad phase layer
 		mObjectToBroadPhase[(int)Layers::NON_MOVING] = BroadPhaseLayers::NON_MOVING;
 		mObjectToBroadPhase[(int)Layers::MOVING] = BroadPhaseLayers::MOVING;
 	}
 
-	virtual uint					GetNumBroadPhaseLayers() const override
+	virtual uint			GetNumBroadPhaseLayers() const override
 	{
 		return BroadPhaseLayers::NUM_LAYERS;
 	}
 
-	virtual BroadPhaseLayer			GetBroadPhaseLayer(ObjectLayer inLayer) const override
+	virtual BroadPhaseLayer	GetBroadPhaseLayer(ObjectLayer inLayer) const override
 	{
 		JPH_ASSERT(inLayer < (int)Layers::NUM_LAYERS);
 		return mObjectToBroadPhase[inLayer];
 	}
 
 #if defined(JPH_EXTERNAL_PROFILE) || defined(JPH_PROFILE_ENABLED)
-	virtual const char *			GetBroadPhaseLayerName(BroadPhaseLayer inLayer) const override
+	virtual const char *	GetBroadPhaseLayerName(BroadPhaseLayer inLayer) const override
 	{
 		switch ((BroadPhaseLayer::Type)inLayer)
 		{
@@ -187,14 +191,14 @@ public:
 #endif // JPH_EXTERNAL_PROFILE || JPH_PROFILE_ENABLED
 
 private:
-	BroadPhaseLayer					mObjectToBroadPhase[(int)Layers::NUM_LAYERS];
+	BroadPhaseLayer			mObjectToBroadPhase[(int)Layers::NUM_LAYERS];
 };
 
 /// Class that determines if an object layer can collide with a broadphase layer
 class ObjectVsBroadPhaseLayerFilterImpl : public ObjectVsBroadPhaseLayerFilter
 {
 public:
-	virtual bool					ShouldCollide(ObjectLayer inLayer1, BroadPhaseLayer inLayer2) const override
+	virtual bool			ShouldCollide(ObjectLayer inLayer1, BroadPhaseLayer inLayer2) const override
 	{
 		switch (inLayer1)
 		{
