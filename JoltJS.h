@@ -55,6 +55,34 @@ using ArraySoftBodySharedSettingsEdge = Array<SoftBodySharedSettingsEdge>;
 using ArraySoftBodySharedSettingsVolume = Array<SoftBodySharedSettingsVolume>;
 using EGroundState = CharacterBase::EGroundState;
 
+// Replacement for EShapeType (since emscripten drops EShapeType we get a naming conflict in the Jolt namespace)
+enum class ShapeType
+{
+	EShapeType_Convex = (int)EShapeType::Convex,
+	EShapeType_Compound = (int)EShapeType::Compound,
+	EShapeType_Decorated = (int)EShapeType::Decorated,
+	EShapeType_Mesh = (int)EShapeType::Mesh,
+	EShapeType_HeightField = (int)EShapeType::HeightField
+};
+
+// Replacement for EShapeSubType (since emscripten drops EShapeSubType we get a naming conflict in the Jolt namespace)
+enum class ShapeSubType
+{
+	EShapeSubType_Sphere = (int)EShapeSubType::Sphere,
+	EShapeSubType_Box = (int)EShapeSubType::Box,
+	EShapeSubType_Capsule = (int)EShapeSubType::Capsule,
+	EShapeSubType_TaperedCapsule = (int)EShapeSubType::TaperedCapsule,
+	EShapeSubType_Cylinder = (int)EShapeSubType::Cylinder,
+	EShapeSubType_ConvexHull = (int)EShapeSubType::ConvexHull,
+	EShapeSubType_StaticCompound = (int)EShapeSubType::StaticCompound,
+	EShapeSubType_MutableCompound = (int)EShapeSubType::MutableCompound,
+	EShapeSubType_RotatedTranslated = (int)EShapeSubType::RotatedTranslated,
+	EShapeSubType_Scaled = (int)EShapeSubType::Scaled,
+	EShapeSubType_OffsetCenterOfMass = (int)EShapeSubType::OffsetCenterOfMass,
+	EShapeSubType_Mesh = (int)EShapeSubType::Mesh,
+	EShapeSubType_HeightField = (int)EShapeSubType::HeightField
+};
+
 // Callback for traces
 static void TraceImpl(const char *inFMT, ...)
 { 
