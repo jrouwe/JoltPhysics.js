@@ -142,6 +142,16 @@ enum ValidateResult {
 	"ValidateResult::RejectAllContactsForThisBodyPair"
 };
 
+enum EActiveEdgeMode {
+	"EActiveEdgeMode::CollideOnlyWithActive",
+	"EActiveEdgeMode::CollideWithAll"
+};
+
+enum ECollectFacesMode {
+	"ECollectFacesMode::CollectFaces",
+	"ECollectFacesMode::NoFaces"
+};
+
 interface Vec3 {
 	void Vec3();
 	void Vec3(float inX, float inY, float inZ);
@@ -969,6 +979,8 @@ interface BroadPhaseQuery {
 };
 
 interface RayCastSettings {
+	attribute EBackFaceMode mBackFaceMode;
+	attribute boolean mTreatConvexAsSolid;
 };
 
 interface CastRayCollector {
@@ -977,14 +989,32 @@ interface CastRayCollector {
 interface CollidePointCollector {
 };
 
-interface CollideShapeSettings {
+interface CollideSettingsBase {
+	attribute EActiveEdgeMode mActiveEdgeMode;
+	attribute ECollectFacesMode mCollectFacesMode;
+	attribute float mCollisionTolerance;
+	attribute float mPenetrationTolerance;
+	[Value] attribute Vec3 mActiveEdgeMovementDirection;
 };
+
+interface CollideShapeSettings {
+	attribute float mMaxSeparationDistance;
+	attribute EBackFaceMode mBackFaceMode;
+};
+
+CollideShapeSettings implements CollideSettingsBase;
 
 interface CollideShapeCollector {
 };
 
 interface ShapeCastSettings {
+	attribute EBackFaceMode mBackFaceModeTriangles;
+	attribute EBackFaceMode mBackFaceModeConvex;
+	attribute boolean mUseShrunkenShapeAndConvexRadius;
+	attribute boolean mReturnDeepestPoint;
 };
+
+ShapeCastSettings implements CollideSettingsBase;
 
 interface CastShapeCollector {
 };
@@ -1202,7 +1232,7 @@ interface CharacterContactListenerJS {
 	void OnContactSolve([Const] CharacterVirtual inCharacter, [Const, Ref] BodyID inBodyID2, [Const, Ref] SubShapeID inSubShapeID2, Vec3 inContactPosition, Vec3 inContactNormal, Vec3 inContactVelocity, [Const] PhysicsMaterial inContactMaterial, Vec3 inCharacterVelocity, [Ref] Vec3 ioNewCharacterVelocity);
 };
 
-[Prefix="JPH::CharacterVirtual::"]
+[Prefix="CharacterVirtual::"]
 interface ExtendedUpdateSettings {
 	void ExtendedUpdateSettings();
 	
