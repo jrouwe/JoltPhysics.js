@@ -238,6 +238,17 @@ interface RRayCast {
 	[Value] attribute Vec3 mDirection;
 };
 
+interface BroadPhaseCastResult {
+	[Value] attribute BodyID mBodyID;
+	attribute float mFraction;
+};
+
+interface RayCastResult {
+	[Value] attribute SubShapeID mSubShapeID2;
+};
+
+RayCastResult implements BroadPhaseCastResult;
+
 interface AABoxCast {
 	void AABoxCast();
 
@@ -961,12 +972,54 @@ interface ContactListenerJS {
 };
 
 interface RayCastBodyCollector {
+	void Reset();
+	void UpdateEarlyOutFraction(float inFraction);
+	void ResetEarlyOutFraction(float inFraction);
+	void ForceEarlyOut();
+	boolean ShouldEarlyOut();
+	float GetEarlyOutFraction();
+	float GetPositiveEarlyOutFraction();
+};
+
+[JSImplementation="RayCastBodyCollector"]
+interface RayCastBodyCollectorJS {
+	void RayCastBodyCollectorJS();
+	void Reset();
+	void AddHit([Const, Ref] BroadPhaseCastResult inResult);
 };
 
 interface CollideShapeBodyCollector {
+	void Reset();
+	void UpdateEarlyOutFraction(float inFraction);
+	void ResetEarlyOutFraction(float inFraction);
+	void ForceEarlyOut();
+	boolean ShouldEarlyOut();
+	float GetEarlyOutFraction();
+	float GetPositiveEarlyOutFraction();
+};
+
+[JSImplementation="CollideShapeBodyCollector"]
+interface CollideShapeBodyCollectorJS {
+	void CollideShapeBodyCollectorJS();
+	void Reset();
+	void AddHit([Const, Ref] BodyID inResult);
 };
 
 interface CastShapeBodyCollector {
+	void Reset();
+	void UpdateEarlyOutFraction(float inFraction);
+	void ResetEarlyOutFraction(float inFraction);
+	void ForceEarlyOut();
+	boolean ShouldEarlyOut();
+	float GetEarlyOutFraction();
+	float GetPositiveEarlyOutFraction();
+};
+
+[JSImplementation="CastShapeBodyCollector"]
+interface CastShapeBodyCollectorJS {
+	void CastShapeBodyCollectorJS();
+	void Reset();
+	void AddHit([Const, Ref] BroadPhaseCastResult inResult);
 };
 
 interface BroadPhaseQuery {
@@ -984,9 +1037,44 @@ interface RayCastSettings {
 };
 
 interface CastRayCollector {
+	void Reset();
+	void UpdateEarlyOutFraction(float inFraction);
+	void ResetEarlyOutFraction(float inFraction);
+	void ForceEarlyOut();
+	boolean ShouldEarlyOut();
+	float GetEarlyOutFraction();
+	float GetPositiveEarlyOutFraction();
+};
+
+[JSImplementation="CastRayCollector"]
+interface CastRayCollectorJS {
+	void CastRayCollectorJS();
+	void Reset();
+	void OnBody([Const, Ref] Body inBody);
+	void AddHit([Const, Ref] RayCastResult inResult);
+};
+
+interface CollidePointResult {
+	[Value] attribute BodyID mBodyID;
+	[Value] attribute SubShapeID mSubShapeID2;
 };
 
 interface CollidePointCollector {
+	void Reset();
+	void UpdateEarlyOutFraction(float inFraction);
+	void ResetEarlyOutFraction(float inFraction);
+	void ForceEarlyOut();
+	boolean ShouldEarlyOut();
+	float GetEarlyOutFraction();
+	float GetPositiveEarlyOutFraction();
+};
+
+[JSImplementation="CollidePointCollector"]
+interface CollidePointCollectorJS {
+	void CollidePointCollectorJS();
+	void Reset();
+	void OnBody([Const, Ref] Body inBody);
+	void AddHit([Const, Ref] CollidePointResult inResult);
 };
 
 interface CollideSettingsBase {
@@ -1005,6 +1093,21 @@ interface CollideShapeSettings {
 CollideShapeSettings implements CollideSettingsBase;
 
 interface CollideShapeCollector {
+	void Reset();
+	void UpdateEarlyOutFraction(float inFraction);
+	void ResetEarlyOutFraction(float inFraction);
+	void ForceEarlyOut();
+	boolean ShouldEarlyOut();
+	float GetEarlyOutFraction();
+	float GetPositiveEarlyOutFraction();
+};
+
+[JSImplementation="CollideShapeCollector"]
+interface CollideShapeCollectorJS {
+	void CollideShapeCollectorJS();
+	void Reset();
+	void OnBody([Const, Ref] Body inBody);
+	void AddHit([Const, Ref] CollideShapeResult inResult);
 };
 
 interface ShapeCastSettings {
@@ -1016,7 +1119,29 @@ interface ShapeCastSettings {
 
 ShapeCastSettings implements CollideSettingsBase;
 
+interface ShapeCastResult {
+	attribute float mFraction;
+	attribute boolean mIsBackFaceHit;
+};
+
+ShapeCastResult implements CollideShapeResult;
+
 interface CastShapeCollector {
+	void Reset();
+	void UpdateEarlyOutFraction(float inFraction);
+	void ResetEarlyOutFraction(float inFraction);
+	void ForceEarlyOut();
+	boolean ShouldEarlyOut();
+	float GetEarlyOutFraction();
+	float GetPositiveEarlyOutFraction();
+};
+
+[JSImplementation="CastShapeCollector"]
+interface CastShapeCollectorJS {
+	void CastShapeCollectorJS();
+	void Reset();
+	void OnBody([Const, Ref] Body inBody);
+	void AddHit([Const, Ref] ShapeCastResult inResult);
 };
 
 interface NarrowPhaseQuery {

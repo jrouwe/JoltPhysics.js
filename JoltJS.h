@@ -14,6 +14,7 @@
 #include "Jolt/Physics/Collision/CastResult.h"
 #include "Jolt/Physics/Collision/AABoxCast.h"
 #include "Jolt/Physics/Collision/ShapeCast.h"
+#include "Jolt/Physics/Collision/CollidePointResult.h"
 #include "Jolt/Physics/Collision/Shape/SphereShape.h"
 #include "Jolt/Physics/Collision/Shape/BoxShape.h"
 #include "Jolt/Physics/Collision/Shape/CapsuleShape.h"
