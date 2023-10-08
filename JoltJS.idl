@@ -137,6 +137,33 @@ enum SixDOFConstraintSettings_EAxis {
 	"SixDOFConstraintSettings_EAxis_RotationZ"
 };
 
+enum EConstraintType {
+	"EConstraintType_Constraint",
+	"EConstraintType_TwoBodyConstraint",
+};
+
+enum EConstraintSubType {
+	"EConstraintSubType_Fixed",
+	"EConstraintSubType_Point",
+	"EConstraintSubType_Hinge",
+	"EConstraintSubType_Slider",
+	"EConstraintSubType_Distance",
+	"EConstraintSubType_Cone",
+	"EConstraintSubType_SwingTwist",
+	"EConstraintSubType_SixDOF",
+	"EConstraintSubType_Path",
+	"EConstraintSubType_Vehicle",
+	"EConstraintSubType_RackAndPinion",
+	"EConstraintSubType_Gear",
+	"EConstraintSubType_Pulley",
+};
+
+enum EMotorState {
+	"EMotorState_Off",
+	"EMotorState_Velocity",
+	"EMotorState_Position"
+};
+
 interface Vec3 {
 	void Vec3();
 	void Vec3(float inX, float inY, float inZ);
@@ -156,6 +183,14 @@ interface Vec3 {
 	void SetZ(float inZ);
 	void SetComponent(unsigned long inCoordinate, float inValue);
 	boolean IsNearZero(optional float inMaxDistSq);
+};
+
+interface Vector2 {
+	void Vector2();
+	void SetZero();
+	void IsZero();
+	void IsClose([Const, Ref] Vector2 inV, optional float inMaxDistSq);
+	[Operator="[]"] float GetComponent(unsigned long inCoordinate);
 };
 
 interface Quat {
@@ -573,8 +608,17 @@ interface ConstraintSettings {
 };
 
 interface Constraint {
+	EConstraintType GetType();
+	EConstraintSubType GetSubType();
+	unsigned long GetConstraintPriority();
+	void SetConstraintPriority(unsigned long inPriority);
+	void SetNumVelocityStepsOverride(long inN);
+	long GetNumVelocityStepsOverride();
+	void SetNumPositionStepsOverride(long inN);
+	long GetNumPositionStepsOverride();
 	void SetEnabled(boolean inEnabled);
 	boolean GetEnabled();
+	boolean IsActive();
 };
 
 // Two body constraint
@@ -587,6 +631,8 @@ TwoBodyConstraintSettings implements ConstraintSettings;
 interface TwoBodyConstraint {
 	Body GetBody1();
 	Body GetBody2();
+	[Value] Mat44 GetConstraintToBody1Matrix();
+	[Value] Mat44 GetConstraintToBody2Matrix();
 };
 
 TwoBodyConstraint implements Constraint;
@@ -642,6 +688,17 @@ interface DistanceConstraintSettings {
 
 DistanceConstraintSettings implements TwoBodyConstraintSettings;
 
+interface DistanceConstraint {
+	void SetDistance(float inMinDistance, float inMaxDistance);
+	float GetMinDistance();
+	float GetMaxDistance();
+	[Ref] SpringSettings GetLimitsSpringSettings();
+	void SetLimitsSpringSettings([Const, Ref] SpringSettings inSettings);
+	float GetTotalLambdaPosition();
+};
+
+DistanceConstraint implements TwoBodyConstraint;
+
 // Point constraint
 interface PointConstraintSettings {
 	void PointConstraintSettings();
@@ -652,6 +709,14 @@ interface PointConstraintSettings {
 };
 
 PointConstraintSettings implements TwoBodyConstraintSettings;
+
+interface PointConstraint {
+	[Value] Vec3 GetLocalSpacePoint1();
+	[Value] Vec3 GetLocalSpacePoint2();
+	[Value] Vec3 GetTotalLambdaPosition();
+};
+
+PointConstraint implements TwoBodyConstraint;
 
 // Hinge constraint
 interface HingeConstraintSettings {
@@ -673,6 +738,31 @@ interface HingeConstraintSettings {
 
 HingeConstraintSettings implements TwoBodyConstraintSettings;
 
+interface HingeConstraint {
+	float GetCurrentAngle();
+	void SetMaxFrictionTorque(float inFrictionTorque);
+	float GetMaxFrictionTorque();
+	[Ref] MotorSettings GetMotorSettings();
+	void SetMotorState(EMotorState inState);
+	EMotorState GetMotorState();
+	void SetTargetAngularVelocity(float inAngularVelocity);
+	float GetTargetAngularVelocity();
+	void SetTargetAngle(float inAngle);
+	float GetTargetAngle();
+	void SetLimits(float inLimitsMin, float inLimitsMax);
+	float GetLimitsMin();
+	float GetLimitsMax();
+	boolean HasLimits();
+	[Ref] SpringSettings GetLimitsSpringSettings();
+	void SetLimitsSpringSettings([Const, Ref] SpringSettings inLimitsSpringSettings);
+	[Value] Vec3 GetTotalLambdaPosition();
+	[Value] Vector2 GetTotalLambdaRotation();
+	float GetTotalLambdaRotationLimits();
+	float GetTotalLambdaMotor();
+};
+
+HingeConstraint implements TwoBodyConstraint;
+
 // Cone constraint
 interface ConeConstraintSettings {
 	void ConeConstraintSettings();
@@ -686,6 +776,11 @@ interface ConeConstraintSettings {
 };
 
 ConeConstraintSettings implements TwoBodyConstraintSettings;
+
+interface ConeConstraint {
+};
+
+ConeConstraint implements TwoBodyConstraint;
 
 // Slider constraint
 interface SliderConstraintSettings {
@@ -708,6 +803,11 @@ interface SliderConstraintSettings {
 
 SliderConstraintSettings implements TwoBodyConstraintSettings;
 
+interface SliderConstraint {
+};
+
+SliderConstraint implements TwoBodyConstraint;
+
 // Swing twist constraint
 interface SwingTwistConstraintSettings {
 	void SwingTwistConstraintSettings();
@@ -729,6 +829,11 @@ interface SwingTwistConstraintSettings {
 };
 
 SwingTwistConstraintSettings implements TwoBodyConstraintSettings;
+
+interface SwingTwistConstraint {
+};
+
+SwingTwistConstraint implements TwoBodyConstraint;
 
 // Six DOF constraint
 interface SixDOFConstraintSettings {
@@ -754,6 +859,11 @@ interface SixDOFConstraintSettings {
 };
 
 SixDOFConstraintSettings implements TwoBodyConstraintSettings;
+
+interface SixDOFConstraint {
+};
+
+SixDOFConstraint implements TwoBodyConstraint;
 
 interface BodyID {
 	void BodyID();

@@ -61,6 +61,7 @@ using ArraySoftBodySharedSettingsFace = Array<SoftBodySharedSettingsFace>;
 using ArraySoftBodySharedSettingsEdge = Array<SoftBodySharedSettingsEdge>;
 using ArraySoftBodySharedSettingsVolume = Array<SoftBodySharedSettingsVolume>;
 using EGroundState = CharacterBase::EGroundState;
+using Vector2 = Vector<2>;
 
 // Alias for EShapeType values to avoid clashes
 constexpr EShapeType EShapeType_Convex = EShapeType::Convex;
@@ -84,6 +85,25 @@ constexpr EShapeSubType EShapeSubType_OffsetCenterOfMass = EShapeSubType::Offset
 constexpr EShapeSubType EShapeSubType_Mesh = EShapeSubType::Mesh;
 constexpr EShapeSubType EShapeSubType_HeightField = EShapeSubType::HeightField;
 
+// Alias for EConstraintType values to avoid clashes
+constexpr EConstraintType EConstraintType_Constraint = EConstraintType::Constraint;
+constexpr EConstraintType EConstraintType_TwoBodyConstraint = EConstraintType::TwoBodyConstraint;
+
+// Alias for EConstraintSubType values to avoid clashes
+constexpr EConstraintSubType EConstraintSubType_Fixed = EConstraintSubType::Fixed;
+constexpr EConstraintSubType EConstraintSubType_Point = EConstraintSubType::Point;
+constexpr EConstraintSubType EConstraintSubType_Hinge = EConstraintSubType::Hinge;
+constexpr EConstraintSubType EConstraintSubType_Slider = EConstraintSubType::Slider;
+constexpr EConstraintSubType EConstraintSubType_Distance = EConstraintSubType::Distance;
+constexpr EConstraintSubType EConstraintSubType_Cone = EConstraintSubType::Cone;
+constexpr EConstraintSubType EConstraintSubType_SwingTwist = EConstraintSubType::SwingTwist;
+constexpr EConstraintSubType EConstraintSubType_SixDOF = EConstraintSubType::SixDOF;
+constexpr EConstraintSubType EConstraintSubType_Path = EConstraintSubType::Path;
+constexpr EConstraintSubType EConstraintSubType_Vehicle = EConstraintSubType::Vehicle;
+constexpr EConstraintSubType EConstraintSubType_RackAndPinion = EConstraintSubType::RackAndPinion;
+constexpr EConstraintSubType EConstraintSubType_Gear = EConstraintSubType::Gear;
+constexpr EConstraintSubType EConstraintSubType_Pulley = EConstraintSubType::Pulley;
+
 // Alias for SixDOFConstraintSettings::EAxis to avoid clashes
 using SixDOFConstraintSettings_EAxis = SixDOFConstraintSettings::EAxis;
 constexpr SixDOFConstraintSettings_EAxis SixDOFConstraintSettings_EAxis_TranslationX = SixDOFConstraintSettings_EAxis::TranslationX;
@@ -92,6 +112,11 @@ constexpr SixDOFConstraintSettings_EAxis SixDOFConstraintSettings_EAxis_Translat
 constexpr SixDOFConstraintSettings_EAxis SixDOFConstraintSettings_EAxis_RotationX = SixDOFConstraintSettings_EAxis::RotationX;
 constexpr SixDOFConstraintSettings_EAxis SixDOFConstraintSettings_EAxis_RotationY = SixDOFConstraintSettings_EAxis::RotationY;
 constexpr SixDOFConstraintSettings_EAxis SixDOFConstraintSettings_EAxis_RotationZ = SixDOFConstraintSettings_EAxis::RotationZ;
+
+// Alias for EMotorState values to avoid clashes
+constexpr EMotorState EMotorState_Off = EMotorState::Off;
+constexpr EMotorState EMotorState_Velocity = EMotorState::Velocity;
+constexpr EMotorState EMotorState_Position = EMotorState::Position;
 
 // Callback for traces
 static void TraceImpl(const char *inFMT, ...)
