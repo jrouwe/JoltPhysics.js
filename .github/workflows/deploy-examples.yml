@@ -12,9 +12,15 @@ jobs:
     steps:
     - name: Checkout Code
       uses: actions/checkout@v4
-        
-    - name: Replace URL
-      run: sed -i 's+./js/jolt-physics.wasm-compat.js+https://www.unpkg.com/jolt-physics/dist/jolt-physics.wasm-compat.js+g' ${{github.workspace}}/Examples/*.html
+
+    - name: Setup Node.js 18.x
+      uses: actions/setup-node@v2
+      with:
+        node-version: 18.x
+
+    - name: Build
+      run: ./ci/build-examples.sh
+      shell: bash
 
     - name: Deploy
       uses: peaceiris/actions-gh-pages@v3
