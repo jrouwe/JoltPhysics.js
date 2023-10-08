@@ -282,6 +282,30 @@ interface Plane {
 	void SetConstant(float inConstant);
 };
 
+interface TransformedShape {
+	void CastRay([Const, Ref] RRayCast inRay, [Const, Ref] RayCastSettings inRayCastSettings, [Ref] CastRayCollector ioCollector, [Const, Ref] ShapeFilter inShapeFilter);
+	void CollidePoint([Const, Ref] Vec3 inPoint, [Ref] CollidePointCollector ioCollector, [Const, Ref] ShapeFilter inShapeFilter);
+	void CollideShape([Const] Shape inShape, [Const, Ref] Vec3 inShapeScale, [Const, Ref] Mat44 inCenterOfMassTransform, [Const, Ref] CollideShapeSettings inCollideShapeSettings, [Const, Ref] Vec3 inBaseOffset, [Ref] CollideShapeCollector ioCollector, [Const, Ref] ShapeFilter inShapeFilter);
+	void CastShape([Const, Ref] RShapeCast inShapeCast, [Const, Ref] ShapeCastSettings inShapeCastSettings, [Const, Ref] Vec3 inBaseOffset, [Ref] CastShapeCollector ioCollector, [Const, Ref] ShapeFilter inShapeFilter);
+	void CollectTransformedShapes([Const, Ref] AABox inBox, [Ref] TransformedShapeCollector ioCollector, [Const, Ref] ShapeFilter inShapeFilter);
+	[Value] Vec3 GetShapeScale();
+	void SetShapeScale([Const, Ref] Vec3 inScale);
+	[Value] Mat44 GetCenterOfMassTransform();
+	[Value] Mat44 GetInverseCenterOfMassTransform();
+	void SetWorldTransform([Const, Ref] Vec3 inPosition, [Const, Ref] Quat inRotation, [Const, Ref] Vec3 inScale);
+	void SetWorldTransform([Const, Ref] Mat44 inTransform);
+	[Value] Mat44 GetWorldTransform();
+	[Value] AABox GetWorldSpaceBounds();
+	[Value] Vec3 GetWorldSpaceSurfaceNormal([Const, Ref] SubShapeID inSubShapeID, [Const, Ref] Vec3 inPosition);
+	[Const] PhysicsMaterial GetMaterial([Const, Ref] SubShapeID inSubShapeID);
+
+	[Value] attribute Vec3 mShapePositionCOM;
+	[Value] attribute Quat mShapeRotation;
+	[Const] attribute Shape mShape;
+	[Value] attribute Float3 mShapeScale;
+	[Value] attribute BodyID mBodyID;
+};
+
 interface PhysicsMaterial {
 	void PhysicsMaterial();
 };
@@ -804,6 +828,7 @@ interface Body {
 	[Value] Vec3 GetCenterOfMassPosition();
 	[Value] Mat44 GetCenterOfMassTransform();
 	[Value] AABox GetWorldSpaceBounds();
+	[Value] TransformedShape GetTransformedShape();
 	MotionProperties GetMotionProperties();
 };
 
@@ -836,6 +861,7 @@ interface BodyInterface {
 	void AddImpulse([Const, Ref] BodyID inBodyID, [Const, Ref] Vec3 inImpulse);
 	void AddImpulse([Const, Ref] BodyID inBodyID, [Const, Ref] Vec3 inImpulse, [Const, Ref] Vec3 inPosition);
 	void AddAngularImpulse([Const, Ref] BodyID inBodyID, [Const, Ref] Vec3 inAngularImpulse);
+	[Value] TransformedShape GetTransformedShape([Const, Ref] BodyID inBodyID);
 };
 
 interface StateRecorder {
@@ -973,6 +999,8 @@ interface ContactListenerJS {
 
 interface RayCastBodyCollector {
 	void Reset();
+	void SetContext([Const] TransformedShape inContext);
+	[Const] TransformedShape GetContext();
 	void UpdateEarlyOutFraction(float inFraction);
 	void ResetEarlyOutFraction(float inFraction);
 	void ForceEarlyOut();
@@ -990,6 +1018,8 @@ interface RayCastBodyCollectorJS {
 
 interface CollideShapeBodyCollector {
 	void Reset();
+	void SetContext([Const] TransformedShape inContext);
+	[Const] TransformedShape GetContext();
 	void UpdateEarlyOutFraction(float inFraction);
 	void ResetEarlyOutFraction(float inFraction);
 	void ForceEarlyOut();
@@ -1007,6 +1037,8 @@ interface CollideShapeBodyCollectorJS {
 
 interface CastShapeBodyCollector {
 	void Reset();
+	void SetContext([Const] TransformedShape inContext);
+	[Const] TransformedShape GetContext();
 	void UpdateEarlyOutFraction(float inFraction);
 	void ResetEarlyOutFraction(float inFraction);
 	void ForceEarlyOut();
@@ -1038,6 +1070,8 @@ interface RayCastSettings {
 
 interface CastRayCollector {
 	void Reset();
+	void SetContext([Const] TransformedShape inContext);
+	[Const] TransformedShape GetContext();
 	void UpdateEarlyOutFraction(float inFraction);
 	void ResetEarlyOutFraction(float inFraction);
 	void ForceEarlyOut();
@@ -1061,6 +1095,8 @@ interface CollidePointResult {
 
 interface CollidePointCollector {
 	void Reset();
+	void SetContext([Const] TransformedShape inContext);
+	[Const] TransformedShape GetContext();
 	void UpdateEarlyOutFraction(float inFraction);
 	void ResetEarlyOutFraction(float inFraction);
 	void ForceEarlyOut();
@@ -1094,6 +1130,8 @@ CollideShapeSettings implements CollideSettingsBase;
 
 interface CollideShapeCollector {
 	void Reset();
+	void SetContext([Const] TransformedShape inContext);
+	[Const] TransformedShape GetContext();
 	void UpdateEarlyOutFraction(float inFraction);
 	void ResetEarlyOutFraction(float inFraction);
 	void ForceEarlyOut();
@@ -1128,6 +1166,8 @@ ShapeCastResult implements CollideShapeResult;
 
 interface CastShapeCollector {
 	void Reset();
+	void SetContext([Const] TransformedShape inContext);
+	[Const] TransformedShape GetContext();
 	void UpdateEarlyOutFraction(float inFraction);
 	void ResetEarlyOutFraction(float inFraction);
 	void ForceEarlyOut();
@@ -1144,11 +1184,32 @@ interface CastShapeCollectorJS {
 	void AddHit([Const, Ref] ShapeCastResult inResult);
 };
 
+interface TransformedShapeCollector {
+	void Reset();
+	void SetContext([Const] TransformedShape inContext);
+	[Const] TransformedShape GetContext();
+	void UpdateEarlyOutFraction(float inFraction);
+	void ResetEarlyOutFraction(float inFraction);
+	void ForceEarlyOut();
+	boolean ShouldEarlyOut();
+	float GetEarlyOutFraction();
+	float GetPositiveEarlyOutFraction();
+};
+
+[JSImplementation="TransformedShapeCollector"]
+interface TransformedShapeCollectorJS {
+	void TransformedShapeCollectorJS();
+	void Reset();
+	void OnBody([Const, Ref] Body inBody);
+	void AddHit([Const, Ref] TransformedShape inResult);
+};
+
 interface NarrowPhaseQuery {
 	void CastRay([Const, Ref] RRayCast inRay, [Const, Ref] RayCastSettings inRayCastSettings, [Ref] CastRayCollector ioCollector, [Const, Ref] BroadPhaseLayerFilter inBroadPhaseLayerFilter, [Const, Ref] ObjectLayerFilter inObjectLayerFilter, [Const, Ref] BodyFilter inBodyFilter, [Const, Ref] ShapeFilter inShapeFilter);
 	void CollidePoint([Const, Ref] Vec3 inPoint, [Ref] CollidePointCollector ioCollector, [Const, Ref] BroadPhaseLayerFilter inBroadPhaseLayerFilter, [Const, Ref] ObjectLayerFilter inObjectLayerFilter, [Const, Ref] BodyFilter inBodyFilter, [Const, Ref] ShapeFilter inShapeFilter);
 	void CollideShape([Const] Shape inShape, [Const, Ref] Vec3 inShapeScale, [Const, Ref] Mat44 inCenterOfMassTransform, [Const, Ref] CollideShapeSettings inCollideShapeSettings, [Const, Ref] Vec3 inBaseOffset, [Ref] CollideShapeCollector ioCollector, [Const, Ref] BroadPhaseLayerFilter inBroadPhaseLayerFilter, [Const, Ref] ObjectLayerFilter inObjectLayerFilter, [Const, Ref] BodyFilter inBodyFilter, [Const, Ref] ShapeFilter inShapeFilter);
 	void CastShape([Const, Ref] RShapeCast inShapeCast, [Const, Ref] ShapeCastSettings inShapeCastSettings, [Const, Ref] Vec3 inBaseOffset, [Ref] CastShapeCollector ioCollector, [Const, Ref] BroadPhaseLayerFilter inBroadPhaseLayerFilter, [Const, Ref] ObjectLayerFilter inObjectLayerFilter, [Const, Ref] BodyFilter inBodyFilter, [Const, Ref] ShapeFilter inShapeFilter);
+	void CollectTransformedShapes([Const, Ref] AABox inBox, [Ref] TransformedShapeCollector ioCollector, [Const, Ref] BroadPhaseLayerFilter inBroadPhaseLayerFilter, [Const, Ref] ObjectLayerFilter inObjectLayerFilter, [Const, Ref] BodyFilter inBodyFilter, [Const, Ref] ShapeFilter inShapeFilter);
 };
 
 interface PhysicsSystem {
