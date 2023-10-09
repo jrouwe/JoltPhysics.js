@@ -1,3 +1,8 @@
+[![Version](https://img.shields.io/npm/v/jolt-physics)](https://www.npmjs.com/package/jolt-physics)
+[![Downloads](https://img.shields.io/npm/dt/jolt-physics.svg)](https://www.npmjs.com/package/jolt-physics)
+[![Bundle Size](https://img.shields.io/bundlephobia/min/jolt-physics?label=bundle%20size)](https://bundlephobia.com/result?p=jolt-physics)
+[![Build Status](https://github.com/jrouwe/JoltPhysics.js/actions/workflows/deploy-examples.yml/badge.svg)](https://github.com/jrouwe/JoltPhysics.js/actions/)
+
 # JoltPhysics.js
 
 This project enables using [Jolt Physics](https://github.com/jrouwe/JoltPhysics) in JavaScript.
