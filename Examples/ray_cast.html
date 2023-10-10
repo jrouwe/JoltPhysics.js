@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>JoltPhysics.js demo</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<link rel="stylesheet" type="text/css" href="style.css">
+	</head>
+	<body>
+		<div id="container">Loading...</div>
+		<div id="info">JoltPhysics.js ray cast demo</div>
+
+		<script src="js/three/three.min.js"></script>
+		<script src="js/three/OrbitControls.js"></script>
+		<script src="js/three/WebGL.js"></script>
+		<script src="js/three/stats.min.js"></script>
+		<script src="js/example.js"></script>
+
+		<script type="module">
+			// In case you haven't built the library yourself, replace URL with: https://www.unpkg.com/jolt-physics/dist/jolt-physics.wasm-compat.js
+			import initJolt from './js/jolt-physics.wasm-compat.js';
+
+			initJolt().then(function (Jolt) {
+				// Initialize this example
+				initExample(Jolt, null);
+
+				// Create a basic floor
+				createFloor();
+
+				// Create a box
+				createBox(new Jolt.Vec3(0, 1, 0), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(1, 1, 1), Jolt.Static, Jolt.NON_MOVING, 0x00ff00);
+
+				// Create ray
+				let ray = new Jolt.RRayCast;
+				ray.mOrigin = new Jolt.Vec3(-5, 1, 0);
+				ray.mDirection = new Jolt.Vec3(10, 0, 0);
+				addLine(ray.mOrigin, ray.mOrigin.Clone().Add(ray.mDirection), 0xff0000);
+
+				// Create ray cast settings (e.g. if we want back face culling)
+				let ray_settings = new Jolt.RayCastSettings;
+
+				// Perform the ray cast as if we were a moving object
+				let bp_filter = new Jolt.DefaultBroadPhaseLayerFilter(jolt.GetObjectVsBroadPhaseLayerFilter(), Jolt.MOVING);
+				let object_filter = new Jolt.DefaultObjectLayerFilter(jolt.GetObjectLayerPairFilter(), Jolt.MOVING);
+				let body_filter = new Jolt.BodyFilter(); // We don't want to filter out any bodies
+				let shape_filter = new Jolt.ShapeFilter(); // We don't want to filter out any shapes
+
+				// Create collector
+				let collector = new Jolt.CastRayCollectorJS;
+				collector.OnBody = (inBody) => {
+					inBody = Jolt.wrapPointer(inBody, Jolt.Body);
+					// Called for every body that is visited, we don't need to do anything here
+				};
+				collector.AddHit = (inRayCastResult) => {
+					inRayCastResult = Jolt.wrapPointer(inRayCastResult, Jolt.RayCastResult);
+					addMarker(ray.mOrigin.Clone().Add(ray.mDirection.Clone().Mul(inRayCastResult.mFraction)), 2, 0x0000ff);
+				};
+
+				// Cast the ray
+				physicsSystem.GetNarrowPhaseQuery().CastRay(ray, ray_settings, collector, bp_filter, object_filter, body_filter, shape_filter);
+			});
+		</script>
+	</body>
+</html>

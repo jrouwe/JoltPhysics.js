@@ -183,6 +183,10 @@ interface Vec3 {
 	void SetZ(float inZ);
 	void SetComponent(unsigned long inCoordinate, float inValue);
 	boolean IsNearZero(optional float inMaxDistSq);
+	[Operator="+=", Ref] Vec3 Add([Const, Ref] Vec3 inV);
+	[Operator="-=", Ref] Vec3 Sub([Const, Ref] Vec3 inV);
+	[Operator="*=", Ref] Vec3 Mul(float inV);
+	[Operator="/=", Ref] Vec3 Div(float inV);
 };
 
 interface Vector2 {
@@ -259,11 +263,15 @@ interface RRayCast {
 };
 
 interface BroadPhaseCastResult {
+	void BroadPhaseCastResult();
+
 	[Value] attribute BodyID mBodyID;
 	attribute float mFraction;
 };
 
 interface RayCastResult {
+	void RayCastResult();
+
 	[Value] attribute SubShapeID mSubShapeID2;
 };
 
@@ -303,6 +311,7 @@ interface Plane {
 };
 
 interface TransformedShape {
+	void TransformedShape();
 	void CastRay([Const, Ref] RRayCast inRay, [Const, Ref] RayCastSettings inRayCastSettings, [Ref] CastRayCollector ioCollector, [Const, Ref] ShapeFilter inShapeFilter);
 	void CollidePoint([Const, Ref] Vec3 inPoint, [Ref] CollidePointCollector ioCollector, [Const, Ref] ShapeFilter inShapeFilter);
 	void CollideShape([Const] Shape inShape, [Const, Ref] Vec3 inShapeScale, [Const, Ref] Mat44 inCenterOfMassTransform, [Const, Ref] CollideShapeSettings inCollideShapeSettings, [Const, Ref] Vec3 inBaseOffset, [Ref] CollideShapeCollector ioCollector, [Const, Ref] ShapeFilter inShapeFilter);
@@ -955,6 +964,7 @@ interface BodyID {
 };
 
 interface SubShapeID {
+	void SubShapeID();
 	[Const] long GetValue();
 	void SetValue(long inValue);
 };
@@ -1117,6 +1127,8 @@ interface BodyLockInterfaceLocking {
 BodyLockInterfaceLocking implements BodyLockInterface;
 
 interface PhysicsSettings {
+	void PhysicsSettings();
+
 	attribute long mMaxInFlightBodyPairs;
 	attribute long mStepListenersBatchSize;
 	attribute long mStepListenerBatchesPerJob;
@@ -1153,6 +1165,8 @@ interface CollideShapeResultFace {
 };
 
 interface CollideShapeResult {
+	void CollideShapeResult();
+
 	[Value] attribute Vec3 mContactPointOn1;
 	[Value] attribute Vec3 mContactPointOn2;
 	[Value] attribute Vec3 mPenetrationAxis;
@@ -1172,6 +1186,7 @@ interface ContactPoints {
 };
 
 interface ContactManifold {
+	void ContactManifold();
 	[Value] ContactManifold SwapShapes();
 	[Value] Vec3 GetWorldSpaceContactPointOn1(unsigned long inIndex);
 	[Value] Vec3 GetWorldSpaceContactPointOn2(unsigned long inIndex);
@@ -1186,6 +1201,7 @@ interface ContactManifold {
 };
 
 interface ContactSettings {
+	void ContactSettings();
 	attribute float mCombinedFriction;
 	attribute float mCombinedRestitution;
 	attribute float mInvMassScale1;
@@ -1198,6 +1214,7 @@ interface ContactSettings {
 };
 
 interface SubShapeIDPair {
+	void SubShapeIDPair();
 	[Value] BodyID GetBody1ID();
 	[Value] SubShapeID GetSubShapeID1();
 	[Value] BodyID GetBody2ID();
@@ -1288,6 +1305,8 @@ interface BroadPhaseQuery {
 };
 
 interface RayCastSettings {
+	void RayCastSettings();
+
 	attribute EBackFaceMode mBackFaceMode;
 	attribute boolean mTreatConvexAsSolid;
 };
@@ -1313,6 +1332,8 @@ interface CastRayCollectorJS {
 };
 
 interface CollidePointResult {
+	void CollidePointResult();
+
 	[Value] attribute BodyID mBodyID;
 	[Value] attribute SubShapeID mSubShapeID2;
 };
@@ -1346,6 +1367,8 @@ interface CollideSettingsBase {
 };
 
 interface CollideShapeSettings {
+	void CollideShapeSettings();
+
 	attribute float mMaxSeparationDistance;
 	attribute EBackFaceMode mBackFaceMode;
 };
@@ -1373,6 +1396,8 @@ interface CollideShapeCollectorJS {
 };
 
 interface ShapeCastSettings {
+	void ShapeCastSettings();
+
 	attribute EBackFaceMode mBackFaceModeTriangles;
 	attribute EBackFaceMode mBackFaceModeConvex;
 	attribute boolean mUseShrunkenShapeAndConvexRadius;
@@ -1382,6 +1407,8 @@ interface ShapeCastSettings {
 ShapeCastSettings implements CollideSettingsBase;
 
 interface ShapeCastResult {
+	void ShapeCastResult();
+
 	attribute float mFraction;
 	attribute boolean mIsBackFaceHit;
 };
@@ -1619,8 +1646,9 @@ interface CharacterVirtualSettings {
 
 CharacterVirtualSettings implements CharacterBaseSettings;
 
-interface CharacterContactSettings
-{
+interface CharacterContactSettings {
+	void CharacterContactSettings();
+
 	attribute boolean mCanPushCharacter;
 	attribute boolean mCanReceiveImpulses;
 };
@@ -1658,9 +1686,11 @@ interface TempAllocator {
 };
 
 interface BroadPhaseLayerFilter {
+	void BroadPhaseLayerFilter();
 };
 
 interface ObjectVsBroadPhaseLayerFilter {
+	void ObjectVsBroadPhaseLayerFilter();
 };
 
 interface DefaultBroadPhaseLayerFilter {
@@ -1670,6 +1700,7 @@ interface DefaultBroadPhaseLayerFilter {
 DefaultBroadPhaseLayerFilter implements ObjectLayerFilter;
 
 interface ObjectLayerFilter {
+	void ObjectLayerFilter();
 };
 
 [JSImplementation="ObjectLayerFilter"]
@@ -1679,6 +1710,7 @@ interface ObjectLayerFilterJS {
 };
 
 interface ObjectLayerPairFilter {
+	void ObjectLayerPairFilter();
 };
 
 [JSImplementation="ObjectLayerPairFilter"]
@@ -1717,6 +1749,7 @@ interface IgnoreSingleBodyFilter {
 IgnoreSingleBodyFilter implements BodyFilter;
 
 interface IgnoreMultipleBodiesFilter {
+	void IgnoreMultipleBodiesFilter();
 	void Clear();
 	void Reserve(unsigned long inSize);
 	void IgnoreBody([Const, Ref] BodyID inBodyID);

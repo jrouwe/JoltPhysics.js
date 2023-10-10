@@ -72,8 +72,9 @@ function initPhysics() {
 	bodyInterface = physicsSystem.GetBodyInterface();
 
 	// Helper functions
-	Jolt.Vec3.prototype.toString = function () { return `(${this.GetX()}, ${this.GetY()}, ${this.GetZ()})` }
-	Jolt.AABox.prototype.toString = function () { return `[${this.mMax.toString()}, ${this.mMin.toString()}]` }
+	Jolt.Vec3.prototype.ToString = function () { return `(${this.GetX()}, ${this.GetY()}, ${this.GetZ()})` };
+	Jolt.Vec3.prototype.Clone = function () { return new Jolt.Vec3(this.GetX(), this.GetY(), this.GetZ()); };
+	Jolt.AABox.prototype.ToString = function () { return `[${this.mMax.toString()}, ${this.mMin.toString()}]`; };
 }
 
 function updatePhysics(deltaTime) {
@@ -270,4 +271,29 @@ function createMeshFloor(n, cell_size, max_height, posX, posY, posZ) {
 	let creation_settings = new Jolt.BodyCreationSettings(shape, new Jolt.Vec3(posX, posY, posZ), new Jolt.Quat(0, 0, 0, 1), Jolt.Static, Jolt.NON_MOVING);
 	let body = bodyInterface.CreateBody(creation_settings);
 	addToScene(body, 0xc7c7c7);
+}
+
+function addLine(from, to, color) {
+	const material = new THREE.LineBasicMaterial({ color: color });
+	const points = [];
+	points.push(wrapVec3(from));
+	points.push(wrapVec3(to));
+	const geometry = new THREE.BufferGeometry().setFromPoints(points);
+	const line = new THREE.Line(geometry, material);
+	scene.add(line);
+}
+
+function addMarker(location, size, color) {
+	const material = new THREE.LineBasicMaterial({ color: color });
+	const points = [];
+	const center = wrapVec3(location);
+	points.push(center.clone().add(new THREE.Vector3(-size, 0, 0)));
+	points.push(center.clone().add(new THREE.Vector3(size, 0, 0)));
+	points.push(center.clone().add(new THREE.Vector3(0, -size, 0)));
+	points.push(center.clone().add(new THREE.Vector3(0, size, 0)));
+	points.push(center.clone().add(new THREE.Vector3(0, 0, -size)));
+	points.push(center.clone().add(new THREE.Vector3(0, 0, size)));
+	const geometry = new THREE.BufferGeometry().setFromPoints(points);
+	const line = new THREE.LineSegments(geometry, material);
+	scene.add(line);
 }
