@@ -55,7 +55,7 @@
 					inRayCastResult = Jolt.wrapPointer(inRayCastResult, Jolt.RayCastResult);
 					let hitPoint = ray.GetPointOnRay(inRayCastResult.mFraction);
 					addMarker(hitPoint, 1, 0x0000ff);
-					let hitNormal = collector.body.GetWorldSpaceSurfaceNormal(inRayCastResult.mSubShapeID, hitPoint);
+					let hitNormal = collector.body.GetWorldSpaceSurfaceNormal(inRayCastResult.mSubShapeID2, hitPoint);
 					addLine(hitPoint, hitPoint.Clone().Add(hitNormal.Mul(2)), 0x00ff00);
 				};
 
