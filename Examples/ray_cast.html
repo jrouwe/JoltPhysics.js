@@ -32,8 +32,8 @@
 
 				// Create ray
 				let ray = new Jolt.RRayCast;
-				ray.mOrigin = new Jolt.Vec3(-5, 1, 0);
-				ray.mDirection = new Jolt.Vec3(10, 0, 0);
+				ray.mOrigin = new Jolt.Vec3(-5, 1, -1);
+				ray.mDirection = new Jolt.Vec3(10, 0, 2);
 				addLine(ray.mOrigin, ray.mOrigin.Clone().Add(ray.mDirection), 0xff0000);
 
 				// Create ray cast settings (e.g. if we want back face culling)
@@ -49,11 +49,14 @@
 				let collector = new Jolt.CastRayCollectorJS;
 				collector.OnBody = (inBody) => {
 					inBody = Jolt.wrapPointer(inBody, Jolt.Body);
-					// Called for every body that is visited, we don't need to do anything here
+					collector.body = inBody; // Store the body for the AddHit callback
 				};
 				collector.AddHit = (inRayCastResult) => {
 					inRayCastResult = Jolt.wrapPointer(inRayCastResult, Jolt.RayCastResult);
-					addMarker(ray.mOrigin.Clone().Add(ray.mDirection.Clone().Mul(inRayCastResult.mFraction)), 2, 0x0000ff);
+					let hitPoint = ray.GetPointOnRay(inRayCastResult.mFraction);
+					addMarker(hitPoint, 1, 0x0000ff);
+					let hitNormal = collector.body.GetWorldSpaceSurfaceNormal(inRayCastResult.mSubShapeID, hitPoint);
+					addLine(hitPoint, hitPoint.Clone().Add(hitNormal.Mul(2)), 0x00ff00);
 				};
 
 				// Cast the ray

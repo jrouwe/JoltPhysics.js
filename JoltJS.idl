@@ -166,14 +166,23 @@ enum EMotorState {
 
 interface Vec3 {
 	void Vec3();
+	void Vec3([Const, Ref] Float3 inV);
 	void Vec3(float inX, float inY, float inZ);
 	[Value] static Vec3 sZero();
 	[Value] static Vec3 sAxisX();
 	[Value] static Vec3 sAxisY();
 	[Value] static Vec3 sAxisZ();
+	[Value] static Vec3 sReplicate(float inValue);
+	[Value] static Vec3 sMin([Const, Ref] Vec3 inLHS, [Const, Ref] Vec3 inRHS);
+	[Value] static Vec3 sMax([Const, Ref] Vec3 inLHS, [Const, Ref] Vec3 inRHS);
+	[Value] static Vec3 sClamp([Const, Ref] Vec3 inValue, [Const, Ref] Vec3 inMin, [Const, Ref] Vec3 inMax);
 	[Operator="[]"] float GetComponent(unsigned long inCoordinate);
+	[Operator="=="] boolean Equals([Const, Ref] Vec3 inV);
+	[Operator="!="] boolean NotEquals([Const, Ref] Vec3 inV);
+	float LengthSq();
 	float Length();
 	[Value] Vec3 Normalized();
+	[Value] Vec3 NormalizedOr([Const, Ref] Vec3 inZeroValue);
 	[Value] Vec3 GetNormalizedPerpendicular();
 	float GetX();
 	float GetY();
@@ -181,12 +190,25 @@ interface Vec3 {
 	void SetX(float inX);
 	void SetY(float inY);
 	void SetZ(float inZ);
+	void Set(float inX, float inY, float inZ);
 	void SetComponent(unsigned long inCoordinate, float inValue);
 	boolean IsNearZero(optional float inMaxDistSq);
+	boolean IsClose([Const, Ref] Vec3 inV, optional float inMaxDistSq);
+	boolean IsNormalized(optional float inTolerance);
+	long GetLowestComponentIndex();
+	long GetHighestComponentIndex();
+	[Const, Value] Vec3 Abs();
+	[Const, Value] Vec3 Reciprocal();
+	[Const, Value] Vec3 Cross([Const, Ref] Vec3 inRHS);
+	float Dot([Const, Ref] Vec3 inRHS);
 	[Operator="+=", Ref] Vec3 Add([Const, Ref] Vec3 inV);
 	[Operator="-=", Ref] Vec3 Sub([Const, Ref] Vec3 inV);
 	[Operator="*=", Ref] Vec3 Mul(float inV);
 	[Operator="/=", Ref] Vec3 Div(float inV);
+	float ReduceMin();
+	float ReduceMax();
+	[Const, Value] Vec3 Sqrt();
+	[Const, Value] Vec3 GetSign();
 };
 
 interface Vector2 {
@@ -194,28 +216,62 @@ interface Vector2 {
 	void SetZero();
 	void IsZero();
 	void IsClose([Const, Ref] Vector2 inV, optional float inMaxDistSq);
+	void IsNormalized(optional float inTolerance);
+	[Const, Value] Vector2 Normalized();
 	[Operator="[]"] float GetComponent(unsigned long inCoordinate);
+	[Operator="+=", Ref] Vector2 Add([Const, Ref] Vector2 inV);
+	[Operator="-=", Ref] Vector2 Sub([Const, Ref] Vector2 inV);
+	[Operator="*=", Ref] Vector2 Mul(float inV);
+	[Operator="/=", Ref] Vector2 Div(float inV);
+	float Dot([Const, Ref] Vector2 inRHS);
 };
 
 interface Quat {
 	void Quat();
 	void Quat(float inX, float inY, float inZ, float inW);
+	[Value] static Quat sZero();
 	[Value] static Quat sIdentity();
 	[Value] static Quat sRotation([Const, Ref] Vec3 inRotation, float inAngle);
+	[Value] static Quat sFromTo([Const, Ref] Vec3 inFrom, [Const, Ref] Vec3 inTo);
+	[Operator="=="] boolean Equals([Const, Ref] Quat inQ);
+	[Operator="!="] boolean NotEquals([Const, Ref] Quat inQ);
+	boolean IsClose([Const, Ref] Quat inQ, optional float inMaxDistSq);
+	boolean IsNormalized(optional float inTolerance);
 	float Length();
+	float LengthSq();
 	[Value] Quat Normalized();
 	[Value] static Quat sEulerAngles([Const, Ref] Vec3 inInput);
+	[Const, Value] Vec3 GetEulerAngles();
 	float GetX();
 	float GetY();
 	float GetZ();
 	float GetW();
+	[Const, Value] Vec3 GetXYZ();
+	void SetX(float inX);
+	void SetY(float inY);
+	void SetZ(float inZ);
+	void SetW(float inW);
+	void Set(float inX, float inY, float inZ, float inW);
+	[Const, Value] Vec3 InverseRotate([Const, Ref] Vec3 inV);
 	[Const, Value] Vec3 RotateAxisX();
 	[Const, Value] Vec3 RotateAxisY();
 	[Const, Value] Vec3 RotateAxisZ();
+	float Dot([Const, Ref] Quat inQ);
+	[Const, Value] Quat Conjugated();
+	[Const, Value] Quat Inversed();
+	[Const, Value] Quat EnsureWPositive();
+	[Const, Value] Quat GetPerpendicular();
+	float GetRotationAngle([Const, Ref] Vec3 inAxis);
+	[Const, Value] Quat GetTwist([Const, Ref] Vec3 inAxis);
+	void GetSwingTwist([Ref] Quat outSwing, [Ref] Quat outTwist);
+	[Const, Value] Quat LERP([Const, Ref] Quat inDestination, float inFraction);
+	[Const, Value] Quat SLERP([Const, Ref] Quat inDestination, float inFraction);
 };
 
 interface Float3 {
 	void Float3(float inX, float inY, float inZ);
+	[Operator="=="] boolean Equals([Const, Ref] Float3 inV);
+	[Operator="!="] boolean NotEquals([Const, Ref] Float3 inV);
 
 	attribute float x;
 	attribute float y;
@@ -223,17 +279,41 @@ interface Float3 {
 };
 
 interface Mat44 {
+	void Mat44();
+	[Value] static Mat44 sZero();
 	[Value] static Mat44 sIdentity();
+	[Value] static Mat44 sRotationX(float inX);
+	[Value] static Mat44 sRotationY(float inY);
+	[Value] static Mat44 sRotationZ(float inZ);
+	[Value] static Mat44 sRotation([Const, Ref] Quat inQ);
+	[Value] static Mat44 sTranslation([Const, Ref] Vec3 inTranslation);
 	[Value] static Mat44 sRotationTranslation([Const, Ref] Quat inRotation, [Const, Ref] Vec3 inTranslation);
+	[Value] static Mat44 sInverseRotationTranslation([Const, Ref] Quat inRotation, [Const, Ref] Vec3 inTranslation);
+	[Value] static Mat44 sScale(float inScale);
 	[Value] Vec3 GetAxisX();
 	[Value] Vec3 GetAxisY();
 	[Value] Vec3 GetAxisZ();
 	[Value] Mat44 GetRotation();
 	[Value] Quat GetQuaternion();
 	[Value] Vec3 GetTranslation();
+	boolean IsClose([Const, Ref] Mat44 inM, optional float inMaxDistSq);
+	[Value] Vec3 Multiply3x3([Const, Ref] Vec3 inV);
+	[Value] Vec3 Multiply3x3Transposed([Const, Ref] Vec3 inV);
+	[Value] Mat44 Transposed();
+	[Value] Mat44 Transposed3x3();
+	[Value] Mat44 Inversed();
+	[Value] Mat44 InversedRotationTranslation();
+	float GetDeterminant3x3();
+	[Value] Mat44 Inversed3x3();
+	[Value] Mat44 GetDirectionPreservingMatrix();
+	[Value] Mat44 PreTranslated([Const, Ref] Vec3 inTranslation);
+	[Value] Mat44 PostTranslated([Const, Ref] Vec3 inTranslation);
+	[Value] Mat44 PreScaled([Const, Ref] Vec3 inScale);
+	[Value] Mat44 PostScaled([Const, Ref] Vec3 inScale);
 };
 
 interface AABox {
+	void AABox();
 	void AABox([Const, Ref] Vec3 inMin, [Const, Ref] Vec3 inMax);
 	[Value] static AABox sBiggest();
 
@@ -242,6 +322,7 @@ interface AABox {
 };
 
 interface OrientedBox {
+	void OrientedBox();
 	void OrientedBox([Const, Ref] Mat44 inOrientation, [Const, Ref] Vec3 inHalfExtents);
 
 	[Value] attribute Mat44 mOrientation;
@@ -249,14 +330,22 @@ interface OrientedBox {
 };
 
 interface RayCast {
+	void RayCast();
 	void RayCast([Const, Ref] Vec3 inOrigin, [Const, Ref] Vec3 inDirection);
+	[Const, Value] RayCast Transformed([Const, Ref] Mat44 inTransform);
+	[Const, Value] RayCast Translated([Const, Ref] Vec3 inTranslation);
+	[Const, Value] Vec3 GetPointOnRay(float inFraction);
 
 	[Value] attribute Vec3 mOrigin;
 	[Value] attribute Vec3 mDirection;
 };
 
 interface RRayCast {
+	void RRayCast();
 	void RRayCast([Const, Ref] Vec3 inOrigin, [Const, Ref] Vec3 inDirection);
+	[Const, Value] RRayCast Transformed([Const, Ref] Mat44 inTransform);
+	[Const, Value] RRayCast Translated([Const, Ref] Vec3 inTranslation);
+	[Const, Value] Vec3 GetPointOnRay(float inFraction);
 
 	[Value] attribute Vec3 mOrigin;
 	[Value] attribute Vec3 mDirection;
@@ -308,6 +397,11 @@ interface Plane {
 	void SetNormal([Const, Ref] Vec3 inNormal);
 	float GetConstant();
 	void SetConstant(float inConstant);
+	[Const, Value] Plane sFromPointAndNormal([Const, Ref] Vec3 inPoint, [Const, Ref] Vec3 inNormal);
+	[Const, Value] Plane sFromPointsCCW([Const, Ref] Vec3 inPoint1, [Const, Ref] Vec3 inPoint2, [Const, Ref] Vec3 inPoint3);
+	[Const, Value] Plane Offset(float inDistance);
+	[Const, Value] Plane GetTransformed([Const, Ref] Mat44 inTransform);
+	float SignedDistance([Const, Ref] Vec3 inPoint);
 };
 
 interface TransformedShape {
@@ -1025,6 +1119,8 @@ interface CollisionGroup {
 interface Body {
 	[Value] BodyID GetID();
 	boolean IsActive();
+	boolean IsRigidBody();
+	boolean IsSoftBody();
 	boolean IsStatic();
 	boolean IsKinematic();
 	boolean IsDynamic();
@@ -1034,6 +1130,10 @@ interface Body {
 	void SetMotionType(EMotionType inMotionType);
 	void SetIsSensor(boolean inIsSensor);
 	boolean IsSensor();
+	void SetSensorDetectsStatic(boolean inDetectsStatic);
+	boolean SensorDetectsStatic();
+	void SetUseManifoldReduction(boolean inUseReduction);
+	boolean GetUseManifoldReduction();
 	unsigned short GetObjectLayer();
 	[Ref] CollisionGroup GetCollisionGroup();
 	boolean GetAllowSleeping();
@@ -1051,19 +1151,27 @@ interface Body {
 	void AddForce([Const, Ref] Vec3 inForce);
 	void AddForce([Const, Ref] Vec3 inForce, [Const, Ref] Vec3 inPosition);
 	void AddTorque([Const, Ref] Vec3 inTorque);
+	[Const, Value] Vec3 GetAccumulatedForce();
+	[Const, Value] Vec3 GetAccumulatedTorque();
+	void ResetForce();
+	void ResetTorque();
 	void AddImpulse([Const, Ref] Vec3 inImpulse);
 	void AddImpulse([Const, Ref] Vec3 inImpulse, [Const, Ref] Vec3 inPosition);
+	void AddAngularImpulse([Const, Ref] Vec3 inAngularImpulse);
 	void MoveKinematic([Const, Ref] Vec3 inPosition, [Const, Ref] Quat inRotation, float inDeltaTime);
 	boolean IsInBroadPhase();
+	[Const, Value] Mat44 GetInverseInertia();
 	[Const] Shape GetShape();
 	[Value] Vec3 GetPosition();
 	[Value] Quat GetRotation();
 	[Value] Mat44 GetWorldTransform();
 	[Value] Vec3 GetCenterOfMassPosition();
 	[Value] Mat44 GetCenterOfMassTransform();
+	[Value] Mat44 GetInverseCenterOfMassTransform();
 	[Value] AABox GetWorldSpaceBounds();
 	[Value] TransformedShape GetTransformedShape();
 	MotionProperties GetMotionProperties();
+	[Const, Value] Vec3 GetWorldSpaceSurfaceNormal([Const, Ref] SubShapeID inSubShapeID, [Const, Ref] Vec3 inPosition);
 };
 
 interface BodyInterface {
