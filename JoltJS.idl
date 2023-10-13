@@ -1113,7 +1113,7 @@ interface CollisionGroup {
 	void SetGroupID(unsigned long inGroupID);
 	unsigned long GetGroupID();
 	void SetSubGroupID(unsigned long inSubGroupID);
-	void GetSubGroupID();
+	unsigned long GetSubGroupID();
 };
 
 interface Body {
