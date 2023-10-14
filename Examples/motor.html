@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>JoltPhysics.js demo</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<link rel="stylesheet" type="text/css" href="style.css">
+	</head>
+	<body>
+		<div id="container">Loading...</div>
+		<div id="info">JoltPhysics.js motor demo<br/>
+		A windmill using powered hinge constraints and a block on a powered slider constraint.</div>
+
+		<script src="js/three/three.min.js"></script>
+		<script src="js/three/OrbitControls.js"></script>
+		<script src="js/three/WebGL.js"></script>
+		<script src="js/three/stats.min.js"></script>
+		<script src="js/example.js"></script>
+
+		<script type="module">
+			// In case you haven't built the library yourself, replace URL with: https://www.unpkg.com/jolt-physics/dist/jolt-physics.wasm-compat.js
+			import initJolt from './js/jolt-physics.wasm-compat.js';
+
+			initJolt().then(function (Jolt) {
+				// Initialize this example
+				initExample(Jolt, null);
+				camera.position.z += 35;
+
+				// Create a basic floor
+				createFloor();
+
+				const makeWindmill = () => {
+					const box = createBox(new Jolt.Vec3(0,10,0), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(0.25,0.25,0.25), Jolt.Static, Jolt.NON_MOVING);
+					const wings = [
+						createBox(new Jolt.Vec3(5,10,0), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(4,0.5,0.5), Jolt.Dynamic, Jolt.MOVING),
+						createBox(new Jolt.Vec3(-5,10,0), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(4,0.5,0.5), Jolt.Dynamic, Jolt.MOVING),
+						createBox(new Jolt.Vec3(0,15,0), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(0.5,4,0.5), Jolt.Dynamic, Jolt.MOVING),
+						createBox(new Jolt.Vec3(0,5,0), Jolt.Quat.prototype.sIdentity(),  new Jolt.Vec3(0.5,4,0.5), Jolt.Dynamic, Jolt.MOVING),
+					]
+					wings.forEach(wing => {
+						const motionProps = wing.GetMotionProperties();
+						const mass = 10;
+						motionProps.SetInverseMass(1.0 / mass);
+						let c = new Jolt.HingeConstraintSettings();
+						c.mPoint1.Set(0, 10, 0);
+						c.mPoint2 = c.mPoint1;
+						c.mHingeAxis1.Set(0, 0, 1);
+						c.mHingeAxis2 = c.mHingeAxis1;
+						c.mNormalAxis1.Set(1, 0, 0);
+						c.mNormalAxis2 = c.mNormalAxis;
+						const joint = c.Create(box, wing);
+						const hinge = Jolt.castObject(joint, Jolt.HingeConstraint);
+						physicsSystem.AddConstraint(hinge);
+						hinge.SetMotorState(Jolt.EMotorState_Velocity);
+						hinge.SetTargetAngularVelocity(-5);
+					})
+
+					// Sphere moving towards the wings
+					const sphere = createSphere(new Jolt.Vec3(-20, 2, 0), 2, Jolt.Dynamic, Jolt.MOVING, 0x118811);
+					sphere.GetMotionProperties().SetInverseMass(1.0 / 5);
+					sphere.AddImpulse(new Jolt.Vec3(100.0, 0, 0));
+				}
+
+				const createSlider = () => {
+					const platform = createBox(new Jolt.Vec3(15, 0.25, 0), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(8, 0.25, 2), Jolt.Static, Jolt.NON_MOVING, 0x993333);
+					const target = createBox(new Jolt.Vec3(23, 2, 0), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(.5, 2, 2),	Jolt.Static, Jolt.NON_MOVING, 0x666633);
+					const box = createBox(new Jolt.Vec3(15, 1.25, 0), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(0.75, 0.75, 0.75), Jolt.Dynamic, Jolt.MOVING, 0x003366);
+					box.GetMotionProperties().SetInverseMass(1.0 / 5);
+					
+					const c = new Jolt.SliderConstraintSettings();
+					c.mPoint1.Set(15, 1.25, 0);
+					c.mPoint2.Set(22.5, 1.25, 0);
+					c.mSliderAxis1.Set(1, 0, 0);
+					c.mSliderAxis2 = c.mSliderAxis1;
+					c.mNormalAxis1.Set(0, 1, 0);
+					c.mNormalAxis2 = c.mNormalAxis;
+					const joint = c.Create(box, target);
+					const slider = Jolt.castObject(joint, Jolt.SliderConstraint);
+					physicsSystem.AddConstraint(slider);
+					slider.SetMotorState(Jolt.EMotorState_Position);
+					slider.SetTargetPosition(0);
+				}
+
+				makeWindmill();
+				createSlider();
+			});
+		</script>
+	</body>
+</html>
