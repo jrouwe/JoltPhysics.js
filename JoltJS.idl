@@ -532,7 +532,7 @@ ConvexShape implements Shape;
 
 // Sphere
 interface SphereShapeSettings {
-	void SphereShapeSettings(float inRadius, [Const] PhysicsMaterial inMaterial);
+	void SphereShapeSettings(float inRadius, [Const] optional PhysicsMaterial inMaterial);
 
 	attribute float mRadius;
 };
@@ -540,7 +540,7 @@ interface SphereShapeSettings {
 SphereShapeSettings implements ConvexShapeSettings;
 
 interface SphereShape {
-	void SphereShape(float inRadius, [Const] PhysicsMaterial inMaterial);
+	void SphereShape(float inRadius, [Const] optional PhysicsMaterial inMaterial);
 	float GetRadius();
 };
 
@@ -584,7 +584,7 @@ CylinderShape implements ConvexShape;
 
 // Capsule
 interface CapsuleShapeSettings {
-	void CapsuleShapeSettings(float inHalfHeight, float inRadius, optional PhysicsMaterial inMaterial);
+	void CapsuleShapeSettings(float inHalfHeight, float inRadius, [Const] optional PhysicsMaterial inMaterial);
 
 	attribute float mRadius;
 	attribute float mHalfHeightOfCylinder;
@@ -593,7 +593,7 @@ interface CapsuleShapeSettings {
 CapsuleShapeSettings implements ConvexShapeSettings;
 
 interface CapsuleShape {
-	void CapsuleShape(float inHalfHeight, float inRadius, optional PhysicsMaterial inMaterial);
+	void CapsuleShape(float inHalfHeight, float inRadius, [Const] optional PhysicsMaterial inMaterial);
 	float GetRadius();
 	float GetHalfHeightOfCylinder();
 };
@@ -602,7 +602,7 @@ CapsuleShape implements ConvexShape;
 
 // Tapered capsule
 interface TaperedCapsuleShapeSettings {
-	void TaperedCapsuleShapeSettings(float inHalfHeightOfTaperedCylinder, float inTopRadius, float inBottomRadius, [Const] PhysicsMaterial inMaterial);
+	void TaperedCapsuleShapeSettings(float inHalfHeightOfTaperedCylinder, float inTopRadius, float inBottomRadius, [Const] optional PhysicsMaterial inMaterial);
 
 	attribute float mHalfHeightOfTaperedCylinder;
 	attribute float mTopRadius;
@@ -692,7 +692,7 @@ RotatedTranslatedShape implements Shape;
 
 // Mesh shape
 interface MeshShapeSettings {
-	void MeshShapeSettings([Ref, Const] TriangleList inTriangleList, [Ref, Const] PhysicsMaterialList inMaterialList);
+	void MeshShapeSettings([Ref, Const] TriangleList inTriangleList, [Ref, Const] optional PhysicsMaterialList inMaterialList);
 	void MeshShapeSettings([Ref, Const] VertexList inVertices, [Ref, Const] IndexedTriangleList inTriangles, [Ref, Const] PhysicsMaterialList inMaterialList);
 };
 
