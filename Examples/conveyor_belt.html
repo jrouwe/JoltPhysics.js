@@ -8,8 +8,8 @@
 	</head>
 	<body>
 		<div id="container">Loading...</div>
-		<div id="info">JoltPhysics.js contact listener demo<br/>
-			This demo shows how to get contact callbacks from the physics engine.
+		<div id="info">JoltPhysics.js ConveyorBelt demo<br/>
+			This demo shows how to use the contact listener to modify object angular and linear velocity
 		</div>
 
 		<script src="js/three/three.min.js"></script>
@@ -23,12 +23,16 @@
 			import initJolt from './js/jolt-physics.wasm-compat.js';
 
 			initJolt().then(function (Jolt) {
+				
 				// Initialize this example
 				initExample(Jolt, null);
+				
+				camera.position.z += 60;
+				camera.position.y += 20;
+				camera.position.x += 50;
 
 				// Create a basic floor
 				createBox(new Jolt.Vec3(0,-5,0), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(100,0.05,100), Jolt.Static, Jolt.NON_MOVING, 0x333333)
-
 
 				// Create conveyor belts
 				const cBeltWidth = 10.0;
@@ -40,7 +44,7 @@
 					const rot1 = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0,1,0), 0.5 * Math.PI * i);
 					const rot2 = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1,0,0), DegreesToRadians(1.0));
 					const rotation = rot1.clone().multiply(rot2);
-					const position = new THREE.Vector3(cBeltLength, 6.0, cBeltWidth).applyQuaternion(rotation);
+					const position = new THREE.Vector3(cBeltLength, 20.0, cBeltWidth).applyQuaternion(rotation);
 					const belt = createBox(new Jolt.Vec3(position.x, position.y, position.z),
 											new Jolt.Quat(rotation.x, rotation.y, rotation.z, rotation.w),
 								new Jolt.Vec3(cBeltLength, 0.1, cBeltWidth), Jolt.Static, Jolt.NON_MOVING);
@@ -52,12 +56,11 @@
 				// Bodies with decreasing friction
 				for (let i = 0; i <= 10; ++i)
 				{
-					const cargo = createBox(new Jolt.Vec3(-cBeltLength + i * 10.0, 10.0, -cBeltLength),
+					const cargo = createBox(new Jolt.Vec3(-cBeltLength + i * 10.0, 25.0, 0),
 						 Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(2,2,2), Jolt.Dynamic, Jolt.MOVING);
 						 cargo.SetFriction(Math.max((0.0, 1.0 - 0.1 * i)));
 				}
 
-				
 				// Create 2 cylinders
 				let cylinder_settings = new Jolt.BodyCreationSettings(new Jolt.CylinderShape(6.0, 1.0, 0.05), 
 								new Jolt.Vec3(-25.0, 1.0, -20.0), Jolt.Quat.prototype.sRotation(new Jolt.Vec3(0,0,1), 0.5 * Math.PI), Jolt.Dynamic, Jolt.MOVING);
@@ -70,11 +73,13 @@
 					const dynamic_belt = createBox(new Jolt.Vec3(-25.0, 3.0, 0), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(5.0, 0.1, 25.0), Jolt.Dynamic, Jolt.MOVING, 0x333399)
 					mLinearBelts.push(dynamic_belt);
 
+					// Create cargo on the dynamic belt
 					const cargo = createBox(new Jolt.Vec3(-25.0, 6.0, 15.0),
 							 Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(2,2,2), Jolt.Dynamic, Jolt.MOVING, 0x990099);
 					cargo.SetFriction(1);
 				}
 
+				// Create an angular belt
 				const mAngularBelt = createBox(new Jolt.Vec3(10.0, 3.0, 0), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(20.0, 0.1, 20.0), Jolt.Static, Jolt.NON_MOVING, 0x993333)
 	
 				// Bodies with decreasing friction dropping on the angular belt
@@ -86,9 +91,7 @@
 				}
 				// Register contact listener
 				const contactListener = new Jolt.ContactListenerJS();
-				contactListener.OnContactValidate = (inBody1, inBody2, inBaseOffset, inCollideShapeResult) => {
-						return Jolt.AcceptAllContactsForThisBodyPair;
-				};
+
 				contactListener.OnContactAdded = (inBody1, inBody2, inManifold, ioSettings) => {
 					inBody1 = Jolt.wrapPointer(inBody1, Jolt.Body);
 					inBody2 = Jolt.wrapPointer(inBody2, Jolt.Body);
@@ -128,7 +131,7 @@
 						const COM1 = wrapVec3(inBody1.GetCenterOfMassPosition());
 						const COM2 = wrapVec3(inBody2.GetCenterOfMassPosition());
 						const body2_linear_surface_velocity = body2_angular ?
-								body2_angular_surface_velocity.Cross(COM1.clonse().sub(COM2)) : new THREE.Vector3(0,0,0);
+								body2_angular_surface_velocity.cross(COM1.clone().sub(COM2)) : new THREE.Vector3(0,0,0);
 
 						// Calculate the relative angular surface velocity
 						const rls = body2_linear_surface_velocity;
@@ -139,9 +142,15 @@
 
 				};
 				contactListener.OnContactPersisted = (inBody1, inBody2, inManifold, ioSettings) => {
+					// Same behavior as contact added
 					contactListener.OnContactAdded(inBody1, inBody2, inManifold, ioSettings);
 				};
 				contactListener.OnContactRemoved = (inSubShapePair) => {
+					//required for JSInterface to have this function exist
+				};
+				contactListener.OnContactValidate = (inBody1, inBody2, inBaseOffset, inCollideShapeResult) => {
+					//required for JSInterface to have this function exist
+					return Jolt.AcceptAllContactsForThisBodyPair;
 				};
 				physicsSystem.SetContactListener(contactListener);
 			});
