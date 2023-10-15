@@ -8,7 +8,7 @@
 	</head>
 	<body>
 		<div id="container">Loading...</div>
-		<div id="info">JoltPhysics.js ConveyorBelt demo<br/>
+		<div id="info">JoltPhysics.js conveyor belt demo<br />
 			This demo shows how to use the contact listener to modify object angular and linear velocity
 		</div>
 
@@ -23,47 +23,42 @@
 			import initJolt from './js/jolt-physics.wasm-compat.js';
 
 			initJolt().then(function (Jolt) {
-				
+
 				// Initialize this example
 				initExample(Jolt, null);
-				
+
 				camera.position.z += 60;
 				camera.position.y += 20;
 				camera.position.x += 50;
 
 				// Create a basic floor
-				createBox(new Jolt.Vec3(0,-5,0), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(100,0.05,100), Jolt.Static, Jolt.NON_MOVING, 0x333333)
+				createFloor(100);
 
 				// Create conveyor belts
 				const cBeltWidth = 10.0;
 				const cBeltLength = 50.0;
 				const mLinearBelts = [];
-				for (let i = 0; i < 4; ++i)
-				{
+				for (let i = 0; i < 4; ++i) {
 					const friction = 0.25 * (i + 1);
-					const rot1 = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0,1,0), 0.5 * Math.PI * i);
-					const rot2 = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1,0,0), DegreesToRadians(1.0));
+					const rot1 = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), 0.5 * Math.PI * i);
+					const rot2 = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), DegreesToRadians(1.0));
 					const rotation = rot1.clone().multiply(rot2);
-					const position = new THREE.Vector3(cBeltLength, 20.0, cBeltWidth).applyQuaternion(rotation);
-					const belt = createBox(new Jolt.Vec3(position.x, position.y, position.z),
-											new Jolt.Quat(rotation.x, rotation.y, rotation.z, rotation.w),
-								new Jolt.Vec3(cBeltLength, 0.1, cBeltWidth), Jolt.Static, Jolt.NON_MOVING);
+					const position = new THREE.Vector3(cBeltLength, 6.0, cBeltWidth).applyQuaternion(rotation);
+					const belt = createBox(unwrapVec3(position), unwrapQuat(rotation), new Jolt.Vec3(cBeltWidth, 0.1, cBeltLength), Jolt.Static, Jolt.NON_MOVING);
 					belt.SetFriction(friction);
 					mLinearBelts.push(belt);
 				}
 
-
 				// Bodies with decreasing friction
-				for (let i = 0; i <= 10; ++i)
-				{
-					const cargo = createBox(new Jolt.Vec3(-cBeltLength + i * 10.0, 25.0, 0),
-						 Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(2,2,2), Jolt.Dynamic, Jolt.MOVING);
-						 cargo.SetFriction(Math.max((0.0, 1.0 - 0.1 * i)));
+				for (let i = 0; i <= 10; ++i) {
+					const cargo = createBox(new Jolt.Vec3(-cBeltLength + i * 10.0, 10.0, -cBeltLength),
+						Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(2, 2, 2), Jolt.Dynamic, Jolt.MOVING);
+					cargo.SetFriction(Math.max((0.0, 1.0 - 0.1 * i)));
 				}
 
 				// Create 2 cylinders
-				let cylinder_settings = new Jolt.BodyCreationSettings(new Jolt.CylinderShape(6.0, 1.0, 0.05), 
-								new Jolt.Vec3(-25.0, 1.0, -20.0), Jolt.Quat.prototype.sRotation(new Jolt.Vec3(0,0,1), 0.5 * Math.PI), Jolt.Dynamic, Jolt.MOVING);
+				let cylinder_settings = new Jolt.BodyCreationSettings(new Jolt.CylinderShape(6.0, 1.0, 0.05),
+					new Jolt.Vec3(-25.0, 1.0, -20.0), Jolt.Quat.prototype.sRotation(new Jolt.Vec3(0, 0, 1), 0.5 * Math.PI), Jolt.Dynamic, Jolt.MOVING);
 				addToScene(bodyInterface.CreateBody(cylinder_settings), 0xff0000);
 				cylinder_settings.mPosition.SetZ(20);
 				addToScene(bodyInterface.CreateBody(cylinder_settings), 0xff0000);
@@ -75,23 +70,22 @@
 
 					// Create cargo on the dynamic belt
 					const cargo = createBox(new Jolt.Vec3(-25.0, 6.0, 15.0),
-							 Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(2,2,2), Jolt.Dynamic, Jolt.MOVING, 0x990099);
+						Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(2, 2, 2), Jolt.Dynamic, Jolt.MOVING, 0x990099);
 					cargo.SetFriction(1);
 				}
 
 				// Create an angular belt
 				const mAngularBelt = createBox(new Jolt.Vec3(10.0, 3.0, 0), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(20.0, 0.1, 20.0), Jolt.Static, Jolt.NON_MOVING, 0x993333)
-	
+
 				// Bodies with decreasing friction dropping on the angular belt
-				for (let i = 0; i <= 6; ++i)
-				{
+				for (let i = 0; i <= 6; ++i) {
 					const cargo = createBox(new Jolt.Vec3(10.0, 10.0, -15.0 + 5.0 * i),
-						 Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(2,2,2), Jolt.Dynamic, Jolt.MOVING, 0x339999);
+						Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(2, 2, 2), Jolt.Dynamic, Jolt.MOVING, 0x339999);
 					cargo.SetFriction(Math.max((0.0, 1.0 - 0.1 * i)));
 				}
+
 				// Register contact listener
 				const contactListener = new Jolt.ContactListenerJS();
-
 				contactListener.OnContactAdded = (inBody1, inBody2, inManifold, ioSettings) => {
 					inBody1 = Jolt.wrapPointer(inBody1, Jolt.Body);
 					inBody2 = Jolt.wrapPointer(inBody2, Jolt.Body);
@@ -103,35 +97,33 @@
 					const rotation1 = wrapQuat(inBody1.GetRotation());
 					const rotation2 = wrapQuat(inBody2.GetRotation());
 
-					const body1_linear_belt = mLinearBelts.find( belt => belt.GetID().GetIndexAndSequenceNumber() == body1ID)
-					const body2_linear_belt = mLinearBelts.find( belt => belt.GetID().GetIndexAndSequenceNumber() == body2ID)
-					if (body1_linear_belt || body2_linear_belt)
-					{
+					const body1_linear_belt = mLinearBelts.find(belt => belt.GetID().GetIndexAndSequenceNumber() == body1ID)
+					const body2_linear_belt = mLinearBelts.find(belt => belt.GetID().GetIndexAndSequenceNumber() == body2ID)
+					if (body1_linear_belt || body2_linear_belt) {
 						// Determine the world space surface velocity of both bodies
 						const cLocalSpaceVelocity = new THREE.Vector3(0, 0, -10.0);
-						const body1_linear_surface_velocity = body1_linear_belt? cLocalSpaceVelocity.applyQuaternion(rotation1) : new THREE.Vector3(0,0,0);
-						const body2_linear_surface_velocity = body2_linear_belt? cLocalSpaceVelocity.applyQuaternion(rotation2) : new THREE.Vector3(0,0,0);
+						const body1_linear_surface_velocity = body1_linear_belt ? cLocalSpaceVelocity.applyQuaternion(rotation1) : new THREE.Vector3(0, 0, 0);
+						const body2_linear_surface_velocity = body2_linear_belt ? cLocalSpaceVelocity.applyQuaternion(rotation2) : new THREE.Vector3(0, 0, 0);
 
 						// Calculate the relative surface velocity
 						const v = body2_linear_surface_velocity.sub(body1_linear_surface_velocity);
-						ioSettings.mRelativeLinearSurfaceVelocity.Set(v.x,v.y,v.z);
+						ioSettings.mRelativeLinearSurfaceVelocity.Set(v.x, v.y, v.z);
 					}
 
 					const angularBodyId = mAngularBelt.GetID().GetIndexAndSequenceNumber();
 					const body1_angular = body1ID == angularBodyId;
 					const body2_angular = body2ID == angularBodyId;
-					if (body1_angular || body2_angular)
-					{
+					if (body1_angular || body2_angular) {
 						// Determine the world space angular surface velocity of both bodies
 						const cLocalSpaceAngularVelocity = new THREE.Vector3(0, DegreesToRadians(10.0), 0);
-						const body1_angular_surface_velocity = body1_angular? cLocalSpaceAngularVelocity.applyQuaternion(rotation1) : new THREE.Vector3(0,0,0);
-						const body2_angular_surface_velocity = body2_angular? cLocalSpaceAngularVelocity.applyQuaternion(rotation2) : new THREE.Vector3(0,0,0);
+						const body1_angular_surface_velocity = body1_angular ? cLocalSpaceAngularVelocity.applyQuaternion(rotation1) : new THREE.Vector3(0, 0, 0);
+						const body2_angular_surface_velocity = body2_angular ? cLocalSpaceAngularVelocity.applyQuaternion(rotation2) : new THREE.Vector3(0, 0, 0);
 
 						// Note that the angular velocity is the angular velocity around body 1's center of mass, so we need to add the linear velocity of body 2's center of mass
 						const COM1 = wrapVec3(inBody1.GetCenterOfMassPosition());
 						const COM2 = wrapVec3(inBody2.GetCenterOfMassPosition());
 						const body2_linear_surface_velocity = body2_angular ?
-								body2_angular_surface_velocity.cross(COM1.clone().sub(COM2)) : new THREE.Vector3(0,0,0);
+							body2_angular_surface_velocity.cross(COM1.clone().sub(COM2)) : new THREE.Vector3(0, 0, 0);
 
 						// Calculate the relative angular surface velocity
 						const rls = body2_linear_surface_velocity;
@@ -146,10 +138,10 @@
 					contactListener.OnContactAdded(inBody1, inBody2, inManifold, ioSettings);
 				};
 				contactListener.OnContactRemoved = (inSubShapePair) => {
-					//required for JSInterface to have this function exist
+					// Required for JSInterface to have this function exist
 				};
 				contactListener.OnContactValidate = (inBody1, inBody2, inBaseOffset, inCollideShapeResult) => {
-					//required for JSInterface to have this function exist
+					// Required for JSInterface to have this function exist
 					return Jolt.AcceptAllContactsForThisBodyPair;
 				};
 				physicsSystem.SetContactListener(contactListener);
