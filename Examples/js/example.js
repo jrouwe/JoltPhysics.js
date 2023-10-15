@@ -20,7 +20,9 @@ var onExampleUpdate;
 const DegreesToRadians = (deg) => deg * (Math.PI / 180.0);
 
 const wrapVec3 = (v) => new THREE.Vector3(v.GetX(), v.GetY(), v.GetZ());
+const unwrapVec3 = (v) => new Jolt.Vec3(v.x, v.y, v.z);
 const wrapQuat = (q) => new THREE.Quaternion(q.GetX(), q.GetY(), q.GetZ(), q.GetW());
+const unwrapQuat = (q) => new Jolt.Quat(q.x, q.y, q.z, q.w);
 
 function getRandomQuat() {
 	return Jolt.Quat.prototype.sRotation(new Jolt.Vec3(0.001 + Math.random(), Math.random(), Math.random()).Normalized(), 2 * Math.PI * Math.random());
@@ -160,8 +162,8 @@ function removeFromScene(threeObject) {
 	dynamicObjects.splice(idx, 1);
 }
 
-function createFloor() {
-	var shape = new Jolt.BoxShape(new Jolt.Vec3(50, 0.5, 50), 0.05, null);
+function createFloor(size = 50) {
+	var shape = new Jolt.BoxShape(new Jolt.Vec3(size, 0.5, size), 0.05, null);
 	var creation_settings = new Jolt.BodyCreationSettings(shape, new Jolt.Vec3(0, -0.5, 0), new Jolt.Quat(0, 0, 0, 1), Jolt.Static, Jolt.NON_MOVING);
 	let body = bodyInterface.CreateBody(creation_settings);
 	addToScene(body, 0xc7c7c7);
