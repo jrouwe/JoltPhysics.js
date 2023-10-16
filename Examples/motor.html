@@ -30,12 +30,12 @@
 				createFloor();
 
 				const makeWindmill = () => {
-					const box = createBox(new Jolt.Vec3(0,10,0), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(0.25,0.25,0.25), Jolt.Static, Jolt.NON_MOVING);
+					const box = createBox(new Jolt.Vec3(0, 10, 0), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(0.25, 0.25, 0.25), Jolt.Static, Jolt.NON_MOVING);
 					const wings = [
-						createBox(new Jolt.Vec3(5,10,0), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(4,0.5,0.5), Jolt.Dynamic, Jolt.MOVING),
-						createBox(new Jolt.Vec3(-5,10,0), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(4,0.5,0.5), Jolt.Dynamic, Jolt.MOVING),
-						createBox(new Jolt.Vec3(0,15,0), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(0.5,4,0.5), Jolt.Dynamic, Jolt.MOVING),
-						createBox(new Jolt.Vec3(0,5,0), Jolt.Quat.prototype.sIdentity(),  new Jolt.Vec3(0.5,4,0.5), Jolt.Dynamic, Jolt.MOVING),
+						createBox(new Jolt.Vec3(5, 10, 0), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(4, 0.5, 0.5), Jolt.Dynamic, Jolt.MOVING),
+						createBox(new Jolt.Vec3(-5, 10, 0), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(4, 0.5, 0.5), Jolt.Dynamic, Jolt.MOVING),
+						createBox(new Jolt.Vec3(0, 15, 0), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(0.5, 4, 0.5), Jolt.Dynamic, Jolt.MOVING),
+						createBox(new Jolt.Vec3(0, 5, 0), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(0.5, 4, 0.5), Jolt.Dynamic, Jolt.MOVING),
 					]
 					wings.forEach(wing => {
 						const motionProps = wing.GetMotionProperties();
@@ -57,19 +57,38 @@
 
 					// Sphere moving towards the wings
 					const sphere = createSphere(new Jolt.Vec3(-20, 2, 0), 2, Jolt.Dynamic, Jolt.MOVING, 0x118811);
-					sphere.GetMotionProperties().SetInverseMass(1.0 / 5);
-					sphere.AddImpulse(new Jolt.Vec3(100.0, 0, 0));
+					sphere.GetMotionProperties().SetInverseMass(1.0 / 15);
+					sphere.AddImpulse(new Jolt.Vec3(250.0, 0, 0));
+					sphere.SetRestitution(0.45);
+
+					// Create a wall for the ball to bounce against
+					const target = createBox(new Jolt.Vec3(-25, 15, 0), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(0.2, 15, 5), Jolt.Static, Jolt.NON_MOVING, 0x661122);
+
+					// Invisible right wall because the sphere gets lost sometimes
+					createBox(new Jolt.Vec3(50, 0, 0), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(0.2, 150, 50), Jolt.Static, Jolt.NON_MOVING, 0x661122);
+					dynamicObjects.pop().visible = false;
+
+					// Invisible top wall
+					createBox(new Jolt.Vec3(0, 75, 0), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(150, 0.2, 50), Jolt.Static, Jolt.NON_MOVING, 0x661122);
+					dynamicObjects.pop().visible = false;
 				}
 
 				const createSlider = () => {
-					const platform = createBox(new Jolt.Vec3(15, 0.25, 0), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(8, 0.25, 2), Jolt.Static, Jolt.NON_MOVING, 0x993333);
-					const target = createBox(new Jolt.Vec3(23, 2, 0), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(.5, 2, 2),	Jolt.Static, Jolt.NON_MOVING, 0x666633);
+					const platform = createBox(new Jolt.Vec3(18, 0.25, 0), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(12.5, 0.25, 2), Jolt.Static, Jolt.NON_MOVING, 0x993333);
+					const target = createBox(new Jolt.Vec3(30, 2, 0), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(0.5, 2, 2), Jolt.Static, Jolt.NON_MOVING, 0x666633);
 					const box = createBox(new Jolt.Vec3(15, 1.25, 0), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(0.75, 0.75, 0.75), Jolt.Dynamic, Jolt.MOVING, 0x003366);
 					box.GetMotionProperties().SetInverseMass(1.0 / 5);
-					
+
+					// Place irregular reference points along slider axis to show precise location control
+					const colors = [0xFF0000, 0x00FF00, 0x0000FF, 0xFFFF00];
+					const offsets = [0, 4, 13, 21];
+					colors.forEach((color, index) => {
+						createBox(new Jolt.Vec3(28 - offsets[index], 2, -2.75), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(1, 4, 0.75), Jolt.Static, Jolt.NON_MOVING, color);
+					})
+
 					const c = new Jolt.SliderConstraintSettings();
 					c.mPoint1.Set(15, 1.25, 0);
-					c.mPoint2.Set(22.5, 1.25, 0);
+					c.mPoint2.Set(28, 1.25, 0);
 					c.mSliderAxis1.Set(1, 0, 0);
 					c.mSliderAxis2 = c.mSliderAxis1;
 					c.mNormalAxis1.Set(0, 1, 0);
@@ -79,6 +98,18 @@
 					physicsSystem.AddConstraint(slider);
 					slider.SetMotorState(Jolt.EMotorState_Position);
 					slider.SetTargetPosition(0);
+
+					let pTime = 0;
+					let counter = 4; // Starts the motor counter closer to the initial spawn point
+					onExampleUpdate = (time, deltaTime) => {
+						if (time - pTime > 1.0) {
+							pTime = time;
+							// Creates a sequence going from -n to n, and set to absolute to wrap the sequence to up/down stepping
+							const index = Math.abs(counter++ % (offsets.length * 2 - 2) - (offsets.length - 1));
+							slider.SetTargetPosition(offsets[index]);
+							bodyInterface.ActivateBody(box.GetID());
+						}
+					}
 				}
 
 				makeWindmill();
