@@ -1,12 +1,11 @@
-name: Deploy Examples
+name: Build and Deploy
 
 on:
   push:
     branches: [ main ]
 
-# Deploys the examples
 jobs:
-  deploy-examples:
+  build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
@@ -22,9 +21,14 @@ jobs:
       run: ./ci/build-examples.sh
       shell: bash
 
-    - name: Deploy
+    - name: Deploy Examples
       uses: peaceiris/actions-gh-pages@v3
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         publish_dir: ./Examples
         force_orphan: true
+
+    - name: Publish NPM
+      env:
+        NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+      run: ./ci/npm-publish.sh
