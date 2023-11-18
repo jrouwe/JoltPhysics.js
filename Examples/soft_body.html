@@ -108,8 +108,8 @@
 					let z = 2.0 * Math.random();
 					let radius = 0.75;
 					let shape = new Jolt.SphereShape(radius, null);
-					let creationSettings = new Jolt.BodyCreationSettings(shape, new Jolt.Vec3(x, 15 + 2.0 * radius * s, z), Jolt.Quat.prototype.sIdentity(), Jolt.Dynamic, Jolt.MOVING);
-					creationSettings.mOverrideMassProperties = Jolt.CalculateInertia;
+					let creationSettings = new Jolt.BodyCreationSettings(shape, new Jolt.Vec3(x, 15 + 2.0 * radius * s, z), Jolt.Quat.prototype.sIdentity(), Jolt.EMotionType_Dynamic, Jolt.MOVING);
+					creationSettings.mOverrideMassProperties = Jolt.EOverrideMassProperties_CalculateInertia;
 					creationSettings.mMassPropertiesOverride.mMass = 100.0;
 					let body = bodyInterface.CreateBody(creationSettings);
 					addToScene(body, colors[s]);

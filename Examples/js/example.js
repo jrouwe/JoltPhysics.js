@@ -78,7 +78,7 @@ function initPhysics() {
 	Jolt.Vec3.prototype.Clone = function () { return new Jolt.Vec3(this.GetX(), this.GetY(), this.GetZ()); };
 	Jolt.Quat.prototype.ToString = function () { return `(${this.GetX()}, ${this.GetY()}, ${this.GetZ()}, ${this.GetW()})` };
 	Jolt.Quat.prototype.Clone = function () { return new Jolt.Vec3(this.GetX(), this.GetY(), this.GetZ(), this.GetW()); };
-	Jolt.AABox.prototype.ToString = function () { return `[${this.mMax.toString()}, ${this.mMin.toString()}]`; };
+	Jolt.AABox.prototype.ToString = function () { return `[${this.mMax.ToString()}, ${this.mMin.ToString()}]`; };
 }
 
 function updatePhysics(deltaTime) {
@@ -126,7 +126,7 @@ function renderExample() {
 		objThree.position.copy(wrapVec3(body.GetPosition()));
 		objThree.quaternion.copy(wrapQuat(body.GetRotation()));
 
-		if (body.GetBodyType() == Jolt.SoftBody)
+		if (body.GetBodyType() == Jolt.EBodyType_SoftBody)
 			objThree.geometry = createMeshForShape(body.GetShape());
 	}
 
@@ -142,7 +142,7 @@ function renderExample() {
 }
 
 function addToScene(body, color) {
-	bodyInterface.AddBody(body.GetID(), Jolt.Activate);
+	bodyInterface.AddBody(body.GetID(), Jolt.EActivation_Activate);
 
 	let threeObject = getThreeObjectForBody(body, color);
 	threeObject.userData.body = body;
@@ -164,7 +164,7 @@ function removeFromScene(threeObject) {
 
 function createFloor(size = 50) {
 	var shape = new Jolt.BoxShape(new Jolt.Vec3(size, 0.5, size), 0.05, null);
-	var creation_settings = new Jolt.BodyCreationSettings(shape, new Jolt.Vec3(0, -0.5, 0), new Jolt.Quat(0, 0, 0, 1), Jolt.Static, Jolt.NON_MOVING);
+	var creation_settings = new Jolt.BodyCreationSettings(shape, new Jolt.Vec3(0, -0.5, 0), new Jolt.Quat(0, 0, 0, 1), Jolt.EBodyType_Static, Jolt.NON_MOVING);
 	let body = bodyInterface.CreateBody(creation_settings);
 	addToScene(body, 0xc7c7c7);
 	return body;
@@ -272,7 +272,7 @@ function createMeshFloor(n, cell_size, max_height, posX, posY, posZ) {
 	let shape = new Jolt.MeshShapeSettings(triangles, new Jolt.PhysicsMaterialList).Create().Get();
 
 	// Create body
-	let creation_settings = new Jolt.BodyCreationSettings(shape, new Jolt.Vec3(posX, posY, posZ), new Jolt.Quat(0, 0, 0, 1), Jolt.Static, Jolt.NON_MOVING);
+	let creation_settings = new Jolt.BodyCreationSettings(shape, new Jolt.Vec3(posX, posY, posZ), new Jolt.Quat(0, 0, 0, 1), Jolt.EMotionType_Static, Jolt.NON_MOVING);
 	let body = bodyInterface.CreateBody(creation_settings);
 	addToScene(body, 0xc7c7c7);
 }

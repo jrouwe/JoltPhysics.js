@@ -45,7 +45,7 @@
 
 			const sEnableCharacterInertia = true;
 
-			const sBackFaceMode = Jolt.CollideWithBackFaces;
+			const sBackFaceMode = Jolt.EBackFaceMode_CollideWithBackFaces;
 			const sUpRotationX = 0;
 			const sUpRotationZ = 0;
 			const sMaxSlopeAngle = DegreesToRadians(45.0);
@@ -115,10 +115,10 @@
 			}
 
 
-			const mLavaObject = createBox(new Jolt.Vec3(0, -50, 0), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(1000, 2, 1000), Jolt.Static, Jolt.NON_MOVING, 0xcc2222);
+			const mLavaObject = createBox(new Jolt.Vec3(0, -50, 0), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(1000, 2, 1000), Jolt.EMotionType_Static, Jolt.NON_MOVING, 0xcc2222);
 			const mLavaObjectId = mLavaObject.GetID().GetIndexAndSequenceNumber();
 
-			const mConveyorBeltObject = createBox(new Jolt.Vec3(0, 0, -10), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(10, 0.25, 2), Jolt.Static, Jolt.NON_MOVING, 0x2222cc);
+			const mConveyorBeltObject = createBox(new Jolt.Vec3(0, 0, -10), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(10, 0.25, 2), Jolt.EMotionType_Static, Jolt.NON_MOVING, 0x2222cc);
 			const mConveyorBeltObjectId = mConveyorBeltObject.GetID().GetIndexAndSequenceNumber();
 
 			const characterContactListener = new Jolt.CharacterContactListenerJS();
@@ -236,7 +236,7 @@
 
 				let new_velocity;
 				const moving_towards_ground = (current_vertical_velocity.y - ground_velocity.y) < 0.1;
-				if (mCharacter.GetGroundState() == Jolt.OnGround	// If on ground
+				if (mCharacter.GetGroundState() == Jolt.EGroundState_OnGround					// If on ground
 					&& (sEnableCharacterInertia ?
 						moving_towards_ground													// Inertia enabled: And not moving away from ground
 						: !mCharacter.IsSlopeTooSteep(mCharacter.GetGroundNormal())))			// Inertia disabled: And not on a slope that is too steep
@@ -293,20 +293,20 @@
 			// Create a basic floor
 			createFloor();
 
-			createBox(new Jolt.Vec3(-45, 1, 0), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(0.5, 2, 45), Jolt.Static, Jolt.NON_MOVING);
-			createBox(new Jolt.Vec3(45, 1, 0), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(0.5, 2, 45), Jolt.Static, Jolt.NON_MOVING);
+			createBox(new Jolt.Vec3(-45, 1, 0), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(0.5, 2, 45), Jolt.EMotionType_Static, Jolt.NON_MOVING);
+			createBox(new Jolt.Vec3(45, 1, 0), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(0.5, 2, 45), Jolt.EMotionType_Static, Jolt.NON_MOVING);
 
 			// Stairs
 			for (let j = 0; j < 5; j++) {
 				let stepHeight = 0.3 + 0.1 * j;
 				for (let i = 1; i < 10; i++) {
-					createBox(new Jolt.Vec3(15 + 5 * j, i * stepHeight - 0.5 + stepHeight / 2, -20 - i * 3), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(2, stepHeight / 2, 2), Jolt.Static, Jolt.NON_MOVING);
+					createBox(new Jolt.Vec3(15 + 5 * j, i * stepHeight - 0.5 + stepHeight / 2, -20 - i * 3), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(2, stepHeight / 2, 2), Jolt.EMotionType_Static, Jolt.NON_MOVING);
 				}
 			}
 
 			// Slopes
 			for (let i = 0; i < 10; i++) {
-				createBox(new Jolt.Vec3(-40 + 5 * i, 2, -25), Jolt.Quat.prototype.sRotation(new Jolt.Vec3(1, 0, 0), DegreesToRadians(70 - i * 5.0)), new Jolt.Vec3(2.5, 0.6, 8), Jolt.Static, Jolt.NON_MOVING);
+				createBox(new Jolt.Vec3(-40 + 5 * i, 2, -25), Jolt.Quat.prototype.sRotation(new Jolt.Vec3(1, 0, 0), DegreesToRadians(70 - i * 5.0)), new Jolt.Vec3(2.5, 0.6, 8), Jolt.EMotionType_Static, Jolt.NON_MOVING);
 			}
 
 			{
@@ -314,9 +314,9 @@
 				const boxHalfExtent = 0.75;
 				let shape = new Jolt.BoxShape(new Jolt.Vec3(boxHalfExtent, boxHalfExtent, boxHalfExtent));
 				let creationSettings = new Jolt.BodyCreationSettings(shape, new Jolt.Vec3(-10.0, 5.0, 10.0),
-					new Jolt.Quat.prototype.sIdentity(), Jolt.Dynamic, Jolt.MOVING);
+					new Jolt.Quat.prototype.sIdentity(), Jolt.EMotionType_Dynamic, Jolt.MOVING);
 				creationSettings.mFriction = 0.1;
-				creationSettings.mOverrideMassProperties = Jolt.CalculateInertia;
+				creationSettings.mOverrideMassProperties = Jolt.EOverrideMassProperties_CalculateInertia;
 				creationSettings.mMassPropertiesOverride.mMass = 1;
 				let body = bodyInterface.CreateBody(creationSettings);
 				addToScene(body, 0x00ffff);

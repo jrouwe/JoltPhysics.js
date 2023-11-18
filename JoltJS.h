@@ -63,6 +63,23 @@ using ArraySoftBodySharedSettingsVolume = Array<SoftBodySharedSettingsVolume>;
 using EGroundState = CharacterBase::EGroundState;
 using Vector2 = Vector<2>;
 
+// Alias for EBodyType values to avoid clashes
+constexpr EBodyType EBodyType_RigidBody = EBodyType::RigidBody;
+constexpr EBodyType EBodyType_SoftBody = EBodyType::SoftBody;
+
+// Alias for EMotionType values to avoid clashes
+constexpr EMotionType EMotionType_Static = EMotionType::Static;
+constexpr EMotionType EMotionType_Kinematic = EMotionType::Kinematic;
+constexpr EMotionType EMotionType_Dynamic = EMotionType::Dynamic;
+
+// Alias for EMotionQuality values to avoid clashes
+constexpr EMotionQuality EMotionQuality_Discrete = EMotionQuality::Discrete;
+constexpr EMotionQuality EMotionQuality_LinearCast = EMotionQuality::LinearCast;
+
+// Alias for EActivation values to avoid clashes
+constexpr EActivation EActivation_Activate = EActivation::Activate;
+constexpr EActivation EActivation_DontActivate = EActivation::DontActivate;
+
 // Alias for EShapeType values to avoid clashes
 constexpr EShapeType EShapeType_Convex = EShapeType::Convex;
 constexpr EShapeType EShapeType_Compound = EShapeType::Compound;
@@ -84,6 +101,61 @@ constexpr EShapeSubType EShapeSubType_Scaled = EShapeSubType::Scaled;
 constexpr EShapeSubType EShapeSubType_OffsetCenterOfMass = EShapeSubType::OffsetCenterOfMass;
 constexpr EShapeSubType EShapeSubType_Mesh = EShapeSubType::Mesh;
 constexpr EShapeSubType EShapeSubType_HeightField = EShapeSubType::HeightField;
+
+// Alias for EConstraintSpace values to avoid clashes
+constexpr EConstraintSpace EConstraintSpace_LocalToBodyCOM = EConstraintSpace::LocalToBodyCOM;
+constexpr EConstraintSpace EConstraintSpace_WorldSpace = EConstraintSpace::WorldSpace;
+
+// Alias for ESpringMode values to avoid clashes
+constexpr ESpringMode ESpringMode_FrequencyAndDamping = ESpringMode::FrequencyAndDamping;
+constexpr ESpringMode ESpringMode_StiffnessAndDamping = ESpringMode::StiffnessAndDamping;
+
+// Alias for EOverrideMassProperties values to avoid clashes
+constexpr EOverrideMassProperties EOverrideMassProperties_CalculateMassAndInertia = EOverrideMassProperties::CalculateMassAndInertia;
+constexpr EOverrideMassProperties EOverrideMassProperties_CalculateInertia = EOverrideMassProperties::CalculateInertia;
+constexpr EOverrideMassProperties EOverrideMassProperties_MassAndInertiaProvided = EOverrideMassProperties::MassAndInertiaProvided;
+
+// Alias for EAllowedDOFs values to avoid clashes
+constexpr EAllowedDOFs EAllowedDOFs_TranslationX = EAllowedDOFs::TranslationX;
+constexpr EAllowedDOFs EAllowedDOFs_TranslationY = EAllowedDOFs::TranslationY;
+constexpr EAllowedDOFs EAllowedDOFs_TranslationZ = EAllowedDOFs::TranslationZ;
+constexpr EAllowedDOFs EAllowedDOFs_RotationX = EAllowedDOFs::RotationX;
+constexpr EAllowedDOFs EAllowedDOFs_RotationY = EAllowedDOFs::RotationY;
+constexpr EAllowedDOFs EAllowedDOFs_RotationZ = EAllowedDOFs::RotationZ;
+constexpr EAllowedDOFs EAllowedDOFs_Plane2D = EAllowedDOFs::Plane2D;
+constexpr EAllowedDOFs EAllowedDOFs_All = EAllowedDOFs::All;
+
+// Alias for EStateRecorderState values to avoid clashes
+constexpr EStateRecorderState EStateRecorderState_None = EStateRecorderState::None;
+constexpr EStateRecorderState EStateRecorderState_Global = EStateRecorderState::Global;
+constexpr EStateRecorderState EStateRecorderState_Bodies = EStateRecorderState::Bodies;
+constexpr EStateRecorderState EStateRecorderState_Contacts = EStateRecorderState::Contacts;
+constexpr EStateRecorderState EStateRecorderState_Constraints = EStateRecorderState::Constraints;
+constexpr EStateRecorderState EStateRecorderState_All = EStateRecorderState::All;
+
+// Alias for EBackFaceMode values to avoid clashes
+constexpr EBackFaceMode EBackFaceMode_IgnoreBackFaces = EBackFaceMode::IgnoreBackFaces;
+constexpr EBackFaceMode EBackFaceMode_CollideWithBackFaces = EBackFaceMode::CollideWithBackFaces;
+
+// Alias for EGroundState values to avoid clashes
+constexpr EGroundState EGroundState_OnGround = EGroundState::OnGround;
+constexpr EGroundState EGroundState_OnSteepGround = EGroundState::OnSteepGround;
+constexpr EGroundState EGroundState_NotSupported = EGroundState::NotSupported;
+constexpr EGroundState EGroundState_InAir = EGroundState::InAir;
+
+// Alias for ValidateResult values to avoid clashes
+constexpr ValidateResult ValidateResult_AcceptAllContactsForThisBodyPair = ValidateResult::AcceptAllContactsForThisBodyPair;
+constexpr ValidateResult ValidateResult_AcceptContact = ValidateResult::AcceptContact;
+constexpr ValidateResult ValidateResult_RejectContact = ValidateResult::RejectContact;
+constexpr ValidateResult ValidateResult_RejectAllContactsForThisBodyPair = ValidateResult::RejectAllContactsForThisBodyPair;
+
+// Alias for EActiveEdgeMode values to avoid clashes
+constexpr EActiveEdgeMode EActiveEdgeMode_CollideOnlyWithActive = EActiveEdgeMode::CollideOnlyWithActive;
+constexpr EActiveEdgeMode EActiveEdgeMode_CollideWithAll = EActiveEdgeMode::CollideWithAll;
+
+// Alias for ECollectFacesMode values to avoid clashes
+constexpr ECollectFacesMode ECollectFacesMode_CollectFaces = ECollectFacesMode::CollectFaces;
+constexpr ECollectFacesMode ECollectFacesMode_NoFaces = ECollectFacesMode::NoFaces;
 
 // Alias for EConstraintType values to avoid clashes
 constexpr EConstraintType EConstraintType_Constraint = EConstraintType::Constraint;

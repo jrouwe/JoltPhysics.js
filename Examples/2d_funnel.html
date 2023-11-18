@@ -28,12 +28,12 @@
 				// Create a basic floor
 				createFloor();
 
-				createBox(new Jolt.Vec3(-12, 8, -5), Jolt.Quat.prototype.sRotation(new Jolt.Vec3(0, 0, 1), 0.2 * Math.PI), new Jolt.Vec3(0.1, 10, 1), Jolt.Static, Jolt.NON_MOVING);
-				createBox(new Jolt.Vec3(12, 8, -5), Jolt.Quat.prototype.sRotation(new Jolt.Vec3(0, 0, 1), -0.2 * Math.PI), new Jolt.Vec3(0.1, 10, 1), Jolt.Static, Jolt.NON_MOVING);
+				createBox(new Jolt.Vec3(-12, 8, -5), Jolt.Quat.prototype.sRotation(new Jolt.Vec3(0, 0, 1), 0.2 * Math.PI), new Jolt.Vec3(0.1, 10, 1), Jolt.EMotionType_Static, Jolt.NON_MOVING);
+				createBox(new Jolt.Vec3(12, 8, -5), Jolt.Quat.prototype.sRotation(new Jolt.Vec3(0, 0, 1), -0.2 * Math.PI), new Jolt.Vec3(0.1, 10, 1), Jolt.EMotionType_Static, Jolt.NON_MOVING);
 
 				let shape = new Jolt.SphereShape(0.5, null);
-				let creationSettings = new Jolt.BodyCreationSettings(shape, new Jolt.Vec3(0, 0, 0), Jolt.Quat.prototype.sIdentity(), Jolt.Dynamic, Jolt.MOVING);
-				creationSettings.mAllowedDOFs = Jolt.Plane2D;
+				let creationSettings = new Jolt.BodyCreationSettings(shape, new Jolt.Vec3(0, 0, 0), Jolt.Quat.prototype.sIdentity(), Jolt.EMotionType_Dynamic, Jolt.MOVING);
+				creationSettings.mAllowedDOFs = Jolt.EAllowedDOFs_Plane2D;
 
 				for (let x = 0; x < 20; ++x)
 					for (let y = 0; y < 10; ++y) { 

@@ -20,24 +20,24 @@ enum Layers {
 };
 
 enum EBodyType {
-	"EBodyType::RigidBody",
-	"EBodyType::SoftBody"
+	"EBodyType_RigidBody",
+	"EBodyType_SoftBody"
 };
 
 enum EMotionType {
-	"EMotionType::Static",
-	"EMotionType::Kinematic",
-	"EMotionType::Dynamic"
+	"EMotionType_Static",
+	"EMotionType_Kinematic",
+	"EMotionType_Dynamic"
 };
 
 enum EMotionQuality {
-	"EMotionQuality::Discrete",
-	"EMotionQuality::LinearCast"
+	"EMotionQuality_Discrete",
+	"EMotionQuality_LinearCast"
 };
 
 enum EActivation {
-	"EActivation::Activate",
-	"EActivation::DontActivate"
+	"EActivation_Activate",
+	"EActivation_DontActivate"
 };
 
 enum EShapeType {
@@ -65,67 +65,68 @@ enum EShapeSubType {
 };
 
 enum EConstraintSpace {
-	"EConstraintSpace::LocalToBodyCOM",
-	"EConstraintSpace::WorldSpace"
+	"EConstraintSpace_LocalToBodyCOM",
+	"EConstraintSpace_WorldSpace"
 };
 
 enum ESpringMode {
-	"ESpringMode::FrequencyAndDamping",
-	"ESpringMode::StiffnessAndDamping",
+	"ESpringMode_FrequencyAndDamping",
+	"ESpringMode_StiffnessAndDamping",
 };
 
 enum EOverrideMassProperties {
-	"EOverrideMassProperties::CalculateMassAndInertia",
-	"EOverrideMassProperties::CalculateInertia",
-	"EOverrideMassProperties::MassAndInertiaProvided"
+	"EOverrideMassProperties_CalculateMassAndInertia",
+	"EOverrideMassProperties_CalculateInertia",
+	"EOverrideMassProperties_MassAndInertiaProvided"
 };
 
 enum EAllowedDOFs {
-	"EAllowedDOFs::TranslationX",
-	"EAllowedDOFs::TranslationY",
-	"EAllowedDOFs::TranslationZ",
-	"EAllowedDOFs::RotationX",
-	"EAllowedDOFs::RotationY",
-	"EAllowedDOFs::RotationZ",
-	"EAllowedDOFs::Plane2D"
+	"EAllowedDOFs_TranslationX",
+	"EAllowedDOFs_TranslationY",
+	"EAllowedDOFs_TranslationZ",
+	"EAllowedDOFs_RotationX",
+	"EAllowedDOFs_RotationY",
+	"EAllowedDOFs_RotationZ",
+	"EAllowedDOFs_Plane2D",
+	"EAllowedDOFs_All"
 };
 
 enum EStateRecorderState {
-	"EStateRecorderState::None",
-	"EStateRecorderState::Global",
-	"EStateRecorderState::Bodies",
-	"EStateRecorderState::Contacts",
-	"EStateRecorderState::Constraints",
-	"EStateRecorderState::All"
+	"EStateRecorderState_None",
+	"EStateRecorderState_Global",
+	"EStateRecorderState_Bodies",
+	"EStateRecorderState_Contacts",
+	"EStateRecorderState_Constraints",
+	"EStateRecorderState_All"
 };
 
 enum EBackFaceMode {
-	"EBackFaceMode::IgnoreBackFaces",
-	"EBackFaceMode::CollideWithBackFaces"
+	"EBackFaceMode_IgnoreBackFaces",
+	"EBackFaceMode_CollideWithBackFaces"
 };
 
 enum EGroundState {
-	"EGroundState::OnGround",
-	"EGroundState::OnSteepGround",
-	"EGroundState::NotSupported",
-	"EGroundState::InAir"
+	"EGroundState_OnGround",
+	"EGroundState_OnSteepGround",
+	"EGroundState_NotSupported",
+	"EGroundState_InAir"
 };
 
 enum ValidateResult {
-	"ValidateResult::AcceptAllContactsForThisBodyPair",
-	"ValidateResult::AcceptContact",
-	"ValidateResult::RejectContact",
-	"ValidateResult::RejectAllContactsForThisBodyPair"
+	"ValidateResult_AcceptAllContactsForThisBodyPair",
+	"ValidateResult_AcceptContact",
+	"ValidateResult_RejectContact",
+	"ValidateResult_RejectAllContactsForThisBodyPair"
 };
 
 enum EActiveEdgeMode {
-	"EActiveEdgeMode::CollideOnlyWithActive",
-	"EActiveEdgeMode::CollideWithAll"
+	"EActiveEdgeMode_CollideOnlyWithActive",
+	"EActiveEdgeMode_CollideWithAll"
 };
 
 enum ECollectFacesMode {
-	"ECollectFacesMode::CollectFaces",
-	"ECollectFacesMode::NoFaces"
+	"ECollectFacesMode_CollectFaces",
+	"ECollectFacesMode_NoFaces"
 };
 
 enum SixDOFConstraintSettings_EAxis {
@@ -1591,7 +1592,7 @@ interface PhysicsSystem {
 	[Const, Ref] BroadPhaseQuery GetBroadPhaseQuery();
 	[Const, Ref] NarrowPhaseQuery GetNarrowPhaseQuery();
 	[Const, Ref] NarrowPhaseQuery GetNarrowPhaseQueryNoLock();
-	void SaveState([Ref] StateRecorder inStream, optional EStateRecorderState inState = "EStateRecorderState::All");
+	void SaveState([Ref] StateRecorder inStream, optional EStateRecorderState inState = "EStateRecorderState_All");
 	boolean	RestoreState([Ref] StateRecorder inStream);
 };
 
