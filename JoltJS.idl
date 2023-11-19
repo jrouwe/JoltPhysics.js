@@ -7,11 +7,13 @@ interface JPHString {
 };
 
 interface ArrayVec3 {
+	boolean empty();
 	long size();
 	[Ref] Vec3 at(long inIndex);
 	void push_back([Const, Ref] Vec3 inValue);
 	void reserve(unsigned long inSize);
 	void resize(unsigned long inSize);
+	void clear();
 };
 
 enum Layers {
@@ -436,10 +438,13 @@ interface PhysicsMaterial {
 
 interface PhysicsMaterialList {
 	void PhysicsMaterialList();
+	boolean empty();
+	long size();
 	[Const] PhysicsMaterial at(long inIndex);
 	void push_back([Const] PhysicsMaterial inMaterial);
 	void reserve(unsigned long inSize);
 	void resize(unsigned long inSize);
+	void clear();
 };
 
 interface Triangle {
@@ -452,18 +457,24 @@ interface Triangle {
 
 interface TriangleList {
 	void TriangleList();
+	boolean empty();
+	long size();
 	[Ref] Triangle at(long inIndex);
 	void push_back([Const, Ref] Triangle inTriangle);
 	void reserve(unsigned long inSize);
 	void resize(unsigned long inSize);
+	void clear();
 };
 
 interface VertexList {
 	void VertexList();
+	boolean empty();
+	long size();
 	[Ref] Float3 at(long inIndex);
 	void push_back([Const, Ref] Float3 inVertex);
 	void reserve(unsigned long inSize);
 	void resize(unsigned long inSize);
+	void clear();
 };
 
 interface IndexedTriangle {
@@ -476,10 +487,13 @@ interface IndexedTriangle {
 
 interface IndexedTriangleList {
 	void IndexedTriangleList();
+	boolean empty();
+	long size();
 	[Ref] IndexedTriangle at(long inIndex);
 	void push_back([Const, Ref] IndexedTriangle inTriangle);
 	void reserve(unsigned long inSize);
 	void resize(unsigned long inSize);
+	void clear();
 };
 
 [Prefix="Shape::"]
@@ -1267,10 +1281,12 @@ interface PhysicsSettings {
 };
 
 interface CollideShapeResultFace {
+	boolean empty();
 	long size();
 	[Ref] Vec3 at(long inIndex);
 	void push_back([Const, Ref] Vec3 inValue);
 	void resize(unsigned long inSize);
+	void clear();
 };
 
 interface CollideShapeResult {
@@ -1288,10 +1304,12 @@ interface CollideShapeResult {
 };
 
 interface ContactPoints {
+	boolean empty();
 	long size();
 	[Ref] Vec3 at(long inIndex);
 	void push_back([Const, Ref] Vec3 inValue);
 	void resize(unsigned long inSize);
+	void clear();
 };
 
 interface ContactManifold {
@@ -1440,6 +1458,41 @@ interface CastRayCollectorJS {
 	void AddHit([Const, Ref] RayCastResult inResult);
 };
 
+interface ArrayRayCastResult {
+	boolean empty();
+	long size();
+	[Ref] RayCastResult at(long inIndex);
+	void push_back([Const, Ref] RayCastResult inValue);
+	void reserve(unsigned long inSize);
+	void resize(unsigned long inSize);
+	void clear();
+};
+
+interface CastRayAllHitCollisionCollector {
+	void CastRayAllHitCollisionCollector();
+	void Sort();
+	boolean HadHit();
+	[Value] attribute ArrayRayCastResult mHits;
+};
+
+CastRayAllHitCollisionCollector implements CastRayCollector;
+
+interface CastRayClosestHitCollisionCollector {
+	void CastRayClosestHitCollisionCollector();
+	boolean HadHit();
+	[Value] attribute RayCastResult mHit;
+};
+
+CastRayClosestHitCollisionCollector implements CastRayCollector;
+
+interface CastRayAnyHitCollisionCollector {
+	void CastRayAnyHitCollisionCollector();
+	boolean HadHit();
+	[Value] attribute RayCastResult mHit;
+};
+
+CastRayAnyHitCollisionCollector implements CastRayCollector;
+
 interface CollidePointResult {
 	void CollidePointResult();
 
@@ -1466,6 +1519,41 @@ interface CollidePointCollectorJS {
 	void OnBody([Const, Ref] Body inBody);
 	void AddHit([Const, Ref] CollidePointResult inResult);
 };
+
+interface ArrayCollidePointResult {
+	boolean empty();
+	long size();
+	[Ref] CollidePointResult at(long inIndex);
+	void push_back([Const, Ref] CollidePointResult inValue);
+	void reserve(unsigned long inSize);
+	void resize(unsigned long inSize);
+	void clear();
+};
+
+interface CollidePointAllHitCollisionCollector {
+	void CollidePointAllHitCollisionCollector();
+	void Sort();
+	boolean HadHit();
+	[Value] attribute ArrayCollidePointResult mHits;
+};
+
+CollidePointAllHitCollisionCollector implements CollidePointCollector;
+
+interface CollidePointClosestHitCollisionCollector {
+	void CollidePointClosestHitCollisionCollector();
+	boolean HadHit();
+	[Value] attribute CollidePointResult mHit;
+};
+
+CollidePointClosestHitCollisionCollector implements CollidePointCollector;
+
+interface CollidePointAnyHitCollisionCollector {
+	void CollidePointAnyHitCollisionCollector();
+	boolean HadHit();
+	[Value] attribute CollidePointResult mHit;
+};
+
+CollidePointAnyHitCollisionCollector implements CollidePointCollector;
 
 interface CollideSettingsBase {
 	attribute EActiveEdgeMode mActiveEdgeMode;
@@ -1503,6 +1591,41 @@ interface CollideShapeCollectorJS {
 	void OnBody([Const, Ref] Body inBody);
 	void AddHit([Const, Ref] CollideShapeResult inResult);
 };
+
+interface ArrayCollideShapeResult {
+	boolean empty();
+	long size();
+	[Ref] CollideShapeResult at(long inIndex);
+	void push_back([Const, Ref] CollideShapeResult inValue);
+	void reserve(unsigned long inSize);
+	void resize(unsigned long inSize);
+	void clear();
+};
+
+interface CollideShapeAllHitCollisionCollector {
+	void CollideShapeAllHitCollisionCollector();
+	void Sort();
+	boolean HadHit();
+	[Value] attribute ArrayCollideShapeResult mHits;
+};
+
+CollideShapeAllHitCollisionCollector implements CollideShapeCollector;
+
+interface CollideShapeClosestHitCollisionCollector {
+	void CollideShapeClosestHitCollisionCollector();
+	boolean HadHit();
+	[Value] attribute CollideShapeResult mHit;
+};
+
+CollideShapeClosestHitCollisionCollector implements CollideShapeCollector;
+
+interface CollideShapeAnyHitCollisionCollector {
+	void CollideShapeAnyHitCollisionCollector();
+	boolean HadHit();
+	[Value] attribute CollideShapeResult mHit;
+};
+
+CollideShapeAnyHitCollisionCollector implements CollideShapeCollector;
 
 interface ShapeCastSettings {
 	void ShapeCastSettings();
@@ -1543,6 +1666,41 @@ interface CastShapeCollectorJS {
 	void OnBody([Const, Ref] Body inBody);
 	void AddHit([Const, Ref] ShapeCastResult inResult);
 };
+
+interface ArrayShapeCastResult {
+	boolean empty();
+	long size();
+	[Ref] ShapeCastResult at(long inIndex);
+	void push_back([Const, Ref] ShapeCastResult inValue);
+	void reserve(unsigned long inSize);
+	void resize(unsigned long inSize);
+	void clear();
+};
+
+interface CastShapeAllHitCollisionCollector {
+	void CastShapeAllHitCollisionCollector();
+	void Sort();
+	boolean HadHit();
+	[Value] attribute ArrayShapeCastResult mHits;
+};
+
+CastShapeAllHitCollisionCollector implements CastShapeCollector;
+
+interface CastShapeClosestHitCollisionCollector {
+	void CastShapeClosestHitCollisionCollector();
+	boolean HadHit();
+	[Value] attribute ShapeCastResult mHit;
+};
+
+CastShapeClosestHitCollisionCollector implements CastShapeCollector;
+
+interface CastShapeAnyHitCollisionCollector {
+	void CastShapeAnyHitCollisionCollector();
+	boolean HadHit();
+	[Value] attribute ShapeCastResult mHit;
+};
+
+CastShapeAnyHitCollisionCollector implements CastShapeCollector;
 
 interface TransformedShapeCollector {
 	void Reset();
@@ -1663,35 +1821,43 @@ interface SoftBodySharedSettingsVolume {
 };
 
 interface ArraySoftBodySharedSettingsVertex {
+	boolean empty();
 	long size();
 	[Ref] SoftBodySharedSettingsVertex at(long inIndex);
 	void push_back([Const, Ref] SoftBodySharedSettingsVertex inValue);
 	void reserve(unsigned long inSize);
 	void resize(unsigned long inSize);
+	void clear();
 };
 
 interface ArraySoftBodySharedSettingsFace {
+	boolean empty();
 	long size();
 	[Ref] SoftBodySharedSettingsFace at(long inIndex);
 	void push_back([Const, Ref] SoftBodySharedSettingsFace inValue);
 	void reserve(unsigned long inSize);
 	void resize(unsigned long inSize);
+	void clear();
 };
 
 interface ArraySoftBodySharedSettingsEdge {
+	boolean empty();
 	long size();
 	[Ref] SoftBodySharedSettingsEdge at(long inIndex);
 	void push_back([Const, Ref] SoftBodySharedSettingsEdge inValue);
 	void reserve(unsigned long inSize);
 	void resize(unsigned long inSize);
+	void clear();
 };
 
 interface ArraySoftBodySharedSettingsVolume {
+	boolean empty();
 	long size();
 	[Ref] SoftBodySharedSettingsVolume at(long inIndex);
 	void push_back([Const, Ref] SoftBodySharedSettingsVolume inValue);
 	void reserve(unsigned long inSize);
 	void resize(unsigned long inSize);
+	void clear();
 };
 
 interface SoftBodySharedSettings {

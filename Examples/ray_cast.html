@@ -30,6 +30,8 @@
 				// Create some boxes
 				createBox(new Jolt.Vec3(0, 1, 0), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(1, 1, 1), Jolt.EMotionType_Static, Jolt.NON_MOVING, 0x00ff00);
 				createBox(new Jolt.Vec3(0, 1, 5), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(1, 1, 1), Jolt.EMotionType_Static, Jolt.NON_MOVING, 0x00ff00);
+				createBox(new Jolt.Vec3(0, 1, 10), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(1, 1, 1), Jolt.EMotionType_Static, Jolt.NON_MOVING, 0x00ff00);
+				createBox(new Jolt.Vec3(0, 1, 15), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(1, 1, 1), Jolt.EMotionType_Static, Jolt.NON_MOVING, 0x00ff00);
 
 				// Create ray
 				let ray = new Jolt.RRayCast;
@@ -79,6 +81,38 @@
 
 				// Cast the ray against the second box
 				physicsSystem.GetNarrowPhaseQuery().CastRay(ray, ray_settings, collector, bp_filter, object_filter, body_filter, shape_filter);
+
+				// Move the ray
+				ray.mOrigin = new Jolt.Vec3(-5, 1, 9);
+				addLine(ray.mOrigin, ray.mOrigin.Clone().Add(ray.mDirection), 0xff0000);
+
+				// Cast the ray against the third box using a closest hit collector
+				let closest_hit_collector = new Jolt.CastRayClosestHitCollisionCollector;
+				physicsSystem.GetNarrowPhaseQuery().CastRay(ray, ray_settings, closest_hit_collector, bp_filter, object_filter, body_filter, shape_filter);
+				if (closest_hit_collector.HadHit()) { 
+					let hitPoint = ray.GetPointOnRay(closest_hit_collector.mHit.mFraction);
+					addMarker(hitPoint, 1, 0x0000ff);
+					let hitNormal = collector.body.GetWorldSpaceSurfaceNormal(closest_hit_collector.mHit.mSubShapeID2, hitPoint);
+					addLine(hitPoint, hitPoint.Clone().Add(hitNormal.Mul(2)), 0x00ff00);
+				}
+
+				// Move the ray
+				ray.mOrigin = new Jolt.Vec3(-5, 1, 14);
+				addLine(ray.mOrigin, ray.mOrigin.Clone().Add(ray.mDirection), 0xff0000);
+
+				// Turn off back face culling
+				ray_settings.mBackFaceMode = Jolt.EBackFaceMode_CollideWithBackFaces;
+
+				// Cast the ray against the fourth box using an all hit collector
+				let all_hit_collector = new Jolt.CastRayAllHitCollisionCollector;
+				physicsSystem.GetNarrowPhaseQuery().CastRay(ray, ray_settings, all_hit_collector, bp_filter, object_filter, body_filter, shape_filter);
+				for (let i = 0; i < all_hit_collector.mHits.size(); i++) {
+					let hit = all_hit_collector.mHits.at(i);
+					let hitPoint = ray.GetPointOnRay(hit.mFraction);
+					addMarker(hitPoint, 1, 0x0000ff);
+					let hitNormal = collector.body.GetWorldSpaceSurfaceNormal(hit.mSubShapeID2, hitPoint);
+					addLine(hitPoint, hitPoint.Clone().Add(hitNormal.Mul(2)), 0x00ff00);
+				}
 			});
 		</script>
 	</body>

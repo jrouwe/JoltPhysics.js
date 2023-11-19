@@ -62,6 +62,22 @@ using ArraySoftBodySharedSettingsEdge = Array<SoftBodySharedSettingsEdge>;
 using ArraySoftBodySharedSettingsVolume = Array<SoftBodySharedSettingsVolume>;
 using EGroundState = CharacterBase::EGroundState;
 using Vector2 = Vector<2>;
+using ArrayRayCastResult = Array<RayCastResult>;
+using CastRayAllHitCollisionCollector = AllHitCollisionCollector<CastRayCollector>;
+using CastRayClosestHitCollisionCollector = ClosestHitCollisionCollector<CastRayCollector>;
+using CastRayAnyHitCollisionCollector = AnyHitCollisionCollector<CastRayCollector>;
+using ArrayCollidePointResult = Array<CollidePointResult>;
+using CollidePointAllHitCollisionCollector = AllHitCollisionCollector<CollidePointCollector>;
+using CollidePointClosestHitCollisionCollector = ClosestHitCollisionCollector<CollidePointCollector>;
+using CollidePointAnyHitCollisionCollector = AnyHitCollisionCollector<CollidePointCollector>;
+using ArrayCollideShapeResult = Array<CollideShapeResult>;
+using CollideShapeAllHitCollisionCollector = AllHitCollisionCollector<CollideShapeCollector>;
+using CollideShapeClosestHitCollisionCollector = ClosestHitCollisionCollector<CollideShapeCollector>;
+using CollideShapeAnyHitCollisionCollector = AnyHitCollisionCollector<CollideShapeCollector>;
+using ArrayShapeCastResult = Array<ShapeCastResult>;
+using CastShapeAllHitCollisionCollector = AllHitCollisionCollector<CastShapeCollector>;
+using CastShapeClosestHitCollisionCollector = ClosestHitCollisionCollector<CastShapeCollector>;
+using CastShapeAnyHitCollisionCollector = AnyHitCollisionCollector<CastShapeCollector>;
 
 // Alias for EBodyType values to avoid clashes
 constexpr EBodyType EBodyType_RigidBody = EBodyType::RigidBody;
