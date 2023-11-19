@@ -27,8 +27,9 @@
 				// Create a basic floor
 				createFloor();
 
-				// Create a box
+				// Create some boxes
 				createBox(new Jolt.Vec3(0, 1, 0), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(1, 1, 1), Jolt.EMotionType_Static, Jolt.NON_MOVING, 0x00ff00);
+				createBox(new Jolt.Vec3(0, 1, 5), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(1, 1, 1), Jolt.EMotionType_Static, Jolt.NON_MOVING, 0x00ff00);
 
 				// Create ray
 				let ray = new Jolt.RRayCast;
@@ -57,9 +58,26 @@
 					addMarker(hitPoint, 1, 0x0000ff);
 					let hitNormal = collector.body.GetWorldSpaceSurfaceNormal(inRayCastResult.mSubShapeID2, hitPoint);
 					addLine(hitPoint, hitPoint.Clone().Add(hitNormal.Mul(2)), 0x00ff00);
+					
+					// Update the collector so that it won't receive any hits further away than this hit
+					collector.UpdateEarlyOutFraction(inRayCastResult.mFraction);
+				};
+				collector.Reset = () => {
+					// Reset fraction to smallest possible value that is bigger than 1 so we can reuse this collector
+					collector.ResetEarlyOutFraction(1.00000011921);
 				};
 
-				// Cast the ray
+				// Cast the ray against the first box
+				physicsSystem.GetNarrowPhaseQuery().CastRay(ray, ray_settings, collector, bp_filter, object_filter, body_filter, shape_filter);
+				
+				// Recycle the collector
+				collector.Reset();
+
+				// Move the ray
+				ray.mOrigin = new Jolt.Vec3(-5, 1, 4);
+				addLine(ray.mOrigin, ray.mOrigin.Clone().Add(ray.mDirection), 0xff0000);
+
+				// Cast the ray against the second box
 				physicsSystem.GetNarrowPhaseQuery().CastRay(ray, ray_settings, collector, bp_filter, object_filter, body_filter, shape_filter);
 			});
 		</script>
