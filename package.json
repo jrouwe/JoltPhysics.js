@@ -7,20 +7,20 @@
   "types": "dist/jolt-physics.wasm-compat.d.ts",
   "exports": {
     ".": {
-      "default": "./dist/jolt-physics.wasm-compat.js",
-      "types": "./dist/jolt-physics.wasm-compat.d.ts"
+      "types": "./dist/jolt-physics.wasm-compat.d.ts",
+      "default": "./dist/jolt-physics.wasm-compat.js"
     },
     "./wasm": {
-      "default": "./dist/jolt-physics.wasm.js",
-      "types": "./dist/jolt-physics.wasm.d.ts"
+      "types": "./dist/jolt-physics.wasm.d.ts",
+      "default": "./dist/jolt-physics.wasm.js"
     },
     "./wasm-compat": {
-      "default": "./dist/jolt-physics.wasm-compat.js",
-      "types": "./dist/jolt-physics.wasm-compat.d.ts"
+      "types": "./dist/jolt-physics.wasm-compat.d.ts",
+      "default": "./dist/jolt-physics.wasm-compat.js"
     },
     "./asm": {
-      "default": "./dist/jolt-physics.js",
-      "types": "./dist/jolt-physics.d.ts"
+      "types": "./dist/jolt-physics.d.ts",
+      "default": "./dist/jolt-physics.js"
     },
     "./jolt-physics.wasm.wasm": "./dist/jolt-physics.wasm.wasm",
     "./package.json": "./package.json"
