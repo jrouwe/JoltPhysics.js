@@ -27,7 +27,7 @@
     const VehicleSettings =
     {
       mPosition: [0, 2, 0],
-      mUseCastSphere: true,
+      mCastType: 'cylinder',
       mWheelRadius: 0.3,
       mWheelWidth: 0.1,
       mHalfVehicleLength: 2.0,
@@ -170,10 +170,17 @@
       const constraint = new Jolt.VehicleConstraint(car_body, vehicle);
 
       let tester;
-      if (VehicleSettings.mUseCastSphere)
-        tester = new Jolt.VehicleCollisionTesterCastSphere(Jolt.MOVING, 0.5 * VehicleSettings.mWheelWidth);
-      else
-        tester = new Jolt.VehicleCollisionTesterRay(Jolt.MOVING);
+      switch (VehicleSettings.mCastType) {
+        case 'cylinder':
+          tester = new Jolt.VehicleCollisionTesterCastCylinder(Jolt.MOVING);
+          break;
+        case 'sphere':
+          tester = new Jolt.VehicleCollisionTesterCastSphere(Jolt.MOVING, 0.5 * VehicleSettings.mWheelWidth);
+          break;
+        default:
+          tester = new Jolt.VehicleCollisionTesterRay(Jolt.MOVING);
+          break;
+      }
 
       constraint.SetVehicleCollisionTester(tester);
 
@@ -246,8 +253,6 @@
       let oldPos = wrapVec3(car_body.GetPosition());
       onExampleUpdate = (time, deltaTime) => {
         prePhysicsUpdate();
-        constraint.OnStep(deltaTime, physicsSystem);
-
 				const pos = wrapVec3(car_body.GetPosition());
         camera.position.add(pos.clone().sub(oldPos));
         oldPos = pos;
@@ -279,7 +284,7 @@
 					input.direction.x = 0;
 				}
 			};
-
+      physicsSystem.AddStepListener(new Jolt.VehicleConstraintStepListener(constraint));
 		  renderExample();
 
     });

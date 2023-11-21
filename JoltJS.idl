@@ -1731,7 +1731,6 @@ interface NarrowPhaseQuery {
 };
 
 interface PhysicsStepListener {
-	void OnStep(float inDeltaTime, [Ref] PhysicsSystem inPhysicsSystem);
 };
 
 interface PhysicsSystem {
@@ -2201,7 +2200,11 @@ interface VehicleConstraint {
 
 };
 VehicleConstraint implements Constraint;
-VehicleConstraint implements PhysicsStepListener;
+
+interface VehicleConstraintStepListener {
+	void VehicleConstraintStepListener(VehicleConstraint inConstraint);
+};
+VehicleConstraintStepListener implements PhysicsStepListener;
 
 interface WheelSettings {
 	void WheelSettings();

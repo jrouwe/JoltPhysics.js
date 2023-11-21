@@ -526,3 +526,17 @@ public:
 		OnContactSolve(inCharacter, inBodyID2, inSubShapeID2, &inContactPosition, &inContactNormal, &inContactVelocity, inContactMaterial, &inCharacterVelocity, ioNewCharacterVelocity);
 	}
 };
+
+class VehicleConstraintStepListener: public PhysicsStepListener {
+	public:
+		VehicleConstraintStepListener(VehicleConstraint * inVehicleConstraint) {
+			mInstance = inVehicleConstraint;
+		}
+		virtual void OnStep(float inDeltaTime, PhysicsSystem &inPhysicsSystem) override {
+			PhysicsStepListener * instance = mInstance;
+			instance->OnStep(inDeltaTime, inPhysicsSystem);
+		}
+	private:
+		VehicleConstraint * mInstance;
+
+};
