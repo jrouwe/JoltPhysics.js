@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>JoltPhysics.js demo</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+  <link rel="stylesheet" type="text/css" href="style.css">
+</head>
+
+<body>
+  <div id="container">Loading...</div>
+  <div id="info">JoltPhysics.js wheeled controller demo<br />
+    WASD to move</div>
+
+  <script src="js/three/three.min.js"></script>
+  <script src="js/three/OrbitControls.js"></script>
+  <script src="js/three/WebGL.js"></script>
+  <script src="js/three/stats.min.js"></script>
+  <script src="js/example.js"></script>
+
+  <script type="module">
+    // In case you haven't built the library yourself, replace URL with: https://www.unpkg.com/jolt-physics/dist/jolt-physics.wasm-compat.js
+    import initJolt from './js/jolt-physics.wasm-compat.js';
+
+    const body_position = [0, 2, 0];
+    const wheel_radius = 0.3;
+    const wheel_width = 0.1;
+    const half_vehicle_length = 3.2;
+    const half_vehicle_width = 1.7;
+    const half_vehicle_height = 0.5;
+    const suspension_min_length = 0.3;
+    const suspension_max_length = 0.5;
+    const suspension_frequency = 1.0;
+
+    const half_turret_width = 1.4;
+    const half_turret_length = 2.0;
+    const half_turret_height = 0.4;
+
+    const half_barrel_length = 1.5;
+    const barrel_radius = 0.1;
+    const barrel_rotation_offset = 0.2;
+
+    const vehicle_mass = 4000.0;
+    const max_pitch_roll_angle = DegreesToRadians(60.0);
+
+    const wheel_pos = [
+      [-0.0, 2.95],
+      [-0.3, 2.1],
+      [-0.3, 1.4],
+      [-0.3, 0.7],
+      [-0.3, 0.0],
+      [-0.3, -0.7],
+      [-0.3, -1.4],
+      [-0.3, -2.1],
+      [-0.0, -2.75]
+    ];
+
+    const track = [
+      [[[38, 64, -14], [38, 64, -16], [38, -64, -16], [38, -64, -14], [64, -64, -16], [64, -64, -14], [64, 64, -16], [64, 64, -14]], [[-16, 64, -14], [-16, 64, -16], [-16, -64, -16], [-16, -64, -14], [10, -64, -16], [10, -64, -14], [10, 64, -16], [10, 64, -14]], [[10, -48, -14], [10, -48, -16], [10, -64, -16], [10, -64, -14], [38, -64, -16], [38, -64, -14], [38, -48, -16], [38, -48, -14]], [[10, 64, -14], [10, 64, -16], [10, 48, -16], [10, 48, -14], [38, 48, -16], [38, 48, -14], [38, 64, -16], [38, 64, -14]]],
+      [[[38, 48, -6], [38, 48, -14], [38, -48, -14], [38, -48, -6], [40, -48, -14], [40, -48, -6], [40, 48, -14], [40, 48, -6]], [[62, 62, -6], [62, 62, -14], [62, -64, -14], [62, -64, -6], [64, -64, -14], [64, -64, -6], [64, 62, -14], [64, 62, -6]], [[8, 48, -6], [8, 48, -14], [8, -48, -14], [8, -48, -6], [10, -48, -14], [10, -48, -6], [10, 48, -14], [10, 48, -6]], [[-16, 62, -6], [-16, 62, -14], [-16, -64, -14], [-16, -64, -6], [-14, -64, -14], [-14, -64, -6], [-14, 62, -14], [-14, 62, -6]], [[-14, -62, -6], [-14, -62, -14], [-14, -64, -14], [-14, -64, -6], [62, -64, -14], [62, -64, -6], [62, -62, -14], [62, -62, -6]], [[8, -48, -6], [8, -48, -14], [8, -50, -14], [8, -50, -6], [40, -50, -14], [40, -50, -6], [40, -48, -14], [40, -48, -6]], [[8, 50, -6], [8, 50, -14], [8, 48, -14], [8, 48, -6], [40, 48, -14], [40, 48, -6], [40, 50, -14], [40, 50, -6]], [[-16, 64, -6], [-16, 64, -14], [-16, 62, -14], [-16, 62, -6], [64, 62, -14], [64, 62, -6], [64, 64, -14], [64, 64, -6]]],
+      [[[-4, 22, -14], [-4, -14, -14], [-4, -14, -10], [4, -14, -14], [4, -14, -10], [4, 22, -14]], [[-4, -27, -14], [-4, -48, -14], [-4, -48, -11], [4, -48, -14], [4, -48, -11], [4, -27, -14]], [[-4, 50, -14], [-4, 30, -14], [-4, 30, -12], [4, 30, -14], [4, 30, -12], [4, 50, -14]], [[46, 50, -14], [46, 31, -14], [46, 50, -12], [54, 31, -14], [54, 50, -12], [54, 50, -14]], [[46, 16, -14], [46, -19, -14], [46, 16, -10], [54, -19, -14], [54, 16, -10], [54, 16, -14]], [[46, -28, -14], [46, -48, -14], [46, -28, -11], [54, -48, -14], [54, -28, -11], [54, -28, -14]]]
+    ];
+
+    const map_colors = [0x666666, 0x006600, 0x000066];
+
+    initJolt().then(function (Jolt) {
+      // Initialize this example
+      window.Jolt = Jolt;
+      container = document.getElementById('container');
+      container.innerHTML = "";
+
+      initGraphics();
+      initPhysics();
+
+      const mapRot = Jolt.Quat.prototype.sRotation(new Jolt.Vec3(0, 1, 0), 0.5 * Math.PI);
+      track.forEach((type, tIdx) => {
+        type.forEach(block => {
+          const hull = new Jolt.ConvexHullShapeSettings;
+          block.forEach(v => {
+            hull.mPoints.push_back(new Jolt.Vec3(-v[1], v[2], v[0]));
+          });
+          const shape = hull.Create().Get();
+          const creation_settings = new Jolt.BodyCreationSettings(shape, new Jolt.Vec3(0, 10, 0), mapRot, Jolt.EBodyType_Static, Jolt.NON_MOVING);
+          const body = bodyInterface.CreateBody(creation_settings);
+          body.SetFriction(1);
+          addToScene(body, map_colors[tIdx]);
+        });
+      });
+
+      const filter = new Jolt.GroupFilterTable();
+
+      const tank_body_shape_settings = new Jolt.OffsetCenterOfMassShapeSettings(new Jolt.Vec3(0, -half_vehicle_height, 0),
+        new Jolt.BoxShapeSettings(new Jolt.Vec3(half_vehicle_width, half_vehicle_height, half_vehicle_length)));
+      const tank_body_shape = tank_body_shape_settings.Create().Get();
+      const tank_body_settings = new Jolt.BodyCreationSettings(tank_body_shape, new Jolt.Vec3(...body_position), Jolt.Quat.prototype.sIdentity(),
+        Jolt.EMotionType_Dynamic, Jolt.MOVING)
+      tank_body_settings.mCollisionGroup.SetGroupFilter(filter);
+      tank_body_settings.mCollisionGroup.SetGroupID(0);
+      tank_body_settings.mCollisionGroup.SetSubGroupID(0);
+      tank_body_settings.mOverrideMassProperties = Jolt.EOverrideMassProperties_CalculateInertia;
+      tank_body_settings.mMassPropertiesOverride.mMass = vehicle_mass;
+
+      const tank_body = bodyInterface.CreateBody(tank_body_settings);
+      bodyInterface.AddBody(tank_body.GetID(), Jolt.EActivation_Activate);
+
+      const vehicle = new Jolt.VehicleConstraintSettings();
+      vehicle.mDrawConstraintSize = 0.1;
+      vehicle.mMaxPitchRollAngle = max_pitch_roll_angle;
+
+      addToScene(tank_body, 0xFF0000);
+
+      const tank = dynamicObjects[dynamicObjects.length - 1];
+
+      const controller_settings = new Jolt.TrackedVehicleControllerSettings();
+      vehicle.mController = controller_settings;
+
+      let material = new THREE.MeshPhongMaterial({ color: 0x666666 });
+      let tank_mat1 = new THREE.MeshPhongMaterial({ color: 0x993333 });
+      let tank_mat2 = new THREE.MeshPhongMaterial({ color: 0x663333 });
+      for (let t = 0; t < 2; ++t) {
+        const track = controller_settings.get_mTracks(t);
+        track.mDrivenWheel = vehicle.mWheels.size() + (wheel_pos.length - 1);
+        wheel_pos.forEach((loc, wheel) => {
+          const w = new Jolt.WheelSettingsTV();
+          w.mPosition = new Jolt.Vec3(t == 0 ? half_vehicle_width : -half_vehicle_width, loc[0], loc[1]);
+          w.mRadius = wheel_radius;
+          w.mWidth = wheel_width;
+          w.mSuspensionMinLength = suspension_min_length;
+          w.mSuspensionMaxLength = wheel == 0 || wheel == wheel_pos.length - 1 ? suspension_min_length : suspension_max_length;
+          w.mSuspensionSpring.mFrequency = suspension_frequency;
+
+          track.mWheels.push_back(vehicle.mWheels.size());
+          vehicle.mWheels.push_back(w);
+
+          const _wheel = new THREE.Mesh(new THREE.CylinderGeometry(
+            wheel_radius, wheel_radius, wheel_width, 20, 1
+          ), material);
+          _wheel.position.set(t == 0 ? half_vehicle_width : -half_vehicle_width, loc[0] - half_vehicle_height, loc[1]);
+          _wheel.quaternion.setFromAxisAngle(new THREE.Vector3(0, 0, 1), Math.PI / 2);
+          tank.add(_wheel);
+        });
+      }
+
+      {
+        const turret = new THREE.Mesh(new THREE.BoxGeometry(2* half_turret_width, 2* half_turret_height, 2 *half_turret_length, 1, 1, 1), tank_mat1);
+        turret.position.set(0, half_vehicle_height + half_turret_height, 0);
+        tank.add(turret);
+
+        const barrel = new THREE.Mesh(new THREE.CylinderGeometry(barrel_radius, barrel_radius, 2 *half_barrel_length, 20, 1), tank_mat2);
+        barrel.quaternion.setFromAxisAngle(new THREE.Vector3(1, 0, 0), Math.PI / 2);
+        barrel.position.set(0, half_vehicle_height + half_turret_height, half_turret_length + half_barrel_length);
+        tank.add(barrel);
+      }
+
+
+      const constraint = new Jolt.VehicleConstraint(tank_body, vehicle);
+
+      const tester = new Jolt.VehicleCollisionTesterRay(Jolt.MOVING);
+      constraint.SetVehicleCollisionTester(tester);
+
+      physicsSystem.AddConstraint(constraint);
+      const controller = Jolt.castObject(constraint.GetController(), Jolt.TrackedVehicleController);
+
+      const input = {
+        direction: new THREE.Vector3(),
+        hand_brake: false
+      };
+
+      let previousForward = 0;
+	    const min_velocity_pivot_turn = 1.0;
+      const prePhysicsUpdate = () => {
+        let forward = 0.0, left_ratio = 1.0, right_ratio = 1.0, brake = 0.0, hand_brake = 0.0;
+        const rotation = wrapQuat(tank_body.GetRotation().Conjugated());
+        const linearV = wrapVec3(tank_body.GetLinearVelocity());
+        const velocity = linearV.applyQuaternion(rotation).z;
+
+        if (input.direction.z != 0) {
+          forward = input.direction.z;
+        }
+        if (previousForward * forward < 0.0) {
+
+          if ((forward > 0.0 && velocity < -0.1) || (forward < 0.0 && velocity > 0.1)) {
+            // Brake while we've not stopped yet
+            forward = 0.0;
+            brake = 1.0;
+          }
+          else {
+            // When we've come to a stop, accept the new direction
+            previousForward = forward;
+          }
+        }
+
+        if (input.hand_brake) {
+          forward = 0.0;
+          hand_brake = 1.0;
+        }
+
+        if (input.direction.x != 0) {
+          if (input.direction.x < 0) {
+            if (brake == 0.0 && forward == 0.0 && Math.abs(velocity) < min_velocity_pivot_turn)
+            {
+              // Pivot turn
+              left_ratio = -1.0;
+              forward = 1.0;
+            }
+            else
+              left_ratio = 0.6;
+          } else {
+            if (brake == 0.0 && forward == 0.0 && Math.abs(velocity) < min_velocity_pivot_turn)
+            {
+              // Pivot turn
+              right_ratio = -1.0;
+              forward = 1.0;
+            }
+            else
+            right_ratio = 0.6;
+          }
+        }
+
+        controller.SetDriverInput(forward, left_ratio, right_ratio, brake);
+        if (right_ratio != 0.0 || left_ratio != 0.0 || forward != 0.0 || brake != 0.0 || hand_brake != 0.0)
+          bodyInterface.ActivateBody(tank_body.GetID());
+      }
+
+      controls.target = tank.position;
+      let oldPos = wrapVec3(tank_body.GetPosition());
+      onExampleUpdate = (time, deltaTime) => {
+        prePhysicsUpdate();
+
+        const pos = wrapVec3(tank_body.GetPosition());
+        camera.position.add(pos.clone().sub(oldPos));
+        oldPos = pos;
+      }
+
+      document.addEventListener("keydown", onDocumentKeyDown, false);
+      document.addEventListener("keyup", onDocumentKeyUp, false);
+      function onDocumentKeyDown(event) {
+        var keyCode = event.which;
+        if (keyCode == 87) {
+          input.direction.z = 1;
+        } else if (keyCode == 83) {
+          input.direction.z = -1;
+        } else if (keyCode == 65) {
+          input.direction.x = -1;
+        } else if (keyCode == 68) {
+          input.direction.x = 1;
+        }
+      };
+      function onDocumentKeyUp(event) {
+        var keyCode = event.which;
+        if (keyCode == 87) {
+          input.direction.z = 0;
+        } else if (keyCode == 83) {
+          input.direction.z = 0;
+        } else if (keyCode == 65) {
+          input.direction.x = 0;
+        } else if (keyCode == 68) {
+          input.direction.x = 0;
+        }
+      };
+      physicsSystem.AddStepListener(new Jolt.VehicleConstraintStepListener(constraint));
+      renderExample();
+
+    });
+
+  </script>
+</body>
+
+</html>

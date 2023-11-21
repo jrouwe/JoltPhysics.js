@@ -2198,6 +2198,9 @@ interface VehicleConstraint {
 	void SetupVelocityConstraint(float inDeltaTime);
 	void WarmStartVelocityConstraint(float inWarmStartImpulseRatio);
 
+	[Value] Mat44 GetWheelLocalTransform(unsigned long inWheelIndex, [Ref] Vec3 inWheelRight, [Ref] Vec3 inWheelUp);
+	[Value] Mat44 GetWheelWorldTransform(unsigned long inWheelIndex, [Ref] Vec3 inWheelRight, [Ref] Vec3 inWheelUp);
+
 };
 VehicleConstraint implements Constraint;
 
@@ -2310,6 +2313,7 @@ interface WheeledVehicleControllerSettings {
 WheeledVehicleControllerSettings implements VehicleControllerSettings;
 
 interface TrackedVehicleControllerSettings {
+	void TrackedVehicleControllerSettings();
 	[Value] attribute VehicleEngineSettings	mEngine;
 	[Value] attribute VehicleTransmissionSettings	mTransmission;
 	[Value] attribute VehicleTrackSettings[] mTracks;
