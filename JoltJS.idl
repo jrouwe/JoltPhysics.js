@@ -1730,6 +1730,10 @@ interface NarrowPhaseQuery {
 	void CollectTransformedShapes([Const, Ref] AABox inBox, [Ref] TransformedShapeCollector ioCollector, [Const, Ref] BroadPhaseLayerFilter inBroadPhaseLayerFilter, [Const, Ref] ObjectLayerFilter inObjectLayerFilter, [Const, Ref] BodyFilter inBodyFilter, [Const, Ref] ShapeFilter inShapeFilter);
 };
 
+interface PhysicsStepListener {
+	void OnStep(float inDeltaTime, [Ref] PhysicsSystem inPhysicsSystem);
+};
+
 interface PhysicsSystem {
 	void SetGravity([Const, Ref] Vec3 inGravity);
 	[Value] Vec3 GetGravity();
@@ -1752,6 +1756,9 @@ interface PhysicsSystem {
 	[Const, Ref] NarrowPhaseQuery GetNarrowPhaseQueryNoLock();
 	void SaveState([Ref] StateRecorder inStream, optional EStateRecorderState inState = "EStateRecorderState_All");
 	boolean	RestoreState([Ref] StateRecorder inStream);
+
+	void	AddStepListener(PhysicsStepListener inListener);
+	void	RemoveStepListener(PhysicsStepListener inListener);
 };
 
 interface MassProperties {
@@ -2152,15 +2159,37 @@ interface ArrayVehicleDifferentialSettings {
 	void clear();
 };
 
+interface VehicleCollisionTester {
+
+};
+interface VehicleCollisionTesterRay {
+	void VehicleCollisionTesterRay(unsigned short inObjectLayer, [Ref] optional Vec3 inUp, optional float inMaxSlopeAngle);
+};
+VehicleCollisionTesterRay implements VehicleCollisionTester;
+interface VehicleCollisionTesterCastSphere {
+	void VehicleCollisionTesterCastSphere(unsigned short inObjectLayer, float inRadius, [Ref] optional Vec3 inUp, optional float inMaxSlopeAngle);
+};
+VehicleCollisionTesterCastSphere implements VehicleCollisionTester;
+interface VehicleCollisionTesterCastCylinder {
+ void VehicleCollisionTesterCastCylinder(unsigned short inObjectLayer, optional float inConvexRadiusFraction);
+};
+VehicleCollisionTesterCastCylinder implements VehicleCollisionTester;
+
 interface VehicleConstraintSettings {
+	void VehicleConstraintSettings();
 	[Value] attribute Vec3 mUp;
 	[Value] attribute Vec3 mForward;
 	attribute float mMaxPitchRollAngle;
+	[Value] attribute ArrayWheelSettings mWheels;
+	[Value] attribute ArrayVehicleAntiRollBar mAntiRollBars;
+	attribute VehicleControllerSettings mController;
 };
 VehicleConstraintSettings implements ConstraintSettings;
 
 interface VehicleConstraint {
 	void VehicleConstraint( [Ref] Body inVehicleBody, [Const, Ref] VehicleConstraintSettings inSettings);
+	void SetMaxPitchRollAngle(float inMaxPitchRollAngle);
+	void SetVehicleCollisionTester([Const] VehicleCollisionTester inTester);
 	[Value] Vec3 GetLocalUp();
 	[Value] Vec3 GetLocalForward();
 	[Value] Vec3 GetWorldUp();
@@ -2169,8 +2198,10 @@ interface VehicleConstraint {
 	[Const] Wheel GetWheel(unsigned long inIdx);
 	void SetupVelocityConstraint(float inDeltaTime);
 	void WarmStartVelocityConstraint(float inWarmStartImpulseRatio);
+
 };
 VehicleConstraint implements Constraint;
+VehicleConstraint implements PhysicsStepListener;
 
 interface WheelSettings {
 	void WheelSettings();
@@ -2190,6 +2221,7 @@ interface WheelSettings {
 };
 
 interface VehicleAntiRollBar {
+	void VehicleAntiRollBar();
 	 attribute long mLeftWheel;
 	 attribute long mRightWheel;
 	 attribute float mStiffness;
