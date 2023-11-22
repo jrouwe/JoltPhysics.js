@@ -97,9 +97,7 @@
       texture.magFilter = THREE.NearestFilter;
       let wheel_material = new THREE.MeshPhongMaterial({ color: 0x666666 });
       wheel_material.map = texture;
-      const createThreeWheel = (joltWheel, joltBody, body) => {
-
-        const bodyPos = wrapVec3(joltBody.GetPosition());
+      const createThreeWheel = (joltWheel, body) => {
         const wheelSetting = joltWheel.GetSettings();
         const wheelPos = wrapVec3(wheelSetting.mPosition);
         const radius = wheelSetting.mRadius;
@@ -191,7 +189,7 @@
 
       const modelWheels = [];
       for (let i = 0; i < vehicle.mWheels.size(); i++) {
-        modelWheels.push(createThreeWheel(constraint.GetWheel(i), tank_body, tank));
+        modelWheels.push(createThreeWheel(constraint.GetWheel(i), tank));
       }
 
       physicsSystem.AddConstraint(constraint);
