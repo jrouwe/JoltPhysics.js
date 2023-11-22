@@ -23,26 +23,23 @@
     // In case you haven't built the library yourself, replace URL with: https://www.unpkg.com/jolt-physics/dist/jolt-physics.wasm-compat.js
     import initJolt from './js/jolt-physics.wasm-compat.js';
 
+    const mPosition = [0, 2, 0];
+    const mCastType = 'cylinder';
+    const mWheelRadius = 0.3;
+    const mWheelWidth = 0.1;
+    const mHalfVehicleLength = 2.0;
+    const mHalfVehicleWidth = 0.9;
+    const mHalfVehicleHeight = 0.2;
+    const mWheelOffsetHorizontal = 1.4;
+    const mWheelOffsetVertical = 0.18;
+    const mSuspensionMinLength = 0.3;
+    const mSuspensionMaxLength = 0.5;
+    const mMaxSteeringAngle = DegreesToRadians(30);
+    const mFourWheelDrive = true;
+    const mFrontBackLimitedSlipRatio = 1.4;
+    const mLeftRightLimitedSlipRatio = 1.4;
+    const mAntiRollbar = true;
 
-    const VehicleSettings =
-    {
-      mPosition: [0, 2, 0],
-      mCastType: 'cylinder',
-      mWheelRadius: 0.3,
-      mWheelWidth: 0.1,
-      mHalfVehicleLength: 2.0,
-      mHalfVehicleWidth: 0.9,
-      mHalfVehicleHeight: 0.2,
-      mWheelOffsetHorizontal: 1.4,
-      mWheelOffsetVertical: 0.18,
-      mSuspensionMinLength: 0.3,
-      mSuspensionMaxLength: 0.5,
-      mMaxSteeringAngle: DegreesToRadians(30),
-      mFourWheelDrive: true,
-      mFrontBackLimitedSlipRatio: 1.4,
-      mLeftRightLimitedSlipRatio: 1.4,
-      mAntiRollbar: true
-    }
 
     const track = [
       [[[38, 64, -14], [38, 64, -16], [38, -64, -16], [38, -64, -14], [64, -64, -16], [64, -64, -14], [64, 64, -16], [64, 64, -14]], [[-16, 64, -14], [-16, 64, -16], [-16, -64, -16], [-16, -64, -14], [10, -64, -16], [10, -64, -14], [10, 64, -16], [10, 64, -14]], [[10, -48, -14], [10, -48, -16], [10, -64, -16], [10, -64, -14], [38, -64, -16], [38, -64, -14], [38, -48, -16], [38, -48, -14]], [[10, 64, -14], [10, 64, -16], [10, 48, -16], [10, 48, -14], [38, 48, -16], [38, 48, -14], [38, 64, -16], [38, 64, -14]]],
@@ -122,10 +119,10 @@
       }
 
 
-      const car_shape_settings = new Jolt.OffsetCenterOfMassShapeSettings(new Jolt.Vec3(0, -VehicleSettings.mHalfVehicleHeight, 0),
-        new Jolt.BoxShapeSettings(new Jolt.Vec3(VehicleSettings.mHalfVehicleWidth, VehicleSettings.mHalfVehicleHeight, VehicleSettings.mHalfVehicleLength)));
+      const car_shape_settings = new Jolt.OffsetCenterOfMassShapeSettings(new Jolt.Vec3(0, -mHalfVehicleHeight, 0),
+        new Jolt.BoxShapeSettings(new Jolt.Vec3(mHalfVehicleWidth, mHalfVehicleHeight, mHalfVehicleLength)));
       const car_shape = car_shape_settings.Create().Get();
-      const car_body_settings = new Jolt.BodyCreationSettings(car_shape, new Jolt.Vec3(...VehicleSettings.mPosition),
+      const car_body_settings = new Jolt.BodyCreationSettings(car_shape, new Jolt.Vec3(...mPosition),
         Jolt.Quat.prototype.sRotation(new Jolt.Vec3(0, 1, 0), Math.PI),
         Jolt.EMotionType_Dynamic, Jolt.MOVING)
       car_body_settings.mOverrideMassProperties = Jolt.EOverrideMassProperties_CalculateInertia;
@@ -141,8 +138,8 @@
       addToScene(car_body, 0xFF0000);
       const car = dynamicObjects[dynamicObjects.length - 1];
       {
-        const back = new THREE.Mesh(new THREE.BoxGeometry(2 * VehicleSettings.mHalfVehicleWidth, .75, 2, 1, 1, 1), car.material);
-        back.position.y += 2 * VehicleSettings.mHalfVehicleHeight;
+        const back = new THREE.Mesh(new THREE.BoxGeometry(2 * mHalfVehicleWidth, .75, 2, 1, 1, 1), car.material);
+        back.position.y += 2 * mHalfVehicleHeight;
         back.position.z -= 1;
         car.add(back);
       }
@@ -151,36 +148,36 @@
       const mWheels = [];
       {
         const fl = new Jolt.WheelSettingsWV();
-        fl.mPosition = new Jolt.Vec3(VehicleSettings.mHalfVehicleWidth, -VehicleSettings.mWheelOffsetVertical, VehicleSettings.mWheelOffsetHorizontal);
-        fl.mMaxSteerAngle = VehicleSettings.mMaxSteeringAngle;
+        fl.mPosition = new Jolt.Vec3(mHalfVehicleWidth, -mWheelOffsetVertical, mWheelOffsetHorizontal);
+        fl.mMaxSteerAngle = mMaxSteeringAngle;
         fl.mMaxHandBrakeTorque = 0.0;
         vehicle.mWheels.push_back(fl);
         mWheels.push(fl);
 
         const fr = new Jolt.WheelSettingsWV();
-        fr.mPosition = new Jolt.Vec3(-VehicleSettings.mHalfVehicleWidth, -VehicleSettings.mWheelOffsetVertical, VehicleSettings.mWheelOffsetHorizontal);
-        fr.mMaxSteerAngle = VehicleSettings.mMaxSteeringAngle;
+        fr.mPosition = new Jolt.Vec3(-mHalfVehicleWidth, -mWheelOffsetVertical, mWheelOffsetHorizontal);
+        fr.mMaxSteerAngle = mMaxSteeringAngle;
         fr.mMaxHandBrakeTorque = 0.0; // Front wheel doesn't have hand brake
         vehicle.mWheels.push_back(fr);
         mWheels.push(fr);
 
         const bl = new Jolt.WheelSettingsWV();
-        bl.mPosition = new Jolt.Vec3(VehicleSettings.mHalfVehicleWidth, -VehicleSettings.mWheelOffsetVertical, -VehicleSettings.mWheelOffsetHorizontal);
+        bl.mPosition = new Jolt.Vec3(mHalfVehicleWidth, -mWheelOffsetVertical, -mWheelOffsetHorizontal);
         bl.mMaxSteerAngle = 0.0;
         vehicle.mWheels.push_back(bl);
         mWheels.push(bl);
 
         const br = new Jolt.WheelSettingsWV();
-        br.mPosition = new Jolt.Vec3(-VehicleSettings.mHalfVehicleWidth, -VehicleSettings.mWheelOffsetVertical, -VehicleSettings.mWheelOffsetHorizontal);
+        br.mPosition = new Jolt.Vec3(-mHalfVehicleWidth, -mWheelOffsetVertical, -mWheelOffsetHorizontal);
         br.mMaxSteerAngle = 0.0;
         vehicle.mWheels.push_back(br);
         mWheels.push(br);
       }
       mWheels.forEach(wheelS => {
-        wheelS.mRadius = VehicleSettings.mWheelRadius;
-        wheelS.mWidth = VehicleSettings.mWheelWidth;
-        wheelS.mSuspensionMinLength = VehicleSettings.mSuspensionMinLength;
-        wheelS.mSuspensionMaxLength = VehicleSettings.mSuspensionMaxLength;
+        wheelS.mRadius = mWheelRadius;
+        wheelS.mWidth = mWheelWidth;
+        wheelS.mSuspensionMinLength = mSuspensionMinLength;
+        wheelS.mSuspensionMaxLength = mSuspensionMaxLength;
       });
       const controller_settings = new Jolt.WheeledVehicleControllerSettings();
       vehicle.mController = controller_settings;
@@ -189,21 +186,21 @@
       const frontWheelDrive = new Jolt.VehicleDifferentialSettings();
       frontWheelDrive.mLeftWheel = FL_WHEEL;
       frontWheelDrive.mRightWheel = FR_WHEEL;
-      frontWheelDrive.mLimitedSlipRatio = VehicleSettings.mLeftRightLimitedSlipRatio;
+      frontWheelDrive.mLimitedSlipRatio = mLeftRightLimitedSlipRatio;
       controller_settings.mDifferentials.push_back(frontWheelDrive);
-      controller_settings.mDifferentialLimitedSlipRatio = VehicleSettings.mFrontBackLimitedSlipRatio;
+      controller_settings.mDifferentialLimitedSlipRatio = mFrontBackLimitedSlipRatio;
 
-      if (VehicleSettings.mFourWheelDrive) {
+      if (mFourWheelDrive) {
         const rearWheelDrive = new Jolt.VehicleDifferentialSettings();
         rearWheelDrive.mLeftWheel = BL_WHEEL;
         rearWheelDrive.mRightWheel = BR_WHEEL;
-        rearWheelDrive.mLimitedSlipRatio = VehicleSettings.mLeftRightLimitedSlipRatio;
+        rearWheelDrive.mLimitedSlipRatio = mLeftRightLimitedSlipRatio;
         controller_settings.mDifferentials.push_back(rearWheelDrive);
 
         frontWheelDrive.mEngineTorqueRatio = rearWheelDrive.mEngineTorqueRatio = 0.5;
       }
 
-      if (VehicleSettings.mAntiRollbar) {
+      if (mAntiRollbar) {
         vehicle.mAntiRollBars.clear;
         const frontRollBar = new Jolt.VehicleAntiRollBar();
         frontRollBar.mLeftWheel = FL_WHEEL;
@@ -218,12 +215,12 @@
       const constraint = new Jolt.VehicleConstraint(car_body, vehicle);
 
       let tester;
-      switch (VehicleSettings.mCastType) {
+      switch (mCastType) {
         case 'cylinder':
           tester = new Jolt.VehicleCollisionTesterCastCylinder(Jolt.MOVING, 0.05);
           break;
         case 'sphere':
-          tester = new Jolt.VehicleCollisionTesterCastSphere(Jolt.MOVING, 0.5 * VehicleSettings.mWheelWidth);
+          tester = new Jolt.VehicleCollisionTesterCastSphere(Jolt.MOVING, 0.5 * mWheelWidth);
           break;
         default:
           tester = new Jolt.VehicleCollisionTesterRay(Jolt.MOVING);
