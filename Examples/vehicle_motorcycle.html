@@ -202,7 +202,7 @@
 
       const modelWheels = [];
       for (let i = 0; i < vehicle.mWheels.size(); i++) {
-        modelWheels.push(createThreeWheel(constraint.GetWheel(i), tank_body, tank));
+        modelWheels.push(createThreeWheel(constraint.GetWheel(i), motorcycle_body, motorcycle));
       }
 
       const input = {
@@ -259,27 +259,31 @@
       document.addEventListener("keydown", onDocumentKeyDown, false);
       document.addEventListener("keyup", onDocumentKeyUp, false);
       function onDocumentKeyDown(event) {
-        var keyCode = event.which;
-        if (keyCode == 87) {
+        var keyCode = event.key;
+        if (keyCode == 'w') {
           input.direction.z = 1;
-        } else if (keyCode == 83) {
+        } else if (keyCode == 's') {
           input.direction.z = -1;
-        } else if (keyCode == 65) {
+        } else if (keyCode == 'a') {
           input.direction.x = -1;
-        } else if (keyCode == 68) {
+        } else if (keyCode == 'd') {
           input.direction.x = 1;
+        } else if (keyCode == 'z') {
+          input.hand_brake = true;
         }
       };
       function onDocumentKeyUp(event) {
-        var keyCode = event.which;
-        if (keyCode == 87) {
+        var keyCode = event.key;
+        if (keyCode == 'w') {
           input.direction.z = 0;
-        } else if (keyCode == 83) {
+        } else if (keyCode == 's') {
           input.direction.z = 0;
-        } else if (keyCode == 65) {
+        } else if (keyCode == 'a') {
           input.direction.x = 0;
-        } else if (keyCode == 68) {
+        } else if (keyCode == 'd') {
           input.direction.x = 0;
+        } else if (keyCode == 'z') {
+          input.hand_brake = false;
         }
       };
       physicsSystem.AddStepListener(new Jolt.VehicleConstraintStepListener(constraint));
