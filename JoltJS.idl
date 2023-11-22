@@ -1730,6 +1730,9 @@ interface NarrowPhaseQuery {
 	void CollectTransformedShapes([Const, Ref] AABox inBox, [Ref] TransformedShapeCollector ioCollector, [Const, Ref] BroadPhaseLayerFilter inBroadPhaseLayerFilter, [Const, Ref] ObjectLayerFilter inObjectLayerFilter, [Const, Ref] BodyFilter inBodyFilter, [Const, Ref] ShapeFilter inShapeFilter);
 };
 
+interface PhysicsStepListener {
+};
+
 interface PhysicsSystem {
 	void SetGravity([Const, Ref] Vec3 inGravity);
 	[Value] Vec3 GetGravity();
@@ -1752,6 +1755,8 @@ interface PhysicsSystem {
 	[Const, Ref] NarrowPhaseQuery GetNarrowPhaseQueryNoLock();
 	void SaveState([Ref] StateRecorder inStream, optional EStateRecorderState inState = "EStateRecorderState_All");
 	boolean	RestoreState([Ref] StateRecorder inStream);
+	void AddStepListener(PhysicsStepListener inListener);
+	void RemoveStepListener(PhysicsStepListener inListener);
 };
 
 interface MassProperties {
@@ -2102,6 +2107,364 @@ interface CharacterVirtual {
 };
 
 CharacterVirtual implements CharacterBase;
+
+interface LinearCurve {
+};
+
+interface ArrayFloat {
+	boolean empty();
+	long size();
+	float at(long inIndex);
+	void push_back(float inValue);
+	void reserve(unsigned long inSize);
+	void resize(unsigned long inSize);
+	void clear();
+};
+
+interface ArrayLong {
+	boolean empty();
+	long size();
+	long at(long inIndex);
+	void push_back(long inValue);
+	void reserve(unsigned long inSize);
+	void resize(unsigned long inSize);
+	void clear();
+};
+
+interface ArrayVehicleAntiRollBar {
+	boolean empty();
+	long size();
+	[Value] VehicleAntiRollBar at(long inIndex);
+	void push_back([Ref] VehicleAntiRollBar inValue);
+	void resize(unsigned long inSize);
+	void clear();
+};
+
+interface ArrayWheelSettings {
+	boolean empty();
+	long size();
+	WheelSettings at(long inIndex);
+	void push_back(WheelSettings inValue);
+	void resize(unsigned long inSize);
+	void clear();
+};
+
+interface ArrayVehicleDifferentialSettings {
+	boolean empty();
+	long size();
+	[Value] VehicleDifferentialSettings at(long inIndex);
+	void push_back([Ref] VehicleDifferentialSettings inValue);
+	void resize(unsigned long inSize);
+	void clear();
+};
+
+interface VehicleCollisionTester {
+};
+
+interface VehicleCollisionTesterRay {
+	void VehicleCollisionTesterRay(unsigned short inObjectLayer, [Ref] optional Vec3 inUp, optional float inMaxSlopeAngle);
+};
+
+VehicleCollisionTesterRay implements VehicleCollisionTester;
+
+interface VehicleCollisionTesterCastSphere {
+	void VehicleCollisionTesterCastSphere(unsigned short inObjectLayer, float inRadius, [Ref] optional Vec3 inUp, optional float inMaxSlopeAngle);
+};
+
+VehicleCollisionTesterCastSphere implements VehicleCollisionTester;
+
+interface VehicleCollisionTesterCastCylinder {
+	void VehicleCollisionTesterCastCylinder(unsigned short inObjectLayer, optional float inConvexRadiusFraction);
+};
+
+VehicleCollisionTesterCastCylinder implements VehicleCollisionTester;
+
+interface VehicleConstraintSettings {
+	void VehicleConstraintSettings();
+
+	[Value] attribute Vec3 mUp;
+	[Value] attribute Vec3 mForward;
+	attribute float mMaxPitchRollAngle;
+	[Value] attribute ArrayWheelSettings mWheels;
+	[Value] attribute ArrayVehicleAntiRollBar mAntiRollBars;
+	attribute VehicleControllerSettings mController;
+};
+
+VehicleConstraintSettings implements ConstraintSettings;
+
+interface VehicleConstraint {
+	void VehicleConstraint([Ref] Body inVehicleBody, [Const, Ref] VehicleConstraintSettings inSettings);
+	void SetMaxPitchRollAngle(float inMaxPitchRollAngle);
+	void SetVehicleCollisionTester([Const] VehicleCollisionTester inTester);
+	[Value] Vec3 GetLocalUp();
+	[Value] Vec3 GetLocalForward();
+	[Value] Vec3 GetWorldUp();
+	Body GetVehicleBody();
+	VehicleController GetController();
+	[Const] Wheel GetWheel(unsigned long inIdx);
+	void SetupVelocityConstraint(float inDeltaTime);
+	void WarmStartVelocityConstraint(float inWarmStartImpulseRatio);
+	[Value] Mat44 GetWheelLocalTransform(unsigned long inWheelIndex, [Ref] Vec3 inWheelRight, [Ref] Vec3 inWheelUp);
+	[Value] Mat44 GetWheelWorldTransform(unsigned long inWheelIndex, [Ref] Vec3 inWheelRight, [Ref] Vec3 inWheelUp);
+};
+
+VehicleConstraint implements Constraint;
+
+interface VehicleConstraintStepListener {
+	void VehicleConstraintStepListener(VehicleConstraint inConstraint);
+};
+
+VehicleConstraintStepListener implements PhysicsStepListener;
+
+interface WheelSettings {
+	void WheelSettings();
+
+	[Value] attribute Vec3 mPosition;
+	[Value] attribute Vec3 mSuspensionForcePoint;
+	[Value] attribute Vec3 mSuspensionDirection;
+	[Value] attribute Vec3 mSteeringAxis;
+	[Value] attribute Vec3 mWheelUp;
+	[Value] attribute Vec3 mWheelForward;
+	[Value] attribute SpringSettings mSuspensionSpring;
+	attribute float mSuspensionMinLength;
+	attribute float mSuspensionMaxLength;
+	attribute float mSuspensionPreloadLength;
+	attribute float mRadius;
+	attribute float mWidth;
+	attribute boolean mEnableSuspensionForcePoint;
+};
+
+interface VehicleAntiRollBar {
+	void VehicleAntiRollBar();
+
+	attribute long mLeftWheel;
+	attribute long mRightWheel;
+	attribute float mStiffness;
+};
+
+interface Wheel {
+	void Wheel([Const, Ref] WheelSettings inSettings);
+	[Const] WheelSettings GetSettings();
+	float GetAngularVelocity();
+	void SetAngularVelocity(float inVel);
+	float GetRotationAngle();
+	void SetRotationAngle(float inAngle);
+	float GetSteerAngle();
+	void SetSteerAngle(float inAngle);
+	boolean HasContact();
+	[Value] BodyID GetContactBodyID();
+	[Value] Vec3 GetContactPosition();
+	float	GetSuspensionLength();
+};
+
+interface WheelSettingsWV {
+	void WheelSettingsWV();
+
+	attribute float mInertia;
+	attribute float mAngularDamping;
+	attribute float mMaxSteerAngle;
+	[Value] attribute LinearCurve mLongitudinalFriction;
+	[Value] attribute LinearCurve mLateralFriction;
+	attribute float mMaxBrakeTorque;
+	attribute float mMaxHandBrakeTorque;
+};
+
+WheelSettingsWV implements WheelSettings;
+
+interface WheelWV {
+	void WheelWV([Const, Ref] WheelSettingsWV inWheel);
+	[Const] WheelSettingsWV GetSettings();
+	void ApplyTorque(float inTorque, float inDeltaTime);
+	void Update(float inDeltaTime, [Const, Ref] VehicleConstraint inConstraint);
+
+	attribute float mLongitudinalSlip;
+	attribute float mLateralSlip;
+	attribute float mCombinedLongitudinalFriction;
+	attribute float mCombinedLateralFriction;
+	attribute float mBrakeImpulse;
+};
+
+WheelWV implements Wheel;
+
+interface WheelSettingsTV {
+	void WheelSettingsTV();
+	attribute float mLongitudinalFriction;
+	attribute float mLateralFriction;
+};
+
+WheelSettingsTV implements WheelSettings;
+
+interface WheelTV {
+	void WheelTV([Const, Ref] WheelSettingsTV inWheel);
+	[Const] WheelSettingsTV GetSettings();
+	void CalculateAngularVelocity([Const, Ref] VehicleConstraint inConstraint);
+	void Update(float inDeltaTime, [Const, Ref] VehicleConstraint inConstraint);
+
+	attribute long mTrackIndex;
+	attribute float mCombinedLongitudinalFriction;
+	attribute float mCombinedLateralFriction;
+	attribute float mBrakeImpulse;
+};
+
+WheelTV implements Wheel;
+
+interface VehicleTrackSettings {
+	attribute long mDrivenWheel;
+	[Value] attribute ArrayLong mWheels;
+	attribute float mInertia;
+	attribute float mAngularDamping;
+	attribute float mMaxBrakeTorque;
+	attribute float mDifferentialRatio;
+};
+
+interface VehicleTrack {
+	attribute float mAngularVelocity;
+};
+
+VehicleTrack implements VehicleTrackSettings;
+
+interface WheeledVehicleControllerSettings {
+	void WheeledVehicleControllerSettings();
+
+	[Value] attribute VehicleEngineSettings	mEngine;
+	[Value] attribute VehicleTransmissionSettings	mTransmission;
+	[Value] attribute ArrayVehicleDifferentialSettings mDifferentials;
+	attribute float mDifferentialLimitedSlipRatio;
+};
+
+WheeledVehicleControllerSettings implements VehicleControllerSettings;
+
+interface TrackedVehicleControllerSettings {
+	void TrackedVehicleControllerSettings();
+	[Value] attribute VehicleEngineSettings	mEngine;
+	[Value] attribute VehicleTransmissionSettings mTransmission;
+	[Value] attribute VehicleTrackSettings[] mTracks;
+};
+
+TrackedVehicleControllerSettings implements VehicleControllerSettings;
+
+interface TrackedVehicleController {
+	void TrackedVehicleController([Const, Ref] TrackedVehicleControllerSettings inSettings, [Ref] VehicleConstraint inConstraint);
+	void SetDriverInput(float inForward, float inLeftRatio, float inRightRatio, float inBrake);
+	void SetForwardInput(float inForward);
+	float GetForwardInput();
+	void SetLeftRatio(float inLeftRatio);
+	float GetLeftRatio();
+	void SetRightRatio(float inRightRatio);
+	float GetRightRatio();
+	void SetBrakeInput(float inBrake);
+	float GetBrakeInput();
+	[Const, Value] VehicleEngine GetEngine();
+	[Const, Value] VehicleTransmission GetTransmission();
+	VehicleTrack[] GetTracks();
+};
+
+TrackedVehicleController implements VehicleController;
+
+interface VehicleEngineSettings {
+	attribute float mMaxTorque;
+	attribute float mMinRPM;
+	attribute float mMaxRPM;
+	[Value] attribute LinearCurve mNormalizedTorque;
+	attribute float mInertia;
+	attribute float mAngularDamping;
+};
+
+interface VehicleEngine {
+	void ClampRPM();
+	float GetCurrentRPM();
+	void SetCurrentRPM(float inRPM);
+	float GetAngularVelocity();
+	float GetTorque(float inAcceleration);
+	void ApplyTorque(float inTorque, float inDeltaTime);
+	void ApplyDamping(float inDeltaTime);
+	boolean AllowSleep();
+};
+
+VehicleEngine implements VehicleEngineSettings;
+
+interface VehicleTransmissionSettings {
+	[Value] attribute ArrayFloat mGearRatios;
+	[Value] attribute ArrayFloat mReverseGearRatios;
+	attribute float mSwitchTime;
+	attribute float mClutchReleaseTime;
+	attribute float mSwitchLatency;
+	attribute float mShiftUpRPM;
+	attribute float mShiftDownRPM;
+	attribute float mClutchStrength;
+};
+
+interface VehicleTransmission {
+	void Set(long inCurrentGear, float inClutchFriction);
+	void Update(float inDeltaTime, float inCurrentRPM, float inForwardInput, boolean inCanShiftUp);
+	long GetCurrentGear();
+	float GetClutchFriction();
+	boolean IsSwitchingGear();
+	float GetCurrentRatio();
+	boolean AllowSleep();
+};
+
+VehicleTransmission implements VehicleTransmissionSettings;
+
+interface VehicleDifferentialSettings {
+	void VehicleDifferentialSettings();
+
+	attribute long mLeftWheel;
+	attribute long mRightWheel;
+	attribute float mDifferentialRatio;
+	attribute float mLeftRightSplit;
+	attribute float mLimitedSlipRatio;
+	attribute float mEngineTorqueRatio;
+};
+
+interface VehicleControllerSettings {
+};
+
+interface VehicleController {
+};
+
+interface WheeledVehicleController {
+	void WheeledVehicleController([Const, Ref] WheeledVehicleControllerSettings inSettings, [Ref] VehicleConstraint inConstraint);
+	void SetDriverInput(float inForward, float inRight, float inBrake, float inHandBrake);
+	void SetForwardInput(float inForward);
+	float GetForwardInput();
+	void SetRightInput(float inRight);
+	float GetRightInput();
+	void SetBrakeInput(float inBrake);
+	float GetBrakeInput();
+	void SetHandBrakeInput(float inHandBrake);
+	float GetHandBrakeInput();
+	[Value] VehicleEngine GetEngine();
+	[Value] VehicleTransmission GetTransmission();
+	[Value] ArrayVehicleDifferentialSettings GetDifferentials();
+	float GetDifferentialLimitedSlipRatio();
+	void SetDifferentialLimitedSlipRatio(float inV);
+	float GetWheelSpeedAtClutch();
+};
+
+WheeledVehicleController implements VehicleController;
+
+interface MotorcycleControllerSettings {
+	void MotorcycleControllerSettings();
+
+	attribute float mMaxLeanAngle;
+	attribute float mLeanSpringConstant;
+	attribute float mLeanSpringDamping;
+	attribute float mLeanSpringIntegrationCoefficient;
+	attribute float mLeanSpringIntegrationCoefficientDecay;
+	attribute float mLeanSmoothingFactor;
+};
+
+MotorcycleControllerSettings implements WheeledVehicleControllerSettings;
+
+interface MotorcycleController {
+	void MotorcycleController([Const, Ref] MotorcycleControllerSettings inSettings, [Ref] VehicleConstraint inConstraint);
+	float GetWheelBase();
+	void EnableLeanController(boolean inEnable);
+	boolean IsLeanControllerEnabled();
+};
+
+MotorcycleController implements WheeledVehicleController;
 
 interface JoltSettings {
 	void JoltSettings();

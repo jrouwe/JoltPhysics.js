@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<title>JoltPhysics.js demo</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+	<link rel="stylesheet" type="text/css" href="style.css">
+</head>
+
+<body>
+	<div id="container">Loading...</div>
+	<div id="info">
+		JoltPhysics.js wheeled controller demo<br />
+		WASD to move. Z to hand brake
+	</div>
+
+	<script src="js/three/three.min.js"></script>
+	<script src="js/three/OrbitControls.js"></script>
+	<script src="js/three/WebGL.js"></script>
+	<script src="js/three/stats.min.js"></script>
+	<script src="js/example.js"></script>
+
+	<script type="module">
+		// In case you haven't built the library yourself, replace URL with: https://www.unpkg.com/jolt-physics/dist/jolt-physics.wasm-compat.js
+		import initJolt from './js/jolt-physics.wasm-compat.js';
+
+		const mPosition = [0, 2, 0];
+		const mCastType = 'cylinder';
+		const mWheelRadius = 0.3;
+		const mWheelWidth = 0.1;
+		const mHalfVehicleLength = 2.0;
+		const mHalfVehicleWidth = 0.9;
+		const mHalfVehicleHeight = 0.2;
+		const mWheelOffsetHorizontal = 1.4;
+		const mWheelOffsetVertical = 0.18;
+		const mSuspensionMinLength = 0.3;
+		const mSuspensionMaxLength = 0.5;
+		const mMaxSteeringAngle = DegreesToRadians(30);
+		const mFourWheelDrive = true;
+		const mFrontBackLimitedSlipRatio = 1.4;
+		const mLeftRightLimitedSlipRatio = 1.4;
+		const mAntiRollbar = true;
+
+
+		const track = [
+			[[[38, 64, -14], [38, 64, -16], [38, -64, -16], [38, -64, -14], [64, -64, -16], [64, -64, -14], [64, 64, -16], [64, 64, -14]], [[-16, 64, -14], [-16, 64, -16], [-16, -64, -16], [-16, -64, -14], [10, -64, -16], [10, -64, -14], [10, 64, -16], [10, 64, -14]], [[10, -48, -14], [10, -48, -16], [10, -64, -16], [10, -64, -14], [38, -64, -16], [38, -64, -14], [38, -48, -16], [38, -48, -14]], [[10, 64, -14], [10, 64, -16], [10, 48, -16], [10, 48, -14], [38, 48, -16], [38, 48, -14], [38, 64, -16], [38, 64, -14]]],
+			[[[38, 48, -6], [38, 48, -14], [38, -48, -14], [38, -48, -6], [40, -48, -14], [40, -48, -6], [40, 48, -14], [40, 48, -6]], [[62, 62, -6], [62, 62, -14], [62, -64, -14], [62, -64, -6], [64, -64, -14], [64, -64, -6], [64, 62, -14], [64, 62, -6]], [[8, 48, -6], [8, 48, -14], [8, -48, -14], [8, -48, -6], [10, -48, -14], [10, -48, -6], [10, 48, -14], [10, 48, -6]], [[-16, 62, -6], [-16, 62, -14], [-16, -64, -14], [-16, -64, -6], [-14, -64, -14], [-14, -64, -6], [-14, 62, -14], [-14, 62, -6]], [[-14, -62, -6], [-14, -62, -14], [-14, -64, -14], [-14, -64, -6], [62, -64, -14], [62, -64, -6], [62, -62, -14], [62, -62, -6]], [[8, -48, -6], [8, -48, -14], [8, -50, -14], [8, -50, -6], [40, -50, -14], [40, -50, -6], [40, -48, -14], [40, -48, -6]], [[8, 50, -6], [8, 50, -14], [8, 48, -14], [8, 48, -6], [40, 48, -14], [40, 48, -6], [40, 50, -14], [40, 50, -6]], [[-16, 64, -6], [-16, 64, -14], [-16, 62, -14], [-16, 62, -6], [64, 62, -14], [64, 62, -6], [64, 64, -14], [64, 64, -6]]],
+			[[[-4, 22, -14], [-4, -14, -14], [-4, -14, -10], [4, -14, -14], [4, -14, -10], [4, 22, -14]], [[-4, -27, -14], [-4, -48, -14], [-4, -48, -11], [4, -48, -14], [4, -48, -11], [4, -27, -14]], [[-4, 50, -14], [-4, 30, -14], [-4, 30, -12], [4, 30, -14], [4, 30, -12], [4, 50, -14]], [[46, 50, -14], [46, 31, -14], [46, 50, -12], [54, 31, -14], [54, 50, -12], [54, 50, -14]], [[46, 16, -14], [46, -19, -14], [46, 16, -10], [54, -19, -14], [54, 16, -10], [54, 16, -14]], [[46, -28, -14], [46, -48, -14], [46, -28, -11], [54, -48, -14], [54, -28, -11], [54, -28, -14]]]
+		];
+
+		const FL_WHEEL = 0;
+		const FR_WHEEL = 1;
+		const BL_WHEEL = 2;
+		const BR_WHEEL = 3;
+
+		const map_colors = [0x666666, 0x006600, 0x000066];
+
+		const sVehicleMass = 1500.0;
+		const sMaxEngineTorque = 500.0;
+		const sClutchStrength = 10.0;
+
+		initJolt().then(function (Jolt) {
+			// Initialize this example
+			window.Jolt = Jolt;
+			container = document.getElementById('container');
+			container.innerHTML = "";
+
+			initGraphics();
+			initPhysics();
+
+			const mapRot = Jolt.Quat.prototype.sRotation(new Jolt.Vec3(0, 1, 0), 0.5 * Math.PI);
+			track.forEach((type, tIdx) => {
+				type.forEach(block => {
+					const hull = new Jolt.ConvexHullShapeSettings;
+					block.forEach(v => {
+						hull.mPoints.push_back(new Jolt.Vec3(-v[1], v[2], v[0]));
+					});
+					const shape = hull.Create().Get();
+					const creation_settings = new Jolt.BodyCreationSettings(shape, new Jolt.Vec3(0, 10, 0), mapRot, Jolt.EBodyType_Static, Jolt.NON_MOVING);
+					const body = bodyInterface.CreateBody(creation_settings);
+					body.SetFriction(2);
+					addToScene(body, map_colors[tIdx]);
+				});
+			});
+
+			const texLoader = new THREE.TextureLoader();
+			const texture = texLoader.load('data:image/gif;base64,R0lGODdhAgACAIABAAAAAP///ywAAAAAAgACAAACA0QCBQA7');
+			texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+
+			texture.offset.set(0, 0);
+			texture.repeat.set(3, 3);
+			texture.magFilter = THREE.NearestFilter;
+			let wheel_material = new THREE.MeshPhongMaterial({ color: 0x666666 });
+			wheel_material.map = texture;
+			const createThreeWheel = (joltWheel, body) => {
+				const wheelSetting = joltWheel.GetSettings();
+				const wheelPos = wrapVec3(wheelSetting.mPosition);
+				const radius = wheelSetting.mRadius;
+				const width = wheelSetting.mWidth;
+
+				const wheel = new THREE.Mesh(new THREE.CylinderGeometry(
+					radius, radius, width, 20, 1
+				), wheel_material);
+				const joint = new THREE.Object3D();
+				const joint_steer = new THREE.Object3D();
+				joint.quaternion.setFromAxisAngle(new THREE.Vector3(0, 0, 1), Math.PI / 2);
+				joint.add(joint_steer);
+				joint_steer.add(wheel);
+				body.add(joint);
+
+				joint.position.copy(wheelPos);
+				wheel.updateRotation = () => {
+					joint.position.y = wheelPos.y - joltWheel.GetSuspensionLength();
+					joint_steer.quaternion.setFromAxisAngle(new THREE.Vector3(1, 0, 0), joltWheel.GetSteerAngle());
+					wheel.quaternion.setFromAxisAngle(new THREE.Vector3(0, 1, 0), -joltWheel.GetRotationAngle());
+				};
+				return wheel;
+			}
+
+
+			const car_shape_settings = new Jolt.OffsetCenterOfMassShapeSettings(new Jolt.Vec3(0, -mHalfVehicleHeight, 0),
+				new Jolt.BoxShapeSettings(new Jolt.Vec3(mHalfVehicleWidth, mHalfVehicleHeight, mHalfVehicleLength)));
+			const car_shape = car_shape_settings.Create().Get();
+			const car_body_settings = new Jolt.BodyCreationSettings(car_shape, new Jolt.Vec3(...mPosition),
+				Jolt.Quat.prototype.sRotation(new Jolt.Vec3(0, 1, 0), Math.PI),
+				Jolt.EMotionType_Dynamic, Jolt.MOVING)
+			car_body_settings.mOverrideMassProperties = Jolt.EOverrideMassProperties_CalculateInertia;
+			car_body_settings.mMassPropertiesOverride.mMass = 1500.0;
+
+			const car_body = bodyInterface.CreateBody(car_body_settings);
+			bodyInterface.AddBody(car_body.GetID(), Jolt.EActivation_Activate);
+
+			const vehicle = new Jolt.VehicleConstraintSettings();
+			vehicle.mDrawConstraintSize = 0.1;
+			vehicle.mMaxPitchRollAngle = DegreesToRadians(60.0);
+
+			addToScene(car_body, 0xFF0000);
+			const car = dynamicObjects[dynamicObjects.length - 1];
+			{
+				const back = new THREE.Mesh(new THREE.BoxGeometry(2 * mHalfVehicleWidth, .75, 2, 1, 1, 1), car.material);
+				back.position.y += 2 * mHalfVehicleHeight;
+				back.position.z -= 1;
+				car.add(back);
+			}
+
+			vehicle.mWheels.clear();
+			const mWheels = [];
+			{
+				const fl = new Jolt.WheelSettingsWV();
+				fl.mPosition = new Jolt.Vec3(mHalfVehicleWidth, -mWheelOffsetVertical, mWheelOffsetHorizontal);
+				fl.mMaxSteerAngle = mMaxSteeringAngle;
+				fl.mMaxHandBrakeTorque = 0.0;
+				vehicle.mWheels.push_back(fl);
+				mWheels.push(fl);
+
+				const fr = new Jolt.WheelSettingsWV();
+				fr.mPosition = new Jolt.Vec3(-mHalfVehicleWidth, -mWheelOffsetVertical, mWheelOffsetHorizontal);
+				fr.mMaxSteerAngle = mMaxSteeringAngle;
+				fr.mMaxHandBrakeTorque = 0.0; // Front wheel doesn't have hand brake
+				vehicle.mWheels.push_back(fr);
+				mWheels.push(fr);
+
+				const bl = new Jolt.WheelSettingsWV();
+				bl.mPosition = new Jolt.Vec3(mHalfVehicleWidth, -mWheelOffsetVertical, -mWheelOffsetHorizontal);
+				bl.mMaxSteerAngle = 0.0;
+				vehicle.mWheels.push_back(bl);
+				mWheels.push(bl);
+
+				const br = new Jolt.WheelSettingsWV();
+				br.mPosition = new Jolt.Vec3(-mHalfVehicleWidth, -mWheelOffsetVertical, -mWheelOffsetHorizontal);
+				br.mMaxSteerAngle = 0.0;
+				vehicle.mWheels.push_back(br);
+				mWheels.push(br);
+			}
+			mWheels.forEach(wheelS => {
+				wheelS.mRadius = mWheelRadius;
+				wheelS.mWidth = mWheelWidth;
+				wheelS.mSuspensionMinLength = mSuspensionMinLength;
+				wheelS.mSuspensionMaxLength = mSuspensionMaxLength;
+			});
+			const controller_settings = new Jolt.WheeledVehicleControllerSettings();
+			vehicle.mController = controller_settings;
+
+			controller_settings.mDifferentials.clear();
+			const frontWheelDrive = new Jolt.VehicleDifferentialSettings();
+			frontWheelDrive.mLeftWheel = FL_WHEEL;
+			frontWheelDrive.mRightWheel = FR_WHEEL;
+			frontWheelDrive.mLimitedSlipRatio = mLeftRightLimitedSlipRatio;
+			controller_settings.mDifferentials.push_back(frontWheelDrive);
+			controller_settings.mDifferentialLimitedSlipRatio = mFrontBackLimitedSlipRatio;
+
+			if (mFourWheelDrive) {
+				const rearWheelDrive = new Jolt.VehicleDifferentialSettings();
+				rearWheelDrive.mLeftWheel = BL_WHEEL;
+				rearWheelDrive.mRightWheel = BR_WHEEL;
+				rearWheelDrive.mLimitedSlipRatio = mLeftRightLimitedSlipRatio;
+				controller_settings.mDifferentials.push_back(rearWheelDrive);
+
+				frontWheelDrive.mEngineTorqueRatio = rearWheelDrive.mEngineTorqueRatio = 0.5;
+			}
+
+			if (mAntiRollbar) {
+				vehicle.mAntiRollBars.clear;
+				const frontRollBar = new Jolt.VehicleAntiRollBar();
+				frontRollBar.mLeftWheel = FL_WHEEL;
+				frontRollBar.mRightWheel = FR_WHEEL;
+				const rearRollBar = new Jolt.VehicleAntiRollBar();
+				rearRollBar.mLeftWheel = BL_WHEEL;
+				rearRollBar.mRightWheel = BR_WHEEL;
+				vehicle.mAntiRollBars.push_back(frontRollBar);
+				vehicle.mAntiRollBars.push_back(rearRollBar);
+			}
+
+			const constraint = new Jolt.VehicleConstraint(car_body, vehicle);
+
+			let tester;
+			switch (mCastType) {
+				case 'cylinder':
+					tester = new Jolt.VehicleCollisionTesterCastCylinder(Jolt.MOVING, 0.05);
+					break;
+				case 'sphere':
+					tester = new Jolt.VehicleCollisionTesterCastSphere(Jolt.MOVING, 0.5 * mWheelWidth);
+					break;
+				default:
+					tester = new Jolt.VehicleCollisionTesterRay(Jolt.MOVING);
+					break;
+			}
+
+			constraint.SetVehicleCollisionTester(tester);
+
+			physicsSystem.AddConstraint(constraint);
+			const controller = Jolt.castObject(constraint.GetController(), Jolt.WheeledVehicleController);
+
+			const modelWheels = [];
+			for (let i = 0; i < vehicle.mWheels.size(); i++) {
+				modelWheels.push(createThreeWheel(constraint.GetWheel(i), car));
+			}
+
+			const input = {
+				direction: new THREE.Vector3(),
+				hand_brake: false
+			};
+
+			let previousForward = 0;
+			const prePhysicsUpdate = () => {
+				let forward = 0.0, right = 0.0, brake = 0.0, hand_brake = 0.0;
+				if (input.direction.z != 0) {
+					forward = input.direction.z;
+				}
+				if (previousForward * forward < 0.0) {
+					const rotation = wrapQuat(car_body.GetRotation().Conjugated());
+					const linearV = wrapVec3(car_body.GetLinearVelocity());
+					const velocity = linearV.applyQuaternion(rotation).z;
+					if ((forward > 0.0 && velocity < -0.1) || (forward < 0.0 && velocity > 0.1)) {
+						// Brake while we've not stopped yet
+						forward = 0.0;
+						brake = 1.0;
+					}
+					else {
+						// When we've come to a stop, accept the new direction
+						previousForward = forward;
+					}
+				}
+
+				if (input.hand_brake) {
+					forward = 0.0;
+					hand_brake = 1.0;
+				}
+				if (input.direction.x != 0) {
+					right = input.direction.x;
+				}
+
+				controller.GetEngine().mMaxTorque = sMaxEngineTorque;
+				controller.SetDriverInput(forward, right, brake, hand_brake);
+				if (right != 0.0 || forward != 0.0 || brake != 0.0 || hand_brake != 0.0)
+					bodyInterface.ActivateBody(car_body.GetID());
+			}
+
+			controls.target = car.position;
+			let oldPos = wrapVec3(car_body.GetPosition());
+			onExampleUpdate = (time, deltaTime) => {
+				prePhysicsUpdate();
+				const pos = wrapVec3(car_body.GetPosition());
+				camera.position.add(pos.clone().sub(oldPos));
+				oldPos = pos;
+
+				modelWheels.forEach(wheel => wheel.updateRotation());
+			}
+
+			document.addEventListener("keydown", onDocumentKeyDown, false);
+			document.addEventListener("keyup", onDocumentKeyUp, false);
+			function onDocumentKeyDown(event) {
+				var keyCode = event.key;
+				if (keyCode == 'w') {
+					input.direction.z = 1;
+				} else if (keyCode == 's') {
+					input.direction.z = -1;
+				} else if (keyCode == 'a') {
+					input.direction.x = -1;
+				} else if (keyCode == 'd') {
+					input.direction.x = 1;
+				} else if (keyCode == 'z') {
+					input.hand_brake = true;
+				}
+			};
+			function onDocumentKeyUp(event) {
+				var keyCode = event.key;
+				if (keyCode == 'w') {
+					input.direction.z = 0;
+				} else if (keyCode == 's') {
+					input.direction.z = 0;
+				} else if (keyCode == 'a') {
+					input.direction.x = 0;
+				} else if (keyCode == 'd') {
+					input.direction.x = 0;
+				} else if (keyCode == 'z') {
+					input.hand_brake = false;
+				}
+			};
+			physicsSystem.AddStepListener(new Jolt.VehicleConstraintStepListener(constraint));
+			renderExample();
+
+		});
+
+	</script>
+</body>
+
+</html>

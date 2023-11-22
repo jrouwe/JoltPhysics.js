@@ -43,6 +43,9 @@
 #include "Jolt/Physics/SoftBody/SoftBodySharedSettings.h"
 #include "Jolt/Physics/Character/CharacterVirtual.h"
 
+#include "Jolt/Physics/Vehicle/MotorcycleController.h"
+#include "Jolt/Physics/Vehicle/TrackedVehicleController.h"
+
 #include <iostream>
 
 using namespace JPH;
@@ -51,6 +54,8 @@ using namespace std;
 // Types that need to be exposed to JavaScript
 using JPHString = String;
 using ArrayVec3 = Array<Vec3>;
+using ArrayFloat = Array<float>;
+using ArrayLong = Array<uint>;
 using SoftBodySharedSettingsVertex = SoftBodySharedSettings::Vertex;
 using SoftBodySharedSettingsFace = SoftBodySharedSettings::Face;
 using SoftBodySharedSettingsEdge = SoftBodySharedSettings::Edge;
@@ -78,6 +83,9 @@ using ArrayShapeCastResult = Array<ShapeCastResult>;
 using CastShapeAllHitCollisionCollector = AllHitCollisionCollector<CastShapeCollector>;
 using CastShapeClosestHitCollisionCollector = ClosestHitCollisionCollector<CastShapeCollector>;
 using CastShapeAnyHitCollisionCollector = AnyHitCollisionCollector<CastShapeCollector>;
+using ArrayWheelSettings = Array<Ref<WheelSettings>>;
+using ArrayVehicleAntiRollBar = Array<VehicleAntiRollBar>;
+using ArrayVehicleDifferentialSettings = Array<VehicleDifferentialSettings>;
 
 // Alias for EBodyType values to avoid clashes
 constexpr EBodyType EBodyType_RigidBody = EBodyType::RigidBody;
@@ -517,4 +525,18 @@ public:
 	{ 
 		OnContactSolve(inCharacter, inBodyID2, inSubShapeID2, &inContactPosition, &inContactNormal, &inContactVelocity, inContactMaterial, &inCharacterVelocity, ioNewCharacterVelocity);
 	}
+};
+
+class VehicleConstraintStepListener: public PhysicsStepListener {
+	public:
+		VehicleConstraintStepListener(VehicleConstraint * inVehicleConstraint) {
+			mInstance = inVehicleConstraint;
+		}
+		virtual void OnStep(float inDeltaTime, PhysicsSystem &inPhysicsSystem) override {
+			PhysicsStepListener * instance = mInstance;
+			instance->OnStep(inDeltaTime, inPhysicsSystem);
+		}
+	private:
+		VehicleConstraint * mInstance;
+
 };
