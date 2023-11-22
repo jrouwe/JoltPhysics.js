@@ -88,12 +88,49 @@
         });
       });
 
+      const texLoader = new THREE.TextureLoader();
+      const texture = texLoader.load('data:image/gif;base64,R0lGODdhAgACAIABAAAAAP///ywAAAAAAgACAAACA0QCBQA7');
+      texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+
+      texture.offset.set(0, 0);
+      texture.repeat.set(3, 3);
+      texture.magFilter = THREE.NearestFilter;
+      let wheel_material = new THREE.MeshPhongMaterial({ color: 0x666666 });
+      wheel_material.map = texture;
+      const createThreeWheel = (joltWheel, joltBody, body) => {
+
+        const bodyPos = wrapVec3(joltBody.GetPosition());
+        const wheelSetting = joltWheel.GetSettings();
+        const wheelPos = wrapVec3(wheelSetting.mPosition);
+        const radius = wheelSetting.mRadius;
+        const width = wheelSetting.mWidth;
+
+        const wheel = new THREE.Mesh(new THREE.CylinderGeometry(
+          radius, radius, width, 20, 1
+        ), wheel_material);
+        const joint = new THREE.Object3D();
+        const joint_steer = new THREE.Object3D();
+        joint.quaternion.setFromAxisAngle(new THREE.Vector3(0, 0, 1), Math.PI / 2);
+        joint.add(joint_steer);
+        joint_steer.add(wheel);
+        body.add(joint);
+
+        joint.position.copy(wheelPos);
+        wheel.updateRotation = () => {
+          joint.position.y = wheelPos.y - joltWheel.GetSuspensionLength();
+          joint_steer.quaternion.setFromAxisAngle(new THREE.Vector3(1, 0, 0), joltWheel.GetSteerAngle());
+          wheel.quaternion.setFromAxisAngle(new THREE.Vector3(0, 1, 0), -joltWheel.GetRotationAngle());
+        };
+        return wheel;
+      }
+
       const filter = new Jolt.GroupFilterTable();
 
       const tank_body_shape_settings = new Jolt.OffsetCenterOfMassShapeSettings(new Jolt.Vec3(0, -half_vehicle_height, 0),
         new Jolt.BoxShapeSettings(new Jolt.Vec3(half_vehicle_width, half_vehicle_height, half_vehicle_length)));
       const tank_body_shape = tank_body_shape_settings.Create().Get();
-      const tank_body_settings = new Jolt.BodyCreationSettings(tank_body_shape, new Jolt.Vec3(...body_position), Jolt.Quat.prototype.sIdentity(),
+      const tank_body_settings = new Jolt.BodyCreationSettings(tank_body_shape, new Jolt.Vec3(...body_position),
+        Jolt.Quat.prototype.sRotation(new Jolt.Vec3(0, 1, 0), Math.PI),
         Jolt.EMotionType_Dynamic, Jolt.MOVING)
       tank_body_settings.mCollisionGroup.SetGroupFilter(filter);
       tank_body_settings.mCollisionGroup.SetGroupID(0);
@@ -132,22 +169,15 @@
 
           track.mWheels.push_back(vehicle.mWheels.size());
           vehicle.mWheels.push_back(w);
-
-          const _wheel = new THREE.Mesh(new THREE.CylinderGeometry(
-            wheel_radius, wheel_radius, wheel_width, 20, 1
-          ), material);
-          _wheel.position.set(t == 0 ? half_vehicle_width : -half_vehicle_width, loc[0] - half_vehicle_height, loc[1]);
-          _wheel.quaternion.setFromAxisAngle(new THREE.Vector3(0, 0, 1), Math.PI / 2);
-          tank.add(_wheel);
         });
       }
 
       {
-        const turret = new THREE.Mesh(new THREE.BoxGeometry(2* half_turret_width, 2* half_turret_height, 2 *half_turret_length, 1, 1, 1), tank_mat1);
+        const turret = new THREE.Mesh(new THREE.BoxGeometry(2 * half_turret_width, 2 * half_turret_height, 2 * half_turret_length, 1, 1, 1), tank_mat1);
         turret.position.set(0, half_vehicle_height + half_turret_height, 0);
         tank.add(turret);
 
-        const barrel = new THREE.Mesh(new THREE.CylinderGeometry(barrel_radius, barrel_radius, 2 *half_barrel_length, 20, 1), tank_mat2);
+        const barrel = new THREE.Mesh(new THREE.CylinderGeometry(barrel_radius, barrel_radius, 2 * half_barrel_length, 20, 1), tank_mat2);
         barrel.quaternion.setFromAxisAngle(new THREE.Vector3(1, 0, 0), Math.PI / 2);
         barrel.position.set(0, half_vehicle_height + half_turret_height, half_turret_length + half_barrel_length);
         tank.add(barrel);
@@ -159,6 +189,11 @@
       const tester = new Jolt.VehicleCollisionTesterRay(Jolt.MOVING);
       constraint.SetVehicleCollisionTester(tester);
 
+      const modelWheels = [];
+      for (let i = 0; i < vehicle.mWheels.size(); i++) {
+        modelWheels.push(createThreeWheel(constraint.GetWheel(i), tank_body, tank));
+      }
+
       physicsSystem.AddConstraint(constraint);
       const controller = Jolt.castObject(constraint.GetController(), Jolt.TrackedVehicleController);
 
@@ -168,7 +203,7 @@
       };
 
       let previousForward = 0;
-	    const min_velocity_pivot_turn = 1.0;
+      const min_velocity_pivot_turn = 1.0;
       const prePhysicsUpdate = () => {
         let forward = 0.0, left_ratio = 1.0, right_ratio = 1.0, brake = 0.0, hand_brake = 0.0;
         const rotation = wrapQuat(tank_body.GetRotation().Conjugated());
@@ -198,8 +233,7 @@
 
         if (input.direction.x != 0) {
           if (input.direction.x < 0) {
-            if (brake == 0.0 && forward == 0.0 && Math.abs(velocity) < min_velocity_pivot_turn)
-            {
+            if (brake == 0.0 && forward == 0.0 && Math.abs(velocity) < min_velocity_pivot_turn) {
               // Pivot turn
               left_ratio = -1.0;
               forward = 1.0;
@@ -207,14 +241,13 @@
             else
               left_ratio = 0.6;
           } else {
-            if (brake == 0.0 && forward == 0.0 && Math.abs(velocity) < min_velocity_pivot_turn)
-            {
+            if (brake == 0.0 && forward == 0.0 && Math.abs(velocity) < min_velocity_pivot_turn) {
               // Pivot turn
               right_ratio = -1.0;
               forward = 1.0;
             }
             else
-            right_ratio = 0.6;
+              right_ratio = 0.6;
           }
         }
 
@@ -231,6 +264,7 @@
         const pos = wrapVec3(tank_body.GetPosition());
         camera.position.add(pos.clone().sub(oldPos));
         oldPos = pos;
+        modelWheels.forEach(wheel => wheel.updateRotation());
       }
 
       document.addEventListener("keydown", onDocumentKeyDown, false);

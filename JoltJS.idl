@@ -2244,6 +2244,8 @@ interface Wheel {
 	void SetSteerAngle(float inAngle);
 	boolean HasContact();
 	[Value] BodyID GetContactBodyID();
+	[Value] Vec3 GetContactPosition();
+	float	GetSuspensionLength();
 };
 
 interface WheelSettingsWV {
