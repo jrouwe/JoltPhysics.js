@@ -42,7 +42,6 @@
 #include "Jolt/Physics/SoftBody/SoftBodyCreationSettings.h"
 #include "Jolt/Physics/SoftBody/SoftBodySharedSettings.h"
 #include "Jolt/Physics/Character/CharacterVirtual.h"
-
 #include "Jolt/Physics/Vehicle/MotorcycleController.h"
 #include "Jolt/Physics/Vehicle/TrackedVehicleController.h"
 
@@ -527,16 +526,21 @@ public:
 	}
 };
 
-class VehicleConstraintStepListener: public PhysicsStepListener {
-	public:
-		VehicleConstraintStepListener(VehicleConstraint * inVehicleConstraint) {
-			mInstance = inVehicleConstraint;
-		}
-		virtual void OnStep(float inDeltaTime, PhysicsSystem &inPhysicsSystem) override {
-			PhysicsStepListener * instance = mInstance;
-			instance->OnStep(inDeltaTime, inPhysicsSystem);
-		}
-	private:
-		VehicleConstraint * mInstance;
+/// A wrapper around the physics step listener that is compatible with JavaScript (JS doesn't like multiple inheritance)
+class VehicleConstraintStepListener : public PhysicsStepListener
+{
+public:
+							VehicleConstraintStepListener(VehicleConstraint* inVehicleConstraint)
+	{
+		mInstance = inVehicleConstraint;
+	}
 
+	virtual void			OnStep(float inDeltaTime, PhysicsSystem& inPhysicsSystem) override
+	{
+		PhysicsStepListener* instance = mInstance;
+		instance->OnStep(inDeltaTime, inPhysicsSystem);
+	}
+
+private:
+	VehicleConstraint *		mInstance;
 };
