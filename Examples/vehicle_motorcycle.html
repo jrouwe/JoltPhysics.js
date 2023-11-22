@@ -2,290 +2,292 @@
 <html lang="en">
 
 <head>
-  <title>JoltPhysics.js demo</title>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
-  <link rel="stylesheet" type="text/css" href="style.css">
+	<title>JoltPhysics.js demo</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+	<link rel="stylesheet" type="text/css" href="style.css">
 </head>
 
 <body>
-  <div id="container">Loading...</div>
-  <div id="info">JoltPhysics.js motorcycle controller demo<br />
-    WASD to move. Z to hand brake</div>
+	<div id="container">Loading...</div>
+	<div id="info">
+		JoltPhysics.js motorcycle controller demo<br />
+		WASD to move. Z to hand brake
+	</div>
 
-  <script src="js/three/three.min.js"></script>
-  <script src="js/three/OrbitControls.js"></script>
-  <script src="js/three/WebGL.js"></script>
-  <script src="js/three/stats.min.js"></script>
-  <script src="js/example.js"></script>
+	<script src="js/three/three.min.js"></script>
+	<script src="js/three/OrbitControls.js"></script>
+	<script src="js/three/WebGL.js"></script>
+	<script src="js/three/stats.min.js"></script>
+	<script src="js/example.js"></script>
 
-  <script type="module">
-    // In case you haven't built the library yourself, replace URL with: https://www.unpkg.com/jolt-physics/dist/jolt-physics.wasm-compat.js
-    import initJolt from './js/jolt-physics.wasm-compat.js';
+	<script type="module">
+		// In case you haven't built the library yourself, replace URL with: https://www.unpkg.com/jolt-physics/dist/jolt-physics.wasm-compat.js
+		import initJolt from './js/jolt-physics.wasm-compat.js';
 
-    const position = [0, 2, 0];
+		const position = [0, 2, 0];
 
-    const back_wheel_radius = 0.31;
-    const back_wheel_width = 0.05;
-    const back_wheel_pos_z = -0.75;
-    const back_suspension_min_length = 0.3;
-    const back_suspension_max_length = 0.5;
-    const back_suspension_freq = 2.0;
-    const back_brake_torque = 250.0;
+		const back_wheel_radius = 0.31;
+		const back_wheel_width = 0.05;
+		const back_wheel_pos_z = -0.75;
+		const back_suspension_min_length = 0.3;
+		const back_suspension_max_length = 0.5;
+		const back_suspension_freq = 2.0;
+		const back_brake_torque = 250.0;
 
-    const front_wheel_radius = 0.31;
-    const front_wheel_width = 0.05;
-    const front_wheel_pos_z = 0.75;
-    const front_suspension_min_length = 0.3;
-    const front_suspension_max_length = 0.5;
-    const front_suspension_freq = 1.5;
-    const front_brake_torque = 500.0;
+		const front_wheel_radius = 0.31;
+		const front_wheel_width = 0.05;
+		const front_wheel_pos_z = 0.75;
+		const front_suspension_min_length = 0.3;
+		const front_suspension_max_length = 0.5;
+		const front_suspension_freq = 1.5;
+		const front_brake_torque = 500.0;
 
-    const half_vehicle_length = 0.4;
-    const half_vehicle_width = 0.2;
-    const half_vehicle_height = 0.3;
+		const half_vehicle_length = 0.4;
+		const half_vehicle_width = 0.2;
+		const half_vehicle_height = 0.3;
 
-    const max_steering_angle = DegreesToRadians(30);
+		const max_steering_angle = DegreesToRadians(30);
 
-      // Angle of the front suspension
-    const caster_angle = DegreesToRadians(30);
+		// Angle of the front suspension
+		const caster_angle = DegreesToRadians(30);
 
-    const vehicle_mass = 240.0;
+		const vehicle_mass = 240.0;
 
-    const max_pitch_roll_angle = DegreesToRadians(60);
+		const max_pitch_roll_angle = DegreesToRadians(60);
 
-    const track = [
-      [[[38, 64, -14], [38, 64, -16], [38, -64, -16], [38, -64, -14], [64, -64, -16], [64, -64, -14], [64, 64, -16], [64, 64, -14]], [[-16, 64, -14], [-16, 64, -16], [-16, -64, -16], [-16, -64, -14], [10, -64, -16], [10, -64, -14], [10, 64, -16], [10, 64, -14]], [[10, -48, -14], [10, -48, -16], [10, -64, -16], [10, -64, -14], [38, -64, -16], [38, -64, -14], [38, -48, -16], [38, -48, -14]], [[10, 64, -14], [10, 64, -16], [10, 48, -16], [10, 48, -14], [38, 48, -16], [38, 48, -14], [38, 64, -16], [38, 64, -14]]],
-      [[[38, 48, -6], [38, 48, -14], [38, -48, -14], [38, -48, -6], [40, -48, -14], [40, -48, -6], [40, 48, -14], [40, 48, -6]], [[62, 62, -6], [62, 62, -14], [62, -64, -14], [62, -64, -6], [64, -64, -14], [64, -64, -6], [64, 62, -14], [64, 62, -6]], [[8, 48, -6], [8, 48, -14], [8, -48, -14], [8, -48, -6], [10, -48, -14], [10, -48, -6], [10, 48, -14], [10, 48, -6]], [[-16, 62, -6], [-16, 62, -14], [-16, -64, -14], [-16, -64, -6], [-14, -64, -14], [-14, -64, -6], [-14, 62, -14], [-14, 62, -6]], [[-14, -62, -6], [-14, -62, -14], [-14, -64, -14], [-14, -64, -6], [62, -64, -14], [62, -64, -6], [62, -62, -14], [62, -62, -6]], [[8, -48, -6], [8, -48, -14], [8, -50, -14], [8, -50, -6], [40, -50, -14], [40, -50, -6], [40, -48, -14], [40, -48, -6]], [[8, 50, -6], [8, 50, -14], [8, 48, -14], [8, 48, -6], [40, 48, -14], [40, 48, -6], [40, 50, -14], [40, 50, -6]], [[-16, 64, -6], [-16, 64, -14], [-16, 62, -14], [-16, 62, -6], [64, 62, -14], [64, 62, -6], [64, 64, -14], [64, 64, -6]]],
-      [[[-4, 22, -14], [-4, -14, -14], [-4, -14, -10], [4, -14, -14], [4, -14, -10], [4, 22, -14]], [[-4, -27, -14], [-4, -48, -14], [-4, -48, -11], [4, -48, -14], [4, -48, -11], [4, -27, -14]], [[-4, 50, -14], [-4, 30, -14], [-4, 30, -12], [4, 30, -14], [4, 30, -12], [4, 50, -14]], [[46, 50, -14], [46, 31, -14], [46, 50, -12], [54, 31, -14], [54, 50, -12], [54, 50, -14]], [[46, 16, -14], [46, -19, -14], [46, 16, -10], [54, -19, -14], [54, 16, -10], [54, 16, -14]], [[46, -28, -14], [46, -48, -14], [46, -28, -11], [54, -48, -14], [54, -28, -11], [54, -28, -14]]]
-    ];
+		const track = [
+			[[[38, 64, -14], [38, 64, -16], [38, -64, -16], [38, -64, -14], [64, -64, -16], [64, -64, -14], [64, 64, -16], [64, 64, -14]], [[-16, 64, -14], [-16, 64, -16], [-16, -64, -16], [-16, -64, -14], [10, -64, -16], [10, -64, -14], [10, 64, -16], [10, 64, -14]], [[10, -48, -14], [10, -48, -16], [10, -64, -16], [10, -64, -14], [38, -64, -16], [38, -64, -14], [38, -48, -16], [38, -48, -14]], [[10, 64, -14], [10, 64, -16], [10, 48, -16], [10, 48, -14], [38, 48, -16], [38, 48, -14], [38, 64, -16], [38, 64, -14]]],
+			[[[38, 48, -6], [38, 48, -14], [38, -48, -14], [38, -48, -6], [40, -48, -14], [40, -48, -6], [40, 48, -14], [40, 48, -6]], [[62, 62, -6], [62, 62, -14], [62, -64, -14], [62, -64, -6], [64, -64, -14], [64, -64, -6], [64, 62, -14], [64, 62, -6]], [[8, 48, -6], [8, 48, -14], [8, -48, -14], [8, -48, -6], [10, -48, -14], [10, -48, -6], [10, 48, -14], [10, 48, -6]], [[-16, 62, -6], [-16, 62, -14], [-16, -64, -14], [-16, -64, -6], [-14, -64, -14], [-14, -64, -6], [-14, 62, -14], [-14, 62, -6]], [[-14, -62, -6], [-14, -62, -14], [-14, -64, -14], [-14, -64, -6], [62, -64, -14], [62, -64, -6], [62, -62, -14], [62, -62, -6]], [[8, -48, -6], [8, -48, -14], [8, -50, -14], [8, -50, -6], [40, -50, -14], [40, -50, -6], [40, -48, -14], [40, -48, -6]], [[8, 50, -6], [8, 50, -14], [8, 48, -14], [8, 48, -6], [40, 48, -14], [40, 48, -6], [40, 50, -14], [40, 50, -6]], [[-16, 64, -6], [-16, 64, -14], [-16, 62, -14], [-16, 62, -6], [64, 62, -14], [64, 62, -6], [64, 64, -14], [64, 64, -6]]],
+			[[[-4, 22, -14], [-4, -14, -14], [-4, -14, -10], [4, -14, -14], [4, -14, -10], [4, 22, -14]], [[-4, -27, -14], [-4, -48, -14], [-4, -48, -11], [4, -48, -14], [4, -48, -11], [4, -27, -14]], [[-4, 50, -14], [-4, 30, -14], [-4, 30, -12], [4, 30, -14], [4, 30, -12], [4, 50, -14]], [[46, 50, -14], [46, 31, -14], [46, 50, -12], [54, 31, -14], [54, 50, -12], [54, 50, -14]], [[46, 16, -14], [46, -19, -14], [46, 16, -10], [54, -19, -14], [54, 16, -10], [54, 16, -14]], [[46, -28, -14], [46, -48, -14], [46, -28, -11], [54, -48, -14], [54, -28, -11], [54, -28, -14]]]
+		];
 
-    const map_colors = [0x666666, 0x006600, 0x000066];
+		const map_colors = [0x666666, 0x006600, 0x000066];
 
-    initJolt().then(function (Jolt) {
-      // Initialize this example
-      window.Jolt = Jolt;
-      container = document.getElementById('container');
-      container.innerHTML = "";
+		initJolt().then(function (Jolt) {
+			// Initialize this example
+			window.Jolt = Jolt;
+			container = document.getElementById('container');
+			container.innerHTML = "";
 
-      initGraphics();
-      initPhysics();
+			initGraphics();
+			initPhysics();
 
-      const mapRot = Jolt.Quat.prototype.sRotation(new Jolt.Vec3(0, 1, 0), 0.5 * Math.PI);
-      track.forEach((type, tIdx) => {
-        type.forEach(block => {
-          const hull = new Jolt.ConvexHullShapeSettings;
-          block.forEach(v => {
-            hull.mPoints.push_back(new Jolt.Vec3(-v[1], v[2], v[0]));
-          });
-          const shape = hull.Create().Get();
-          const creation_settings = new Jolt.BodyCreationSettings(shape, new Jolt.Vec3(0, 10, 0), mapRot, Jolt.EBodyType_Static, Jolt.NON_MOVING);
-          const body = bodyInterface.CreateBody(creation_settings);
-          body.SetFriction(1);
-          addToScene(body, map_colors[tIdx]);
-        });
-      });
+			const mapRot = Jolt.Quat.prototype.sRotation(new Jolt.Vec3(0, 1, 0), 0.5 * Math.PI);
+			track.forEach((type, tIdx) => {
+				type.forEach(block => {
+					const hull = new Jolt.ConvexHullShapeSettings;
+					block.forEach(v => {
+						hull.mPoints.push_back(new Jolt.Vec3(-v[1], v[2], v[0]));
+					});
+					const shape = hull.Create().Get();
+					const creation_settings = new Jolt.BodyCreationSettings(shape, new Jolt.Vec3(0, 10, 0), mapRot, Jolt.EBodyType_Static, Jolt.NON_MOVING);
+					const body = bodyInterface.CreateBody(creation_settings);
+					body.SetFriction(1);
+					addToScene(body, map_colors[tIdx]);
+				});
+			});
 
-      const texLoader = new THREE.TextureLoader();
-      const texture = texLoader.load('data:image/gif;base64,R0lGODdhAgACAIABAAAAAP///ywAAAAAAgACAAACA0QCBQA7');
-      texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+			const texLoader = new THREE.TextureLoader();
+			const texture = texLoader.load('data:image/gif;base64,R0lGODdhAgACAIABAAAAAP///ywAAAAAAgACAAACA0QCBQA7');
+			texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
 
-      texture.offset.set(0, 0);
-      texture.repeat.set(3, 3);
-      texture.magFilter = THREE.NearestFilter;
-      let wheel_material = new THREE.MeshPhongMaterial({ color: 0x666666 });
-      wheel_material.map = texture;
-      const createThreeWheel = (joltWheel, body) => {
-        const wheelSetting = joltWheel.GetSettings();
-        const wheelPos = wrapVec3(wheelSetting.mPosition);
-        const radius = wheelSetting.mRadius;
-        const width = wheelSetting.mWidth;
+			texture.offset.set(0, 0);
+			texture.repeat.set(3, 3);
+			texture.magFilter = THREE.NearestFilter;
+			let wheel_material = new THREE.MeshPhongMaterial({ color: 0x666666 });
+			wheel_material.map = texture;
+			const createThreeWheel = (joltWheel, body) => {
+				const wheelSetting = joltWheel.GetSettings();
+				const wheelPos = wrapVec3(wheelSetting.mPosition);
+				const radius = wheelSetting.mRadius;
+				const width = wheelSetting.mWidth;
 
-        const wheel = new THREE.Mesh(new THREE.CylinderGeometry(
-          radius, radius, width, 20, 1
-        ), wheel_material);
-        const joint = new THREE.Object3D();
-        const joint_steer = new THREE.Object3D();
-        joint.quaternion.setFromAxisAngle(new THREE.Vector3(0, 0, 1), Math.PI / 2);
-        joint.add(joint_steer);
-        joint_steer.add(wheel);
-        body.add(joint);
+				const wheel = new THREE.Mesh(new THREE.CylinderGeometry(
+					radius, radius, width, 20, 1
+				), wheel_material);
+				const joint = new THREE.Object3D();
+				const joint_steer = new THREE.Object3D();
+				joint.quaternion.setFromAxisAngle(new THREE.Vector3(0, 0, 1), Math.PI / 2);
+				joint.add(joint_steer);
+				joint_steer.add(wheel);
+				body.add(joint);
 
-        joint.position.copy(wheelPos);
-        wheel.updateRotation = () => {
-          joint.position.y = wheelPos.y - joltWheel.GetSuspensionLength();
-          joint_steer.quaternion.setFromAxisAngle(new THREE.Vector3(1, 0, 0), joltWheel.GetSteerAngle());
-          wheel.quaternion.setFromAxisAngle(new THREE.Vector3(0, 1, 0), -joltWheel.GetRotationAngle());
-        };
-        return wheel;
-      }
-
-
-      const motorcycle_shape_settings = new Jolt.OffsetCenterOfMassShapeSettings(new Jolt.Vec3(0, -half_vehicle_height, 0),
-        new Jolt.BoxShapeSettings(new Jolt.Vec3(half_vehicle_width, half_vehicle_height, half_vehicle_length)));
-      const motorcycle_shape = motorcycle_shape_settings.Create().Get();
-      const motorcycle_body_settings = new Jolt.BodyCreationSettings(motorcycle_shape, new Jolt.Vec3(...position),
-        Jolt.Quat.prototype.sRotation(new Jolt.Vec3(0, 1, 0), Math.PI),
-        Jolt.EMotionType_Dynamic, Jolt.MOVING)
-      motorcycle_body_settings.mOverrideMassProperties = Jolt.EOverrideMassProperties_CalculateInertia;
-      motorcycle_body_settings.mMassPropertiesOverride.mMass = vehicle_mass;
-
-      const motorcycle_body = bodyInterface.CreateBody(motorcycle_body_settings);
-      bodyInterface.AddBody(motorcycle_body.GetID(), Jolt.EActivation_Activate);
-
-      const vehicle = new Jolt.VehicleConstraintSettings();
-      vehicle.mDrawConstraintSize = 0.1;
-      vehicle.mMaxPitchRollAngle = max_pitch_roll_angle;
-
-      addToScene(motorcycle_body, 0xFF0000);
-      const motorcycle = dynamicObjects[dynamicObjects.length - 1];
-
-      vehicle.mWheels.clear();
-      {
-        const front = new Jolt.WheelSettingsWV();
-        front.mPosition = new Jolt.Vec3(0.0, -0.9 * half_vehicle_height, front_wheel_pos_z);
-        front.mMaxSteerAngle = max_steering_angle;
-        front.mSuspensionDirection = new Jolt.Vec3(0, -1, Math.tan(caster_angle)).Normalized();
-        front.mSteeringAxis = new Jolt.Vec3(0, 1, -Math.tan(caster_angle)).Normalized();
-        front.mRadius = front_wheel_radius;
-        front.mWidth = front_wheel_width;
-        front.mSuspensionMinLength = front_suspension_min_length;
-        front.mSuspensionMaxLength = front_suspension_max_length;
-        front.mSuspensionSpring.mFrequency = front_suspension_freq;
-        front.mMaxBrakeTorque = front_brake_torque;
-
-        vehicle.mWheels.push_back(front);
-
-        const back = new Jolt.WheelSettingsWV();
-        back.mPosition = new Jolt.Vec3(0.0, -0.9 * half_vehicle_height, back_wheel_pos_z);
-        back.mMaxSteerAngle = 0.0;
-        back.mRadius = back_wheel_radius;
-        back.mWidth = back_wheel_width;
-        back.mSuspensionMinLength = back_suspension_min_length;
-        back.mSuspensionMaxLength = back_suspension_max_length;
-        back.mSuspensionSpring.mFrequency = back_suspension_freq;
-        back.mMaxBrakeTorque = back_brake_torque;
-
-        vehicle.mWheels.push_back(back);
-      }
-      const controller_settings = new Jolt.MotorcycleControllerSettings();
-      controller_settings.mEngine.mMaxTorque = 150.0;
-      controller_settings.mEngine.mMinRPM = 1000.0;
-      controller_settings.mEngine.mMaxRPM = 10000.0;
-      controller_settings.mTransmission.mShiftDownRPM = 2000.0;
-      controller_settings.mTransmission.mShiftUpRPM = 8000.0;
-      controller_settings.mTransmission.mClutchStrength = 2.0;
-
-      vehicle.mController = controller_settings;
-
-      controller_settings.mDifferentials.clear();
-      const differential = new Jolt.VehicleDifferentialSettings();
-      differential.mLeftWheel = -1;
-      differential.mRightWheel = 1;
-      differential.mDifferentialRatio = 1.93 * 40.0 / 16.0;;
-      controller_settings.mDifferentials.push_back(differential);
-
-      const constraint = new Jolt.VehicleConstraint(motorcycle_body, vehicle);
-
-      const tester = new Jolt.VehicleCollisionTesterCastCylinder(Jolt.MOVING, 1);
-      constraint.SetVehicleCollisionTester(tester);
-
-      physicsSystem.AddConstraint(constraint);
-      const controller = Jolt.castObject(constraint.GetController(), Jolt.MotorcycleController);
+				joint.position.copy(wheelPos);
+				wheel.updateRotation = () => {
+					joint.position.y = wheelPos.y - joltWheel.GetSuspensionLength();
+					joint_steer.quaternion.setFromAxisAngle(new THREE.Vector3(1, 0, 0), joltWheel.GetSteerAngle());
+					wheel.quaternion.setFromAxisAngle(new THREE.Vector3(0, 1, 0), -joltWheel.GetRotationAngle());
+				};
+				return wheel;
+			}
 
 
-      const modelWheels = [];
-      for (let i = 0; i < vehicle.mWheels.size(); i++) {
-        modelWheels.push(createThreeWheel(constraint.GetWheel(i), motorcycle));
-      }
+			const motorcycle_shape_settings = new Jolt.OffsetCenterOfMassShapeSettings(new Jolt.Vec3(0, -half_vehicle_height, 0),
+				new Jolt.BoxShapeSettings(new Jolt.Vec3(half_vehicle_width, half_vehicle_height, half_vehicle_length)));
+			const motorcycle_shape = motorcycle_shape_settings.Create().Get();
+			const motorcycle_body_settings = new Jolt.BodyCreationSettings(motorcycle_shape, new Jolt.Vec3(...position),
+				Jolt.Quat.prototype.sRotation(new Jolt.Vec3(0, 1, 0), Math.PI),
+				Jolt.EMotionType_Dynamic, Jolt.MOVING)
+			motorcycle_body_settings.mOverrideMassProperties = Jolt.EOverrideMassProperties_CalculateInertia;
+			motorcycle_body_settings.mMassPropertiesOverride.mMass = vehicle_mass;
 
-      const input = {
-        direction: new THREE.Vector3(),
-        hand_brake: false
-      };
+			const motorcycle_body = bodyInterface.CreateBody(motorcycle_body_settings);
+			bodyInterface.AddBody(motorcycle_body.GetID(), Jolt.EActivation_Activate);
 
-      let previousForward = 0;
-      const prePhysicsUpdate = () => {
-        let forward = 0.0, right = 0.0, brake = 0.0, hand_brake = 0.0;
-        if (input.direction.z != 0) {
-          forward = input.direction.z;
-        }
-        if (previousForward * forward < 0.0) {
-          const rotation = wrapQuat(motorcycle_body.GetRotation().Conjugated());
-          const linearV = wrapVec3(motorcycle_body.GetLinearVelocity());
-          const velocity = linearV.applyQuaternion(rotation).z;
-          if ((forward > 0.0 && velocity < -0.1) || (forward < 0.0 && velocity > 0.1)) {
-            // Brake while we've not stopped yet
-            forward = 0.0;
-            brake = 1.0;
-          }
-          else {
-            // When we've come to a stop, accept the new direction
-            previousForward = forward;
-          }
-        }
+			const vehicle = new Jolt.VehicleConstraintSettings();
+			vehicle.mDrawConstraintSize = 0.1;
+			vehicle.mMaxPitchRollAngle = max_pitch_roll_angle;
 
-        if (input.hand_brake) {
-          forward = 0.0;
-          hand_brake = 1.0;
-        }
-        if (input.direction.x != 0) {
-          right = input.direction.x;
-        }
+			addToScene(motorcycle_body, 0xFF0000);
+			const motorcycle = dynamicObjects[dynamicObjects.length - 1];
 
-        controller.SetDriverInput(forward, right, brake, hand_brake);
-        if (right != 0.0 || forward != 0.0 || brake != 0.0 || hand_brake != 0.0)
-          bodyInterface.ActivateBody(motorcycle_body.GetID());
-      }
+			vehicle.mWheels.clear();
+			{
+				const front = new Jolt.WheelSettingsWV();
+				front.mPosition = new Jolt.Vec3(0.0, -0.9 * half_vehicle_height, front_wheel_pos_z);
+				front.mMaxSteerAngle = max_steering_angle;
+				front.mSuspensionDirection = new Jolt.Vec3(0, -1, Math.tan(caster_angle)).Normalized();
+				front.mSteeringAxis = new Jolt.Vec3(0, 1, -Math.tan(caster_angle)).Normalized();
+				front.mRadius = front_wheel_radius;
+				front.mWidth = front_wheel_width;
+				front.mSuspensionMinLength = front_suspension_min_length;
+				front.mSuspensionMaxLength = front_suspension_max_length;
+				front.mSuspensionSpring.mFrequency = front_suspension_freq;
+				front.mMaxBrakeTorque = front_brake_torque;
 
-      controls.target = motorcycle.position;
-      let oldPos = wrapVec3(motorcycle_body.GetPosition());
-      onExampleUpdate = (time, deltaTime) => {
-        prePhysicsUpdate();
+				vehicle.mWheels.push_back(front);
 
-        const pos = wrapVec3(motorcycle_body.GetPosition());
-        camera.position.add(pos.clone().sub(oldPos));
-        oldPos = pos;
+				const back = new Jolt.WheelSettingsWV();
+				back.mPosition = new Jolt.Vec3(0.0, -0.9 * half_vehicle_height, back_wheel_pos_z);
+				back.mMaxSteerAngle = 0.0;
+				back.mRadius = back_wheel_radius;
+				back.mWidth = back_wheel_width;
+				back.mSuspensionMinLength = back_suspension_min_length;
+				back.mSuspensionMaxLength = back_suspension_max_length;
+				back.mSuspensionSpring.mFrequency = back_suspension_freq;
+				back.mMaxBrakeTorque = back_brake_torque;
 
-        modelWheels.forEach(wheel => wheel.updateRotation());
-      }
+				vehicle.mWheels.push_back(back);
+			}
+			const controller_settings = new Jolt.MotorcycleControllerSettings();
+			controller_settings.mEngine.mMaxTorque = 150.0;
+			controller_settings.mEngine.mMinRPM = 1000.0;
+			controller_settings.mEngine.mMaxRPM = 10000.0;
+			controller_settings.mTransmission.mShiftDownRPM = 2000.0;
+			controller_settings.mTransmission.mShiftUpRPM = 8000.0;
+			controller_settings.mTransmission.mClutchStrength = 2.0;
 
-      document.addEventListener("keydown", onDocumentKeyDown, false);
-      document.addEventListener("keyup", onDocumentKeyUp, false);
-      function onDocumentKeyDown(event) {
-        var keyCode = event.key;
-        if (keyCode == 'w') {
-          input.direction.z = 1;
-        } else if (keyCode == 's') {
-          input.direction.z = -1;
-        } else if (keyCode == 'a') {
-          input.direction.x = -1;
-        } else if (keyCode == 'd') {
-          input.direction.x = 1;
-        } else if (keyCode == 'z') {
-          input.hand_brake = true;
-        }
-      };
-      function onDocumentKeyUp(event) {
-        var keyCode = event.key;
-        if (keyCode == 'w') {
-          input.direction.z = 0;
-        } else if (keyCode == 's') {
-          input.direction.z = 0;
-        } else if (keyCode == 'a') {
-          input.direction.x = 0;
-        } else if (keyCode == 'd') {
-          input.direction.x = 0;
-        } else if (keyCode == 'z') {
-          input.hand_brake = false;
-        }
-      };
-      physicsSystem.AddStepListener(new Jolt.VehicleConstraintStepListener(constraint));
-      renderExample();
+			vehicle.mController = controller_settings;
 
-    });
+			controller_settings.mDifferentials.clear();
+			const differential = new Jolt.VehicleDifferentialSettings();
+			differential.mLeftWheel = -1;
+			differential.mRightWheel = 1;
+			differential.mDifferentialRatio = 1.93 * 40.0 / 16.0;;
+			controller_settings.mDifferentials.push_back(differential);
 
-  </script>
+			const constraint = new Jolt.VehicleConstraint(motorcycle_body, vehicle);
+
+			const tester = new Jolt.VehicleCollisionTesterCastCylinder(Jolt.MOVING, 1);
+			constraint.SetVehicleCollisionTester(tester);
+
+			physicsSystem.AddConstraint(constraint);
+			const controller = Jolt.castObject(constraint.GetController(), Jolt.MotorcycleController);
+
+
+			const modelWheels = [];
+			for (let i = 0; i < vehicle.mWheels.size(); i++) {
+				modelWheels.push(createThreeWheel(constraint.GetWheel(i), motorcycle));
+			}
+
+			const input = {
+				direction: new THREE.Vector3(),
+				hand_brake: false
+			};
+
+			let previousForward = 0;
+			const prePhysicsUpdate = () => {
+				let forward = 0.0, right = 0.0, brake = 0.0, hand_brake = 0.0;
+				if (input.direction.z != 0) {
+					forward = input.direction.z;
+				}
+				if (previousForward * forward < 0.0) {
+					const rotation = wrapQuat(motorcycle_body.GetRotation().Conjugated());
+					const linearV = wrapVec3(motorcycle_body.GetLinearVelocity());
+					const velocity = linearV.applyQuaternion(rotation).z;
+					if ((forward > 0.0 && velocity < -0.1) || (forward < 0.0 && velocity > 0.1)) {
+						// Brake while we've not stopped yet
+						forward = 0.0;
+						brake = 1.0;
+					}
+					else {
+						// When we've come to a stop, accept the new direction
+						previousForward = forward;
+					}
+				}
+
+				if (input.hand_brake) {
+					forward = 0.0;
+					hand_brake = 1.0;
+				}
+				if (input.direction.x != 0) {
+					right = input.direction.x;
+				}
+
+				controller.SetDriverInput(forward, right, brake, hand_brake);
+				if (right != 0.0 || forward != 0.0 || brake != 0.0 || hand_brake != 0.0)
+					bodyInterface.ActivateBody(motorcycle_body.GetID());
+			}
+
+			controls.target = motorcycle.position;
+			let oldPos = wrapVec3(motorcycle_body.GetPosition());
+			onExampleUpdate = (time, deltaTime) => {
+				prePhysicsUpdate();
+
+				const pos = wrapVec3(motorcycle_body.GetPosition());
+				camera.position.add(pos.clone().sub(oldPos));
+				oldPos = pos;
+
+				modelWheels.forEach(wheel => wheel.updateRotation());
+			}
+
+			document.addEventListener("keydown", onDocumentKeyDown, false);
+			document.addEventListener("keyup", onDocumentKeyUp, false);
+			function onDocumentKeyDown(event) {
+				var keyCode = event.key;
+				if (keyCode == 'w') {
+					input.direction.z = 1;
+				} else if (keyCode == 's') {
+					input.direction.z = -1;
+				} else if (keyCode == 'a') {
+					input.direction.x = -1;
+				} else if (keyCode == 'd') {
+					input.direction.x = 1;
+				} else if (keyCode == 'z') {
+					input.hand_brake = true;
+				}
+			};
+			function onDocumentKeyUp(event) {
+				var keyCode = event.key;
+				if (keyCode == 'w') {
+					input.direction.z = 0;
+				} else if (keyCode == 's') {
+					input.direction.z = 0;
+				} else if (keyCode == 'a') {
+					input.direction.x = 0;
+				} else if (keyCode == 'd') {
+					input.direction.x = 0;
+				} else if (keyCode == 'z') {
+					input.hand_brake = false;
+				}
+			};
+			physicsSystem.AddStepListener(new Jolt.VehicleConstraintStepListener(constraint));
+			renderExample();
+
+		});
+
+	</script>
 </body>
 
 </html>

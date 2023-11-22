@@ -1755,9 +1755,8 @@ interface PhysicsSystem {
 	[Const, Ref] NarrowPhaseQuery GetNarrowPhaseQueryNoLock();
 	void SaveState([Ref] StateRecorder inStream, optional EStateRecorderState inState = "EStateRecorderState_All");
 	boolean	RestoreState([Ref] StateRecorder inStream);
-
-	void	AddStepListener(PhysicsStepListener inListener);
-	void	RemoveStepListener(PhysicsStepListener inListener);
+	void AddStepListener(PhysicsStepListener inListener);
+	void RemoveStepListener(PhysicsStepListener inListener);
 };
 
 interface MassProperties {
@@ -2109,8 +2108,7 @@ interface CharacterVirtual {
 
 CharacterVirtual implements CharacterBase;
 
-interface LinearCurve{
-
+interface LinearCurve {
 };
 
 interface ArrayFloat {
@@ -2122,6 +2120,7 @@ interface ArrayFloat {
 	void resize(unsigned long inSize);
 	void clear();
 };
+
 interface ArrayLong {
 	boolean empty();
 	long size();
@@ -2140,6 +2139,7 @@ interface ArrayVehicleAntiRollBar {
 	void resize(unsigned long inSize);
 	void clear();
 };
+
 interface ArrayWheelSettings {
 	boolean empty();
 	long size();
@@ -2159,23 +2159,29 @@ interface ArrayVehicleDifferentialSettings {
 };
 
 interface VehicleCollisionTester {
-
 };
+
 interface VehicleCollisionTesterRay {
 	void VehicleCollisionTesterRay(unsigned short inObjectLayer, [Ref] optional Vec3 inUp, optional float inMaxSlopeAngle);
 };
+
 VehicleCollisionTesterRay implements VehicleCollisionTester;
+
 interface VehicleCollisionTesterCastSphere {
 	void VehicleCollisionTesterCastSphere(unsigned short inObjectLayer, float inRadius, [Ref] optional Vec3 inUp, optional float inMaxSlopeAngle);
 };
+
 VehicleCollisionTesterCastSphere implements VehicleCollisionTester;
+
 interface VehicleCollisionTesterCastCylinder {
- void VehicleCollisionTesterCastCylinder(unsigned short inObjectLayer, optional float inConvexRadiusFraction);
+	void VehicleCollisionTesterCastCylinder(unsigned short inObjectLayer, optional float inConvexRadiusFraction);
 };
+
 VehicleCollisionTesterCastCylinder implements VehicleCollisionTester;
 
 interface VehicleConstraintSettings {
 	void VehicleConstraintSettings();
+
 	[Value] attribute Vec3 mUp;
 	[Value] attribute Vec3 mForward;
 	attribute float mMaxPitchRollAngle;
@@ -2183,10 +2189,11 @@ interface VehicleConstraintSettings {
 	[Value] attribute ArrayVehicleAntiRollBar mAntiRollBars;
 	attribute VehicleControllerSettings mController;
 };
+
 VehicleConstraintSettings implements ConstraintSettings;
 
 interface VehicleConstraint {
-	void VehicleConstraint( [Ref] Body inVehicleBody, [Const, Ref] VehicleConstraintSettings inSettings);
+	void VehicleConstraint([Ref] Body inVehicleBody, [Const, Ref] VehicleConstraintSettings inSettings);
 	void SetMaxPitchRollAngle(float inMaxPitchRollAngle);
 	void SetVehicleCollisionTester([Const] VehicleCollisionTester inTester);
 	[Value] Vec3 GetLocalUp();
@@ -2197,20 +2204,21 @@ interface VehicleConstraint {
 	[Const] Wheel GetWheel(unsigned long inIdx);
 	void SetupVelocityConstraint(float inDeltaTime);
 	void WarmStartVelocityConstraint(float inWarmStartImpulseRatio);
-
 	[Value] Mat44 GetWheelLocalTransform(unsigned long inWheelIndex, [Ref] Vec3 inWheelRight, [Ref] Vec3 inWheelUp);
 	[Value] Mat44 GetWheelWorldTransform(unsigned long inWheelIndex, [Ref] Vec3 inWheelRight, [Ref] Vec3 inWheelUp);
-
 };
+
 VehicleConstraint implements Constraint;
 
 interface VehicleConstraintStepListener {
 	void VehicleConstraintStepListener(VehicleConstraint inConstraint);
 };
+
 VehicleConstraintStepListener implements PhysicsStepListener;
 
 interface WheelSettings {
 	void WheelSettings();
+
 	[Value] attribute Vec3 mPosition;
 	[Value] attribute Vec3 mSuspensionForcePoint;
 	[Value] attribute Vec3 mSuspensionDirection;
@@ -2228,9 +2236,10 @@ interface WheelSettings {
 
 interface VehicleAntiRollBar {
 	void VehicleAntiRollBar();
-	 attribute long mLeftWheel;
-	 attribute long mRightWheel;
-	 attribute float mStiffness;
+
+	attribute long mLeftWheel;
+	attribute long mRightWheel;
+	attribute float mStiffness;
 };
 
 interface Wheel {
@@ -2250,14 +2259,16 @@ interface Wheel {
 
 interface WheelSettingsWV {
 	void WheelSettingsWV();
-	 attribute float mInertia;
-	 attribute float mAngularDamping;
-	 attribute float mMaxSteerAngle;
-	[Value]  attribute LinearCurve mLongitudinalFriction;
-	[Value]  attribute LinearCurve mLateralFriction;
-	 attribute float mMaxBrakeTorque;
-	 attribute float mMaxHandBrakeTorque;
+
+	attribute float mInertia;
+	attribute float mAngularDamping;
+	attribute float mMaxSteerAngle;
+	[Value] attribute LinearCurve mLongitudinalFriction;
+	[Value] attribute LinearCurve mLateralFriction;
+	attribute float mMaxBrakeTorque;
+	attribute float mMaxHandBrakeTorque;
 };
+
 WheelSettingsWV implements WheelSettings;
 
 interface WheelWV {
@@ -2265,19 +2276,22 @@ interface WheelWV {
 	[Const] WheelSettingsWV GetSettings();
 	void ApplyTorque(float inTorque, float inDeltaTime);
 	void Update(float inDeltaTime, [Const, Ref] VehicleConstraint inConstraint);
-	 attribute float mLongitudinalSlip;
-	 attribute float mLateralSlip;
-	 attribute float mCombinedLongitudinalFriction;
-	 attribute float mCombinedLateralFriction;
-	 attribute float mBrakeImpulse;
+
+	attribute float mLongitudinalSlip;
+	attribute float mLateralSlip;
+	attribute float mCombinedLongitudinalFriction;
+	attribute float mCombinedLateralFriction;
+	attribute float mBrakeImpulse;
 };
+
 WheelWV implements Wheel;
 
 interface WheelSettingsTV {
 	void WheelSettingsTV();
-	 attribute float mLongitudinalFriction;
-	 attribute float mLateralFriction;
+	attribute float mLongitudinalFriction;
+	attribute float mLateralFriction;
 };
+
 WheelSettingsTV implements WheelSettings;
 
 interface WheelTV {
@@ -2285,11 +2299,13 @@ interface WheelTV {
 	[Const] WheelSettingsTV GetSettings();
 	void CalculateAngularVelocity([Const, Ref] VehicleConstraint inConstraint);
 	void Update(float inDeltaTime, [Const, Ref] VehicleConstraint inConstraint);
+
 	attribute long mTrackIndex;
 	attribute float mCombinedLongitudinalFriction;
 	attribute float mCombinedLateralFriction;
 	attribute float mBrakeImpulse;
 };
+
 WheelTV implements Wheel;
 
 interface VehicleTrackSettings {
@@ -2300,30 +2316,35 @@ interface VehicleTrackSettings {
 	attribute float mMaxBrakeTorque;
 	attribute float mDifferentialRatio;
 };
+
 interface VehicleTrack {
 	attribute float mAngularVelocity;
 };
+
 VehicleTrack implements VehicleTrackSettings;
 
 interface WheeledVehicleControllerSettings {
 	void WheeledVehicleControllerSettings();
+
 	[Value] attribute VehicleEngineSettings	mEngine;
 	[Value] attribute VehicleTransmissionSettings	mTransmission;
 	[Value] attribute ArrayVehicleDifferentialSettings mDifferentials;
-	attribute float mDifferentialLimitedSlipRatio;	
+	attribute float mDifferentialLimitedSlipRatio;
 };
+
 WheeledVehicleControllerSettings implements VehicleControllerSettings;
 
 interface TrackedVehicleControllerSettings {
 	void TrackedVehicleControllerSettings();
 	[Value] attribute VehicleEngineSettings	mEngine;
-	[Value] attribute VehicleTransmissionSettings	mTransmission;
+	[Value] attribute VehicleTransmissionSettings mTransmission;
 	[Value] attribute VehicleTrackSettings[] mTracks;
 };
+
 TrackedVehicleControllerSettings implements VehicleControllerSettings;
 
 interface TrackedVehicleController {
-	void TrackedVehicleController([Const,Ref] TrackedVehicleControllerSettings inSettings, [Ref] VehicleConstraint inConstraint);
+	void TrackedVehicleController([Const, Ref] TrackedVehicleControllerSettings inSettings, [Ref] VehicleConstraint inConstraint);
 	void SetDriverInput(float inForward, float inLeftRatio, float inRightRatio, float inBrake);
 	void SetForwardInput(float inForward);
 	float GetForwardInput();
@@ -2337,6 +2358,7 @@ interface TrackedVehicleController {
 	[Const, Value] VehicleTransmission GetTransmission();
 	VehicleTrack[] GetTracks();
 };
+
 TrackedVehicleController implements VehicleController;
 
 interface VehicleEngineSettings {
@@ -2349,7 +2371,7 @@ interface VehicleEngineSettings {
 };
 
 interface VehicleEngine {
-	void	ClampRPM();
+	void ClampRPM();
 	float GetCurrentRPM();
 	void SetCurrentRPM(float inRPM);
 	float GetAngularVelocity();
@@ -2358,17 +2380,18 @@ interface VehicleEngine {
 	void ApplyDamping(float inDeltaTime);
 	boolean AllowSleep();
 };
+
 VehicleEngine implements VehicleEngineSettings;
 
 interface VehicleTransmissionSettings {
 	[Value] attribute ArrayFloat mGearRatios;
 	[Value] attribute ArrayFloat mReverseGearRatios;
-	 attribute float mSwitchTime;
-	 attribute float mClutchReleaseTime;
-	 attribute float mSwitchLatency;
-	 attribute float mShiftUpRPM;
-	 attribute float mShiftDownRPM;
-	 attribute float mClutchStrength;
+	attribute float mSwitchTime;
+	attribute float mClutchReleaseTime;
+	attribute float mSwitchLatency;
+	attribute float mShiftUpRPM;
+	attribute float mShiftDownRPM;
+	attribute float mClutchStrength;
 };
 
 interface VehicleTransmission {
@@ -2380,10 +2403,12 @@ interface VehicleTransmission {
 	float GetCurrentRatio();
 	boolean AllowSleep();
 };
+
 VehicleTransmission implements VehicleTransmissionSettings;
 
 interface VehicleDifferentialSettings {
 	void VehicleDifferentialSettings();
+
 	attribute long mLeftWheel;
 	attribute long mRightWheel;
 	attribute float mDifferentialRatio;
@@ -2392,10 +2417,9 @@ interface VehicleDifferentialSettings {
 	attribute float mEngineTorqueRatio;
 };
 
-
 interface VehicleControllerSettings {
-
 };
+
 interface VehicleController {
 };
 
@@ -2413,15 +2437,16 @@ interface WheeledVehicleController {
 	[Value] VehicleEngine GetEngine();
 	[Value] VehicleTransmission GetTransmission();
 	[Value] ArrayVehicleDifferentialSettings GetDifferentials();
-
 	float GetDifferentialLimitedSlipRatio();
 	void SetDifferentialLimitedSlipRatio(float inV);
 	float GetWheelSpeedAtClutch();
 };
+
 WheeledVehicleController implements VehicleController;
 
 interface MotorcycleControllerSettings {
 	void MotorcycleControllerSettings();
+
 	attribute float mMaxLeanAngle;
 	attribute float mLeanSpringConstant;
 	attribute float mLeanSpringDamping;
@@ -2429,6 +2454,7 @@ interface MotorcycleControllerSettings {
 	attribute float mLeanSpringIntegrationCoefficientDecay;
 	attribute float mLeanSmoothingFactor;
 };
+
 MotorcycleControllerSettings implements WheeledVehicleControllerSettings;
 
 interface MotorcycleController {
@@ -2437,9 +2463,8 @@ interface MotorcycleController {
 	void EnableLeanController(boolean inEnable);
 	boolean IsLeanControllerEnabled();
 };
+
 MotorcycleController implements WheeledVehicleController;
-
-
 
 interface JoltSettings {
 	void JoltSettings();
