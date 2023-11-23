@@ -48,6 +48,7 @@
 		const half_vehicle_height = 0.3;
 
 		const max_steering_angle = DegreesToRadians(30);
+		const steerSpeed = 4.0;
 
 		// Angle of the front suspension
 		const caster_angle = DegreesToRadians(30);
@@ -55,6 +56,9 @@
 		const vehicle_mass = 240.0;
 
 		const max_pitch_roll_angle = DegreesToRadians(60);
+
+		let previousForward = 1.0;
+		let currentRight = 0.0;
 
 		initJolt().then(function (Jolt) {
 			// Initialize this example
@@ -99,7 +103,6 @@
 				};
 				return wheel;
 			}
-
 
 			const motorcycle_shape_settings = new Jolt.OffsetCenterOfMassShapeSettings(new Jolt.Vec3(0, -half_vehicle_height, 0),
 				new Jolt.BoxShapeSettings(new Jolt.Vec3(half_vehicle_width, half_vehicle_height, half_vehicle_length)));
@@ -173,7 +176,6 @@
 			physicsSystem.AddConstraint(constraint);
 			const controller = Jolt.castObject(constraint.GetController(), Jolt.MotorcycleController);
 
-
 			const modelWheels = [];
 			for (let i = 0; i < vehicle.mWheels.size(); i++) {
 				modelWheels.push(createThreeWheel(constraint.GetWheel(i), motorcycle));
@@ -184,12 +186,13 @@
 				hand_brake: false
 			};
 
-			let previousForward = 0;
-			const prePhysicsUpdate = () => {
+			const prePhysicsUpdate = (deltaTime) => {
 				let forward = 0.0, right = 0.0, brake = 0.0, hand_brake = 0.0;
+
 				if (input.direction.z != 0) {
 					forward = input.direction.z;
 				}
+
 				if (previousForward * forward < 0.0) {
 					const rotation = wrapQuat(motorcycle_body.GetRotation().Conjugated());
 					const linearV = wrapVec3(motorcycle_body.GetLinearVelocity());
@@ -209,9 +212,12 @@
 					forward = 0.0;
 					hand_brake = 1.0;
 				}
-				if (input.direction.x != 0) {
-					right = input.direction.x;
-				}
+
+				if (input.direction.x > currentRight)
+					currentRight = Math.min(currentRight + steerSpeed * deltaTime, input.direction.x);
+				else if (input.direction.x < currentRight)
+					currentRight = Math.max(currentRight - steerSpeed * deltaTime, input.direction.x);
+				right = currentRight;
 
 				controller.SetDriverInput(forward, right, brake, hand_brake);
 				if (right != 0.0 || forward != 0.0 || brake != 0.0 || hand_brake != 0.0)
@@ -221,7 +227,7 @@
 			controls.target = motorcycle.position;
 			let oldPos = wrapVec3(motorcycle_body.GetPosition());
 			onExampleUpdate = (time, deltaTime) => {
-				prePhysicsUpdate();
+				prePhysicsUpdate(deltaTime);
 
 				const pos = wrapVec3(motorcycle_body.GetPosition());
 				camera.position.add(pos.clone().sub(oldPos));

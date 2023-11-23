@@ -51,6 +51,8 @@
 		const sMaxEngineTorque = 500.0;
 		const sClutchStrength = 10.0;
 
+		let previousForward = 1.0;
+
 		initJolt().then(function (Jolt) {
 			// Initialize this example
 			window.Jolt = Jolt;
@@ -95,7 +97,6 @@
 				return wheel;
 			}
 
-
 			const car_shape_settings = new Jolt.OffsetCenterOfMassShapeSettings(new Jolt.Vec3(0, -mHalfVehicleHeight, 0),
 				new Jolt.BoxShapeSettings(new Jolt.Vec3(mHalfVehicleWidth, mHalfVehicleHeight, mHalfVehicleLength)));
 			const car_shape = car_shape_settings.Create().Get();
@@ -103,7 +104,7 @@
 				Jolt.Quat.prototype.sRotation(new Jolt.Vec3(0, 1, 0), Math.PI),
 				Jolt.EMotionType_Dynamic, Jolt.MOVING)
 			car_body_settings.mOverrideMassProperties = Jolt.EOverrideMassProperties_CalculateInertia;
-			car_body_settings.mMassPropertiesOverride.mMass = 1500.0;
+			car_body_settings.mMassPropertiesOverride.mMass = sVehicleMass;
 
 			const car_body = bodyInterface.CreateBody(car_body_settings);
 			bodyInterface.AddBody(car_body.GetID(), Jolt.EActivation_Activate);
@@ -219,12 +220,13 @@
 				hand_brake: false
 			};
 
-			let previousForward = 0;
 			const prePhysicsUpdate = () => {
 				let forward = 0.0, right = 0.0, brake = 0.0, hand_brake = 0.0;
+
 				if (input.direction.z != 0) {
 					forward = input.direction.z;
 				}
+
 				if (previousForward * forward < 0.0) {
 					const rotation = wrapQuat(car_body.GetRotation().Conjugated());
 					const linearV = wrapVec3(car_body.GetLinearVelocity());
@@ -244,11 +246,13 @@
 					forward = 0.0;
 					hand_brake = 1.0;
 				}
+
 				if (input.direction.x != 0) {
 					right = input.direction.x;
 				}
 
 				controller.GetEngine().mMaxTorque = sMaxEngineTorque;
+				controller.GetTransmission().mClutchStrength = sClutchStrength;
 				controller.SetDriverInput(forward, right, brake, hand_brake);
 				if (right != 0.0 || forward != 0.0 || brake != 0.0 || hand_brake != 0.0)
 					bodyInterface.ActivateBody(car_body.GetID());
