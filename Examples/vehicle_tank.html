@@ -12,7 +12,7 @@
 	<div id="container">Loading...</div>
 	<div id="info">
 		JoltPhysics.js tank controller demo<br />
-		WASD to move. Z to hand brake
+		WASD to move.
 	</div>
 
 	<script src="js/three/three.min.js"></script>
@@ -58,6 +58,8 @@
 			[-0.0, -2.75]
 		];
 
+		let previousForward = 1.0;
+		
 		initJolt().then(function (Jolt) {
 			// Initialize this example
 			window.Jolt = Jolt;
@@ -102,17 +104,12 @@
 				return wheel;
 			}
 
-			const filter = new Jolt.GroupFilterTable();
-
 			const tank_body_shape_settings = new Jolt.OffsetCenterOfMassShapeSettings(new Jolt.Vec3(0, -half_vehicle_height, 0),
 				new Jolt.BoxShapeSettings(new Jolt.Vec3(half_vehicle_width, half_vehicle_height, half_vehicle_length)));
 			const tank_body_shape = tank_body_shape_settings.Create().Get();
 			const tank_body_settings = new Jolt.BodyCreationSettings(tank_body_shape, new Jolt.Vec3(...body_position),
 				Jolt.Quat.prototype.sRotation(new Jolt.Vec3(0, 1, 0), Math.PI),
 				Jolt.EMotionType_Dynamic, Jolt.MOVING)
-			tank_body_settings.mCollisionGroup.SetGroupFilter(filter);
-			tank_body_settings.mCollisionGroup.SetGroupID(0);
-			tank_body_settings.mCollisionGroup.SetSubGroupID(0);
 			tank_body_settings.mOverrideMassProperties = Jolt.EOverrideMassProperties_CalculateInertia;
 			tank_body_settings.mMassPropertiesOverride.mMass = vehicle_mass;
 
@@ -175,37 +172,18 @@
 			const controller = Jolt.castObject(constraint.GetController(), Jolt.TrackedVehicleController);
 
 			const input = {
-				direction: new THREE.Vector3(),
-				hand_brake: false
+				direction: new THREE.Vector3()
 			};
 
-			let previousForward = 0;
 			const min_velocity_pivot_turn = 1.0;
 			const prePhysicsUpdate = () => {
-				let forward = 0.0, left_ratio = 1.0, right_ratio = 1.0, brake = 0.0, hand_brake = 0.0;
+				let forward = 0.0, left_ratio = 1.0, right_ratio = 1.0, brake = 0.0;
 				const rotation = wrapQuat(tank_body.GetRotation().Conjugated());
 				const linearV = wrapVec3(tank_body.GetLinearVelocity());
 				const velocity = linearV.applyQuaternion(rotation).z;
 
 				if (input.direction.z != 0) {
 					forward = input.direction.z;
-				}
-				if (previousForward * forward < 0.0) {
-
-					if ((forward > 0.0 && velocity < -0.1) || (forward < 0.0 && velocity > 0.1)) {
-						// Brake while we've not stopped yet
-						forward = 0.0;
-						brake = 1.0;
-					}
-					else {
-						// When we've come to a stop, accept the new direction
-						previousForward = forward;
-					}
-				}
-
-				if (input.hand_brake) {
-					forward = 0.0;
-					hand_brake = 1.0;
 				}
 
 				if (input.direction.x != 0) {
@@ -228,8 +206,21 @@
 					}
 				}
 
+				if (previousForward * forward < 0.0) {
+
+					if ((forward > 0.0 && velocity < -0.1) || (forward < 0.0 && velocity > 0.1)) {
+						// Brake while we've not stopped yet
+						forward = 0.0;
+						brake = 1.0;
+					}
+					else {
+						// When we've come to a stop, accept the new direction
+						previousForward = forward;
+					}
+				}
+
 				controller.SetDriverInput(forward, left_ratio, right_ratio, brake);
-				if (right_ratio != 0.0 || left_ratio != 0.0 || forward != 0.0 || brake != 0.0 || hand_brake != 0.0)
+				if (right_ratio != 0.0 || left_ratio != 0.0 || forward != 0.0 || brake != 0.0)
 					bodyInterface.ActivateBody(tank_body.GetID());
 			}
 
@@ -256,8 +247,6 @@
 					input.direction.x = -1;
 				} else if (keyCode == 'd') {
 					input.direction.x = 1;
-				} else if (keyCode == 'z') {
-					input.hand_brake = true;
 				}
 			};
 			function onDocumentKeyUp(event) {
@@ -270,8 +259,6 @@
 					input.direction.x = 0;
 				} else if (keyCode == 'd') {
 					input.direction.x = 0;
-				} else if (keyCode == 'z') {
-					input.hand_brake = false;
 				}
 			};
 
