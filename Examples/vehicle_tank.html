@@ -58,14 +58,6 @@
 			[-0.0, -2.75]
 		];
 
-		const track = [
-			[[[38, 64, -14], [38, 64, -16], [38, -64, -16], [38, -64, -14], [64, -64, -16], [64, -64, -14], [64, 64, -16], [64, 64, -14]], [[-16, 64, -14], [-16, 64, -16], [-16, -64, -16], [-16, -64, -14], [10, -64, -16], [10, -64, -14], [10, 64, -16], [10, 64, -14]], [[10, -48, -14], [10, -48, -16], [10, -64, -16], [10, -64, -14], [38, -64, -16], [38, -64, -14], [38, -48, -16], [38, -48, -14]], [[10, 64, -14], [10, 64, -16], [10, 48, -16], [10, 48, -14], [38, 48, -16], [38, 48, -14], [38, 64, -16], [38, 64, -14]]],
-			[[[38, 48, -6], [38, 48, -14], [38, -48, -14], [38, -48, -6], [40, -48, -14], [40, -48, -6], [40, 48, -14], [40, 48, -6]], [[62, 62, -6], [62, 62, -14], [62, -64, -14], [62, -64, -6], [64, -64, -14], [64, -64, -6], [64, 62, -14], [64, 62, -6]], [[8, 48, -6], [8, 48, -14], [8, -48, -14], [8, -48, -6], [10, -48, -14], [10, -48, -6], [10, 48, -14], [10, 48, -6]], [[-16, 62, -6], [-16, 62, -14], [-16, -64, -14], [-16, -64, -6], [-14, -64, -14], [-14, -64, -6], [-14, 62, -14], [-14, 62, -6]], [[-14, -62, -6], [-14, -62, -14], [-14, -64, -14], [-14, -64, -6], [62, -64, -14], [62, -64, -6], [62, -62, -14], [62, -62, -6]], [[8, -48, -6], [8, -48, -14], [8, -50, -14], [8, -50, -6], [40, -50, -14], [40, -50, -6], [40, -48, -14], [40, -48, -6]], [[8, 50, -6], [8, 50, -14], [8, 48, -14], [8, 48, -6], [40, 48, -14], [40, 48, -6], [40, 50, -14], [40, 50, -6]], [[-16, 64, -6], [-16, 64, -14], [-16, 62, -14], [-16, 62, -6], [64, 62, -14], [64, 62, -6], [64, 64, -14], [64, 64, -6]]],
-			[[[-4, 22, -14], [-4, -14, -14], [-4, -14, -10], [4, -14, -14], [4, -14, -10], [4, 22, -14]], [[-4, -27, -14], [-4, -48, -14], [-4, -48, -11], [4, -48, -14], [4, -48, -11], [4, -27, -14]], [[-4, 50, -14], [-4, 30, -14], [-4, 30, -12], [4, 30, -14], [4, 30, -12], [4, 50, -14]], [[46, 50, -14], [46, 31, -14], [46, 50, -12], [54, 31, -14], [54, 50, -12], [54, 50, -14]], [[46, 16, -14], [46, -19, -14], [46, 16, -10], [54, -19, -14], [54, 16, -10], [54, 16, -14]], [[46, -28, -14], [46, -48, -14], [46, -28, -11], [54, -48, -14], [54, -28, -11], [54, -28, -14]]]
-		];
-
-		const map_colors = [0x666666, 0x006600, 0x000066];
-
 		initJolt().then(function (Jolt) {
 			// Initialize this example
 			window.Jolt = Jolt;
@@ -74,21 +66,7 @@
 
 			initGraphics();
 			initPhysics();
-
-			const mapRot = Jolt.Quat.prototype.sRotation(new Jolt.Vec3(0, 1, 0), 0.5 * Math.PI);
-			track.forEach((type, tIdx) => {
-				type.forEach(block => {
-					const hull = new Jolt.ConvexHullShapeSettings;
-					block.forEach(v => {
-						hull.mPoints.push_back(new Jolt.Vec3(-v[1], v[2], v[0]));
-					});
-					const shape = hull.Create().Get();
-					const creation_settings = new Jolt.BodyCreationSettings(shape, new Jolt.Vec3(0, 10, 0), mapRot, Jolt.EBodyType_Static, Jolt.NON_MOVING);
-					const body = bodyInterface.CreateBody(creation_settings);
-					body.SetFriction(1);
-					addToScene(body, map_colors[tIdx]);
-				});
-			});
+			createVehicleTrack();
 
 			const texLoader = new THREE.TextureLoader();
 			const texture = texLoader.load('data:image/gif;base64,R0lGODdhAgACAIABAAAAAP///ywAAAAAAgACAAACA0QCBQA7');
@@ -182,7 +160,6 @@
 				barrel.position.set(0, half_vehicle_height + half_turret_height, half_turret_length + half_barrel_length);
 				tank.add(barrel);
 			}
-
 
 			const constraint = new Jolt.VehicleConstraint(tank_body, vehicle);
 
@@ -297,9 +274,9 @@
 					input.hand_brake = false;
 				}
 			};
+
 			physicsSystem.AddStepListener(new Jolt.VehicleConstraintStepListener(constraint));
 			renderExample();
-
 		});
 
 	</script>
