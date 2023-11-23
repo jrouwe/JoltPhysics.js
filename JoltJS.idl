@@ -167,6 +167,11 @@ enum EMotorState {
 	"EMotorState_Position"
 };
 
+enum ETransmissionMode {
+	"ETransmissionMode_Auto",
+	"ETransmissionMode_Manual",
+};
+
 interface Vec3 {
 	void Vec3();
 	void Vec3([Const, Ref] Float3 inV);
@@ -2109,6 +2114,14 @@ interface CharacterVirtual {
 CharacterVirtual implements CharacterBase;
 
 interface LinearCurve {
+	void LinearCurve();
+	void Clear();
+	void Reserve(unsigned long inSize);
+	void AddPoint(float inX, float inY);
+	void Sort();
+	float GetMinX();
+	float GetMaxX();
+	float GetValue(float inX);
 };
 
 interface ArrayFloat {
@@ -2202,8 +2215,6 @@ interface VehicleConstraint {
 	Body GetVehicleBody();
 	VehicleController GetController();
 	[Const] Wheel GetWheel(unsigned long inIdx);
-	void SetupVelocityConstraint(float inDeltaTime);
-	void WarmStartVelocityConstraint(float inWarmStartImpulseRatio);
 	[Value] Mat44 GetWheelLocalTransform(unsigned long inWheelIndex, [Ref] Vec3 inWheelRight, [Ref] Vec3 inWheelUp);
 	[Value] Mat44 GetWheelWorldTransform(unsigned long inWheelIndex, [Ref] Vec3 inWheelRight, [Ref] Vec3 inWheelUp);
 };
@@ -2254,7 +2265,15 @@ interface Wheel {
 	boolean HasContact();
 	[Value] BodyID GetContactBodyID();
 	[Value] Vec3 GetContactPosition();
-	float	GetSuspensionLength();
+	[Value] Vec3 GetContactPointVelocity();
+	[Value] Vec3 GetContactNormal();
+	[Value] Vec3 GetContactLongitudinal();
+	[Value] Vec3 GetContactLateral();
+	float GetSuspensionLength();
+	boolean HasHitHardPoint();
+	float GetSuspensionLambda();
+	float GetLongitudinalLambda();
+	float GetLateralLambda();
 };
 
 interface WheelSettingsWV {
@@ -2274,8 +2293,6 @@ WheelSettingsWV implements WheelSettings;
 interface WheelWV {
 	void WheelWV([Const, Ref] WheelSettingsWV inWheel);
 	[Const] WheelSettingsWV GetSettings();
-	void ApplyTorque(float inTorque, float inDeltaTime);
-	void Update(float inDeltaTime, [Const, Ref] VehicleConstraint inConstraint);
 
 	attribute float mLongitudinalSlip;
 	attribute float mLateralSlip;
@@ -2288,6 +2305,7 @@ WheelWV implements Wheel;
 
 interface WheelSettingsTV {
 	void WheelSettingsTV();
+
 	attribute float mLongitudinalFriction;
 	attribute float mLateralFriction;
 };
@@ -2297,8 +2315,6 @@ WheelSettingsTV implements WheelSettings;
 interface WheelTV {
 	void WheelTV([Const, Ref] WheelSettingsTV inWheel);
 	[Const] WheelSettingsTV GetSettings();
-	void CalculateAngularVelocity([Const, Ref] VehicleConstraint inConstraint);
-	void Update(float inDeltaTime, [Const, Ref] VehicleConstraint inConstraint);
 
 	attribute long mTrackIndex;
 	attribute float mCombinedLongitudinalFriction;
@@ -2336,6 +2352,7 @@ WheeledVehicleControllerSettings implements VehicleControllerSettings;
 
 interface TrackedVehicleControllerSettings {
 	void TrackedVehicleControllerSettings();
+
 	[Value] attribute VehicleEngineSettings	mEngine;
 	[Value] attribute VehicleTransmissionSettings mTransmission;
 	[Value] attribute VehicleTrackSettings[] mTracks;
@@ -2376,14 +2393,12 @@ interface VehicleEngine {
 	void SetCurrentRPM(float inRPM);
 	float GetAngularVelocity();
 	float GetTorque(float inAcceleration);
-	void ApplyTorque(float inTorque, float inDeltaTime);
-	void ApplyDamping(float inDeltaTime);
-	boolean AllowSleep();
 };
 
 VehicleEngine implements VehicleEngineSettings;
 
 interface VehicleTransmissionSettings {
+	attribute ETransmissionMode mMode;
 	[Value] attribute ArrayFloat mGearRatios;
 	[Value] attribute ArrayFloat mReverseGearRatios;
 	attribute float mSwitchTime;
@@ -2396,12 +2411,10 @@ interface VehicleTransmissionSettings {
 
 interface VehicleTransmission {
 	void Set(long inCurrentGear, float inClutchFriction);
-	void Update(float inDeltaTime, float inCurrentRPM, float inForwardInput, boolean inCanShiftUp);
 	long GetCurrentGear();
 	float GetClutchFriction();
 	boolean IsSwitchingGear();
 	float GetCurrentRatio();
-	boolean AllowSleep();
 };
 
 VehicleTransmission implements VehicleTransmissionSettings;

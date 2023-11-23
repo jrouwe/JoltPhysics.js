@@ -213,6 +213,10 @@ constexpr EMotorState EMotorState_Off = EMotorState::Off;
 constexpr EMotorState EMotorState_Velocity = EMotorState::Velocity;
 constexpr EMotorState EMotorState_Position = EMotorState::Position;
 
+// Alias for ETransmissionMode values to avoid clashes
+constexpr ETransmissionMode ETransmissionMode_Auto = ETransmissionMode::Auto;
+constexpr ETransmissionMode ETransmissionMode_Manual = ETransmissionMode::Manual;
+
 // Callback for traces
 static void TraceImpl(const char *inFMT, ...)
 { 
