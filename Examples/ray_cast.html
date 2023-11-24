@@ -32,6 +32,7 @@
 				createBox(new Jolt.Vec3(0, 1, 5), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(1, 1, 1), Jolt.EMotionType_Static, Jolt.NON_MOVING, 0x00ff00);
 				createBox(new Jolt.Vec3(0, 1, 10), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(1, 1, 1), Jolt.EMotionType_Static, Jolt.NON_MOVING, 0x00ff00);
 				createBox(new Jolt.Vec3(0, 1, 15), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(1, 1, 1), Jolt.EMotionType_Static, Jolt.NON_MOVING, 0x00ff00);
+				createBox(new Jolt.Vec3(0, 1, 20), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(1, 1, 1), Jolt.EMotionType_Static, Jolt.NON_MOVING, 0x00ff00);
 
 				// Create ray
 				let ray = new Jolt.RRayCast;
@@ -109,6 +110,19 @@
 
 				// Cast the ray against the fourth box using an all hit collector
 				let all_hit_collector = new Jolt.CastRayAllHitCollisionCollector;
+				physicsSystem.GetNarrowPhaseQuery().CastRay(ray, ray_settings, all_hit_collector, bp_filter, object_filter, body_filter, shape_filter);
+				for (let i = 0; i < all_hit_collector.mHits.size(); i++) {
+					let hit = all_hit_collector.mHits.at(i);
+					let body = physicsSystem.GetBodyLockInterfaceNoLock().TryGetBody(hit.mBodyID);
+					drawHit(body, hit);
+				}
+
+				// Move the ray
+				ray.mOrigin = new Jolt.Vec3(-5, 1, 19);
+				drawRay(ray);
+
+				// Cast the ray against the fifth box resetting the all hit collector
+				all_hit_collector.Reset();
 				physicsSystem.GetNarrowPhaseQuery().CastRay(ray, ray_settings, all_hit_collector, bp_filter, object_filter, body_filter, shape_filter);
 				for (let i = 0; i < all_hit_collector.mHits.size(); i++) {
 					let hit = all_hit_collector.mHits.at(i);
