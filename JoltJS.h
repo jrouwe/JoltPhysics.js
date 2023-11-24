@@ -44,6 +44,9 @@
 #include "Jolt/Physics/Character/CharacterVirtual.h"
 #include "Jolt/Physics/Vehicle/MotorcycleController.h"
 #include "Jolt/Physics/Vehicle/TrackedVehicleController.h"
+#include "Jolt/Physics/Collision/BroadPhase/BroadPhaseLayerInterfaceTable.h"
+#include "Jolt/Physics/Collision/BroadPhase/ObjectVsBroadPhaseLayerFilterTable.h"
+#include "Jolt/Physics/Collision/ObjectLayerPairFilterTable.h"
 
 #include <iostream>
 
@@ -244,99 +247,6 @@ static bool AssertFailedImpl(const char *inExpression, const char *inMessage, co
 
 #endif // JPH_ENABLE_ASSERTS
 
-// Layer that objects can be in, determines which other objects it can collide with.
-enum class Layers
-{
-	NON_MOVING = 0,
-	MOVING = 1,
-	NUM_LAYERS = 2
-};
-
-/// Class that determines if two object layers can collide
-class ObjectLayerPairFilterImpl : public ObjectLayerPairFilter
-{
-public:
-	virtual bool			ShouldCollide(ObjectLayer inObject1, ObjectLayer inObject2) const override
-	{
-		switch (inObject1)
-		{
-		case (int)Layers::NON_MOVING:
-			return inObject2 == (int)Layers::MOVING; // Non moving only collides with moving
-		case (int)Layers::MOVING:
-			return true; // Moving collides with everything
-		default:
-			JPH_ASSERT(false);
-			return false;
-		}
-	}
-};
-
-// Each broadphase layer results in a separate bounding volume tree in the broad phase.
-namespace BroadPhaseLayers
-{
-	static constexpr BroadPhaseLayer NON_MOVING(0);
-	static constexpr BroadPhaseLayer MOVING(1);
-	static constexpr uint NUM_LAYERS(2);
-};
-
-// BroadPhaseLayerInterface implementation
-// This defines a mapping between object and broadphase layers.
-class BPLayerInterfaceImpl final : public BroadPhaseLayerInterface
-{
-public:
-							BPLayerInterfaceImpl()
-	{
-		// Create a mapping table from object to broad phase layer
-		mObjectToBroadPhase[(int)Layers::NON_MOVING] = BroadPhaseLayers::NON_MOVING;
-		mObjectToBroadPhase[(int)Layers::MOVING] = BroadPhaseLayers::MOVING;
-	}
-
-	virtual uint			GetNumBroadPhaseLayers() const override
-	{
-		return BroadPhaseLayers::NUM_LAYERS;
-	}
-
-	virtual BroadPhaseLayer	GetBroadPhaseLayer(ObjectLayer inLayer) const override
-	{
-		JPH_ASSERT(inLayer < (int)Layers::NUM_LAYERS);
-		return mObjectToBroadPhase[inLayer];
-	}
-
-#if defined(JPH_EXTERNAL_PROFILE) || defined(JPH_PROFILE_ENABLED)
-	virtual const char *	GetBroadPhaseLayerName(BroadPhaseLayer inLayer) const override
-	{
-		switch ((BroadPhaseLayer::Type)inLayer)
-		{
-		case (BroadPhaseLayer::Type)BroadPhaseLayers::NON_MOVING:	return "NON_MOVING";
-		case (BroadPhaseLayer::Type)BroadPhaseLayers::MOVING:		return "MOVING";
-		default:													JPH_ASSERT(false); return "INVALID";
-		}
-	}
-#endif // JPH_EXTERNAL_PROFILE || JPH_PROFILE_ENABLED
-
-private:
-	BroadPhaseLayer			mObjectToBroadPhase[(int)Layers::NUM_LAYERS];
-};
-
-/// Class that determines if an object layer can collide with a broadphase layer
-class ObjectVsBroadPhaseLayerFilterImpl : public ObjectVsBroadPhaseLayerFilter
-{
-public:
-	virtual bool			ShouldCollide(ObjectLayer inLayer1, BroadPhaseLayer inLayer2) const override
-	{
-		switch (inLayer1)
-		{
-		case (int)Layers::NON_MOVING:
-			return inLayer2 == BroadPhaseLayers::MOVING;
-		case (int)Layers::MOVING:
-			return true;	
-		default:
-			JPH_ASSERT(false);
-			return false;
-		}
-	}
-};
-
 /// Settings to pass to constructor
 class JoltSettings
 {
@@ -345,6 +255,9 @@ public:
 	uint					mMaxBodyPairs = 65536;
 	uint					mMaxContactConstraints = 10240;
 	uint					mTempAllocatorSize = 10 * 1024 * 1024;
+	BroadPhaseLayerInterface *mBroadPhaseLayerInterface = nullptr;
+	ObjectVsBroadPhaseLayerFilter *mObjectVsBroadPhaseLayerFilter = nullptr;
+	ObjectLayerPairFilter *	mObjectLayerPairFilter = nullptr;
 };
 
 /// Main API for JavaScript
@@ -367,9 +280,16 @@ public:
 		// Init temp allocator
 		mTempAllocator = new TempAllocatorImpl(inSettings.mTempAllocatorSize);
 		
+		// Store interfaces
+		JPH_ASSERT(inSettings.mBroadPhaseLayerInterface != nullptr);
+		JPH_ASSERT(inSettings.mObjectVsBroadPhaseLayerFilter != nullptr);
+		JPH_ASSERT(inSettings.mObjectLayerPairFilter != nullptr);
+		mObjectVsBroadPhaseLayerFilter = inSettings.mObjectVsBroadPhaseLayerFilter;
+		mObjectLayerPairFilter = inSettings.mObjectLayerPairFilter;
+
 		// Init the physics system
 		constexpr uint cNumBodyMutexes = 0;
-		mPhysicsSystem.Init(inSettings.mMaxBodies, cNumBodyMutexes, inSettings.mMaxBodyPairs, inSettings.mMaxContactConstraints, mBPLayerInterface, mObjectVsBroadPhaseLayerFilter, mObjectVsObjectLayerFilter);
+		mPhysicsSystem.Init(inSettings.mMaxBodies, cNumBodyMutexes, inSettings.mMaxBodyPairs, inSettings.mMaxContactConstraints, *inSettings.mBroadPhaseLayerInterface, *inSettings.mObjectVsBroadPhaseLayerFilter, *inSettings.mObjectLayerPairFilter);
 	}
 
 	/// Destructor
@@ -402,21 +322,20 @@ public:
 	/// Access the default object layer pair filter
 	ObjectLayerPairFilter *GetObjectLayerPairFilter()
 	{
-		return &mObjectVsObjectLayerFilter;
+		return mObjectLayerPairFilter;
 	}
 
 	/// Access the default object vs broadphase layer filter
 	ObjectVsBroadPhaseLayerFilter *GetObjectVsBroadPhaseLayerFilter()
 	{
-		return &mObjectVsBroadPhaseLayerFilter;
+		return mObjectVsBroadPhaseLayerFilter;
 	}
 
 private:
 	TempAllocatorImpl *		mTempAllocator;
 	JobSystemThreadPool		mJobSystem { cMaxPhysicsJobs, cMaxPhysicsBarriers, (int)thread::hardware_concurrency() - 1 };
-	BPLayerInterfaceImpl	mBPLayerInterface;
-	ObjectVsBroadPhaseLayerFilterImpl mObjectVsBroadPhaseLayerFilter;
-	ObjectLayerPairFilterImpl mObjectVsObjectLayerFilter;
+	ObjectVsBroadPhaseLayerFilter *mObjectVsBroadPhaseLayerFilter = nullptr;
+	ObjectLayerPairFilter *	mObjectLayerPairFilter = nullptr;
 	PhysicsSystem			mPhysicsSystem;
 };
 

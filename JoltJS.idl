@@ -16,11 +16,6 @@ interface ArrayVec3 {
 	void clear();
 };
 
-enum Layers {
-	"Layers::MOVING",
-	"Layers::NON_MOVING"
-};
-
 enum EBodyType {
 	"EBodyType_RigidBody",
 	"EBodyType_SoftBody"
@@ -1147,7 +1142,6 @@ interface Body {
 	boolean CanBeKinematicOrDynamic();
 	EBodyType GetBodyType();
 	EMotionType GetMotionType();
-	void SetMotionType(EMotionType inMotionType);
 	void SetIsSensor(boolean inIsSensor);
 	boolean IsSensor();
 	void SetSensorDetectsStatic(boolean inDetectsStatic);
@@ -1996,6 +1990,7 @@ interface ObjectLayerFilterJS {
 
 interface ObjectLayerPairFilter {
 	void ObjectLayerPairFilter();
+	boolean ShouldCollide(unsigned short inLayer1, unsigned short inLayer2);
 };
 
 [JSImplementation="ObjectLayerPairFilter"]
@@ -2479,12 +2474,45 @@ interface MotorcycleController {
 
 MotorcycleController implements WheeledVehicleController;
 
+interface BroadPhaseLayerInterface {
+	unsigned short GetNumBroadPhaseLayers();
+};
+
+interface BroadPhaseLayer {
+	void BroadPhaseLayer(unsigned short inLayer);
+};
+
+interface BroadPhaseLayerInterfaceTable {
+	void BroadPhaseLayerInterfaceTable(unsigned short inNumObjectLayers, unsigned short inNumBroadPhaseLayers);
+	void MapObjectToBroadPhaseLayer(unsigned short inObjectLayer, [Const, Ref] BroadPhaseLayer inBroadPhaseLayer);
+};
+
+BroadPhaseLayerInterfaceTable implements BroadPhaseLayerInterface;
+
+interface ObjectVsBroadPhaseLayerFilterTable {
+	void ObjectVsBroadPhaseLayerFilterTable([Const, Ref] BroadPhaseLayerInterface inBroadPhaseLayerInterface, unsigned short inNumBroadPhaseLayers, [Const, Ref] ObjectLayerPairFilter inObjectLayerPairFilter, unsigned short inNumObjectLayers);
+};
+
+ObjectVsBroadPhaseLayerFilterTable implements ObjectVsBroadPhaseLayerFilter;
+
+interface ObjectLayerPairFilterTable {
+	void ObjectLayerPairFilterTable(unsigned short inNumObjectLayers);
+	unsigned short GetNumObjectLayers();
+	void DisableCollision(unsigned short inLayer1, unsigned short inLayer2);
+	void EnableCollision(unsigned short inLayer1, unsigned short inLayer2);
+};
+
+ObjectLayerPairFilterTable implements ObjectLayerPairFilter;
+
 interface JoltSettings {
 	void JoltSettings();
 
 	attribute unsigned long mMaxBodies;
 	attribute unsigned long mMaxBodyPairs;
 	attribute unsigned long mMaxContactConstraints;
+	attribute BroadPhaseLayerInterface mBroadPhaseLayerInterface;
+	attribute ObjectVsBroadPhaseLayerFilter mObjectVsBroadPhaseLayerFilter;
+	attribute ObjectLayerPairFilter mObjectLayerPairFilter;
 };
 
 interface JoltInterface {

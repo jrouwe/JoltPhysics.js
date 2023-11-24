@@ -44,7 +44,7 @@
 					const rot2 = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), DegreesToRadians(1.0));
 					const rotation = rot1.clone().multiply(rot2);
 					const position = new THREE.Vector3(cBeltLength, 6.0, cBeltWidth).applyQuaternion(rotation);
-					const belt = createBox(unwrapVec3(position), unwrapQuat(rotation), new Jolt.Vec3(cBeltWidth, 0.1, cBeltLength), Jolt.EMotionType_Static, Jolt.NON_MOVING);
+					const belt = createBox(unwrapVec3(position), unwrapQuat(rotation), new Jolt.Vec3(cBeltWidth, 0.1, cBeltLength), Jolt.EMotionType_Static, LAYER_NON_MOVING);
 					belt.SetFriction(friction);
 					mLinearBelts.push(belt);
 				}
@@ -52,35 +52,35 @@
 				// Bodies with decreasing friction
 				for (let i = 0; i <= 10; ++i) {
 					const cargo = createBox(new Jolt.Vec3(-cBeltLength + i * 10.0, 10.0, -cBeltLength),
-						Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(2, 2, 2), Jolt.EMotionType_Dynamic, Jolt.MOVING);
+						Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(2, 2, 2), Jolt.EMotionType_Dynamic, LAYER_MOVING);
 					cargo.SetFriction(Math.max((0.0, 1.0 - 0.1 * i)));
 				}
 
 				// Create 2 cylinders
 				let cylinder_settings = new Jolt.BodyCreationSettings(new Jolt.CylinderShape(6.0, 1.0, 0.05),
-					new Jolt.Vec3(-25.0, 1.0, -20.0), Jolt.Quat.prototype.sRotation(new Jolt.Vec3(0, 0, 1), 0.5 * Math.PI), Jolt.EMotionType_Dynamic, Jolt.MOVING);
+					new Jolt.Vec3(-25.0, 1.0, -20.0), Jolt.Quat.prototype.sRotation(new Jolt.Vec3(0, 0, 1), 0.5 * Math.PI), Jolt.EMotionType_Dynamic, LAYER_MOVING);
 				addToScene(bodyInterface.CreateBody(cylinder_settings), 0xff0000);
 				cylinder_settings.mPosition.SetZ(20);
 				addToScene(bodyInterface.CreateBody(cylinder_settings), 0xff0000);
 
 				{
 					// Let a dynamic belt rest on it
-					const dynamic_belt = createBox(new Jolt.Vec3(-25.0, 3.0, 0), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(5.0, 0.1, 25.0), Jolt.EMotionType_Dynamic, Jolt.MOVING, 0x333399)
+					const dynamic_belt = createBox(new Jolt.Vec3(-25.0, 3.0, 0), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(5.0, 0.1, 25.0), Jolt.EMotionType_Dynamic, LAYER_MOVING, 0x333399)
 					mLinearBelts.push(dynamic_belt);
 
 					// Create cargo on the dynamic belt
 					const cargo = createBox(new Jolt.Vec3(-25.0, 6.0, 15.0),
-						Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(2, 2, 2), Jolt.EMotionType_Dynamic, Jolt.MOVING, 0x990099);
+						Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(2, 2, 2), Jolt.EMotionType_Dynamic, LAYER_MOVING, 0x990099);
 					cargo.SetFriction(1);
 				}
 
 				// Create an angular belt
-				const mAngularBelt = createBox(new Jolt.Vec3(10.0, 3.0, 0), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(20.0, 0.1, 20.0), Jolt.EMotionType_Static, Jolt.NON_MOVING, 0x993333)
+				const mAngularBelt = createBox(new Jolt.Vec3(10.0, 3.0, 0), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(20.0, 0.1, 20.0), Jolt.EMotionType_Static, LAYER_NON_MOVING, 0x993333)
 
 				// Bodies with decreasing friction dropping on the angular belt
 				for (let i = 0; i <= 6; ++i) {
 					const cargo = createBox(new Jolt.Vec3(10.0, 10.0, -15.0 + 5.0 * i),
-						Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(2, 2, 2), Jolt.EMotionType_Dynamic, Jolt.MOVING, 0x339999);
+						Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(2, 2, 2), Jolt.EMotionType_Dynamic, LAYER_MOVING, 0x339999);
 					cargo.SetFriction(Math.max((0.0, 1.0 - 0.1 * i)));
 				}
 

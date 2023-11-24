@@ -33,7 +33,7 @@
 				let material = new THREE.MeshPhongMaterial({ color: 0xffffff });
 				let geometry = new THREE.BoxGeometry(1, 1, 1);
 				let shape = new Jolt.BoxShape(new Jolt.Vec3(0.5, 0.5, 0.5), 0.05, null);
-				let creationSettings = new Jolt.BodyCreationSettings(shape, Jolt.Vec3.prototype.sZero(), Jolt.Quat.prototype.sIdentity(), Jolt.EMotionType_Dynamic, Jolt.MOVING);
+				let creationSettings = new Jolt.BodyCreationSettings(shape, Jolt.Vec3.prototype.sZero(), Jolt.Quat.prototype.sIdentity(), Jolt.EMotionType_Dynamic, LAYER_MOVING);
 
 				for (let y = 0; y < towerHeight; y++) {
 
@@ -51,7 +51,7 @@
 
 				// Create block to fall on scene
 				shape = new Jolt.BoxShape(new Jolt.Vec3(1, 1, 1), 0.05, null);
-				let body = bodyInterface.CreateBody(new Jolt.BodyCreationSettings(shape, new Jolt.Vec3(0, 20, 0), Jolt.Quat.prototype.sIdentity(), Jolt.EMotionType_Dynamic, Jolt.MOVING));
+				let body = bodyInterface.CreateBody(new Jolt.BodyCreationSettings(shape, new Jolt.Vec3(0, 20, 0), Jolt.Quat.prototype.sIdentity(), Jolt.EMotionType_Dynamic, LAYER_MOVING));
 				addToScene(body, 0xff0000);
 			});
 

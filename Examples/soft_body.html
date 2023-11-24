@@ -95,7 +95,7 @@
 
 				// Create soft body
 				let body_creation_settings = new Jolt.SoftBodyCreationSettings(shared_settings, new Jolt.Vec3(0, 10, 0), Jolt.Quat.prototype.sIdentity());
-				body_creation_settings.mObjectLayer = Jolt.MOVING;
+				body_creation_settings.mObjectLayer = LAYER_MOVING;
 				body_creation_settings.mUpdatePosition = false;
 				let body = bodyInterface.CreateSoftBody(body_creation_settings);
 				addToScene(body, 0xffffff);
@@ -108,7 +108,7 @@
 					let z = 2.0 * Math.random();
 					let radius = 0.75;
 					let shape = new Jolt.SphereShape(radius, null);
-					let creationSettings = new Jolt.BodyCreationSettings(shape, new Jolt.Vec3(x, 15 + 2.0 * radius * s, z), Jolt.Quat.prototype.sIdentity(), Jolt.EMotionType_Dynamic, Jolt.MOVING);
+					let creationSettings = new Jolt.BodyCreationSettings(shape, new Jolt.Vec3(x, 15 + 2.0 * radius * s, z), Jolt.Quat.prototype.sIdentity(), Jolt.EMotionType_Dynamic, LAYER_MOVING);
 					creationSettings.mOverrideMassProperties = Jolt.EOverrideMassProperties_CalculateInertia;
 					creationSettings.mMassPropertiesOverride.mMass = 100.0;
 					let body = bodyInterface.CreateBody(creationSettings);

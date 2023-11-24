@@ -122,7 +122,7 @@
 					let rot = getRandomQuat();
 
 					// Create physics body
-					let creationSettings = new Jolt.BodyCreationSettings(shape, pos, rot, Jolt.EMotionType_Dynamic, Jolt.MOVING);
+					let creationSettings = new Jolt.BodyCreationSettings(shape, pos, rot, Jolt.EMotionType_Dynamic, LAYER_MOVING);
 					creationSettings.mRestitution = 0.5;
 					let body = bodyInterface.CreateBody(creationSettings);
 

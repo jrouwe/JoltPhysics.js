@@ -102,7 +102,7 @@
 			const car_shape = car_shape_settings.Create().Get();
 			const car_body_settings = new Jolt.BodyCreationSettings(car_shape, new Jolt.Vec3(...mPosition),
 				Jolt.Quat.prototype.sRotation(new Jolt.Vec3(0, 1, 0), Math.PI),
-				Jolt.EMotionType_Dynamic, Jolt.MOVING)
+				Jolt.EMotionType_Dynamic, LAYER_MOVING)
 			car_body_settings.mOverrideMassProperties = Jolt.EOverrideMassProperties_CalculateInertia;
 			car_body_settings.mMassPropertiesOverride.mMass = sVehicleMass;
 
@@ -195,13 +195,13 @@
 			let tester;
 			switch (mCastType) {
 				case 'cylinder':
-					tester = new Jolt.VehicleCollisionTesterCastCylinder(Jolt.MOVING, 0.05);
+					tester = new Jolt.VehicleCollisionTesterCastCylinder(LAYER_MOVING, 0.05);
 					break;
 				case 'sphere':
-					tester = new Jolt.VehicleCollisionTesterCastSphere(Jolt.MOVING, 0.5 * mWheelWidth);
+					tester = new Jolt.VehicleCollisionTesterCastSphere(LAYER_MOVING, 0.5 * mWheelWidth);
 					break;
 				default:
-					tester = new Jolt.VehicleCollisionTesterRay(Jolt.MOVING);
+					tester = new Jolt.VehicleCollisionTesterRay(LAYER_MOVING);
 					break;
 			}
 

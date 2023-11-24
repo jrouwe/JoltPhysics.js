@@ -30,12 +30,12 @@
 				createFloor();
 
 				const makeWindmill = () => {
-					const box = createBox(new Jolt.Vec3(0, 10, 0), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(0.25, 0.25, 0.25), Jolt.EMotionType_Static, Jolt.NON_MOVING);
+					const box = createBox(new Jolt.Vec3(0, 10, 0), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(0.25, 0.25, 0.25), Jolt.EMotionType_Static, LAYER_NON_MOVING);
 					const wings = [
-						createBox(new Jolt.Vec3(5, 10, 0), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(4, 0.5, 0.5), Jolt.EMotionType_Dynamic, Jolt.MOVING),
-						createBox(new Jolt.Vec3(-5, 10, 0), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(4, 0.5, 0.5), Jolt.EMotionType_Dynamic, Jolt.MOVING),
-						createBox(new Jolt.Vec3(0, 15, 0), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(0.5, 4, 0.5), Jolt.EMotionType_Dynamic, Jolt.MOVING),
-						createBox(new Jolt.Vec3(0, 5, 0), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(0.5, 4, 0.5), Jolt.EMotionType_Dynamic, Jolt.MOVING),
+						createBox(new Jolt.Vec3(5, 10, 0), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(4, 0.5, 0.5), Jolt.EMotionType_Dynamic, LAYER_MOVING),
+						createBox(new Jolt.Vec3(-5, 10, 0), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(4, 0.5, 0.5), Jolt.EMotionType_Dynamic, LAYER_MOVING),
+						createBox(new Jolt.Vec3(0, 15, 0), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(0.5, 4, 0.5), Jolt.EMotionType_Dynamic, LAYER_MOVING),
+						createBox(new Jolt.Vec3(0, 5, 0), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(0.5, 4, 0.5), Jolt.EMotionType_Dynamic, LAYER_MOVING),
 					]
 					wings.forEach(wing => {
 						const motionProps = wing.GetMotionProperties();
@@ -56,34 +56,34 @@
 					})
 
 					// Sphere moving towards the wings
-					const sphere = createSphere(new Jolt.Vec3(-20, 2, 0), 2, Jolt.EMotionType_Dynamic, Jolt.MOVING, 0x118811);
+					const sphere = createSphere(new Jolt.Vec3(-20, 2, 0), 2, Jolt.EMotionType_Dynamic, LAYER_MOVING, 0x118811);
 					sphere.GetMotionProperties().SetInverseMass(1.0 / 15);
 					sphere.AddImpulse(new Jolt.Vec3(250.0, 0, 0));
 					sphere.SetRestitution(0.45);
 
 					// Create a wall for the ball to bounce against
-					const target = createBox(new Jolt.Vec3(-25, 15, 0), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(0.2, 15, 5), Jolt.EMotionType_Static, Jolt.NON_MOVING, 0x661122);
+					const target = createBox(new Jolt.Vec3(-25, 15, 0), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(0.2, 15, 5), Jolt.EMotionType_Static, LAYER_NON_MOVING, 0x661122);
 
 					// Invisible right wall because the sphere gets lost sometimes
-					createBox(new Jolt.Vec3(50, 0, 0), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(0.2, 150, 50), Jolt.EMotionType_Static, Jolt.NON_MOVING, 0x661122);
+					createBox(new Jolt.Vec3(50, 0, 0), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(0.2, 150, 50), Jolt.EMotionType_Static, LAYER_NON_MOVING, 0x661122);
 					dynamicObjects.pop().visible = false;
 
 					// Invisible top wall
-					createBox(new Jolt.Vec3(0, 75, 0), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(150, 0.2, 50), Jolt.EMotionType_Static, Jolt.NON_MOVING, 0x661122);
+					createBox(new Jolt.Vec3(0, 75, 0), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(150, 0.2, 50), Jolt.EMotionType_Static, LAYER_NON_MOVING, 0x661122);
 					dynamicObjects.pop().visible = false;
 				}
 
 				const createSlider = () => {
-					const platform = createBox(new Jolt.Vec3(18, 0.25, 0), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(12.5, 0.25, 2), Jolt.EMotionType_Static, Jolt.NON_MOVING, 0x993333);
-					const target = createBox(new Jolt.Vec3(30, 2, 0), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(0.5, 2, 2), Jolt.EMotionType_Static, Jolt.NON_MOVING, 0x666633);
-					const box = createBox(new Jolt.Vec3(15, 1.25, 0), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(0.75, 0.75, 0.75), Jolt.EMotionType_Dynamic, Jolt.MOVING, 0x003366);
+					const platform = createBox(new Jolt.Vec3(18, 0.25, 0), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(12.5, 0.25, 2), Jolt.EMotionType_Static, LAYER_NON_MOVING, 0x993333);
+					const target = createBox(new Jolt.Vec3(30, 2, 0), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(0.5, 2, 2), Jolt.EMotionType_Static, LAYER_NON_MOVING, 0x666633);
+					const box = createBox(new Jolt.Vec3(15, 1.25, 0), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(0.75, 0.75, 0.75), Jolt.EMotionType_Dynamic, LAYER_MOVING, 0x003366);
 					box.GetMotionProperties().SetInverseMass(1.0 / 5);
 
 					// Place irregular reference points along slider axis to show precise location control
 					const colors = [0xFF0000, 0x00FF00, 0x0000FF, 0xFFFF00];
 					const offsets = [0, 4, 13, 21];
 					colors.forEach((color, index) => {
-						createBox(new Jolt.Vec3(28 - offsets[index], 2, -2.75), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(1, 4, 0.75), Jolt.EMotionType_Static, Jolt.NON_MOVING, color);
+						createBox(new Jolt.Vec3(28 - offsets[index], 2, -2.75), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(1, 4, 0.75), Jolt.EMotionType_Static, LAYER_NON_MOVING, color);
 					})
 
 					const c = new Jolt.SliderConstraintSettings();

@@ -37,12 +37,12 @@
 					filter.DisableCollision(z, z + 1);
 
 				let shape = new Jolt.BoxShape(new Jolt.Vec3(0.5, 0.5, 0.5), 0.05, null);
-				let creationSettings = new Jolt.BodyCreationSettings(shape, new Jolt.Vec3(-15, 20, 0), Jolt.Quat.prototype.sIdentity(), Jolt.EMotionType_Dynamic, Jolt.MOVING);
+				let creationSettings = new Jolt.BodyCreationSettings(shape, new Jolt.Vec3(-15, 20, 0), Jolt.Quat.prototype.sIdentity(), Jolt.EMotionType_Dynamic, LAYER_MOVING);
 				creationSettings.mCollisionGroup.SetGroupFilter(filter);
 
 				function createBody(creationSettings, z) {
 					creationSettings.mMotionType = z == 0 ? Jolt.EMotionType_Static : Jolt.EMotionType_Dynamic;
-					creationSettings.mObjectLayer = z == 0 ? Jolt.NON_MOVING : Jolt.MOVING;
+					creationSettings.mObjectLayer = z == 0 ? LAYER_NON_MOVING : LAYER_MOVING;
 					creationSettings.mPosition.SetZ(z);
 					creationSettings.mCollisionGroup.SetSubGroupID(z);
 
