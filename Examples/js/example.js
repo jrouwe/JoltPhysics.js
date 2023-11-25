@@ -314,6 +314,7 @@ function createVehicleTrack() {
 			const shape = hull.Create().Get();
 			const creation_settings = new Jolt.BodyCreationSettings(shape, new Jolt.Vec3(0, 10, 0), mapRot, Jolt.EBodyType_Static, LAYER_NON_MOVING);
 			const body = bodyInterface.CreateBody(creation_settings);
+			body.SetFriction(1.0);
 			addToScene(body, mapColors[tIdx]);
 		});
 	});
