@@ -70,40 +70,35 @@
 			initPhysics();
 			createVehicleTrack();
 
+			// Create material for wheel
 			const texLoader = new THREE.TextureLoader();
 			const texture = texLoader.load('data:image/gif;base64,R0lGODdhAgACAIABAAAAAP///ywAAAAAAgACAAACA0QCBQA7');
 			texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
-
 			texture.offset.set(0, 0);
 			texture.repeat.set(3, 3);
 			texture.magFilter = THREE.NearestFilter;
-			let wheel_material = new THREE.MeshPhongMaterial({ color: 0x666666 });
-			wheel_material.map = texture;
-			const createThreeWheel = (joltWheel, body) => {
+			let wheelMaterial = new THREE.MeshPhongMaterial({ color: 0x666666 });
+			wheelMaterial.map = texture;
+
+			const createThreeWheel = (constraint, wheelIndex, body) => {
+				// Create wheel mesh
+				const joltWheel = constraint.GetWheel(wheelIndex);
 				const wheelSetting = joltWheel.GetSettings();
-				const wheelPos = wrapVec3(wheelSetting.mPosition);
-				const radius = wheelSetting.mRadius;
-				const width = wheelSetting.mWidth;
+				const wheel = new THREE.Mesh(new THREE.CylinderGeometry(wheelSetting.mRadius, wheelSetting.mRadius, wheelSetting.mWidth, 20, 1), wheelMaterial);
+				body.add(wheel);
 
-				const wheel = new THREE.Mesh(new THREE.CylinderGeometry(
-					radius, radius, width, 20, 1
-				), wheel_material);
-				const joint = new THREE.Object3D();
-				const joint_steer = new THREE.Object3D();
-				joint.quaternion.setFromAxisAngle(new THREE.Vector3(0, 0, 1), Math.PI / 2);
-				joint.add(joint_steer);
-				joint_steer.add(wheel);
-				body.add(joint);
-
-				joint.position.copy(wheelPos);
-				wheel.updateRotation = () => {
-					joint.position.y = wheelPos.y - joltWheel.GetSuspensionLength();
-					joint_steer.quaternion.setFromAxisAngle(new THREE.Vector3(1, 0, 0), joltWheel.GetSteerAngle());
-					wheel.quaternion.setFromAxisAngle(new THREE.Vector3(0, 1, 0), -joltWheel.GetRotationAngle());
+				// Function to update the orientation of the wheel
+				wheel.updateLocalTransform = () => {
+					let transform = constraint.GetWheelLocalTransform(wheelIndex, new Jolt.Vec3(0, 1, 0), new Jolt.Vec3(1, 0, 0));
+					wheel.position.copy(wrapVec3(transform.GetTranslation()));
+					wheel.quaternion.copy(wrapQuat(transform.GetRotation().GetQuaternion()));
 				};
+				wheel.updateLocalTransform();
+
 				return wheel;
 			}
 
+			// Create tank body
 			const tank_body_shape_settings = new Jolt.OffsetCenterOfMassShapeSettings(new Jolt.Vec3(0, -half_vehicle_height, 0),
 				new Jolt.BoxShapeSettings(new Jolt.Vec3(half_vehicle_width, half_vehicle_height, half_vehicle_length)));
 			const tank_body_shape = tank_body_shape_settings.Create().Get();
@@ -112,15 +107,13 @@
 				Jolt.EMotionType_Dynamic, LAYER_MOVING)
 			tank_body_settings.mOverrideMassProperties = Jolt.EOverrideMassProperties_CalculateInertia;
 			tank_body_settings.mMassPropertiesOverride.mMass = vehicle_mass;
-
 			const tank_body = bodyInterface.CreateBody(tank_body_settings);
 			bodyInterface.AddBody(tank_body.GetID(), Jolt.EActivation_Activate);
+			addToScene(tank_body, 0xFF0000);
 
 			const vehicle = new Jolt.VehicleConstraintSettings();
 			vehicle.mDrawConstraintSize = 0.1;
 			vehicle.mMaxPitchRollAngle = max_pitch_roll_angle;
-
-			addToScene(tank_body, 0xFF0000);
 
 			const tank = dynamicObjects[dynamicObjects.length - 1];
 
@@ -165,7 +158,7 @@
 
 			const modelWheels = [];
 			for (let i = 0; i < vehicle.mWheels.size(); i++) {
-				modelWheels.push(createThreeWheel(constraint.GetWheel(i), tank));
+				modelWheels.push(createThreeWheel(constraint, i, tank));
 			}
 
 			physicsSystem.AddConstraint(constraint);
@@ -232,7 +225,7 @@
 				const pos = wrapVec3(tank_body.GetPosition());
 				camera.position.add(pos.clone().sub(oldPos));
 				oldPos = pos;
-				modelWheels.forEach(wheel => wheel.updateRotation());
+				modelWheels.forEach(wheel => wheel.updateLocalTransform());
 			}
 
 			document.addEventListener("keydown", onDocumentKeyDown, false);
