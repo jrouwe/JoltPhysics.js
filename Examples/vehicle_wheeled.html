@@ -68,7 +68,7 @@
 			const texture = texLoader.load('data:image/gif;base64,R0lGODdhAgACAIABAAAAAP///ywAAAAAAgACAAACA0QCBQA7');
 			texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
 			texture.offset.set(0, 0);
-			texture.repeat.set(3, 3);
+			texture.repeat.set(1, 1);
 			texture.magFilter = THREE.NearestFilter;
 			let wheelMaterial = new THREE.MeshPhongMaterial({ color: 0x666666 });
 			wheelMaterial.map = texture;
