@@ -71,21 +71,21 @@ function initGraphics() {
 
 function initPhysics() {
 	// We use only 2 layers: one for non-moving objects and one for moving objects
-	let object_filter = new Jolt.ObjectLayerPairFilterTable(2);
-	object_filter.EnableCollision(LAYER_NON_MOVING, LAYER_MOVING);
-	object_filter.EnableCollision(LAYER_MOVING, LAYER_MOVING);
+	let objectFilter = new Jolt.ObjectLayerPairFilterTable(2);
+	objectFilter.EnableCollision(LAYER_NON_MOVING, LAYER_MOVING);
+	objectFilter.EnableCollision(LAYER_MOVING, LAYER_MOVING);
 
 	// We use a 1-to-1 mapping between object layers and broadphase layers
 	const BP_LAYER_NON_MOVING = new Jolt.BroadPhaseLayer(0);
 	const BP_LAYER_MOVING = new Jolt.BroadPhaseLayer(1);
-	let bp_interface = new Jolt.BroadPhaseLayerInterfaceTable(2, 2);
-	bp_interface.MapObjectToBroadPhaseLayer(LAYER_NON_MOVING, BP_LAYER_NON_MOVING);
-	bp_interface.MapObjectToBroadPhaseLayer(LAYER_MOVING, BP_LAYER_MOVING);
+	let bpInterface = new Jolt.BroadPhaseLayerInterfaceTable(2, 2);
+	bpInterface.MapObjectToBroadPhaseLayer(LAYER_NON_MOVING, BP_LAYER_NON_MOVING);
+	bpInterface.MapObjectToBroadPhaseLayer(LAYER_MOVING, BP_LAYER_MOVING);
 
 	// Initialize Jolt
 	settings = new Jolt.JoltSettings();
-	settings.mObjectLayerPairFilter = object_filter;
-	settings.mBroadPhaseLayerInterface = bp_interface;
+	settings.mObjectLayerPairFilter = objectFilter;
+	settings.mBroadPhaseLayerInterface = bpInterface;
 	settings.mObjectVsBroadPhaseLayerFilter = new Jolt.ObjectVsBroadPhaseLayerFilterTable(settings.mBroadPhaseLayerInterface, 2, settings.mObjectLayerPairFilter, 2);
 	jolt = new Jolt.JoltInterface(settings);
 	physicsSystem = jolt.GetPhysicsSystem();
@@ -182,8 +182,8 @@ function removeFromScene(threeObject) {
 
 function createFloor(size = 50) {
 	var shape = new Jolt.BoxShape(new Jolt.Vec3(size, 0.5, size), 0.05, null);
-	var creation_settings = new Jolt.BodyCreationSettings(shape, new Jolt.Vec3(0, -0.5, 0), new Jolt.Quat(0, 0, 0, 1), Jolt.EBodyType_Static, LAYER_NON_MOVING);
-	let body = bodyInterface.CreateBody(creation_settings);
+	var creationSettings = new Jolt.BodyCreationSettings(shape, new Jolt.Vec3(0, -0.5, 0), new Jolt.Quat(0, 0, 0, 1), Jolt.EBodyType_Static, LAYER_NON_MOVING);
+	let body = bodyInterface.CreateBody(creationSettings);
 	addToScene(body, 0xc7c7c7);
 	return body;
 }
@@ -257,19 +257,19 @@ function getThreeObjectForBody(body, color) {
 	return threeObject;
 }
 
-function createMeshFloor(n, cell_size, max_height, posX, posY, posZ) {
+function createMeshFloor(n, cellSize, maxHeight, posX, posY, posZ) {
 	// Create regular grid of triangles
 	let height = function (x, y) { return Math.sin(x / 2) * Math.cos(y / 3); };
 	let triangles = new Jolt.TriangleList;
 	triangles.resize(n * n * 2);
 	for (let x = 0; x < n; ++x)
 		for (let z = 0; z < n; ++z) {
-			let center = n * cell_size / 2;
+			let center = n * cellSize / 2;
 
-			let x1 = cell_size * x - center;
-			let z1 = cell_size * z - center;
-			let x2 = x1 + cell_size;
-			let z2 = z1 + cell_size;
+			let x1 = cellSize * x - center;
+			let z1 = cellSize * z - center;
+			let x2 = x1 + cellSize;
+			let z2 = z1 + cellSize;
 
 			{
 				let t = triangles.at((x * n + z) * 2);
@@ -290,8 +290,8 @@ function createMeshFloor(n, cell_size, max_height, posX, posY, posZ) {
 	let shape = new Jolt.MeshShapeSettings(triangles, new Jolt.PhysicsMaterialList).Create().Get();
 
 	// Create body
-	let creation_settings = new Jolt.BodyCreationSettings(shape, new Jolt.Vec3(posX, posY, posZ), new Jolt.Quat(0, 0, 0, 1), Jolt.EMotionType_Static, LAYER_NON_MOVING);
-	let body = bodyInterface.CreateBody(creation_settings);
+	let creationSettings = new Jolt.BodyCreationSettings(shape, new Jolt.Vec3(posX, posY, posZ), new Jolt.Quat(0, 0, 0, 1), Jolt.EMotionType_Static, LAYER_NON_MOVING);
+	let body = bodyInterface.CreateBody(creationSettings);
 	addToScene(body, 0xc7c7c7);
 }
 
@@ -312,8 +312,8 @@ function createVehicleTrack() {
 				hull.mPoints.push_back(new Jolt.Vec3(-v[1], v[2], v[0]));
 			});
 			const shape = hull.Create().Get();
-			const creation_settings = new Jolt.BodyCreationSettings(shape, new Jolt.Vec3(0, 10, 0), mapRot, Jolt.EBodyType_Static, LAYER_NON_MOVING);
-			const body = bodyInterface.CreateBody(creation_settings);
+			const creationSettings = new Jolt.BodyCreationSettings(shape, new Jolt.Vec3(0, 10, 0), mapRot, Jolt.EBodyType_Static, LAYER_NON_MOVING);
+			const body = bodyInterface.CreateBody(creationSettings);
 			body.SetFriction(1.0);
 			addToScene(body, mapColors[tIdx]);
 		});

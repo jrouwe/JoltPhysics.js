@@ -231,10 +231,10 @@
 					constraintSettings.SetLimitedAxis(Jolt.SixDOFConstraintSettings_EAxis_TranslationX, -0.1, 0.1);
 					constraintSettings.SetLimitedAxis(Jolt.SixDOFConstraintSettings_EAxis_TranslationY, -0.1, 0.1);
 					constraintSettings.SetLimitedAxis(Jolt.SixDOFConstraintSettings_EAxis_TranslationZ, -0.1, 0.1);
-					let max_angle = DegreesToRadians(10);
-					constraintSettings.SetLimitedAxis(Jolt.SixDOFConstraintSettings_EAxis_RotationX, -max_angle, max_angle);
-					constraintSettings.SetLimitedAxis(Jolt.SixDOFConstraintSettings_EAxis_RotationY, -max_angle, max_angle);
-					constraintSettings.SetLimitedAxis(Jolt.SixDOFConstraintSettings_EAxis_RotationZ, -max_angle, max_angle);
+					let maxAngle = DegreesToRadians(10);
+					constraintSettings.SetLimitedAxis(Jolt.SixDOFConstraintSettings_EAxis_RotationX, -maxAngle, maxAngle);
+					constraintSettings.SetLimitedAxis(Jolt.SixDOFConstraintSettings_EAxis_RotationY, -maxAngle, maxAngle);
+					constraintSettings.SetLimitedAxis(Jolt.SixDOFConstraintSettings_EAxis_RotationZ, -maxAngle, maxAngle);
 
 					let prevBody = null;
 

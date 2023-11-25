@@ -38,38 +38,38 @@
 				let ray = new Jolt.RRayCast;
 				ray.mOrigin = new Jolt.Vec3(-5, 1, -1);
 				ray.mDirection = new Jolt.Vec3(10, 0, 2);
-				let drawRay = (inRay) => {
-					addLine(inRay.mOrigin, inRay.mOrigin.Clone().Add(inRay.mDirection), 0xff0000);
+				let drawRay = (ray) => {
+					addLine(ray.mOrigin, ray.mOrigin.Clone().Add(ray.mDirection), 0xff0000);
 				};
 				drawRay(ray);
 
 				// Create ray cast settings (e.g. if we want back face culling)
-				let ray_settings = new Jolt.RayCastSettings;
+				let raySettings = new Jolt.RayCastSettings;
 
 				// Perform the ray cast as if we were a moving object
-				let bp_filter = new Jolt.DefaultBroadPhaseLayerFilter(jolt.GetObjectVsBroadPhaseLayerFilter(), LAYER_MOVING);
-				let object_filter = new Jolt.DefaultObjectLayerFilter(jolt.GetObjectLayerPairFilter(), LAYER_MOVING);
-				let body_filter = new Jolt.BodyFilter(); // We don't want to filter out any bodies
-				let shape_filter = new Jolt.ShapeFilter(); // We don't want to filter out any shapes
+				let bpFilter = new Jolt.DefaultBroadPhaseLayerFilter(jolt.GetObjectVsBroadPhaseLayerFilter(), LAYER_MOVING);
+				let objectFilter = new Jolt.DefaultObjectLayerFilter(jolt.GetObjectLayerPairFilter(), LAYER_MOVING);
+				let bodyFilter = new Jolt.BodyFilter(); // We don't want to filter out any bodies
+				let shapeFilter = new Jolt.ShapeFilter(); // We don't want to filter out any shapes
 
 				// Create collector
 				let collector = new Jolt.CastRayCollectorJS;
-				let drawHit = (inBody, inHit) => {
-					let hitPoint = ray.GetPointOnRay(inHit.mFraction);
+				let drawHit = (body, hit) => {
+					let hitPoint = ray.GetPointOnRay(hit.mFraction);
 					addMarker(hitPoint, 1, 0x0000ff);
-					let hitNormal = inBody.GetWorldSpaceSurfaceNormal(inHit.mSubShapeID2, hitPoint);
+					let hitNormal = body.GetWorldSpaceSurfaceNormal(hit.mSubShapeID2, hitPoint);
 					addLine(hitPoint, hitPoint.Clone().Add(hitNormal.Mul(2)), 0x00ff00);
 				}
-				collector.OnBody = (inBody) => {
-					inBody = Jolt.wrapPointer(inBody, Jolt.Body);
-					collector.body = inBody; // Store the body for the AddHit callback, note this is called whenever there is a collision with the bounding box of the object so you may not receive an AddHit callback for this body
+				collector.OnBody = (body) => {
+					body = Jolt.wrapPointer(body, Jolt.Body);
+					collector.body = body; // Store the body for the AddHit callback, note this is called whenever there is a collision with the bounding box of the object so you may not receive an AddHit callback for this body
 				};
-				collector.AddHit = (inRayCastResult) => {
-					inRayCastResult = Jolt.wrapPointer(inRayCastResult, Jolt.RayCastResult);
-					drawHit(collector.body, inRayCastResult);
+				collector.AddHit = (rayCastResult) => {
+					rayCastResult = Jolt.wrapPointer(rayCastResult, Jolt.RayCastResult);
+					drawHit(collector.body, rayCastResult);
 					
 					// Update the collector so that it won't receive any hits further away than this hit
-					collector.UpdateEarlyOutFraction(inRayCastResult.mFraction);
+					collector.UpdateEarlyOutFraction(rayCastResult.mFraction);
 				};
 				collector.Reset = () => {
 					// Reset your bookkeeping, in any case we'll need to reset the early out fraction for the base class
@@ -77,7 +77,7 @@
 				};
 
 				// Cast the ray against the first box
-				physicsSystem.GetNarrowPhaseQuery().CastRay(ray, ray_settings, collector, bp_filter, object_filter, body_filter, shape_filter);
+				physicsSystem.GetNarrowPhaseQuery().CastRay(ray, raySettings, collector, bpFilter, objectFilter, bodyFilter, shapeFilter);
 				
 				// Recycle the collector
 				collector.Reset();
@@ -87,7 +87,7 @@
 				drawRay(ray);
 
 				// Cast the ray against the second box
-				physicsSystem.GetNarrowPhaseQuery().CastRay(ray, ray_settings, collector, bp_filter, object_filter, body_filter, shape_filter);
+				physicsSystem.GetNarrowPhaseQuery().CastRay(ray, raySettings, collector, bpFilter, objectFilter, bodyFilter, shapeFilter);
 
 				// Move the ray
 				ray.mOrigin = new Jolt.Vec3(-5, 1, 9);
@@ -95,7 +95,7 @@
 
 				// Cast the ray against the third box using a closest hit collector
 				let closest_hit_collector = new Jolt.CastRayClosestHitCollisionCollector;
-				physicsSystem.GetNarrowPhaseQuery().CastRay(ray, ray_settings, closest_hit_collector, bp_filter, object_filter, body_filter, shape_filter);
+				physicsSystem.GetNarrowPhaseQuery().CastRay(ray, raySettings, closest_hit_collector, bpFilter, objectFilter, bodyFilter, shapeFilter);
 				if (closest_hit_collector.HadHit()) { 
 					let body = physicsSystem.GetBodyLockInterfaceNoLock().TryGetBody(closest_hit_collector.mHit.mBodyID);
 					drawHit(body, closest_hit_collector.mHit);
@@ -106,11 +106,11 @@
 				drawRay(ray);
 
 				// Turn off back face culling
-				ray_settings.mBackFaceMode = Jolt.EBackFaceMode_CollideWithBackFaces;
+				raySettings.mBackFaceMode = Jolt.EBackFaceMode_CollideWithBackFaces;
 
 				// Cast the ray against the fourth box using an all hit collector
 				let all_hit_collector = new Jolt.CastRayAllHitCollisionCollector;
-				physicsSystem.GetNarrowPhaseQuery().CastRay(ray, ray_settings, all_hit_collector, bp_filter, object_filter, body_filter, shape_filter);
+				physicsSystem.GetNarrowPhaseQuery().CastRay(ray, raySettings, all_hit_collector, bpFilter, objectFilter, bodyFilter, shapeFilter);
 				for (let i = 0; i < all_hit_collector.mHits.size(); i++) {
 					let hit = all_hit_collector.mHits.at(i);
 					let body = physicsSystem.GetBodyLockInterfaceNoLock().TryGetBody(hit.mBodyID);
@@ -123,7 +123,7 @@
 
 				// Cast the ray against the fifth box resetting the all hit collector
 				all_hit_collector.Reset();
-				physicsSystem.GetNarrowPhaseQuery().CastRay(ray, ray_settings, all_hit_collector, bp_filter, object_filter, body_filter, shape_filter);
+				physicsSystem.GetNarrowPhaseQuery().CastRay(ray, raySettings, all_hit_collector, bpFilter, objectFilter, bodyFilter, shapeFilter);
 				for (let i = 0; i < all_hit_collector.mHits.size(); i++) {
 					let hit = all_hit_collector.mHits.at(i);
 					let body = physicsSystem.GetBodyLockInterfaceNoLock().TryGetBody(hit.mBodyID);

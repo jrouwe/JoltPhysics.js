@@ -98,14 +98,14 @@
 
 						case 7: {
 							// Compound shape
-							let shape_settings = new Jolt.StaticCompoundShapeSettings();
+							let shapeSettings = new Jolt.StaticCompoundShapeSettings();
 							let l = 1.0 + Math.random();
 							let r2 = 0.5 + 0.5 * Math.random();
 							let r1 = 0.5 * r2;
-							shape_settings.AddShape(new Jolt.Vec3(-l, 0, 0), Jolt.Quat.prototype.sIdentity(), new Jolt.SphereShapeSettings(r2));
-							shape_settings.AddShape(new Jolt.Vec3(l, 0, 0), Jolt.Quat.prototype.sIdentity(), new Jolt.SphereShapeSettings(r2));
-							shape_settings.AddShape(new Jolt.Vec3(0, 0, 0), Jolt.Quat.prototype.sRotation(new Jolt.Vec3(0, 0, 1), 0.5 * Math.PI), new Jolt.CapsuleShapeSettings(l, r1));
-							shape = shape_settings.Create().Get();
+							shapeSettings.AddShape(new Jolt.Vec3(-l, 0, 0), Jolt.Quat.prototype.sIdentity(), new Jolt.SphereShapeSettings(r2));
+							shapeSettings.AddShape(new Jolt.Vec3(l, 0, 0), Jolt.Quat.prototype.sIdentity(), new Jolt.SphereShapeSettings(r2));
+							shapeSettings.AddShape(new Jolt.Vec3(0, 0, 0), Jolt.Quat.prototype.sRotation(new Jolt.Vec3(0, 0, 1), 0.5 * Math.PI), new Jolt.CapsuleShapeSettings(l, r1));
+							shape = shapeSettings.Create().Get();
 							break;
 						}
 

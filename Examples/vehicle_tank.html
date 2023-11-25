@@ -25,28 +25,28 @@
 		// In case you haven't built the library yourself, replace URL with: https://www.unpkg.com/jolt-physics/dist/jolt-physics.wasm-compat.js
 		import initJolt from './js/jolt-physics.wasm-compat.js';
 
-		const body_position = [0, 2, 0];
-		const wheel_radius = 0.3;
-		const wheel_width = 0.1;
-		const half_vehicle_length = 3.2;
-		const half_vehicle_width = 1.7;
-		const half_vehicle_height = 0.5;
-		const suspension_min_length = 0.3;
-		const suspension_max_length = 0.5;
-		const suspension_frequency = 1.0;
+		const bodyPosition = [0, 2, 0];
+		const wheelRadius = 0.3;
+		const wheelWidth = 0.1;
+		const halfVehicleLength = 3.2;
+		const halfVehicleWidth = 1.7;
+		const halfVehicleHeight = 0.5;
+		const suspensionMinLength = 0.3;
+		const suspensionMaxLength = 0.5;
+		const suspensionFrequency = 1.0;
 
-		const half_turret_width = 1.4;
-		const half_turret_length = 2.0;
-		const half_turret_height = 0.4;
+		const halfTurretWidth = 1.4;
+		const halfTurretLength = 2.0;
+		const halfTurretHeight = 0.4;
 
-		const half_barrel_length = 1.5;
-		const barrel_radius = 0.1;
-		const barrel_rotation_offset = 0.2;
+		const halfBarrelLength = 1.5;
+		const barrelRadius = 0.1;
+		const barrelRotationOffset = 0.2;
 
-		const vehicle_mass = 4000.0;
-		const max_pitch_roll_angle = DegreesToRadians(60.0);
+		const vehicleMass = 4000.0;
+		const maxPitchRollAngle = DegreesToRadians(60.0);
 
-		const wheel_pos = [
+		const wheelPos = [
 			[-0.0, 2.95],
 			[-0.3, 2.1],
 			[-0.3, 1.4],
@@ -99,41 +99,41 @@
 			}
 
 			// Create tank body
-			const tank_body_shape_settings = new Jolt.OffsetCenterOfMassShapeSettings(new Jolt.Vec3(0, -half_vehicle_height, 0),
-				new Jolt.BoxShapeSettings(new Jolt.Vec3(half_vehicle_width, half_vehicle_height, half_vehicle_length)));
-			const tank_body_shape = tank_body_shape_settings.Create().Get();
-			const tank_body_settings = new Jolt.BodyCreationSettings(tank_body_shape, new Jolt.Vec3(...body_position),
+			const tankBodyShapeSettings = new Jolt.OffsetCenterOfMassShapeSettings(new Jolt.Vec3(0, -halfVehicleHeight, 0),
+				new Jolt.BoxShapeSettings(new Jolt.Vec3(halfVehicleWidth, halfVehicleHeight, halfVehicleLength)));
+			const tankBodyShape = tankBodyShapeSettings.Create().Get();
+			const tankBodySettings = new Jolt.BodyCreationSettings(tankBodyShape, new Jolt.Vec3(...bodyPosition),
 				Jolt.Quat.prototype.sRotation(new Jolt.Vec3(0, 1, 0), Math.PI),
 				Jolt.EMotionType_Dynamic, LAYER_MOVING)
-			tank_body_settings.mOverrideMassProperties = Jolt.EOverrideMassProperties_CalculateInertia;
-			tank_body_settings.mMassPropertiesOverride.mMass = vehicle_mass;
-			const tank_body = bodyInterface.CreateBody(tank_body_settings);
-			bodyInterface.AddBody(tank_body.GetID(), Jolt.EActivation_Activate);
-			addToScene(tank_body, 0xFF0000);
+			tankBodySettings.mOverrideMassProperties = Jolt.EOverrideMassProperties_CalculateInertia;
+			tankBodySettings.mMassPropertiesOverride.mMass = vehicleMass;
+			const tankBody = bodyInterface.CreateBody(tankBodySettings);
+			bodyInterface.AddBody(tankBody.GetID(), Jolt.EActivation_Activate);
+			addToScene(tankBody, 0xFF0000);
 
 			const vehicle = new Jolt.VehicleConstraintSettings();
 			vehicle.mDrawConstraintSize = 0.1;
-			vehicle.mMaxPitchRollAngle = max_pitch_roll_angle;
+			vehicle.mMaxPitchRollAngle = maxPitchRollAngle;
 
 			const tank = dynamicObjects[dynamicObjects.length - 1];
 
-			const controller_settings = new Jolt.TrackedVehicleControllerSettings();
-			vehicle.mController = controller_settings;
+			const controllerSettings = new Jolt.TrackedVehicleControllerSettings();
+			vehicle.mController = controllerSettings;
 
 			let material = new THREE.MeshPhongMaterial({ color: 0x666666 });
-			let tank_mat1 = new THREE.MeshPhongMaterial({ color: 0x993333 });
-			let tank_mat2 = new THREE.MeshPhongMaterial({ color: 0x663333 });
+			let tankMat1 = new THREE.MeshPhongMaterial({ color: 0x993333 });
+			let tankMat2 = new THREE.MeshPhongMaterial({ color: 0x663333 });
 			for (let t = 0; t < 2; ++t) {
-				const track = controller_settings.get_mTracks(t);
-				track.mDrivenWheel = vehicle.mWheels.size() + (wheel_pos.length - 1);
-				wheel_pos.forEach((loc, wheel) => {
+				const track = controllerSettings.get_mTracks(t);
+				track.mDrivenWheel = vehicle.mWheels.size() + (wheelPos.length - 1);
+				wheelPos.forEach((loc, wheel) => {
 					const w = new Jolt.WheelSettingsTV();
-					w.mPosition = new Jolt.Vec3(t == 0 ? half_vehicle_width : -half_vehicle_width, loc[0], loc[1]);
-					w.mRadius = wheel_radius;
-					w.mWidth = wheel_width;
-					w.mSuspensionMinLength = suspension_min_length;
-					w.mSuspensionMaxLength = wheel == 0 || wheel == wheel_pos.length - 1 ? suspension_min_length : suspension_max_length;
-					w.mSuspensionSpring.mFrequency = suspension_frequency;
+					w.mPosition = new Jolt.Vec3(t == 0 ? halfVehicleWidth : -halfVehicleWidth, loc[0], loc[1]);
+					w.mRadius = wheelRadius;
+					w.mWidth = wheelWidth;
+					w.mSuspensionMinLength = suspensionMinLength;
+					w.mSuspensionMaxLength = wheel == 0 || wheel == wheelPos.length - 1 ? suspensionMinLength : suspensionMaxLength;
+					w.mSuspensionSpring.mFrequency = suspensionFrequency;
 
 					track.mWheels.push_back(vehicle.mWheels.size());
 					vehicle.mWheels.push_back(w);
@@ -141,17 +141,17 @@
 			}
 
 			{
-				const turret = new THREE.Mesh(new THREE.BoxGeometry(2 * half_turret_width, 2 * half_turret_height, 2 * half_turret_length, 1, 1, 1), tank_mat1);
-				turret.position.set(0, half_vehicle_height + half_turret_height, 0);
+				const turret = new THREE.Mesh(new THREE.BoxGeometry(2 * halfTurretWidth, 2 * halfTurretHeight, 2 * halfTurretLength, 1, 1, 1), tankMat1);
+				turret.position.set(0, halfVehicleHeight + halfTurretHeight, 0);
 				tank.add(turret);
 
-				const barrel = new THREE.Mesh(new THREE.CylinderGeometry(barrel_radius, barrel_radius, 2 * half_barrel_length, 20, 1), tank_mat2);
+				const barrel = new THREE.Mesh(new THREE.CylinderGeometry(barrelRadius, barrelRadius, 2 * halfBarrelLength, 20, 1), tankMat2);
 				barrel.quaternion.setFromAxisAngle(new THREE.Vector3(1, 0, 0), Math.PI / 2);
-				barrel.position.set(0, half_vehicle_height + half_turret_height, half_turret_length + half_barrel_length);
+				barrel.position.set(0, halfVehicleHeight + halfTurretHeight, halfTurretLength + halfBarrelLength);
 				tank.add(barrel);
 			}
 
-			const constraint = new Jolt.VehicleConstraint(tank_body, vehicle);
+			const constraint = new Jolt.VehicleConstraint(tankBody, vehicle);
 
 			const tester = new Jolt.VehicleCollisionTesterRay(LAYER_MOVING);
 			constraint.SetVehicleCollisionTester(tester);
@@ -168,34 +168,32 @@
 				direction: new THREE.Vector3()
 			};
 
-			const min_velocity_pivot_turn = 1.0;
+			const minVelocityPivotTurn = 1.0;
 			const prePhysicsUpdate = () => {
-				let forward = 0.0, left_ratio = 1.0, right_ratio = 1.0, brake = 0.0;
-				const rotation = wrapQuat(tank_body.GetRotation().Conjugated());
-				const linearV = wrapVec3(tank_body.GetLinearVelocity());
+				let forward = 0.0, leftRatio = 1.0, rightRatio = 1.0, brake = 0.0;
+				const rotation = wrapQuat(tankBody.GetRotation().Conjugated());
+				const linearV = wrapVec3(tankBody.GetLinearVelocity());
 				const velocity = linearV.applyQuaternion(rotation).z;
 
-				if (input.direction.z != 0) {
-					forward = input.direction.z;
-				}
+				forward = input.direction.z;
 
 				if (input.direction.x != 0) {
 					if (input.direction.x < 0) {
-						if (brake == 0.0 && forward == 0.0 && Math.abs(velocity) < min_velocity_pivot_turn) {
+						if (brake == 0.0 && forward == 0.0 && Math.abs(velocity) < minVelocityPivotTurn) {
 							// Pivot turn
-							left_ratio = -1.0;
+							leftRatio = -1.0;
 							forward = 1.0;
 						}
 						else
-							left_ratio = 0.6;
+							leftRatio = 0.6;
 					} else {
-						if (brake == 0.0 && forward == 0.0 && Math.abs(velocity) < min_velocity_pivot_turn) {
+						if (brake == 0.0 && forward == 0.0 && Math.abs(velocity) < minVelocityPivotTurn) {
 							// Pivot turn
-							right_ratio = -1.0;
+							rightRatio = -1.0;
 							forward = 1.0;
 						}
 						else
-							right_ratio = 0.6;
+							rightRatio = 0.6;
 					}
 				}
 
@@ -212,17 +210,17 @@
 					}
 				}
 
-				controller.SetDriverInput(forward, left_ratio, right_ratio, brake);
-				if (right_ratio != 0.0 || left_ratio != 0.0 || forward != 0.0 || brake != 0.0)
-					bodyInterface.ActivateBody(tank_body.GetID());
+				controller.SetDriverInput(forward, leftRatio, rightRatio, brake);
+				if (rightRatio != 0.0 || leftRatio != 0.0 || forward != 0.0 || brake != 0.0)
+					bodyInterface.ActivateBody(tankBody.GetID());
 			}
 
 			controls.target = tank.position;
-			let oldPos = wrapVec3(tank_body.GetPosition());
+			let oldPos = wrapVec3(tankBody.GetPosition());
 			onExampleUpdate = (time, deltaTime) => {
 				prePhysicsUpdate();
 
-				const pos = wrapVec3(tank_body.GetPosition());
+				const pos = wrapVec3(tankBody.GetPosition());
 				camera.position.add(pos.clone().sub(oldPos));
 				oldPos = pos;
 				modelWheels.forEach(wheel => wheel.updateLocalTransform());

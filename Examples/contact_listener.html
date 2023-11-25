@@ -38,36 +38,36 @@
 
 				// Register contact listener
 				const contactListener = new Jolt.ContactListenerJS();
-				contactListener.OnContactValidate = (inBody1, inBody2, inBaseOffset, inCollideShapeResult) => {
-					inBody1 = Jolt.wrapPointer(inBody1, Jolt.Body);
-					inBody2 = Jolt.wrapPointer(inBody2, Jolt.Body);
-					inCollideShapeResult = Jolt.wrapPointer(inCollideShapeResult, Jolt.CollideShapeResult);
-					collisionLog.value += 'OnContactValidate ' + inBody1.GetID().GetIndex() + ' ' + inBody2.GetID().GetIndex() + ' ' + inCollideShapeResult.mPenetrationAxis.ToString() + '\n';
+				contactListener.OnContactValidate = (body1, body2, baseOffset, collideShapeResult) => {
+					body1 = Jolt.wrapPointer(body1, Jolt.Body);
+					body2 = Jolt.wrapPointer(body2, Jolt.Body);
+					collideShapeResult = Jolt.wrapPointer(collideShapeResult, Jolt.CollideShapeResult);
+					collisionLog.value += 'OnContactValidate ' + body1.GetID().GetIndex() + ' ' + body2.GetID().GetIndex() + ' ' + collideShapeResult.mPenetrationAxis.ToString() + '\n';
 					return Jolt.ValidateResult_AcceptAllContactsForThisBodyPair;
 				};
-				contactListener.OnContactAdded = (inBody1, inBody2, inManifold, ioSettings) => {
-					inBody1 = Jolt.wrapPointer(inBody1, Jolt.Body);
-					inBody2 = Jolt.wrapPointer(inBody2, Jolt.Body);
-					inManifold = Jolt.wrapPointer(inManifold, Jolt.ContactManifold);
-					ioSettings = Jolt.wrapPointer(ioSettings, Jolt.ContactSettings);
-					collisionLog.value += 'OnContactAdded ' + inBody1.GetID().GetIndex() + ' ' + inBody2.GetID().GetIndex() + ' ' + inManifold.mWorldSpaceNormal.ToString() + '\n';
+				contactListener.OnContactAdded = (body1, body2, manifold, settings) => {
+					body1 = Jolt.wrapPointer(body1, Jolt.Body);
+					body2 = Jolt.wrapPointer(body2, Jolt.Body);
+					manifold = Jolt.wrapPointer(manifold, Jolt.ContactManifold);
+					settings = Jolt.wrapPointer(settings, Jolt.ContactSettings);
+					collisionLog.value += 'OnContactAdded ' + body1.GetID().GetIndex() + ' ' + body2.GetID().GetIndex() + ' ' + manifold.mWorldSpaceNormal.ToString() + '\n';
 
 					// Override the restitution to 0.5
-					ioSettings.mCombinedRestitution = 0.5;
+					settings.mCombinedRestitution = 0.5;
 				};
-				contactListener.OnContactPersisted = (inBody1, inBody2, inManifold, ioSettings) => {
-					inBody1 = Jolt.wrapPointer(inBody1, Jolt.Body);
-					inBody2 = Jolt.wrapPointer(inBody2, Jolt.Body);
-					inManifold = Jolt.wrapPointer(inManifold, Jolt.ContactManifold);
-					ioSettings = Jolt.wrapPointer(ioSettings, Jolt.ContactSettings);
-					collisionLog.value += 'OnContactPersisted ' + inBody1.GetID().GetIndex() + ' ' + inBody2.GetID().GetIndex() + ' ' + inManifold.mWorldSpaceNormal.ToString() + '\n';
+				contactListener.OnContactPersisted = (body1, body2, manifold, settings) => {
+					body1 = Jolt.wrapPointer(body1, Jolt.Body);
+					body2 = Jolt.wrapPointer(body2, Jolt.Body);
+					manifold = Jolt.wrapPointer(manifold, Jolt.ContactManifold);
+					settings = Jolt.wrapPointer(settings, Jolt.ContactSettings);
+					collisionLog.value += 'OnContactPersisted ' + body1.GetID().GetIndex() + ' ' + body2.GetID().GetIndex() + ' ' + manifold.mWorldSpaceNormal.ToString() + '\n';
 
 					// Override the restitution to 0.5
-					ioSettings.mCombinedRestitution = 0.5;
+					settings.mCombinedRestitution = 0.5;
 				};
-				contactListener.OnContactRemoved = (inSubShapePair) => {
-					inSubShapePair = Jolt.wrapPointer(inSubShapePair, Jolt.SubShapeIDPair);
-					collisionLog.value += 'OnContactRemoved ' + inSubShapePair.GetBody1ID().GetIndex() + ' ' + inSubShapePair.GetBody2ID().GetIndex() + '\n';
+				contactListener.OnContactRemoved = (subShapePair) => {
+					subShapePair = Jolt.wrapPointer(subShapePair, Jolt.SubShapeIDPair);
+					collisionLog.value += 'OnContactRemoved ' + subShapePair.GetBody1ID().GetIndex() + ' ' + subShapePair.GetBody2ID().GetIndex() + '\n';
 				};
 				physicsSystem.SetContactListener(contactListener);
 			});
