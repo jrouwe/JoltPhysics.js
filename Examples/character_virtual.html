@@ -130,6 +130,7 @@
 			}
 			characterContactListener.OnContactValidate = (character, bodyID2, subShapeID2) => {
 				bodyID2 = Jolt.wrapPointer(bodyID2, Jolt.BodyID);
+				character = Jolt.wrapPointer(character, Jolt.CharacterVirtual);
 				// Teleport the user back to the origin if they fall off the platform
 				if (bodyID2.GetIndexAndSequenceNumber() == lavaObjectId) {
 					character.SetPosition(new Jolt.Vec3(0, 10, 0));
