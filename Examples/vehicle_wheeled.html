@@ -217,15 +217,18 @@
 			}
 
 			const input = {
-				direction: new THREE.Vector3(),
+				forwardPressed: false,
+				backwardPressed: false,
+				leftPressed: false,
+				rightPressed: false,
 				handBrake: false
 			};
 
 			const prePhysicsUpdate = () => {
 				let forward = 0.0, right = 0.0, brake = 0.0, handBrake = 0.0;
 
-				forward = input.direction.z;
-				right = input.direction.x;
+				forward = input.forwardPressed? 1.0 : (input.backwardPressed? -1.0 : 0.0);
+				right = input.rightPressed? 1.0 : (input.leftPressed? -1.0 : 0.0);
 
 				if (previousForward * forward < 0.0) {
 					const rotation = wrapQuat(carBody.GetRotation().Conjugated());
@@ -268,13 +271,13 @@
 			function onDocumentKeyDown(event) {
 				var keyCode = event.key;
 				if (keyCode == 'w') {
-					input.direction.z = 1;
+					input.forwardPressed = true;
 				} else if (keyCode == 's') {
-					input.direction.z = -1;
+					input.backwardPressed = true;
 				} else if (keyCode == 'a') {
-					input.direction.x = -1;
+					input.leftPressed = true;
 				} else if (keyCode == 'd') {
-					input.direction.x = 1;
+					input.rightPressed = true;
 				} else if (keyCode == 'z') {
 					input.handBrake = true;
 				}
@@ -282,13 +285,13 @@
 			function onDocumentKeyUp(event) {
 				var keyCode = event.key;
 				if (keyCode == 'w') {
-					input.direction.z = 0;
+					input.forwardPressed = false;
 				} else if (keyCode == 's') {
-					input.direction.z = 0;
+					input.backwardPressed = false;
 				} else if (keyCode == 'a') {
-					input.direction.x = 0;
+					input.leftPressed = false;
 				} else if (keyCode == 'd') {
-					input.direction.x = 0;
+					input.rightPressed = false;
 				} else if (keyCode == 'z') {
 					input.handBrake = false;
 				}
