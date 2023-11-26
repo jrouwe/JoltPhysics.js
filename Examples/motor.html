@@ -30,30 +30,32 @@
 				createFloor();
 
 				const makeWindmill = () => {
+					// Create a box to rotate the wings around
 					const box = createBox(new Jolt.Vec3(0, 10, 0), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(0.25, 0.25, 0.25), Jolt.EMotionType_Static, LAYER_NON_MOVING);
-					const wings = [
-						createBox(new Jolt.Vec3(5, 10, 0), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(4, 0.5, 0.5), Jolt.EMotionType_Dynamic, LAYER_MOVING),
-						createBox(new Jolt.Vec3(-5, 10, 0), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(4, 0.5, 0.5), Jolt.EMotionType_Dynamic, LAYER_MOVING),
-						createBox(new Jolt.Vec3(0, 15, 0), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(0.5, 4, 0.5), Jolt.EMotionType_Dynamic, LAYER_MOVING),
-						createBox(new Jolt.Vec3(0, 5, 0), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(0.5, 4, 0.5), Jolt.EMotionType_Dynamic, LAYER_MOVING),
-					]
-					wings.forEach(wing => {
-						const motionProps = wing.GetMotionProperties();
-						const mass = 10;
-						motionProps.SetInverseMass(1.0 / mass);
-						let c = new Jolt.HingeConstraintSettings();
-						c.mPoint1.Set(0, 10, 0);
-						c.mPoint2 = c.mPoint1;
-						c.mHingeAxis1.Set(0, 0, 1);
-						c.mHingeAxis2 = c.mHingeAxis1;
-						c.mNormalAxis1.Set(1, 0, 0);
-						c.mNormalAxis2 = c.mNormalAxis;
-						const joint = c.Create(box, wing);
-						const hinge = Jolt.castObject(joint, Jolt.HingeConstraint);
-						physicsSystem.AddConstraint(hinge);
-						hinge.SetMotorState(Jolt.EMotorState_Velocity);
-						hinge.SetTargetAngularVelocity(-5);
-					})
+
+					// Create the wings as a compound shape
+					let wingsShapeSettings = new Jolt.StaticCompoundShapeSettings();
+					wingsShapeSettings.AddShape(new Jolt.Vec3(5, 0, 0), Jolt.Quat.prototype.sIdentity(), new Jolt.BoxShapeSettings(new Jolt.Vec3(4, 0.5, 0.5), 0.05, null))
+					wingsShapeSettings.AddShape(new Jolt.Vec3(-5, 0, 0), Jolt.Quat.prototype.sIdentity(), new Jolt.BoxShapeSettings(new Jolt.Vec3(4, 0.5, 0.5), 0.05, null))
+					wingsShapeSettings.AddShape(new Jolt.Vec3(0, 5, 0), Jolt.Quat.prototype.sIdentity(), new Jolt.BoxShapeSettings(new Jolt.Vec3(0.5, 4, 0.5), 0.05, null))
+					wingsShapeSettings.AddShape(new Jolt.Vec3(0, -5, 0), Jolt.Quat.prototype.sIdentity(), new Jolt.BoxShapeSettings(new Jolt.Vec3(0.5, 4, 0.5), 0.05, null))
+					let wingsShape = wingsShapeSettings.Create().Get();
+					const wingsCreationSettings = new Jolt.BodyCreationSettings(wingsShape, new Jolt.Vec3(0, 10, 0), Jolt.Quat.prototype.sIdentity(), Jolt.EMotionType_Dynamic, LAYER_MOVING);
+					let wing = bodyInterface.CreateBody(wingsCreationSettings);
+					addToScene(wing, 0xff0000);
+
+					// Constrain the wings to the box using a powered hinge
+					let c = new Jolt.HingeConstraintSettings();
+					c.mPoint1 = c.mPoint2 = wingsCreationSettings.mPosition;
+					c.mHingeAxis1.Set(0, 0, 1);
+					c.mHingeAxis2 = c.mHingeAxis1;
+					c.mNormalAxis1.Set(1, 0, 0);
+					c.mNormalAxis2 = c.mNormalAxis;
+					const joint = c.Create(box, wing);
+					const hinge = Jolt.castObject(joint, Jolt.HingeConstraint);
+					physicsSystem.AddConstraint(hinge);
+					hinge.SetMotorState(Jolt.EMotorState_Velocity);
+					hinge.SetTargetAngularVelocity(-5);
 
 					// Sphere moving towards the wings
 					const sphere = createSphere(new Jolt.Vec3(-20, 2, 0), 2, Jolt.EMotionType_Dynamic, LAYER_MOVING, 0x118811);
@@ -77,7 +79,6 @@
 					const platform = createBox(new Jolt.Vec3(18, 0.25, 0), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(12.5, 0.25, 2), Jolt.EMotionType_Static, LAYER_NON_MOVING, 0x993333);
 					const target = createBox(new Jolt.Vec3(30, 2, 0), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(0.5, 2, 2), Jolt.EMotionType_Static, LAYER_NON_MOVING, 0x666633);
 					const box = createBox(new Jolt.Vec3(15, 1.25, 0), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(0.75, 0.75, 0.75), Jolt.EMotionType_Dynamic, LAYER_MOVING, 0x003366);
-					box.GetMotionProperties().SetInverseMass(1.0 / 5);
 
 					// Place irregular reference points along slider axis to show precise location control
 					const colors = [0xFF0000, 0x00FF00, 0x0000FF, 0xFFFF00];
