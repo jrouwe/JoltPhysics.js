@@ -154,6 +154,8 @@
 			});
 
 			const controllerSettings = new Jolt.WheeledVehicleControllerSettings();
+			controllerSettings.mEngine.mMaxTorque = maxEngineTorque;
+			controllerSettings.mTransmission.mClutchStrength = clutchStrength;
 			vehicle.mController = controllerSettings;
 
 			// Front differential
@@ -245,8 +247,6 @@
 					handBrake = 1.0;
 				}
 
-				controller.GetEngine().mMaxTorque = maxEngineTorque;
-				controller.GetTransmission().mClutchStrength = clutchStrength;
 				controller.SetDriverInput(forward, right, brake, handBrake);
 				if (right != 0.0 || forward != 0.0 || brake != 0.0 || handBrake != 0.0)
 					bodyInterface.ActivateBody(carBody.GetID());
