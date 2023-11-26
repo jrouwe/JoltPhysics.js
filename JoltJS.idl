@@ -2142,7 +2142,7 @@ interface ArrayLong {
 interface ArrayVehicleAntiRollBar {
 	boolean empty();
 	long size();
-	[Value] VehicleAntiRollBar at(long inIndex);
+	[Ref] VehicleAntiRollBar at(long inIndex);
 	void push_back([Ref] VehicleAntiRollBar inValue);
 	void resize(unsigned long inSize);
 	void clear();
@@ -2160,7 +2160,7 @@ interface ArrayWheelSettings {
 interface ArrayVehicleDifferentialSettings {
 	boolean empty();
 	long size();
-	[Value] VehicleDifferentialSettings at(long inIndex);
+	[Ref] VehicleDifferentialSettings at(long inIndex);
 	void push_back([Ref] VehicleDifferentialSettings inValue);
 	void resize(unsigned long inSize);
 	void clear();
@@ -2366,8 +2366,8 @@ interface TrackedVehicleController {
 	float GetRightRatio();
 	void SetBrakeInput(float inBrake);
 	float GetBrakeInput();
-	[Const, Value] VehicleEngine GetEngine();
-	[Const, Value] VehicleTransmission GetTransmission();
+	[Ref] VehicleEngine GetEngine();
+	[Ref] VehicleTransmission GetTransmission();
 	VehicleTrack[] GetTracks();
 };
 
@@ -2442,9 +2442,9 @@ interface WheeledVehicleController {
 	float GetBrakeInput();
 	void SetHandBrakeInput(float inHandBrake);
 	float GetHandBrakeInput();
-	[Value] VehicleEngine GetEngine();
-	[Value] VehicleTransmission GetTransmission();
-	[Value] ArrayVehicleDifferentialSettings GetDifferentials();
+	[Ref] VehicleEngine GetEngine();
+	[Ref] VehicleTransmission GetTransmission();
+	[Ref] ArrayVehicleDifferentialSettings GetDifferentials();
 	float GetDifferentialLimitedSlipRatio();
 	void SetDifferentialLimitedSlipRatio(float inV);
 	float GetWheelSpeedAtClutch();
