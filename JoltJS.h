@@ -279,11 +279,12 @@ public:
 
 		// Init temp allocator
 		mTempAllocator = new TempAllocatorImpl(inSettings.mTempAllocatorSize);
-		
+
+		// Check required objects
+		if (inSettings.mBroadPhaseLayerInterface == nullptr || inSettings.mObjectVsBroadPhaseLayerFilter == nullptr || inSettings.mObjectLayerPairFilter == nullptr)
+			Trace("Error: BroadPhaseLayerInterface, ObjectVsBroadPhaseLayerFilter and ObjectLayerPairFilter must be provided");
+
 		// Store interfaces
-		JPH_ASSERT(inSettings.mBroadPhaseLayerInterface != nullptr);
-		JPH_ASSERT(inSettings.mObjectVsBroadPhaseLayerFilter != nullptr);
-		JPH_ASSERT(inSettings.mObjectLayerPairFilter != nullptr);
 		mObjectVsBroadPhaseLayerFilter = inSettings.mObjectVsBroadPhaseLayerFilter;
 		mObjectLayerPairFilter = inSettings.mObjectLayerPairFilter;
 
