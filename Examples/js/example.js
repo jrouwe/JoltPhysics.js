@@ -76,8 +76,8 @@ function initPhysics() {
 	objectFilter.EnableCollision(LAYER_MOVING, LAYER_MOVING);
 
 	// We use a 1-to-1 mapping between object layers and broadphase layers
-	const BP_LAYER_NON_MOVING = new Jolt.BroadPhaseLayer(0);
-	const BP_LAYER_MOVING = new Jolt.BroadPhaseLayer(1);
+	const BP_LAYER_NON_MOVING = new Jolt.BroadPhaseLayer(LAYER_NON_MOVING);
+	const BP_LAYER_MOVING = new Jolt.BroadPhaseLayer(LAYER_MOVING);
 	let bpInterface = new Jolt.BroadPhaseLayerInterfaceTable(2, 2);
 	bpInterface.MapObjectToBroadPhaseLayer(LAYER_NON_MOVING, BP_LAYER_NON_MOVING);
 	bpInterface.MapObjectToBroadPhaseLayer(LAYER_MOVING, BP_LAYER_MOVING);
