@@ -285,18 +285,24 @@ public:
 			Trace("Error: BroadPhaseLayerInterface, ObjectVsBroadPhaseLayerFilter and ObjectLayerPairFilter must be provided");
 
 		// Store interfaces
+		mBroadPhaseLayerInterface = inSettings.mBroadPhaseLayerInterface;
 		mObjectVsBroadPhaseLayerFilter = inSettings.mObjectVsBroadPhaseLayerFilter;
 		mObjectLayerPairFilter = inSettings.mObjectLayerPairFilter;
 
 		// Init the physics system
 		constexpr uint cNumBodyMutexes = 0;
-		mPhysicsSystem.Init(inSettings.mMaxBodies, cNumBodyMutexes, inSettings.mMaxBodyPairs, inSettings.mMaxContactConstraints, *inSettings.mBroadPhaseLayerInterface, *inSettings.mObjectVsBroadPhaseLayerFilter, *inSettings.mObjectLayerPairFilter);
+		mPhysicsSystem = new PhysicsSystem();
+		mPhysicsSystem->Init(inSettings.mMaxBodies, cNumBodyMutexes, inSettings.mMaxBodyPairs, inSettings.mMaxContactConstraints, *inSettings.mBroadPhaseLayerInterface, *inSettings.mObjectVsBroadPhaseLayerFilter, *inSettings.mObjectLayerPairFilter);
 	}
 
 	/// Destructor
 							~JoltInterface()
 	{
 		// Destroy subsystems
+		delete mPhysicsSystem;
+		delete mBroadPhaseLayerInterface;
+		delete mObjectVsBroadPhaseLayerFilter;
+		delete mObjectLayerPairFilter;
 		delete mTempAllocator;
 		delete Factory::sInstance;
 		Factory::sInstance = nullptr;
@@ -305,13 +311,13 @@ public:
 	/// Step the world
 	void					Step(float inDeltaTime, int inCollisionSteps)
 	{
-		mPhysicsSystem.Update(inDeltaTime, inCollisionSteps, mTempAllocator, &mJobSystem);
+		mPhysicsSystem->Update(inDeltaTime, inCollisionSteps, mTempAllocator, &mJobSystem);
 	}
 
 	/// Access to the physics system
 	PhysicsSystem *			GetPhysicsSystem()
 	{
-		return &mPhysicsSystem;
+		return mPhysicsSystem;
 	}
 
 	/// Access to the temp allocator
@@ -335,9 +341,10 @@ public:
 private:
 	TempAllocatorImpl *		mTempAllocator;
 	JobSystemThreadPool		mJobSystem { cMaxPhysicsJobs, cMaxPhysicsBarriers, (int)thread::hardware_concurrency() - 1 };
+	BroadPhaseLayerInterface *mBroadPhaseLayerInterface = nullptr;
 	ObjectVsBroadPhaseLayerFilter *mObjectVsBroadPhaseLayerFilter = nullptr;
 	ObjectLayerPairFilter *	mObjectLayerPairFilter = nullptr;
-	PhysicsSystem			mPhysicsSystem;
+	PhysicsSystem *			mPhysicsSystem = nullptr;
 };
 
 /// Helper class to extract triangles from the shape
