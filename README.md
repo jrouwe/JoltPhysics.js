@@ -93,6 +93,31 @@ By default the examples use the WASM version of Jolt. This requires serving the 
 
 If you need to debug the C++ code take a look at [WASM debugging](https://developer.chrome.com/blog/wasm-debugging-2020/).
 
+## Memory Management
+
+The samples are very bad at cleaning up after themselves (basically they don't). When using emscripten to port a library to WASM, [nothing is cleaned up](https://emscripten.org/docs/porting/connecting_cpp_and_javascript/WebIDL-Binder.html#using-c-classes-in-javascript) automatically, so everything you newed with ```new Jolt.XXX``` needs to be destroyed by ```Jolt.destroy(...)```.
+
+On top of this, Jolt uses reference counting for a number of its classes (everything that inherits from [RefTarget](https://jrouwe.github.io/JoltPhysics/class_ref_target.html)). The most important classes are:
+
+* ShapeSettings
+* Shape
+* ConstraintSettings
+* Constraint
+* PhysicsMaterial
+* GroupFilter
+* SoftBodySharedSettings
+* VehicleCollisionTester
+* VehicleController
+* Wheel
+* CharacterBaseSettings
+* CharacterBase
+
+If you new one of these objects, you need to destroy it as well. However if, after newing, you pass a reference counted object on to another object (e.g. a ShapeSettings to a CompoundShapeSettings or a Shape to a Body) then that other object will take a reference and you don't need to destroy the object anymore (the C++ side will handle this).
+
+The Body class is also a special case, it is destroyed through BodyInterface.DestroyBody(body.GetID()) (which internally destroys the Body).
+
+Almost everything else can be destroyed straight after it has been passed to Jolt. [An example that shows how to properly clean up using Jolt is here](https://github.com/jrouwe/JoltPhysics.js/blob/main/Examples/proper_cleanup.html).
+
 ## Credits
 
 This project was started from the [Ammo.js](https://github.com/kripken/ammo.js) code, but little remains of it as the Jolt Physics API is very different from the Bullet API.
