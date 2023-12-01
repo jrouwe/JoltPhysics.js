@@ -108,7 +108,6 @@
 			motorcycleBodySettings.mOverrideMassProperties = Jolt.EOverrideMassProperties_CalculateInertia;
 			motorcycleBodySettings.mMassPropertiesOverride.mMass = vehicleMass;
 			const motorcycleBody = bodyInterface.CreateBody(motorcycleBodySettings);
-			bodyInterface.AddBody(motorcycleBody.GetID(), Jolt.EActivation_Activate);
 			addToScene(motorcycleBody, 0xFF0000);
 
 			const vehicle = new Jolt.VehicleConstraintSettings();

@@ -101,7 +101,6 @@
 			carBodySettings.mOverrideMassProperties = Jolt.EOverrideMassProperties_CalculateInertia;
 			carBodySettings.mMassPropertiesOverride.mMass = vehicleMass;
 			const carBody = bodyInterface.CreateBody(carBodySettings);
-			bodyInterface.AddBody(carBody.GetID(), Jolt.EActivation_Activate);
 			addToScene(carBody, 0xFF0000);
 
 			// Add the coach to the car
