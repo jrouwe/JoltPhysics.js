@@ -93,7 +93,7 @@
 					c.mSliderAxis1.Set(1, 0, 0);
 					c.mSliderAxis2 = c.mSliderAxis1;
 					c.mNormalAxis1.Set(0, 1, 0);
-					c.mNormalAxis2 = c.mNormalAxis;
+					c.mNormalAxis2 = c.mNormalAxis1;
 					const joint = c.Create(box, target);
 					const slider = Jolt.castObject(joint, Jolt.SliderConstraint);
 					physicsSystem.AddConstraint(slider);
