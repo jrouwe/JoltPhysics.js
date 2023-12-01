@@ -774,6 +774,7 @@ FixedConstraintSettings implements TwoBodyConstraintSettings;
 // Spring settings
 interface SpringSettings {
 	void SpringSettings();
+	boolean HasStiffness();
 
 	attribute ESpringMode mMode;
 	attribute float mFrequency;
@@ -1732,6 +1733,17 @@ interface NarrowPhaseQuery {
 interface PhysicsStepListener {
 };
 
+interface BodyIDVector {
+	void BodyIDVector();
+	boolean empty();
+	long size();
+	[Ref] BodyID at(long inIndex);
+	void push_back([Const, Ref] BodyID inBodyID);
+	void reserve(unsigned long inSize);
+	void resize(unsigned long inSize);
+	void clear();
+};
+
 interface PhysicsSystem {
 	void SetGravity([Const, Ref] Vec3 inGravity);
 	[Value] Vec3 GetGravity();
@@ -1740,6 +1752,8 @@ interface PhysicsSystem {
 	unsigned long GetNumBodies();
 	unsigned long GetNumActiveBodies(EBodyType inBodyType);
 	unsigned long GetMaxBodies();
+	void GetBodies([Ref] BodyIDVector outBodies);
+	void GetActiveBodies(EBodyType inBodyType, [Ref] BodyIDVector outBodies);
 	void AddConstraint(Constraint inConstraint);
 	void RemoveConstraint(Constraint inConstraint);
 	void SetContactListener(ContactListener inListener);
