@@ -163,6 +163,8 @@
 			frontWheelDrive.mLeftWheel = FL_WHEEL;
 			frontWheelDrive.mRightWheel = FR_WHEEL;
 			frontWheelDrive.mLimitedSlipRatio = leftRightLimitedSlipRatio;
+			if (fourWheelDrive)
+				frontWheelDrive.mEngineTorqueRatio = 0.5; // Split engine torque when 4WD
 			controllerSettings.mDifferentials.push_back(frontWheelDrive);
 			controllerSettings.mDifferentialLimitedSlipRatio = frontBackLimitedSlipRatio;
 
@@ -172,9 +174,8 @@
 				rearWheelDrive.mLeftWheel = BL_WHEEL;
 				rearWheelDrive.mRightWheel = BR_WHEEL;
 				rearWheelDrive.mLimitedSlipRatio = leftRightLimitedSlipRatio;
+				rearWheelDrive.mEngineTorqueRatio = 0.5;
 				controllerSettings.mDifferentials.push_back(rearWheelDrive);
-
-				frontWheelDrive.mEngineTorqueRatio = rearWheelDrive.mEngineTorqueRatio = 0.5;
 			}
 
 			// Anti-roll bars
