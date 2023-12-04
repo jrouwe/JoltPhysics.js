@@ -520,6 +520,16 @@ interface Shape {
 	[Value] Vec3 GetCenterOfMass();
 	long long GetUserData();
 	void SetUserData(long long inUserData);
+	unsigned long GetSubShapeIDBitsRecursive();
+	float GetInnerRadius();
+	[Value] MassProperties GetMassProperties();
+	[Const] PhysicsMaterial GetMaterial([Const, Ref] SubShapeID inSubShapeID);
+	[Value] Vec3 GetSurfaceNormal([Const, Ref] SubShapeID inSubShapeID, [Const, Ref] Vec3 inLocalSurfacePosition);
+	long long GetSubShapeUserData([Const, Ref] SubShapeID inSubShapeID);
+	[Value] TransformedShape GetSubShapeTransformedShape([Const, Ref] SubShapeID inSubShapeID, [Const, Ref] Vec3 inPositionCOM, [Const, Ref] Quat inRotation, [Const, Ref] Vec3 inScale, [Ref] SubShapeID outRemainder);
+	float GetVolume();
+	boolean IsValidScale([Const, Ref] Vec3 inScale);
+	[Value] ShapeResult ScaleShape([Const, Ref] Vec3 inScale);
 };
 
 interface ShapeGetTriangles {
