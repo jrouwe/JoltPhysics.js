@@ -717,8 +717,16 @@ RotatedTranslatedShape implements Shape;
 
 // Mesh shape
 interface MeshShapeSettings {
+	void MeshShapeSettings();
 	void MeshShapeSettings([Ref, Const] TriangleList inTriangleList, [Ref, Const] optional PhysicsMaterialList inMaterialList);
 	void MeshShapeSettings([Ref, Const] VertexList inVertices, [Ref, Const] IndexedTriangleList inTriangles, [Ref, Const] PhysicsMaterialList inMaterialList);
+	void Sanitize();
+
+	[Value] attribute VertexList mTriangleVertices;
+	[Value] attribute IndexedTriangleList mIndexedTriangles;
+	[Value] attribute PhysicsMaterialList mMaterials;
+	attribute unsigned long mMaxTrianglesPerLeaf;
+	attribute float mActiveEdgeCosThresholdAngle;
 };
 
 MeshShapeSettings implements ShapeSettings;
