@@ -671,6 +671,18 @@ interface StaticCompoundShape {
 
 StaticCompoundShape implements Shape;
 
+// Decorated shape
+interface DecoratedShapeSettings {
+};
+
+DecoratedShapeSettings implements ShapeSettings;
+
+interface DecoratedShape {
+	[Const] Shape GetInnerShape();
+};
+
+DecoratedShape implements Shape;
+
 // Scaled shape
 interface ScaledShapeSettings {
 	void ScaledShapeSettings(ShapeSettings inShape, [Ref, Const] Vec3 inScale);
@@ -678,13 +690,13 @@ interface ScaledShapeSettings {
 	[Value] attribute Vec3 mScale;
 };
 
-ScaledShapeSettings implements ShapeSettings;
+ScaledShapeSettings implements DecoratedShapeSettings;
 
 interface ScaledShape {
 	void ScaledShape(Shape inShape, [Ref, Const] Vec3 inScale);
 };
 
-ScaledShape implements Shape;
+ScaledShape implements DecoratedShape;
 
 // Offset COM
 interface OffsetCenterOfMassShapeSettings {
@@ -693,12 +705,12 @@ interface OffsetCenterOfMassShapeSettings {
 	[Value] attribute Vec3 mOffset;
 };
 
-OffsetCenterOfMassShapeSettings implements ShapeSettings;
+OffsetCenterOfMassShapeSettings implements DecoratedShapeSettings;
 
 interface OffsetCenterOfMassShape {
 };
 
-OffsetCenterOfMassShape implements Shape;
+OffsetCenterOfMassShape implements DecoratedShape;
 
 // Rotated translated
 interface RotatedTranslatedShapeSettings {
@@ -708,12 +720,12 @@ interface RotatedTranslatedShapeSettings {
 	[Value] attribute Quat mRotation;
 };
 
-RotatedTranslatedShapeSettings implements ShapeSettings;
+RotatedTranslatedShapeSettings implements DecoratedShapeSettings;
 
 interface RotatedTranslatedShape {
 };
 
-RotatedTranslatedShape implements Shape;
+RotatedTranslatedShape implements DecoratedShape;
 
 // Mesh shape
 interface MeshShapeSettings {
