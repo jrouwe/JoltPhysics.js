@@ -237,7 +237,6 @@ static void TraceImpl(const char *inFMT, ...)
 	cout << buffer << endl;
 }
 
-
 #ifdef JPH_ENABLE_ASSERTS
 
 // Callback for asserts
@@ -481,20 +480,9 @@ private:
 	VehicleConstraint *		mInstance;
 };
 
-class HeightFieldShapeConstantValues {
-	public:
-			/// Value used to create gaps in the height field
-		static constexpr float	cNoCollisionValue = HeightFieldShapeConstants::cNoCollisionValue;
-
-		/// Stack size to use during WalkHeightField
-		static constexpr int cStackSize  = HeightFieldShapeConstants::cStackSize;
-
-		/// A position in the hierarchical grid is defined by a level (which grid), x and y position. We encode this in a single uint32 as: level << 28 | y << 14 | x
-		static constexpr uint cNumBitsXY = HeightFieldShapeConstants::cNumBitsXY;
-		static constexpr uint cMaskBitsXY = HeightFieldShapeConstants::cMaskBitsXY;
-		static constexpr uint cLevelShift = HeightFieldShapeConstants::cLevelShift;
-
-		/// When height samples are converted to 16 bit:
-		static constexpr uint16 cNoCollisionValue16 = HeightFieldShapeConstants::cNoCollisionValue16;
-		static constexpr uint16 cMaxHeightValue16 = HeightFieldShapeConstants::cMaxHeightValue16;
+class HeightFieldShapeConstantValues 
+{
+public:
+	/// Value used to create gaps in the height field
+	static constexpr float	cNoCollisionValue = HeightFieldShapeConstants::cNoCollisionValue;
 };

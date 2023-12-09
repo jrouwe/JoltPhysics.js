@@ -167,9 +167,11 @@ enum ETransmissionMode {
 	"ETransmissionMode_Manual",
 };
 
+interface FloatMemRef {
+};
 
-interface FloatMemRef {};
-interface Uint8MemRef {};
+interface Uint8MemRef {
+};
 
 interface Vec3 {
 	void Vec3();
@@ -752,22 +754,13 @@ interface MeshShape {
 
 MeshShape implements Shape;
 
-
 interface HeightFieldShapeConstantValues {
-		[Const] static readonly attribute float	cNoCollisionValue;
-
-		[Const] static readonly attribute long cStackSize;
-
-		[Const] static readonly attribute long cNumBitsXY;
-		[Const] static readonly attribute long cMaskBitsXY;
-		[Const] static readonly attribute long cLevelShift;
-
-		[Const] static readonly attribute long cNoCollisionValue16;
-		[Const] static readonly attribute long cMaxHeightValue16;
+	[Const] static readonly attribute float	cNoCollisionValue;
 };
 
 interface HeightFieldShapeSettings {
-	void HeightFieldShapeSettings( [Const] FloatMemRef inSamples, [Ref] Vec3 inOffset, [Ref] Vec3 inscale, long inSampleCount, [Const] optional Uint8MemRef inMaterialIndices, [Ref, Const] optional PhysicsMaterialList inMaterialList);
+	void HeightFieldShapeSettings();
+
 	[Value] attribute Vec3 mOffset;
 	[Value] attribute Vec3 mScale;
 	attribute long mSampleCount;
@@ -780,6 +773,7 @@ interface HeightFieldShapeSettings {
 	[Value] attribute PhysicsMaterialList mMaterials;
 	attribute float mActiveEdgeCosThresholdAngle;
 };
+
 HeightFieldShapeSettings implements ShapeSettings;
 
 interface HeightFieldShape {
@@ -1249,7 +1243,7 @@ interface Body {
 	void AddImpulse([Const, Ref] Vec3 inImpulse, [Const, Ref] Vec3 inPosition);
 	void AddAngularImpulse([Const, Ref] Vec3 inAngularImpulse);
 	void MoveKinematic([Const, Ref] Vec3 inPosition, [Const, Ref] Quat inRotation, float inDeltaTime);
-	boolean ApplyBuoyancyImpulse([Ref] Vec3 inSurfacePosition, [Ref] Vec3 inSurfaceNormal, float inBuoyancy, float inLinearDrag, float inAngularDrag, [Ref] Vec3 inFluidVelocity, [Ref] Vec3 inGravity, float inDeltaTime);
+	boolean ApplyBuoyancyImpulse([Const, Ref] Vec3 inSurfacePosition, [Const, Ref] Vec3 inSurfaceNormal, float inBuoyancy, float inLinearDrag, float inAngularDrag, [Const, Ref] Vec3 inFluidVelocity, [Const, Ref] Vec3 inGravity, float inDeltaTime);
 	boolean IsInBroadPhase();
 	[Const, Value] Mat44 GetInverseInertia();
 	[Const] Shape GetShape();
@@ -2228,10 +2222,11 @@ interface ArrayLong {
 	void resize(unsigned long inSize);
 	void clear();
 };
+
 interface ArrayUint8 {
 	boolean empty();
 	long size();
-	long at(long inIndex);
+	octet at(long inIndex);
 	void push_back(octet inValue);
 	void reserve(unsigned long inSize);
 	void resize(unsigned long inSize);
