@@ -13,12 +13,6 @@
 				top: 0;
 				right: 0;
 			}
-
-			#canvas {
-				position: absolute;
-				top: 256px;
-				right: 0;
-			}
 		</style>
 	</head>
 
@@ -53,6 +47,7 @@
 			<text x="64" y="96" style="font-weight: bold; font-size:52px; fill: #f0f">JOLT</text>
 			<text x="16" y="168" style="font-weight: bold; font-size:52px; fill: #ff0">PHYSICS</text>
 		</svg>
+		<!-- used for both the extraction of image-data to a height map, and for the CanvasTexture used to render the displacement map on the THREE side -->
 		<canvas style="display: none" id="canvas" width="256" height="256"></canvas>
 
 
@@ -69,13 +64,16 @@
 				const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
 				const f32 = new Float32Array(canvas.width * canvas.height);
 				f32.forEach((o, i) => {
-					f32[i] = imgData.data[i * 4]; // reading only red channel
+					f32[i] = imgData.data[i * 4]; // reading only red channel for height
 					if (imgData.data[i * 4 + 3] == 0) {
-						f32[i] = Jolt.HeightFieldShapeConstantValues.prototype.cNoCollisionValue;
+						f32[i] = Jolt.HeightFieldShapeConstantValues.prototype.cNoCollisionValue; //invisible pixels make holes
 					}
 				});
 				return { img, data: f32 };
 			}
+
+			// Malloc a block of memory. Reference it in the Jolt HEAP for use on the JS side as a F32 ArrayBuffer
+			// Wrap it as a typed Jolt pointer for Typing and type-safety in Typescript 
 			function allocF32(len) {
 				const floatPtr = Jolt._webidl_malloc(4 * len);
 				const floatPtrRef = Jolt.wrapPointer(floatPtr, Jolt.FloatMemRef);
@@ -99,7 +97,7 @@
 				const shapeSettings = new Jolt.HeightFieldShapeSettings(f32Array.ref, inOffset, inScale, heightmap.img.width);
 				shapeSettings.mBlockSize = 2;
 				let shape = shapeSettings.Create().Get();
-				const position = new Jolt.Vec3(x, -20, z);
+				const position = new Jolt.Vec3(x, -20, z); //The image tends towards 'white', so offset it down closer to zero
 				const rotation = new Jolt.Quat(0, 0, 0, 1)
 				var creationSettings = new Jolt.BodyCreationSettings(shape, position, rotation, Jolt.EBodyType_Static, LAYER_NON_MOVING);
 				let body = bodyInterface.CreateBody(creationSettings);
@@ -124,12 +122,12 @@
 					new THREE.MeshPhongMaterial({
 						displacementMap: displacementMap,
 						map: displacementMap,
-						displacementScale: 256 / 10,
+						displacementScale: 256 * 0.1, //This should match the Y multiplier used on the ShapeSettings inScale.
 						flatShading: true
 					})
 				);
 				planeMesh.rotation.x = -Math.PI / 2;
-				planeMesh.position.y -= 20;
+				planeMesh.position.y -= 20; // mirror the same Y offset used on the HeightField above
 				planeMesh.geometry.computeVertexNormals();
 				planeMesh.material.needsUpdate = true;
 
