@@ -26,6 +26,7 @@
 #include "Jolt/Physics/Collision/Shape/OffsetCenterOfMassShape.h"
 #include "Jolt/Physics/Collision/Shape/RotatedTranslatedShape.h"
 #include "Jolt/Physics/Collision/Shape/MeshShape.h"
+#include "Jolt/Physics/Collision/Shape/HeightFieldShape.h"
 #include "Jolt/Physics/Collision/CollisionCollectorImpl.h"
 #include "Jolt/Physics/Collision/GroupFilterTable.h"
 #include "Jolt/Physics/Collision/CollideShape.h"
@@ -58,6 +59,9 @@ using JPHString = String;
 using ArrayVec3 = Array<Vec3>;
 using ArrayFloat = Array<float>;
 using ArrayLong = Array<uint>;
+using ArrayUint8 = Array<uint8>;
+using FloatMemRef = float;
+using Uint8MemRef = uint8;
 using SoftBodySharedSettingsVertex = SoftBodySharedSettings::Vertex;
 using SoftBodySharedSettingsFace = SoftBodySharedSettings::Face;
 using SoftBodySharedSettingsEdge = SoftBodySharedSettings::Edge;
@@ -474,4 +478,11 @@ public:
 
 private:
 	VehicleConstraint *		mInstance;
+};
+
+class HeightFieldShapeConstantValues 
+{
+public:
+	/// Value used to create gaps in the height field
+	static constexpr float	cNoCollisionValue = HeightFieldShapeConstants::cNoCollisionValue;
 };

@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>JoltPhysics.js demo</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<link rel="stylesheet" type="text/css" href="style.css">
+		<style>
+			#sampleImg {
+				position: absolute;
+				width: 256px;
+				height: 256px;
+				top: 0;
+				right: 0;
+			}
+		</style>
+	</head>
+
+	<body>
+		<div id="container">Loading...</div>
+		<div id="info">JoltPhysics.js heightfield demo<br />
+		</div>
+
+		<script src="js/three/three.min.js"></script>
+		<script src="js/three/OrbitControls.js"></script>
+		<script src="js/three/WebGL.js"></script>
+		<script src="js/three/stats.min.js"></script>
+		<script src="js/example.js"></script>
+
+		<svg id="sampleImg" xmlns="http://www.w3.org/2000/svg" xml:space="preserve" viewBox="0 0 256 256">
+			<defs>
+				<filter id="turbulenceFilter">
+					<feTurbulence type="fractalNoise" baseFrequency=".02" numOctaves="3" seed="5" result="turbulence" />
+					<feColorMatrix in="turbulence" type="matrix" result="grayscale" values=".33 .33 .33 0 0
+													.33 .33 .33 0 0
+													.33 .33 .33 0 0
+													0 0 0 1 0" />
+					<feComposite operator="in" in="grayscale" in2="SourceGraphic" />
+					<feComponentTransfer color-interpolation-filters="sRGB">
+						<feFuncR type="gamma" exponent="1.5" amplitude="1.3" offset="0"></feFuncR>
+						<feFuncG type="gamma" exponent="1.5" amplitude="1.3" offset="0"></feFuncG>
+						<feFuncB type="gamma" exponent="1.5" amplitude="1.3" offset="0"></feFuncB>
+					</feComponentTransfer>
+				</filter>
+			</defs>
+			<rect x="0" y="0" width="256" height="256" filter="url(#turbulenceFilter)"></rect>
+			<text x="64" y="96" style="font-weight: bold; font-size:52px; fill: #f0f">JOLT</text>
+			<text x="16" y="168" style="font-weight: bold; font-size:52px; fill: #ff0">PHYSICS</text>
+		</svg>
+		<!-- used for both the extraction of image-data to a height map, and for the CanvasTexture used to render the displacement map on the THREE side -->
+		<canvas style="display: none" id="canvas" width="256" height="256"></canvas>
+
+
+		<script type="module">
+			// In case you haven't built the library yourself, replace URL with: https://www.unpkg.com/jolt-physics/dist/jolt-physics.wasm-compat.js
+			import initJolt from './js/jolt-physics.wasm-compat.js';
+
+			const mapScale = 0.35;
+
+			function heightFieldFromSVGl(svg, x, z) {
+				// Draw the SVG to a canvas, and extract the image data
+				const canvas = document.getElementById('canvas');
+				canvas.width = svg.width;
+				canvas.height = svg.width;
+				const ctx = canvas.getContext('2d');
+				ctx.drawImage(svg, 0, 0);
+				const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+				// Create the heightfield
+				const shapeSettings = new Jolt.HeightFieldShapeSettings();
+				shapeSettings.mOffset = new Jolt.Vec3(0, 0, 0);
+				shapeSettings.mScale = new Jolt.Vec3(mapScale, 0.1, mapScale);
+				shapeSettings.mSampleCount = canvas.width;
+				shapeSettings.mBlockSize = 2;
+				const totalSize = canvas.width * canvas.height;
+				shapeSettings.mHeightSamples.reserve(totalSize);
+				for (let i = 0; i < totalSize; i++) {
+					let height = imgData.data[i * 4]; // Reading only red channel for height
+					if (imgData.data[i * 4 + 3] == 0)
+						height = Jolt.HeightFieldShapeConstantValues.prototype.cNoCollisionValue; // Invisible pixels make holes
+					shapeSettings.mHeightSamples.push_back(height);
+				}
+				let shape = shapeSettings.Create().Get();
+
+				// Create the body
+				const position = new Jolt.Vec3(x, -20, z); // The image tends towards 'white', so offset it down closer to zero
+				const rotation = new Jolt.Quat(0, 0, 0, 1)
+				var creationSettings = new Jolt.BodyCreationSettings(shape, position, rotation, Jolt.EBodyType_Static, LAYER_NON_MOVING);
+				let body = bodyInterface.CreateBody(creationSettings);
+				Jolt.destroy(creationSettings);
+				return body;
+			}
+
+			initJolt().then(async function (Jolt) {
+				// Initialize this example
+				initExample(Jolt, null);
+				const img = new Image();
+				img.width = 256;
+				img.height = 256;
+				img.src = 'data:image/svg+xml;base64,' + btoa(document.querySelector('svg').outerHTML);
+				await new Promise(resolve => img.onload = resolve);
+				const terrain = heightFieldFromSVGl(img, -img.width * mapScale / 2, -img.width * mapScale / 2);
+
+				const displacementMap = new THREE.CanvasTexture(document.getElementById('canvas'));
+				// Creating the plane with displacement
+				const planeMesh = new THREE.Mesh(
+					new THREE.PlaneGeometry(img.width * mapScale, img.width * mapScale, 256, 256),
+					new THREE.MeshPhongMaterial({
+						displacementMap: displacementMap,
+						map: displacementMap,
+						displacementScale: 256 * 0.1, // This should match the Y multiplier used on the ShapeSettings inScale.
+						flatShading: true
+					})
+				);
+				planeMesh.rotation.x = -Math.PI / 2;
+				planeMesh.position.y -= 20; // Mirror the same Y offset used on the HeightField above
+				planeMesh.geometry.computeVertexNormals();
+				planeMesh.material.needsUpdate = true;
+
+				bodyInterface.AddBody(terrain.GetID(), Jolt.EActivation_Activate);
+				scene.add(planeMesh);
+
+				const position = new Jolt.Vec3(0, 0, 0);
+				for (let y = 0; y < 10; y++)
+					for (let x = 0; x < 10; x++) {
+						const px = -31 + x * 62 / 10;
+						const py = -31 + y * 62 / 10;
+						position.Set(px, 20, py);
+						createSphere(position, 1, Jolt.EMotionType_Dynamic, LAYER_MOVING, 0xFF0000);
+					}
+			});
+
+		</script>
+	</body>
+</html>
