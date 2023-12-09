@@ -524,6 +524,16 @@ interface Shape {
 	[Value] Vec3 GetCenterOfMass();
 	long long GetUserData();
 	void SetUserData(long long inUserData);
+	unsigned long GetSubShapeIDBitsRecursive();
+	float GetInnerRadius();
+	[Value] MassProperties GetMassProperties();
+	[Const] PhysicsMaterial GetMaterial([Const, Ref] SubShapeID inSubShapeID);
+	[Value] Vec3 GetSurfaceNormal([Const, Ref] SubShapeID inSubShapeID, [Const, Ref] Vec3 inLocalSurfacePosition);
+	long long GetSubShapeUserData([Const, Ref] SubShapeID inSubShapeID);
+	[Value] TransformedShape GetSubShapeTransformedShape([Const, Ref] SubShapeID inSubShapeID, [Const, Ref] Vec3 inPositionCOM, [Const, Ref] Quat inRotation, [Const, Ref] Vec3 inScale, [Ref] SubShapeID outRemainder);
+	float GetVolume();
+	boolean IsValidScale([Const, Ref] Vec3 inScale);
+	[Value] ShapeResult ScaleShape([Const, Ref] Vec3 inScale);
 };
 
 interface ShapeGetTriangles {
@@ -665,6 +675,18 @@ interface StaticCompoundShape {
 
 StaticCompoundShape implements Shape;
 
+// Decorated shape
+interface DecoratedShapeSettings {
+};
+
+DecoratedShapeSettings implements ShapeSettings;
+
+interface DecoratedShape {
+	[Const] Shape GetInnerShape();
+};
+
+DecoratedShape implements Shape;
+
 // Scaled shape
 interface ScaledShapeSettings {
 	void ScaledShapeSettings(ShapeSettings inShape, [Ref, Const] Vec3 inScale);
@@ -672,13 +694,13 @@ interface ScaledShapeSettings {
 	[Value] attribute Vec3 mScale;
 };
 
-ScaledShapeSettings implements ShapeSettings;
+ScaledShapeSettings implements DecoratedShapeSettings;
 
 interface ScaledShape {
 	void ScaledShape(Shape inShape, [Ref, Const] Vec3 inScale);
 };
 
-ScaledShape implements Shape;
+ScaledShape implements DecoratedShape;
 
 // Offset COM
 interface OffsetCenterOfMassShapeSettings {
@@ -687,12 +709,12 @@ interface OffsetCenterOfMassShapeSettings {
 	[Value] attribute Vec3 mOffset;
 };
 
-OffsetCenterOfMassShapeSettings implements ShapeSettings;
+OffsetCenterOfMassShapeSettings implements DecoratedShapeSettings;
 
 interface OffsetCenterOfMassShape {
 };
 
-OffsetCenterOfMassShape implements Shape;
+OffsetCenterOfMassShape implements DecoratedShape;
 
 // Rotated translated
 interface RotatedTranslatedShapeSettings {
@@ -702,17 +724,25 @@ interface RotatedTranslatedShapeSettings {
 	[Value] attribute Quat mRotation;
 };
 
-RotatedTranslatedShapeSettings implements ShapeSettings;
+RotatedTranslatedShapeSettings implements DecoratedShapeSettings;
 
 interface RotatedTranslatedShape {
 };
 
-RotatedTranslatedShape implements Shape;
+RotatedTranslatedShape implements DecoratedShape;
 
 // Mesh shape
 interface MeshShapeSettings {
+	void MeshShapeSettings();
 	void MeshShapeSettings([Ref, Const] TriangleList inTriangleList, [Ref, Const] optional PhysicsMaterialList inMaterialList);
 	void MeshShapeSettings([Ref, Const] VertexList inVertices, [Ref, Const] IndexedTriangleList inTriangles, [Ref, Const] PhysicsMaterialList inMaterialList);
+	void Sanitize();
+
+	[Value] attribute VertexList mTriangleVertices;
+	[Value] attribute IndexedTriangleList mIndexedTriangles;
+	[Value] attribute PhysicsMaterialList mMaterials;
+	attribute unsigned long mMaxTrianglesPerLeaf;
+	attribute float mActiveEdgeCosThresholdAngle;
 };
 
 MeshShapeSettings implements ShapeSettings;
