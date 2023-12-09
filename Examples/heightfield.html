@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>JoltPhysics.js demo</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<link rel="stylesheet" type="text/css" href="style.css">
+    <style>
+      #sampleImg {
+        position: absolute;
+        width: 256px;
+        height: 256px;
+        top: 0;
+        right: 0;
+      }
+      #canvas {
+        position: absolute;
+        top: 256px;
+        right: 0;
+      }
+    </style>
+	</head>
+	<body>
+		<div id="container">Loading...</div>
+		<div id="info">JoltPhysics.js heightfield demo<br/>
+		</div>
+
+		<script src="js/three/three.min.js"></script>
+		<script src="js/three/OrbitControls.js"></script>
+		<script src="js/three/WebGL.js"></script>
+		<script src="js/three/stats.min.js"></script>
+		<script src="js/example.js"></script>
+
+    <svg id="sampleImg" xmlns="http://www.w3.org/2000/svg" xml:space="preserve" viewBox="0 0 256 256">
+      <defs>
+          <filter id="turbulenceFilter">
+              <feTurbulence
+                type="fractalNoise"
+                baseFrequency=".02"
+                numOctaves="3"
+                seed="5"
+                result="turbulence" />
+          <feColorMatrix
+                in="turbulence"
+                type="matrix"
+                result="grayscale"
+                values=".33 .33 .33 0 0
+                        .33 .33 .33 0 0
+                        .33 .33 .33 0 0
+                        0 0 0 1 0" />
+              <feComposite operator="in" in="grayscale" in2="SourceGraphic"/>
+              <feComponentTransfer color-interpolation-filters="sRGB">
+                    <feFuncR type="gamma" exponent="1.5" amplitude="1.3" offset="0"></feFuncR>
+                    <feFuncG type="gamma" exponent="1.5" amplitude="1.3" offset="0"></feFuncG>
+                    <feFuncB type="gamma" exponent="1.5" amplitude="1.3" offset="0"></feFuncB>
+              </feComponentTransfer>
+          </filter>
+      </defs>
+      <rect x="0" y="0" width="256" height="256" filter="url(#turbulenceFilter)"></rect>
+      <text x="64" y="96" style="font-weight: bold; font-size:52px; fill: #fff">JOLT</text>
+      <text x="16" y="168" style="font-weight: bold; font-size:52px; fill: #fff">PHYSICS</text>
+    </svg>
+    <canvas style="display: none" id="canvas" width="256" height="256"></canvas>
+
+
+		<script type="module">
+			// In case you haven't built the library yourself, replace URL with: https://www.unpkg.com/jolt-physics/dist/jolt-physics.wasm-compat.js
+			import initJolt from './js/jolt-physics.wasm-compat.js';
+
+      function getGrayscaleData(img) {
+          const canvas = document.getElementById('canvas');
+          canvas.width = img.width;
+          canvas.height = img.width;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0);
+          const imgData = ctx.getImageData(0,0,canvas.width, canvas.height);
+          const f32 = new Float32Array(canvas.width * canvas.height);
+          f32.forEach((o,i) => {
+            f32[i] = imgData.data[i*4]; // reading only red channel
+            if(imgData.data[i*4+3] == 0) {
+              f32[i] = Jolt.HeightFieldShapeConstantValues.prototype.cNoCollisionValue;
+            }
+          });
+          return {img, data: f32};
+      }
+      function allocF32(len) {
+        const floatPtr = Jolt._webidl_malloc(4 * len);
+        const floatPtrRef = Jolt.wrapPointer(floatPtr, Jolt.FloatMemRef);
+        const f32Array = new Float32Array(Jolt.HEAPF32.buffer, floatPtr, len);
+        return {
+          ref: floatPtrRef,
+          array: f32Array
+        }
+      }
+
+      function heightFieldFromSVGl(svg, x, z) {
+        const heightmap = getGrayscaleData(svg);
+        const f32Array = allocF32(heightmap.data.length);
+        f32Array.array.set(heightmap.data);
+
+        const inOffset = new Jolt.Vec3(-heightmap.img.width*1.5/2, 0, -heightmap.img.height*1.5/2);
+        const inScale = new Jolt.Vec3(1, 0.1, 1);
+
+        const shapeSettings = new Jolt.HeightFieldShapeSettings(f32Array.ref, inOffset, inScale, heightmap.img.width);
+        shapeSettings.mBlockSize=2;
+        let shape = shapeSettings.Create().Get();
+        const position = new Jolt.Vec3(x, -20, z);
+        const rotation = new Jolt.Quat(0, 0, 0, 1)
+        var creationSettings = new Jolt.BodyCreationSettings(shape, position, rotation, Jolt.EBodyType_Static, LAYER_NON_MOVING);
+        let body = bodyInterface.CreateBody(creationSettings);
+        Jolt.destroy(creationSettings);
+        return body;
+      }
+
+			initJolt().then(async function (Jolt) {
+				// Initialize this example
+				initExample(Jolt, null);
+        const img = new Image();
+        img.width = 128;
+        img.height = 128;
+        img.src='data:image/svg+xml;base64,'+btoa(document.querySelector('svg').outerHTML);
+        await new Promise(resolve => img.onload=resolve);
+        const terrain = heightFieldFromSVGl(img, 32, 32);
+
+				addToScene(terrain, 0xaaaaaa);
+
+        const position = new Jolt.Vec3(0, 0, 0);
+        for(let y=0;y<10;y++)
+        for(let x=0;x<10;x++) {
+          const px = -31 + x * 62 / 10;
+          const py = -31 + y * 62 / 10; 
+          position.Set(px, 20, py);
+          createSphere(position, 1, Jolt.EMotionType_Dynamic, LAYER_MOVING, 0xFF0000);
+        }
+			});
+
+		</script>
+	</body>
+</html>

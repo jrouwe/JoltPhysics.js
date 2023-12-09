@@ -26,6 +26,7 @@
 #include "Jolt/Physics/Collision/Shape/OffsetCenterOfMassShape.h"
 #include "Jolt/Physics/Collision/Shape/RotatedTranslatedShape.h"
 #include "Jolt/Physics/Collision/Shape/MeshShape.h"
+#include "Jolt/Physics/Collision/Shape/HeightFieldShape.h"
 #include "Jolt/Physics/Collision/CollisionCollectorImpl.h"
 #include "Jolt/Physics/Collision/GroupFilterTable.h"
 #include "Jolt/Physics/Collision/CollideShape.h"
@@ -58,6 +59,9 @@ using JPHString = String;
 using ArrayVec3 = Array<Vec3>;
 using ArrayFloat = Array<float>;
 using ArrayLong = Array<uint>;
+using ArrayUint8 = Array<uint8>;
+using FloatMemRef = float;
+using Uint8MemRef = uint8;
 using SoftBodySharedSettingsVertex = SoftBodySharedSettings::Vertex;
 using SoftBodySharedSettingsFace = SoftBodySharedSettings::Face;
 using SoftBodySharedSettingsEdge = SoftBodySharedSettings::Edge;
@@ -232,6 +236,7 @@ static void TraceImpl(const char *inFMT, ...)
 	// Print to the TTY
 	cout << buffer << endl;
 }
+
 
 #ifdef JPH_ENABLE_ASSERTS
 
@@ -474,4 +479,22 @@ public:
 
 private:
 	VehicleConstraint *		mInstance;
+};
+
+class HeightFieldShapeConstantValues {
+	public:
+			/// Value used to create gaps in the height field
+		static constexpr float	cNoCollisionValue = HeightFieldShapeConstants::cNoCollisionValue;
+
+		/// Stack size to use during WalkHeightField
+		static constexpr int cStackSize  = HeightFieldShapeConstants::cStackSize;
+
+		/// A position in the hierarchical grid is defined by a level (which grid), x and y position. We encode this in a single uint32 as: level << 28 | y << 14 | x
+		static constexpr uint cNumBitsXY = HeightFieldShapeConstants::cNumBitsXY;
+		static constexpr uint cMaskBitsXY = HeightFieldShapeConstants::cMaskBitsXY;
+		static constexpr uint cLevelShift = HeightFieldShapeConstants::cLevelShift;
+
+		/// When height samples are converted to 16 bit:
+		static constexpr uint16 cNoCollisionValue16 = HeightFieldShapeConstants::cNoCollisionValue16;
+		static constexpr uint16 cMaxHeightValue16 = HeightFieldShapeConstants::cMaxHeightValue16;
 };
