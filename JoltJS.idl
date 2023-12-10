@@ -14,6 +14,7 @@ interface ArrayVec3 {
 	void reserve(unsigned long inSize);
 	void resize(unsigned long inSize);
 	void clear();
+	Vec3MemRef data();
 };
 
 enum EBodyType {
@@ -167,10 +168,16 @@ enum ETransmissionMode {
 	"ETransmissionMode_Manual",
 };
 
+interface Vec3MemRef {
+};
+
 interface FloatMemRef {
 };
 
 interface Uint8MemRef {
+};
+
+interface UintMemRef {
 };
 
 interface Vec3 {
@@ -2211,16 +2218,18 @@ interface ArrayFloat {
 	void reserve(unsigned long inSize);
 	void resize(unsigned long inSize);
 	void clear();
+	FloatMemRef data();
 };
 
-interface ArrayLong {
+interface ArrayUint {
 	boolean empty();
 	long size();
-	long at(long inIndex);
-	void push_back(long inValue);
+	unsigned long at(long inIndex);
+	void push_back(unsigned long inValue);
 	void reserve(unsigned long inSize);
 	void resize(unsigned long inSize);
 	void clear();
+	UintMemRef data();
 };
 
 interface ArrayUint8 {
@@ -2231,6 +2240,7 @@ interface ArrayUint8 {
 	void reserve(unsigned long inSize);
 	void resize(unsigned long inSize);
 	void clear();
+	Uint8MemRef data();
 };
 
 interface ArrayVehicleAntiRollBar {
@@ -2415,7 +2425,7 @@ WheelTV implements Wheel;
 
 interface VehicleTrackSettings {
 	attribute long mDrivenWheel;
-	[Value] attribute ArrayLong mWheels;
+	[Value] attribute ArrayUint mWheels;
 	attribute float mInertia;
 	attribute float mAngularDamping;
 	attribute float mMaxBrakeTorque;
