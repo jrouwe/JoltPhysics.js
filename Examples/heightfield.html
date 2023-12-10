@@ -73,13 +73,13 @@
 				shapeSettings.mSampleCount = canvas.width;
 				shapeSettings.mBlockSize = 2;
 				const totalSize = canvas.width * canvas.height;
-				shapeSettings.mHeightSamples.reserve(totalSize);
-				for (let i = 0; i < totalSize; i++) {
-					let height = imgData.data[i * 4]; // Reading only red channel for height
+				shapeSettings.mHeightSamples.resize(totalSize);
+				let heightSamples = new Float32Array(Jolt.HEAPF32.buffer, Jolt.getPointer(shapeSettings.mHeightSamples.data()), totalSize); // Convert the height samples into a Float32Array
+				heightSamples.forEach((o, i) => {
+					heightSamples[i] = imgData.data[i * 4]; // Reading only red channel for height
 					if (imgData.data[i * 4 + 3] == 0)
-						height = Jolt.HeightFieldShapeConstantValues.prototype.cNoCollisionValue; // Invisible pixels make holes
-					shapeSettings.mHeightSamples.push_back(height);
-				}
+						heightSamples[i] = Jolt.HeightFieldShapeConstantValues.prototype.cNoCollisionValue; // Invisible pixels make holes
+				});
 				let shape = shapeSettings.Create().Get();
 
 				// Create the body
