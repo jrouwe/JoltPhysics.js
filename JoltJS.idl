@@ -168,6 +168,11 @@ enum ETransmissionMode {
 	"ETransmissionMode_Manual",
 };
 
+enum ETireFrictionDirection {
+	"ETireFrictionDirection_Longitudinal",
+	"ETireFrictionDirection_Lateral",
+};
+
 interface Vec3MemRef {
 };
 
@@ -2325,6 +2330,19 @@ interface VehicleConstraintStepListener {
 };
 
 VehicleConstraintStepListener implements PhysicsStepListener;
+
+interface VehicleConstraintCallbacksEm {
+	void SetVehicleConstraint([Ref] VehicleConstraint inConstraint);
+};
+
+[JSImplementation="VehicleConstraintCallbacksEm"]
+interface VehicleConstraintCallbacksJS {
+	void VehicleConstraintCallbacksJS();
+	float GetCombinedFriction(unsigned long inWheelIndex, ETireFrictionDirection inTireFrictionDirection, float inTireFriction, [Const, Ref] Body inBody2, [Const, Ref] SubShapeID inSubShapeID2);
+	void OnPreStepCallback([Ref] VehicleConstraint inVehicle, float inDeltaTime, [Ref] PhysicsSystem inPhysicsSystem);
+	void OnPostCollideCallback([Ref] VehicleConstraint inVehicle, float inDeltaTime, [Ref] PhysicsSystem inPhysicsSystem);
+	void OnPostStepCallback([Ref] VehicleConstraint inVehicle, float inDeltaTime, [Ref] PhysicsSystem inPhysicsSystem);
+};
 
 interface WheelSettings {
 	void WheelSettings();

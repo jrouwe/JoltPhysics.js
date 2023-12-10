@@ -208,6 +208,17 @@
 			}
 			constraint.SetVehicleCollisionTester(tester);
 
+			// Optional step: Set the vehicle constraint callbacks
+			let callbacks = new Jolt.VehicleConstraintCallbacksJS();
+			callbacks.GetCombinedFriction = (wheelIndex, tireFrictionDirection, tireFriction, body2, subShapeID2) => {
+				body2 = Jolt.wrapPointer(body2, Jolt.Body);
+				return Math.sqrt(tireFriction * body2.GetFriction()); // This is the default calculation
+			};
+			callbacks.OnPreStepCallback = (vehicle, deltaTime, physicsSystem) => { };
+			callbacks.OnPostCollideCallback = (vehicle, deltaTime, physicsSystem) => { };
+			callbacks.OnPostStepCallback = (vehicle, deltaTime, physicsSystem) => { };
+			callbacks.SetVehicleConstraint(constraint);
+
 			physicsSystem.AddConstraint(constraint);
 			const controller = Jolt.castObject(constraint.GetController(), Jolt.WheeledVehicleController);
 

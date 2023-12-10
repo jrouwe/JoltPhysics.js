@@ -43,6 +43,7 @@
 #include "Jolt/Physics/SoftBody/SoftBodyCreationSettings.h"
 #include "Jolt/Physics/SoftBody/SoftBodySharedSettings.h"
 #include "Jolt/Physics/Character/CharacterVirtual.h"
+#include "Jolt/Physics/Vehicle/VehicleConstraint.h"
 #include "Jolt/Physics/Vehicle/MotorcycleController.h"
 #include "Jolt/Physics/Vehicle/TrackedVehicleController.h"
 #include "Jolt/Physics/Collision/BroadPhase/BroadPhaseLayerInterfaceTable.h"
@@ -225,6 +226,11 @@ constexpr EMotorState EMotorState_Position = EMotorState::Position;
 // Alias for ETransmissionMode values to avoid clashes
 constexpr ETransmissionMode ETransmissionMode_Auto = ETransmissionMode::Auto;
 constexpr ETransmissionMode ETransmissionMode_Manual = ETransmissionMode::Manual;
+
+// Alias for values to avoid clashes
+using ETireFrictionDirection = VehicleConstraint::ETireFrictionDirection;
+constexpr ETireFrictionDirection ETireFrictionDirection_Longitudinal = ETireFrictionDirection::Longitudinal;
+constexpr ETireFrictionDirection ETireFrictionDirection_Lateral = ETireFrictionDirection::Lateral;
 
 // Callback for traces
 static void TraceImpl(const char *inFMT, ...)
@@ -467,12 +473,12 @@ public:
 class VehicleConstraintStepListener : public PhysicsStepListener
 {
 public:
-							VehicleConstraintStepListener(VehicleConstraint* inVehicleConstraint)
+							VehicleConstraintStepListener(VehicleConstraint *inVehicleConstraint)
 	{
 		mInstance = inVehicleConstraint;
 	}
 
-	virtual void			OnStep(float inDeltaTime, PhysicsSystem& inPhysicsSystem) override
+	virtual void			OnStep(float inDeltaTime, PhysicsSystem &inPhysicsSystem) override
 	{
 		PhysicsStepListener* instance = mInstance;
 		instance->OnStep(inDeltaTime, inPhysicsSystem);
@@ -480,6 +486,34 @@ public:
 
 private:
 	VehicleConstraint *		mInstance;
+};
+
+/// A wrapper around the vehicle constraint callbacks that is compatible with JavaScript
+class VehicleConstraintCallbacksEm
+{
+public:
+	virtual					~VehicleConstraintCallbacksEm() = default;
+
+	void					SetVehicleConstraint(VehicleConstraint &inConstraint)
+	{
+		inConstraint.SetCombineFriction([this](uint inWheelIndex, ETireFrictionDirection inTireFrictionDirection, float inTireFriction, const Body &inBody2, const SubShapeID &inSubShapeID2) {
+			return GetCombinedFriction(inWheelIndex, inTireFrictionDirection, inTireFriction, inBody2, inSubShapeID2);
+		});
+		inConstraint.SetPreStepCallback([this](VehicleConstraint &inVehicle, float inDeltaTime, PhysicsSystem &inPhysicsSystem) {
+			OnPreStepCallback(inVehicle, inDeltaTime, inPhysicsSystem);
+		});
+		inConstraint.SetPostCollideCallback([this](VehicleConstraint &inVehicle, float inDeltaTime, PhysicsSystem &inPhysicsSystem) {
+			OnPostCollideCallback(inVehicle, inDeltaTime, inPhysicsSystem);
+		});
+		inConstraint.SetPostStepCallback([this](VehicleConstraint &inVehicle, float inDeltaTime, PhysicsSystem &inPhysicsSystem) {
+			OnPostStepCallback(inVehicle, inDeltaTime, inPhysicsSystem);
+		});
+	}
+
+	virtual float			GetCombinedFriction(unsigned int inWheelIndex, ETireFrictionDirection inTireFrictionDirection, float inTireFriction, const Body &inBody2, const SubShapeID &inSubShapeID2) = 0;
+	virtual void			OnPreStepCallback(VehicleConstraint &inVehicle, float inDeltaTime, PhysicsSystem &inPhysicsSystem) = 0;
+	virtual void			OnPostCollideCallback(VehicleConstraint &inVehicle, float inDeltaTime, PhysicsSystem &inPhysicsSystem) = 0;
+	virtual void			OnPostStepCallback(VehicleConstraint &inVehicle, float inDeltaTime, PhysicsSystem &inPhysicsSystem) = 0;
 };
 
 class HeightFieldShapeConstantValues 
