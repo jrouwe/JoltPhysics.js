@@ -536,8 +536,8 @@ interface Shape {
 	[Value] AABox GetLocalBounds();
 	[Value] AABox GetWorldSpaceBounds([Const, Ref] Mat44 inCenterOfMassTransform, [Const, Ref] Vec3 inScale);
 	[Value] Vec3 GetCenterOfMass();
-	long long GetUserData();
-	void SetUserData(long long inUserData);
+	unsigned long long GetUserData();
+	void SetUserData(unsigned long long inUserData);
 	unsigned long GetSubShapeIDBitsRecursive();
 	float GetInnerRadius();
 	[Value] MassProperties GetMassProperties();
@@ -818,6 +818,8 @@ interface Constraint {
 	void SetEnabled(boolean inEnabled);
 	boolean GetEnabled();
 	boolean IsActive();
+	unsigned long long GetUserData();
+	void SetUserData(unsigned long long inUserData);
 };
 
 // Two body constraint
@@ -1269,6 +1271,8 @@ interface Body {
 	[Value] TransformedShape GetTransformedShape();
 	MotionProperties GetMotionProperties();
 	[Const, Value] Vec3 GetWorldSpaceSurfaceNormal([Const, Ref] SubShapeID inSubShapeID, [Const, Ref] Vec3 inPosition);
+	unsigned long long GetUserData();
+	void SetUserData(unsigned long long inUserData);
 };
 
 interface BodyInterface {
@@ -1301,6 +1305,8 @@ interface BodyInterface {
 	void AddImpulse([Const, Ref] BodyID inBodyID, [Const, Ref] Vec3 inImpulse, [Const, Ref] Vec3 inPosition);
 	void AddAngularImpulse([Const, Ref] BodyID inBodyID, [Const, Ref] Vec3 inAngularImpulse);
 	[Value] TransformedShape GetTransformedShape([Const, Ref] BodyID inBodyID);
+	unsigned long long GetUserData([Const, Ref] BodyID inBodyID);
+	void SetUserData([Const, Ref] BodyID inBodyID, unsigned long long inUserData);
 };
 
 interface StateRecorder {
