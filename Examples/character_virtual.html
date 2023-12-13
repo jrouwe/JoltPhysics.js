@@ -115,6 +115,7 @@
 
 			const lavaObject = createBox(new Jolt.Vec3(0, -50, 0), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(1000, 2, 1000), Jolt.EMotionType_Static, LAYER_NON_MOVING, 0xcc2222);
 			const lavaObjectId = lavaObject.GetID().GetIndexAndSequenceNumber();
+			let isInLava = false;
 
 			const conveyorBeltObject = createBox(new Jolt.Vec3(0, 0, -10), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(10, 0.25, 2), Jolt.EMotionType_Static, LAYER_NON_MOVING, 0x2222cc);
 			const conveyorBeltObjectId = conveyorBeltObject.GetID().GetIndexAndSequenceNumber();
@@ -131,10 +132,8 @@
 			characterContactListener.OnContactValidate = (character, bodyID2, subShapeID2) => {
 				bodyID2 = Jolt.wrapPointer(bodyID2, Jolt.BodyID);
 				character = Jolt.wrapPointer(character, Jolt.CharacterVirtual);
-				// Teleport the user back to the origin if they fall off the platform
-				if (bodyID2.GetIndexAndSequenceNumber() == lavaObjectId) {
-					character.SetPosition(new Jolt.Vec3(0, 10, 0));
-				}
+				if (bodyID2.GetIndexAndSequenceNumber() == lavaObjectId)
+					isInLava = true; // Can't modify velocity or position at this point, marking that we want to teleport
 				return true;
 			}
 			characterContactListener.OnContactAdded = (character, bodyID2, subShapeID2, contactPosition, contactNormal, settings) => {
@@ -153,23 +152,28 @@
 			}
 
 			const prePhysicsUpdate = (deltaTime) => {
+				if (isInLava) {
+					// Teleport the user back to the origin if they fall off the platform
+					character.SetPosition(new Jolt.Vec3(0, 10, 0));
+					isInLava = false;
+				}
 				const characterUp = wrapVec3(character.GetUp());
 				if (!enableStickToFloor) {
 					updateSettings.mStickToFloorStepDown = Jolt.Vec3.prototype.sZero();
 				} else {
 					const vec = characterUp.clone().multiplyScalar(-updateSettings.mStickToFloorStepDown.Length());
-					updateSettings.mStickToFloorStepDown = new Jolt.Vec3(vec.x, vec.y, vec.z);
+					updateSettings.mStickToFloorStepDown = unwrapVec3(vec);
 				}
 
 				if (!enableWalkStairs) {
 					updateSettings.mWalkStairsStepUp = Jolt.Vec3.prototype.sZero();
 				} else {
 					const vec = characterUp.clone().multiplyScalar(updateSettings.mWalkStairsStepUp.Length());
-					updateSettings.mWalkStairsStepUp = new Jolt.Vec3(vec.x, vec.y, vec.z);
+					updateSettings.mWalkStairsStepUp = unwrapVec3(vec);
 				}
 				characterUp.multiplyScalar(-physicsSystem.GetGravity().Length());
 				character.ExtendedUpdate(deltaTime,
-					new Jolt.Vec3(characterUp.x, characterUp.y, characterUp.z),
+					character.GetUp(),
 					updateSettings,
 					movingBPFilter,
 					movingLayerFilter,
@@ -236,7 +240,7 @@
 					newVelocity.add(currentHorizontalVelocity);
 				}
 
-				character.SetLinearVelocity(new Jolt.Vec3(newVelocity.x, newVelocity.y, newVelocity.z));
+				character.SetLinearVelocity(unwrapVec3(newVelocity));
 			}
 
 			const setCrouched = (crouched, forceUpdate) => {
