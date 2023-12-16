@@ -2074,6 +2074,17 @@ interface ObjectVsBroadPhaseLayerFilter {
 	void ObjectVsBroadPhaseLayerFilter();
 };
 
+interface ObjectVsBroadPhaseLayerFilterEm {
+};
+
+ObjectVsBroadPhaseLayerFilterEm implements ObjectVsBroadPhaseLayerFilter;
+
+[JSImplementation="ObjectVsBroadPhaseLayerFilterEm"]
+interface ObjectVsBroadPhaseLayerFilterJS {
+	void ObjectVsBroadPhaseLayerFilterJS();
+	[Const] boolean ShouldCollide(unsigned short inLayer1, BroadPhaseLayer inLayer2);
+};
+
 interface DefaultBroadPhaseLayerFilter {
 	void DefaultBroadPhaseLayerFilter([Const, Ref] ObjectVsBroadPhaseLayerFilter inFilter, unsigned short inObjectLayer);
 };
@@ -2603,11 +2614,23 @@ interface MotorcycleController {
 MotorcycleController implements WheeledVehicleController;
 
 interface BroadPhaseLayerInterface {
-	unsigned short GetNumBroadPhaseLayers();
+	unsigned long GetNumBroadPhaseLayers();
 };
 
 interface BroadPhaseLayer {
 	void BroadPhaseLayer(unsigned short inLayer);
+};
+
+interface BroadPhaseLayerInterfaceEm {
+};
+
+BroadPhaseLayerInterfaceEm implements BroadPhaseLayerInterface;
+
+[JSImplementation="BroadPhaseLayerInterfaceEm"]
+interface BroadPhaseLayerInterfaceJS {
+	void BroadPhaseLayerInterfaceJS();
+	[Const] unsigned long GetNumBroadPhaseLayers();
+	[Const] unsigned short GetBPLayer(unsigned short inLayer); // Unfortunately the C++ version of GetBroadPhaseLayer is not compatible with JS so we have to use a different name and use an unsigned short instead of a BroadPhaseLayer
 };
 
 interface BroadPhaseLayerInterfaceTable {

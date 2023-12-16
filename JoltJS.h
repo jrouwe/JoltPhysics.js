@@ -488,6 +488,30 @@ private:
 	VehicleConstraint *		mInstance;
 };
 
+/// Wrapper class around ObjectVsBroadPhaseLayerFilter to make it compatible with JavaScript (JS cannot pass parameter by value)
+class ObjectVsBroadPhaseLayerFilterEm : public ObjectVsBroadPhaseLayerFilter
+{
+public:
+	virtual bool			ShouldCollide(ObjectLayer inLayer1, BroadPhaseLayer *inLayer2) const = 0;
+
+	virtual bool			ShouldCollide(ObjectLayer inLayer1, BroadPhaseLayer inLayer2) const
+	{
+		return ShouldCollide(inLayer1, &inLayer2);
+	}
+};
+
+/// Wrapper class around BroadPhaseLayerInterface to make it compatible with JavaScript (JS cannot return parameter by value)
+class BroadPhaseLayerInterfaceEm : public BroadPhaseLayerInterface
+{
+public:
+	virtual unsigned short GetBPLayer(ObjectLayer inLayer) const = 0;
+
+	virtual BroadPhaseLayer	GetBroadPhaseLayer(ObjectLayer inLayer) const override
+	{
+		return BroadPhaseLayer(GetBPLayer(inLayer));
+	}
+};
+
 /// A wrapper around the vehicle constraint callbacks that is compatible with JavaScript
 class VehicleConstraintCallbacksEm
 {
