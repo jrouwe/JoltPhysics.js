@@ -23,12 +23,15 @@ set(INTERPROCEDURAL_OPTIMIZATION OFF)
 # Turn on symbols
 set(GENERATE_DEBUG_SYMBOLS ON)
 
+# Use 32-bit object layers to support more bits in ObjectLayerPairFilterMask
+set(OBJECT_LAYER_BITS 32)
+
 # Include Jolt
 include(FetchContent)
 FetchContent_Declare(
         JoltPhysics
         GIT_REPOSITORY "https://github.com/jrouwe/JoltPhysics"
-        GIT_TAG "8691a4ff82133b2770e31ee6ce73507a9db953bb"
+        GIT_TAG "e7b634d52c82bac6f2e85ac5859dea690b0174f5"
 		SOURCE_SUBDIR "Build"
 )
 FetchContent_MakeAvailable(JoltPhysics)
@@ -84,6 +87,7 @@ set(EMCC_GLUE_ARGS
   -I${JoltPhysics_SOURCE_DIR}/..
   -Wall
   -std=c++17
+  -DJPH_OBJECT_LAYER_BITS=32
   -include ${JOLT_HEADER_FILE})
 
 # Can't find a way to automatically inherit settings set by target_compile_definitions, so hardcoding defines here

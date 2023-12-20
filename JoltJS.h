@@ -49,12 +49,18 @@
 #include "Jolt/Physics/Collision/BroadPhase/BroadPhaseLayerInterfaceTable.h"
 #include "Jolt/Physics/Collision/BroadPhase/ObjectVsBroadPhaseLayerFilterTable.h"
 #include "Jolt/Physics/Collision/ObjectLayerPairFilterTable.h"
+#include "Jolt/Physics/Collision/BroadPhase/BroadPhaseLayerInterfaceMask.h"
+#include "Jolt/Physics/Collision/BroadPhase/ObjectVsBroadPhaseLayerFilterMask.h"
+#include "Jolt/Physics/Collision/ObjectLayerPairFilterMask.h"
 #include "Jolt/Physics/Body/BodyActivationListener.h"
 
 #include <iostream>
 
 using namespace JPH;
 using namespace std;
+
+// Ensure that we use 32-bit object layers
+static_assert(sizeof(ObjectLayer) == 4);
 
 // Types that need to be exposed to JavaScript
 using JPHString = String;

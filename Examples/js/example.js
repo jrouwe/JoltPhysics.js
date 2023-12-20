@@ -73,7 +73,7 @@ function initGraphics() {
 	window.addEventListener('resize', onWindowResize, false);
 }
 
-function initPhysics() {
+let setupCollisionFiltering = function (settings) {
 	// Layer that objects can be in, determines which other objects it can collide with
 	// Typically you at least want to have 1 layer for moving bodies and 1 layer for static bodies, but you can have more
 	// layers if you want. E.g. you could have a layer for high detail collision (which is not used by the physics simulation
@@ -93,11 +93,16 @@ function initPhysics() {
 	bpInterface.MapObjectToBroadPhaseLayer(LAYER_NON_MOVING, BP_LAYER_NON_MOVING);
 	bpInterface.MapObjectToBroadPhaseLayer(LAYER_MOVING, BP_LAYER_MOVING);
 
-	// Initialize Jolt
-	settings = new Jolt.JoltSettings();
 	settings.mObjectLayerPairFilter = objectFilter;
 	settings.mBroadPhaseLayerInterface = bpInterface;
 	settings.mObjectVsBroadPhaseLayerFilter = new Jolt.ObjectVsBroadPhaseLayerFilterTable(settings.mBroadPhaseLayerInterface, NUM_BROAD_PHASE_LAYERS, settings.mObjectLayerPairFilter, NUM_OBJECT_LAYERS);
+};
+
+function initPhysics() {
+
+	// Initialize Jolt
+	settings = new Jolt.JoltSettings();
+	setupCollisionFiltering(settings);
 	jolt = new Jolt.JoltInterface(settings);
 	Jolt.destroy(settings);
 	physicsSystem = jolt.GetPhysicsSystem();

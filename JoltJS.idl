@@ -543,7 +543,7 @@ interface Shape {
 	[Value] MassProperties GetMassProperties();
 	[Const] PhysicsMaterial GetMaterial([Const, Ref] SubShapeID inSubShapeID);
 	[Value] Vec3 GetSurfaceNormal([Const, Ref] SubShapeID inSubShapeID, [Const, Ref] Vec3 inLocalSurfacePosition);
-	long long GetSubShapeUserData([Const, Ref] SubShapeID inSubShapeID);
+	unsigned long long GetSubShapeUserData([Const, Ref] SubShapeID inSubShapeID);
 	[Value] TransformedShape GetSubShapeTransformedShape([Const, Ref] SubShapeID inSubShapeID, [Const, Ref] Vec3 inPositionCOM, [Const, Ref] Quat inRotation, [Const, Ref] Vec3 inScale, [Ref] SubShapeID outRemainder);
 	float GetVolume();
 	boolean IsValidScale([Const, Ref] Vec3 inScale);
@@ -1232,7 +1232,7 @@ interface Body {
 	boolean SensorDetectsStatic();
 	void SetUseManifoldReduction(boolean inUseReduction);
 	boolean GetUseManifoldReduction();
-	unsigned short GetObjectLayer();
+	unsigned long GetObjectLayer();
 	[Ref] CollisionGroup GetCollisionGroup();
 	boolean GetAllowSleeping();
 	void SetAllowSleeping(boolean inAllow);
@@ -1286,8 +1286,8 @@ interface BodyInterface {
 	[Value] BodyID CreateAndAddSoftBody([Const, Ref] SoftBodyCreationSettings inSettings, EActivation inActivationMode);
 	[Const] Shape GetShape([Const, Ref] BodyID inBodyID);
 	void SetShape([Const, Ref] BodyID inBodyID, [Const] Shape inShape, boolean inUpdateMassProperties, EActivation inActivationMode);
-	void SetObjectLayer([Const, Ref] BodyID inBodyID, unsigned short inLayer);
-	unsigned short GetObjectLayer([Const, Ref] BodyID inBodyID);
+	void SetObjectLayer([Const, Ref] BodyID inBodyID, unsigned long inLayer);
+	unsigned long GetObjectLayer([Const, Ref] BodyID inBodyID);
 	void SetPositionAndRotation([Const, Ref] BodyID inBodyID, [Const, Ref] Vec3 inPosition, [Const, Ref] Quat inRotation, EActivation inActivationMode);
 	void SetPositionAndRotationWhenChanged([Const, Ref] BodyID inBodyID, [Const, Ref] Vec3 inPosition, [Const, Ref] Quat inRotation, EActivation inActivationMode);
 	void GetPositionAndRotation([Const, Ref] BodyID inBodyID, [Ref] Vec3 outPosition, [Ref] Quat outRotation);
@@ -1886,14 +1886,14 @@ interface MassProperties {
 };
 
 interface BodyCreationSettings {
-	void BodyCreationSettings([Const] Shape inShape, [Ref] Vec3 inPosition, [Ref] Quat inRotation, EMotionType inMotionType, unsigned short inObjectLayer);
+	void BodyCreationSettings([Const] Shape inShape, [Ref] Vec3 inPosition, [Ref] Quat inRotation, EMotionType inMotionType, unsigned long inObjectLayer);
 
 	[Value] attribute Vec3 mPosition;
 	[Value] attribute Quat mRotation;
 	[Value] attribute Vec3 mLinearVelocity;
 	[Value] attribute Vec3 mAngularVelocity;
-	attribute long long mUserData;
-	attribute unsigned short mObjectLayer;
+	attribute unsigned long long mUserData;
+	attribute unsigned long mObjectLayer;
 	[Value] attribute CollisionGroup mCollisionGroup;
 	attribute EMotionType mMotionType;
 	attribute EAllowedDOFs mAllowedDOFs;
@@ -2000,12 +2000,12 @@ interface SoftBodySharedSettings {
 };
 
 interface SoftBodyCreationSettings {
-	void SoftBodyCreationSettings([Const] SoftBodySharedSettings inSettings, [Ref] Vec3 inPosition, [Ref] Quat inRotation, unsigned short inObjectLayer);
+	void SoftBodyCreationSettings([Const] SoftBodySharedSettings inSettings, [Ref] Vec3 inPosition, [Ref] Quat inRotation, unsigned long inObjectLayer);
 
 	[Value] attribute Vec3 mPosition;
 	[Value] attribute Quat mRotation;
-	attribute long long mUserData;
-	attribute unsigned short mObjectLayer;
+	attribute unsigned long long mUserData;
+	attribute unsigned long mObjectLayer;
 	[Value] attribute CollisionGroup mCollisionGroup;
 	attribute unsigned long mNumIterations;
 	attribute float mLinearDamping;
@@ -2100,11 +2100,11 @@ ObjectVsBroadPhaseLayerFilterEm implements ObjectVsBroadPhaseLayerFilter;
 [JSImplementation="ObjectVsBroadPhaseLayerFilterEm"]
 interface ObjectVsBroadPhaseLayerFilterJS {
 	void ObjectVsBroadPhaseLayerFilterJS();
-	[Const] boolean ShouldCollide(unsigned short inLayer1, BroadPhaseLayer inLayer2);
+	[Const] boolean ShouldCollide(unsigned long inLayer1, BroadPhaseLayer inLayer2);
 };
 
 interface DefaultBroadPhaseLayerFilter {
-	void DefaultBroadPhaseLayerFilter([Const, Ref] ObjectVsBroadPhaseLayerFilter inFilter, unsigned short inObjectLayer);
+	void DefaultBroadPhaseLayerFilter([Const, Ref] ObjectVsBroadPhaseLayerFilter inFilter, unsigned long inObjectLayer);
 };
 
 DefaultBroadPhaseLayerFilter implements ObjectLayerFilter;
@@ -2116,28 +2116,28 @@ interface ObjectLayerFilter {
 [JSImplementation="ObjectLayerFilter"]
 interface ObjectLayerFilterJS {
 	void ObjectLayerFilterJS();
-	[Const] boolean ShouldCollide(unsigned short inLayer);
+	[Const] boolean ShouldCollide(unsigned long inLayer);
 };
 
 interface ObjectLayerPairFilter {
 	void ObjectLayerPairFilter();
-	boolean ShouldCollide(unsigned short inLayer1, unsigned short inLayer2);
+	boolean ShouldCollide(unsigned long inLayer1, unsigned long inLayer2);
 };
 
 [JSImplementation="ObjectLayerPairFilter"]
 interface ObjectLayerPairFilterJS {
 	void ObjectLayerPairFilterJS();
-	[Const] boolean ShouldCollide(unsigned short inLayer1, unsigned short inLayer2);
+	[Const] boolean ShouldCollide(unsigned long inLayer1, unsigned long inLayer2);
 };
 
 interface DefaultObjectLayerFilter {
-	void DefaultObjectLayerFilter([Const, Ref] ObjectLayerPairFilter inFilter, unsigned short inObjectLayer);
+	void DefaultObjectLayerFilter([Const, Ref] ObjectLayerPairFilter inFilter, unsigned long inObjectLayer);
 };
 
 DefaultObjectLayerFilter implements ObjectLayerFilter;
 
 interface SpecifiedObjectLayerFilter {
-	void SpecifiedObjectLayerFilter(unsigned short inObjectLayer);
+	void SpecifiedObjectLayerFilter(unsigned long inObjectLayer);
 };
 
 SpecifiedObjectLayerFilter implements ObjectLayerFilter;
@@ -2314,19 +2314,19 @@ interface VehicleCollisionTester {
 };
 
 interface VehicleCollisionTesterRay {
-	void VehicleCollisionTesterRay(unsigned short inObjectLayer, [Ref] optional Vec3 inUp, optional float inMaxSlopeAngle);
+	void VehicleCollisionTesterRay(unsigned long inObjectLayer, [Ref] optional Vec3 inUp, optional float inMaxSlopeAngle);
 };
 
 VehicleCollisionTesterRay implements VehicleCollisionTester;
 
 interface VehicleCollisionTesterCastSphere {
-	void VehicleCollisionTesterCastSphere(unsigned short inObjectLayer, float inRadius, [Ref] optional Vec3 inUp, optional float inMaxSlopeAngle);
+	void VehicleCollisionTesterCastSphere(unsigned long inObjectLayer, float inRadius, [Ref] optional Vec3 inUp, optional float inMaxSlopeAngle);
 };
 
 VehicleCollisionTesterCastSphere implements VehicleCollisionTester;
 
 interface VehicleCollisionTesterCastCylinder {
-	void VehicleCollisionTesterCastCylinder(unsigned short inObjectLayer, optional float inConvexRadiusFraction);
+	void VehicleCollisionTesterCastCylinder(unsigned long inObjectLayer, optional float inConvexRadiusFraction);
 };
 
 VehicleCollisionTesterCastCylinder implements VehicleCollisionTester;
@@ -2637,6 +2637,7 @@ interface BroadPhaseLayerInterface {
 
 interface BroadPhaseLayer {
 	void BroadPhaseLayer(unsigned short inLayer);
+	unsigned short GetValue();
 };
 
 interface BroadPhaseLayerInterfaceEm {
@@ -2648,30 +2649,52 @@ BroadPhaseLayerInterfaceEm implements BroadPhaseLayerInterface;
 interface BroadPhaseLayerInterfaceJS {
 	void BroadPhaseLayerInterfaceJS();
 	[Const] unsigned long GetNumBroadPhaseLayers();
-	[Const] unsigned short GetBPLayer(unsigned short inLayer); // Unfortunately the C++ version of GetBroadPhaseLayer is not compatible with JS so we have to use a different name and use an unsigned short instead of a BroadPhaseLayer
+	[Const] unsigned short GetBPLayer(unsigned long inLayer); // Unfortunately the C++ version of GetBroadPhaseLayer is not compatible with JS so we have to use a different name and use an unsigned short instead of a BroadPhaseLayer
 };
 
 interface BroadPhaseLayerInterfaceTable {
-	void BroadPhaseLayerInterfaceTable(unsigned short inNumObjectLayers, unsigned short inNumBroadPhaseLayers);
-	void MapObjectToBroadPhaseLayer(unsigned short inObjectLayer, [Const, Ref] BroadPhaseLayer inBroadPhaseLayer);
+	void BroadPhaseLayerInterfaceTable(unsigned long inNumObjectLayers, unsigned long inNumBroadPhaseLayers);
+	void MapObjectToBroadPhaseLayer(unsigned long inObjectLayer, [Const, Ref] BroadPhaseLayer inBroadPhaseLayer);
 };
 
 BroadPhaseLayerInterfaceTable implements BroadPhaseLayerInterface;
 
 interface ObjectVsBroadPhaseLayerFilterTable {
-	void ObjectVsBroadPhaseLayerFilterTable([Const, Ref] BroadPhaseLayerInterface inBroadPhaseLayerInterface, unsigned short inNumBroadPhaseLayers, [Const, Ref] ObjectLayerPairFilter inObjectLayerPairFilter, unsigned short inNumObjectLayers);
+	void ObjectVsBroadPhaseLayerFilterTable([Const, Ref] BroadPhaseLayerInterface inBroadPhaseLayerInterface, unsigned long inNumBroadPhaseLayers, [Const, Ref] ObjectLayerPairFilter inObjectLayerPairFilter, unsigned long inNumObjectLayers);
 };
 
 ObjectVsBroadPhaseLayerFilterTable implements ObjectVsBroadPhaseLayerFilter;
 
 interface ObjectLayerPairFilterTable {
-	void ObjectLayerPairFilterTable(unsigned short inNumObjectLayers);
-	unsigned short GetNumObjectLayers();
-	void DisableCollision(unsigned short inLayer1, unsigned short inLayer2);
-	void EnableCollision(unsigned short inLayer1, unsigned short inLayer2);
+	void ObjectLayerPairFilterTable(unsigned long inNumObjectLayers);
+	unsigned long GetNumObjectLayers();
+	void DisableCollision(unsigned long inLayer1, unsigned long inLayer2);
+	void EnableCollision(unsigned long inLayer1, unsigned long inLayer2);
 };
 
 ObjectLayerPairFilterTable implements ObjectLayerPairFilter;
+
+interface BroadPhaseLayerInterfaceMask {
+	void BroadPhaseLayerInterfaceMask(unsigned long inNumBroadPhaseLayers);
+	void ConfigureLayer([Const, Ref] BroadPhaseLayer inBroadPhaseLayer, unsigned long inGroupsToInclude, unsigned long inGroupsToExclude);
+};
+
+BroadPhaseLayerInterfaceMask implements BroadPhaseLayerInterface;
+
+interface ObjectVsBroadPhaseLayerFilterMask {
+	void ObjectVsBroadPhaseLayerFilterMask([Const, Ref] BroadPhaseLayerInterfaceMask inBroadPhaseLayerInterface);
+};
+
+ObjectVsBroadPhaseLayerFilterMask implements ObjectVsBroadPhaseLayerFilter;
+
+interface ObjectLayerPairFilterMask {
+	void ObjectLayerPairFilterMask();
+	static unsigned long sGetObjectLayer(unsigned long inGroup, unsigned long inMask);
+	static unsigned long sGetGroup(unsigned long inObjectLayer);
+	static unsigned long sGetMask(unsigned long inObjectLayer);
+};
+
+ObjectLayerPairFilterMask implements ObjectLayerPairFilter;
 
 interface JoltSettings {
 	void JoltSettings();
