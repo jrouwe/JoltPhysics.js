@@ -1821,6 +1821,12 @@ interface NarrowPhaseQuery {
 interface PhysicsStepListener {
 };
 
+[JSImplementation="PhysicsStepListener"]
+interface PhysicsStepListenerJS {
+	void PhysicsStepListenerJS();
+	void OnStep(float inDeltaTime, [Ref] PhysicsSystem inSystem);
+};
+
 interface BodyIDVector {
 	void BodyIDVector();
 	boolean empty();
