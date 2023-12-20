@@ -1827,6 +1827,16 @@ interface PhysicsStepListenerJS {
 	void OnStep(float inDeltaTime, [Ref] PhysicsSystem inSystem);
 };
 
+interface BodyActivationListener {
+};
+
+[JSImplementation="BodyActivationListener"]
+interface BodyActivationListenerJS {
+	void BodyActivationListenerJS();
+	void OnBodyActivated([Const, Ref] BodyID inBodyID, unsigned long long inBodyUserData);
+	void OnBodyDeactivated([Const, Ref] BodyID inBodyID, unsigned long long inBodyUserData);
+};
+
 interface BodyIDVector {
 	void BodyIDVector();
 	boolean empty();
@@ -1864,6 +1874,8 @@ interface PhysicsSystem {
 	boolean	RestoreState([Ref] StateRecorder inStream);
 	void AddStepListener(PhysicsStepListener inListener);
 	void RemoveStepListener(PhysicsStepListener inListener);
+	void SetBodyActivationListener(BodyActivationListener inListener);
+	[Const] BodyActivationListener GetBodyActivationListener();
 };
 
 interface MassProperties {

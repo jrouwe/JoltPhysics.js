@@ -49,6 +49,7 @@
 #include "Jolt/Physics/Collision/BroadPhase/BroadPhaseLayerInterfaceTable.h"
 #include "Jolt/Physics/Collision/BroadPhase/ObjectVsBroadPhaseLayerFilterTable.h"
 #include "Jolt/Physics/Collision/ObjectLayerPairFilterTable.h"
+#include "Jolt/Physics/Body/BodyActivationListener.h"
 
 #include <iostream>
 
