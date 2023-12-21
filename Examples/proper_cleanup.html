@@ -51,7 +51,9 @@
 				let boxPosition = new Jolt.Vec3(5, 0, 0);
 				compound.AddShape(boxPosition, Jolt.Quat.prototype.sIdentity(), box); // 'box' is now owned by 'compound'
 				Jolt.destroy(boxPosition);
-				let shape = compound.Create().Get(); // Create the shape, the ShapeSettings object holds a reference to Shape so we need to hold on to 'compound' a little bit longer
+				let shape = compound.Create().Get();
+				shape.AddRef(); // We want to own this shape so we can delete 'compound' which internally keeps a reference
+				Jolt.destroy(compound);
 
 				// Create the body
 				let bodyPosition = new Jolt.Vec3(1, 2, 3);
@@ -59,7 +61,7 @@
 				let creationSettings = new Jolt.BodyCreationSettings(shape, bodyPosition, bodyRotation, Jolt.EMotionType_Dynamic, MY_LAYER); // 'creationSettings' now holds a reference to 'shape'
 				Jolt.destroy(bodyPosition);
 				Jolt.destroy(bodyRotation);
-				Jolt.destroy(compound);
+				shape.Release(); // We no longer need our own reference to 'shape' because 'creationSettings' now has one
 				let body = bodyInterface.CreateBody(creationSettings);
 				Jolt.destroy(creationSettings); // 'creationSettings' no longer needed, all settings and the shape reference went to 'body'
 

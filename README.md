@@ -112,7 +112,7 @@ On top of this, Jolt uses reference counting for a number of its classes (everyt
 * CharacterBaseSettings
 * CharacterBase
 
-Reference counting objects start with a reference count of 0. If you want to keep ownership over the object, you need to call object.AddRef(), this will increment the reference count. If you want to release ownership you call object.Release(), this will decrement the reference count and if the reference count reaches 0 the object will be destroyed. If, after newing, you pass a reference counted object on to another object (e.g. a ShapeSettings to a CompoundShapeSettings or a Shape to a Body) then that other object will take a reference, in that case it is not needed to call AddRef/Release yourself.
+Reference counting objects start with a reference count of 0. If you want to keep ownership over the object, you need to call ```object.AddRef()```, this will increment the reference count. If you want to release ownership you call ```object.Release()```, this will decrement the reference count and if the reference count reaches 0 the object will be destroyed. If, after newing, you pass a reference counted object on to another object (e.g. a ShapeSettings to a CompoundShapeSettings or a Shape to a Body) then that other object will take a reference, in that case it is not needed take a reference yourself beforehand so you can skip the calls to ```AddRef/Release```. Note that it is also possible to do ```new Jolt.XXX``` followed by ```Jolt.destroy(...)``` for a reference counted object if no one took a reference.
 
 The Body class is also a special case, it is destroyed through BodyInterface.DestroyBody(body.GetID()) (which internally destroys the Body).
 
