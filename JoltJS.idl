@@ -452,6 +452,9 @@ interface TransformedShape {
 
 interface PhysicsMaterial {
 	void PhysicsMaterial();
+	unsigned long GetRefCount();
+	void AddRef();
+	void Release();
 };
 
 interface PhysicsMaterialList {
@@ -524,12 +527,18 @@ interface ShapeResult {
 
 // Shape
 interface ShapeSettings {
+	unsigned long GetRefCount();
+	void AddRef();
+	void Release();
 	[Value] ShapeResult Create();
 
 	attribute unsigned long long mUserData;
 };
 
 interface Shape {
+	unsigned long GetRefCount();
+	void AddRef();
+	void Release();
 	EShapeType GetType();
 	EShapeSubType GetSubType();
 	boolean MustBeStatic();
@@ -801,12 +810,19 @@ HeightFieldShape implements Shape;
 
 // Constraint
 interface ConstraintSettings {
+	unsigned long GetRefCount();
+	void AddRef();
+	void Release();
+
 	attribute boolean mEnabled;
 	attribute long mNumVelocityStepsOverride;
 	attribute long mNumPositionStepsOverride;
 };
 
 interface Constraint {
+	unsigned long GetRefCount();
+	void AddRef();
+	void Release();
 	EConstraintType GetType();
 	EConstraintSubType GetSubType();
 	unsigned long GetConstraintPriority();
@@ -1187,6 +1203,9 @@ interface MotionProperties {
 };
 
 interface GroupFilter {
+	unsigned long GetRefCount();
+	void AddRef();
+	void Release();
 };
 
 [JSImplementation="GroupFilter"]
@@ -1986,7 +2005,9 @@ interface ArraySoftBodySharedSettingsVolume {
 
 interface SoftBodySharedSettings {
 	void SoftBodySharedSettings();
-
+	unsigned long GetRefCount();
+	void AddRef();
+	void Release();
 	void AddFace([Const, Ref] SoftBodySharedSettingsFace inFace);
 	void CalculateEdgeLengths();
 	void CalculateVolumeConstraintVolumes();
@@ -2019,6 +2040,10 @@ interface SoftBodyCreationSettings {
 };
 
 interface CharacterBaseSettings {
+	unsigned long GetRefCount();
+	void AddRef();
+	void Release();
+
 	[Value] attribute Vec3 mUp;
 	[Value] attribute Plane mSupportingVolume;
 	attribute float mMaxSlopeAngle;
@@ -2185,6 +2210,9 @@ interface ShapeFilterJS2 {
 };
 
 interface CharacterBase {
+	unsigned long GetRefCount();
+	void AddRef();
+	void Release();
 	void SetMaxSlopeAngle(float inMaxSlopeAngle);
 	float GetCosMaxSlopeAngle();
 	void SetUp([Const, Ref] Vec3 inUp);
@@ -2311,6 +2339,9 @@ interface ArrayVehicleDifferentialSettings {
 };
 
 interface VehicleCollisionTester {
+	unsigned long GetRefCount();
+	void AddRef();
+	void Release();
 };
 
 interface VehicleCollisionTesterRay {
@@ -2381,6 +2412,9 @@ interface VehicleConstraintCallbacksJS {
 
 interface WheelSettings {
 	void WheelSettings();
+	unsigned long GetRefCount();
+	void AddRef();
+	void Release();
 
 	[Value] attribute Vec3 mPosition;
 	[Value] attribute Vec3 mSuspensionForcePoint;
@@ -2586,6 +2620,9 @@ interface VehicleControllerSettings {
 };
 
 interface VehicleController {
+	unsigned long GetRefCount();
+	void AddRef();
+	void Release();
 };
 
 interface WheeledVehicleController {

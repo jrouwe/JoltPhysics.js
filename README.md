@@ -108,11 +108,11 @@ On top of this, Jolt uses reference counting for a number of its classes (everyt
 * SoftBodySharedSettings
 * VehicleCollisionTester
 * VehicleController
-* Wheel
+* WheelSettings
 * CharacterBaseSettings
 * CharacterBase
 
-If you new one of these objects, you need to destroy it as well. However if, after newing, you pass a reference counted object on to another object (e.g. a ShapeSettings to a CompoundShapeSettings or a Shape to a Body) then that other object will take a reference and you don't need to destroy the object anymore (the C++ side will handle this).
+Reference counting objects start with a reference count of 0. If you want to keep ownership over the object, you need to call object.AddRef(), this will increment the reference count. If you want to release ownership you call object.Release(), this will decrement the reference count and if the reference count reaches 0 the object will be destroyed. If, after newing, you pass a reference counted object on to another object (e.g. a ShapeSettings to a CompoundShapeSettings or a Shape to a Body) then that other object will take a reference, in that case it is not needed to call AddRef/Release yourself.
 
 The Body class is also a special case, it is destroyed through BodyInterface.DestroyBody(body.GetID()) (which internally destroys the Body).
 
