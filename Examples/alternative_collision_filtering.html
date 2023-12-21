@@ -69,7 +69,7 @@
 				// 3rd floor: Part of group static but colliding only with GROUP_FLOOR3
 				createBox(new Jolt.Vec3(0, 9, 0), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(5, 0.5, 5), Jolt.EMotionType_STATIC, sGetObjectLayer(GROUP_STATIC, GROUP_FLOOR3), 0x00009f);
 
-				// Create dynamnic objects that collide only with a specific floor or the ground floor
+				// Create dynamic objects that collide only with a specific floor or the ground floor
 				for (let x = 0; x < 10; x++)
 					for (let z = 0; z < 10; z++)
 						for (let l = 0; l < 3; l++)
