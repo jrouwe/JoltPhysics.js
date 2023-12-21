@@ -511,12 +511,20 @@ public:
 class BroadPhaseLayerInterfaceEm : public BroadPhaseLayerInterface
 {
 public:
-	virtual unsigned short GetBPLayer(ObjectLayer inLayer) const = 0;
+	virtual unsigned short	GetBPLayer(ObjectLayer inLayer) const = 0;
 
 	virtual BroadPhaseLayer	GetBroadPhaseLayer(ObjectLayer inLayer) const override
 	{
 		return BroadPhaseLayer(GetBPLayer(inLayer));
 	}
+
+#if defined(JPH_EXTERNAL_PROFILE) || defined(JPH_PROFILE_ENABLED)
+	/// Get the user readable name of a broadphase layer (debugging purposes)
+	virtual const char *	GetBroadPhaseLayerName(BroadPhaseLayer inLayer) const override
+	{
+		return "Undefined";
+	}
+#endif // JPH_EXTERNAL_PROFILE || JPH_PROFILE_ENABLED
 };
 
 /// A wrapper around the vehicle constraint callbacks that is compatible with JavaScript
