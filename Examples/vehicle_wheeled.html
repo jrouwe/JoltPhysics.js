@@ -73,6 +73,9 @@
 			let wheelMaterial = new THREE.MeshPhongMaterial({ color: 0x666666 });
 			wheelMaterial.map = texture;
 
+			const wheelRight = new Jolt.Vec3(0, 1, 0);
+			const wheelUp = new Jolt.Vec3(1, 0, 0);			
+
 			const createThreeWheel = (constraint, wheelIndex, body) => {
 				// Create wheel mesh
 				const joltWheel = constraint.GetWheel(wheelIndex);
@@ -82,7 +85,7 @@
 
 				// Function to update the orientation of the wheel
 				wheel.updateLocalTransform = () => {
-					let transform = constraint.GetWheelLocalTransform(wheelIndex, new Jolt.Vec3(0, 1, 0), new Jolt.Vec3(1, 0, 0));
+					let transform = constraint.GetWheelLocalTransform(wheelIndex, wheelRight, wheelUp);
 					wheel.position.copy(wrapVec3(transform.GetTranslation()));
 					wheel.quaternion.copy(wrapQuat(transform.GetRotation().GetQuaternion()));
 				};
