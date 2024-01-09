@@ -1286,8 +1286,8 @@ interface Body {
 	EMotionType GetMotionType();
 	void SetIsSensor(boolean inIsSensor);
 	boolean IsSensor();
-	void SetSensorDetectsStatic(boolean inDetectsStatic);
-	boolean SensorDetectsStatic();
+	void SetCollideKinematicVsNonDynamic(boolean inCollide);
+	boolean GetCollideKinematicVsNonDynamic();
 	void SetUseManifoldReduction(boolean inUseReduction);
 	boolean GetUseManifoldReduction();
 	unsigned long GetObjectLayer();
