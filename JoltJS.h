@@ -43,6 +43,7 @@
 #include "Jolt/Physics/Ragdoll/Ragdoll.h"
 #include "Jolt/Physics/SoftBody/SoftBodyCreationSettings.h"
 #include "Jolt/Physics/SoftBody/SoftBodySharedSettings.h"
+#include "Jolt/Physics/SoftBody/SoftBodyShape.h"
 #include "Jolt/Physics/Character/CharacterVirtual.h"
 #include "Jolt/Physics/Vehicle/VehicleConstraint.h"
 #include "Jolt/Physics/Vehicle/MotorcycleController.h"
@@ -249,10 +250,14 @@ constexpr EMotorState EMotorState_Position = EMotorState::Position;
 constexpr ETransmissionMode ETransmissionMode_Auto = ETransmissionMode::Auto;
 constexpr ETransmissionMode ETransmissionMode_Manual = ETransmissionMode::Manual;
 
-// Alias for values to avoid clashes
+// Alias for ETireFrictionDirection values to avoid clashes
 using ETireFrictionDirection = VehicleConstraint::ETireFrictionDirection;
 constexpr ETireFrictionDirection ETireFrictionDirection_Longitudinal = ETireFrictionDirection::Longitudinal;
 constexpr ETireFrictionDirection ETireFrictionDirection_Lateral = ETireFrictionDirection::Lateral;
+
+// Alias for ESwingType values to avoid clashes
+constexpr ESwingType ESwingType_Cone = ESwingType::Cone;
+constexpr ESwingType ESwingType_Pyramid = ESwingType::Pyramid;
 
 // Callback for traces
 static void TraceImpl(const char *inFMT, ...)

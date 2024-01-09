@@ -185,6 +185,11 @@ enum ETireFrictionDirection {
 	"ETireFrictionDirection_Lateral",
 };
 
+enum ESwingType {
+	"ESwingType_Cone",
+	"ESwingType_Pyramid",
+};
+
 interface Vec3MemRef {
 };
 
@@ -343,6 +348,7 @@ interface Mat44 {
 	[Value] static Mat44 sRotationTranslation([Const, Ref] Quat inRotation, [Const, Ref] Vec3 inTranslation);
 	[Value] static Mat44 sInverseRotationTranslation([Const, Ref] Quat inRotation, [Const, Ref] Vec3 inTranslation);
 	[Value] static Mat44 sScale(float inScale);
+	[Value] static Mat44 sPerspective(float inFovY, float inAspect, float inNear, float inFar);
 	[Value] Vec3 GetAxisX();
 	[Value] Vec3 GetAxisY();
 	[Value] Vec3 GetAxisZ();
@@ -1100,6 +1106,7 @@ interface SwingTwistConstraintSettings {
 	[Value] attribute Vec3 mPosition2;
 	[Value] attribute Vec3 mTwistAxis2;
 	[Value] attribute Vec3 mPlaneAxis2;
+	attribute ESwingType mSwingType;
 	attribute float mNormalHalfConeAngle;
 	attribute float mPlaneHalfConeAngle;
 	attribute float mTwistMinAngle;
@@ -1164,6 +1171,7 @@ interface SixDOFConstraintSettings {
 	[Value] attribute Vec3 mAxisX2;
 	[Value] attribute Vec3 mAxisY2;
 	attribute float[] mMaxFriction;
+	attribute ESwingType mSwingType;
 	attribute float[] mLimitMin;
 	attribute float[] mLimitMax;
 	[Value] attribute SpringSettings[] mLimitsSpringSettings;
@@ -1177,6 +1185,10 @@ interface SixDOFConstraint {
 	void SetRotationLimits([Const, Ref] Vec3 inLimitMin, [Const, Ref] Vec3 inLimitMax);
 	float GetLimitsMin(SixDOFConstraintSettings_EAxis inAxis);
 	float GetLimitsMax(SixDOFConstraintSettings_EAxis inAxis);
+	[Const, Value] Vec3 GetTranslationLimitsMin();
+	[Const, Value] Vec3 GetTranslationLimitsMax();
+	[Const, Value] Vec3 GetRotationLimitsMin();
+	[Const, Value] Vec3 GetRotationLimitsMax();
 	boolean IsFixedAxis(SixDOFConstraintSettings_EAxis inAxis);
 	boolean IsFreeAxis(SixDOFConstraintSettings_EAxis inAxis);
 	[Const, Ref] SpringSettings GetLimitsSpringSettings(SixDOFConstraintSettings_EAxis inAxis);
@@ -1239,6 +1251,8 @@ interface MotionProperties {
 	[Value] Vec3 GetInverseInertiaDiagonal();
 	[Value] Quat GetInertiaRotation();
 	void SetInverseInertia([Const, Ref] Vec3 inInvI, [Const, Ref] Quat inRotation);
+	[Const, Value] Vec3 LockTranslation([Const, Ref] Vec3 inV);
+	[Const, Value] Vec3 LockAngular([Const, Ref] Vec3 inV);
 };
 
 interface GroupFilter {
@@ -1290,10 +1304,13 @@ interface Body {
 	boolean GetCollideKinematicVsNonDynamic();
 	void SetUseManifoldReduction(boolean inUseReduction);
 	boolean GetUseManifoldReduction();
+	void SetApplyGyroscopicForce(boolean inApply);
+	boolean GetApplyGyroscopicForce();
 	unsigned long GetObjectLayer();
 	[Ref] CollisionGroup GetCollisionGroup();
 	boolean GetAllowSleeping();
 	void SetAllowSleeping(boolean inAllow);
+	void ResetSleepTimer();
 	float GetFriction();
 	void SetFriction(float inFriction);
 	float GetRestitution();
@@ -1916,6 +1933,7 @@ interface PhysicsSystem {
 	unsigned long GetMaxBodies();
 	void GetBodies([Ref] BodyIDVector outBodies);
 	void GetActiveBodies(EBodyType inBodyType, [Ref] BodyIDVector outBodies);
+	[Const, Value] AABox GetBounds();
 	void AddConstraint(Constraint inConstraint);
 	void RemoveConstraint(Constraint inConstraint);
 	void SetContactListener(ContactListener inListener);
@@ -1960,6 +1978,9 @@ interface BodyCreationSettings {
 	attribute EAllowedDOFs mAllowedDOFs;
 	attribute boolean mAllowDynamicOrKinematic;
 	attribute boolean mIsSensor;
+	attribute boolean mUseManifoldReduction;
+	attribute boolean mCollideKinematicVsNonDynamic;
+	attribute boolean mApplyGyroscopicForce;
 	attribute EMotionQuality mMotionQuality;
 	attribute boolean mAllowSleeping;
 	attribute float mFriction;
@@ -1969,6 +1990,8 @@ interface BodyCreationSettings {
 	attribute float mMaxLinearVelocity;
 	attribute float mMaxAngularVelocity;
 	attribute float mGravityFactor;
+	attribute unsigned long mNumVelocityStepsOverride;
+	attribute unsigned long mNumPositionStepsOverride;
 	attribute EOverrideMassProperties mOverrideMassProperties;
 	attribute float mInertiaMultiplier;
 	[Value] attribute MassProperties mMassPropertiesOverride;
@@ -2080,6 +2103,13 @@ interface SoftBodyCreationSettings {
 	attribute boolean mUpdatePosition;
 	attribute boolean mMakeRotationIdentity;
 };
+
+interface SoftBodyShape {
+	[Const] unsigned long GetSubShapeIDBits();
+	[Const] unsigned long GetFaceIndex([Const, Ref] SubShapeID inSubShapeID);
+};
+
+SoftBodyShape implements Shape;
 
 interface CharacterBaseSettings {
 	unsigned long GetRefCount();
@@ -2429,6 +2459,10 @@ interface VehicleConstraint {
 	[Const] Wheel GetWheel(unsigned long inIdx);
 	[Value] Mat44 GetWheelLocalTransform(unsigned long inWheelIndex, [Ref] Vec3 inWheelRight, [Ref] Vec3 inWheelUp);
 	[Value] Mat44 GetWheelWorldTransform(unsigned long inWheelIndex, [Ref] Vec3 inWheelRight, [Ref] Vec3 inWheelUp);
+	void SetNumStepsBetweenCollisionTestActive(unsigned long inSteps);
+	[Const] unsigned long GetNumStepsBetweenCollisionTestActive();
+	void SetNumStepsBetweenCollisionTestInactive(unsigned long inSteps);
+	[Const] unsigned long GetNumStepsBetweenCollisionTestInactive();
 };
 
 VehicleConstraint implements Constraint;
