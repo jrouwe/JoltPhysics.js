@@ -46,6 +46,7 @@
 				let mAnimation, mPose, mRagdoll;
 
 				let mAnimationTime = 0;
+				
 				// Initialize this example
 				initExample(Jolt, (mTime, mDeltaTime) => {
 					if (mAnimation && mPose && mRagdoll) {
@@ -56,7 +57,8 @@
 					}
 				});
 
-				scene.add(new THREE.AmbientLight(0xFFFFFF, 0.2))
+				scene.add(new THREE.AmbientLight(0xFFFFFF, 0.2));
+				
 				// Create a basic floor
 				createFloor();
 				const floorModel = dynamicObjects[dynamicObjects.length - 1];
@@ -100,13 +102,13 @@
 				const mRagdollSettings = await RagdollLoader.load(Jolt, "../assets/Human/Human.tof", Jolt.EMotionType_Kinematic, "Ragdoll");
 				mRagdoll = mRagdollSettings.CreateRagdoll(0, 0, physicsSystem);
 				mRagdoll.AddToPhysicsSystem(Jolt.EActivation_Activate);
+				
 				// Create ragdoll
-
 				let bodyCount = mRagdoll.GetBodyCount();
 				for (let i = 0; i < bodyCount; i++) {
 					const bodyID = mRagdoll.GetBodyID(i);
 					let body = physicsSystem.GetBodyLockInterfaceNoLock().TryGetBody(bodyID);
-					addToScene(body, 0xFF00FF);
+					addToThreeScene(body, 0xFF00FF);
 					bodyThreeJs.push(dynamicObjects[dynamicObjects.length - 1]);
 				}
 
@@ -129,6 +131,8 @@
 				dropdown.onchange = () => loadAnimation();
 
 				loadAnimation();
+				
+				// Position the camera
 				camera.position.z = -8;
 				camera.position.y = 3;
 			});

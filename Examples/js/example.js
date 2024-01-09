@@ -176,14 +176,18 @@ function renderExample() {
 	stats.update();
 }
 
-function addToScene(body, color) {
-	bodyInterface.AddBody(body.GetID(), Jolt.EActivation_Activate);
-
+function addToThreeScene(body, color) {
 	let threeObject = getThreeObjectForBody(body, color);
 	threeObject.userData.body = body;
 
 	scene.add(threeObject);
 	dynamicObjects.push(threeObject);
+}
+
+function addToScene(body, color) {
+	bodyInterface.AddBody(body.GetID(), Jolt.EActivation_Activate);
+
+	addToThreeScene(body, color);
 }
 
 function removeFromScene(threeObject) {

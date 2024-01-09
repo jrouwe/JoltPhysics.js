@@ -22,7 +22,6 @@
 			// In case you haven't built the library yourself, replace URL with: https://www.unpkg.com/jolt-physics/dist/jolt-physics.wasm-compat.js
 			import initJolt from './../js/jolt-physics.wasm-compat.js';
 
-
 			initJolt().then(async function (Jolt) {
 
 				const sTypes = ["Fixed", "Point", "Hinge", "Slider", "Cone", "Ragdoll"];
@@ -32,10 +31,10 @@
 				// Initialize this example
 				initExample(Jolt, null);
 
-				scene.add(new THREE.AmbientLight(0xFFFFFF, 0.2))
+				scene.add(new THREE.AmbientLight(0xFFFFFF, 0.2));
+
 				// Create a basic floor
 				createFloor();
-
 
 				let bodyThreeJs = [];
 				let mRagdoll = undefined;
@@ -48,7 +47,6 @@
 					dropdown.appendChild(option);
 				});
 				dropdown.value = sConstraintType;
-
 
 				async function createRagDoll() {
 					const sConstraintType = dropdown.value;
@@ -74,7 +72,7 @@
 					for (let i = 0; i < bodyCount; i++) {
 						const bodyID = mRagdoll.GetBodyID(i);
 						let body = physicsSystem.GetBodyLockInterfaceNoLock().TryGetBody(bodyID);
-						addToScene(body, 0xFF00FF);
+						addToThreeScene(body, 0xFF00FF);
 						bodyThreeJs.push(dynamicObjects[dynamicObjects.length - 1]);
 					}
 				}
@@ -82,6 +80,8 @@
 				dropdown.onchange = () => createRagDoll();
 
 				createRagDoll();
+				
+				// Position the camera
 				camera.position.z = -4;
 				camera.position.y = 2;
 			});

@@ -363,12 +363,12 @@ interface Mat44 {
 	[Value] Mat44 PostTranslated([Const, Ref] Vec3 inTranslation);
 	[Value] Mat44 PreScaled([Const, Ref] Vec3 inScale);
 	[Value] Mat44 PostScaled([Const, Ref] Vec3 inScale);
-	void SetColumn3(long inCol, [Ref] Vec3 inV);
-	void SetAxisX([Ref] Vec3 inV);
-	void SetAxisY([Ref] Vec3 inV);
-	void SetAxisZ([Ref] Vec3 inV);
-	void SetTranslation([Ref] Vec3 inV);
-	void SetColumn4(long inCol, [Ref] Vec4 inV);
+	void SetColumn3(long inCol, [Const, Ref] Vec3 inV);
+	void SetAxisX([Const, Ref] Vec3 inV);
+	void SetAxisY([Const, Ref] Vec3 inV);
+	void SetAxisZ([Const, Ref] Vec3 inV);
+	void SetTranslation([Const, Ref] Vec3 inV);
+	void SetColumn4(long inCol, [Const, Ref] Vec4 inV);
 };
 
 interface AABox {
@@ -2719,16 +2719,19 @@ interface Skeleton {
 };
 
 interface SkeletalAnimationJointState {
-	void FromMatrix([Ref] Mat44 inMatrix);
+	void FromMatrix([Const, Ref] Mat44 inMatrix);
 	[Value] Mat44 ToMatrix();
+	
 	[Value] attribute Vec3 mTranslation;
 	[Value] attribute Quat mRotation;
 };
 
 interface SkeletalAnimationKeyframe {
 	void SkeletalAnimationKeyframe();
+	
 	attribute float mTime;
 };
+
 SkeletalAnimationKeyframe implements SkeletalAnimationJointState;
 
 interface ArraySkeletonKeyframe {
@@ -2736,7 +2739,7 @@ interface ArraySkeletonKeyframe {
 	boolean empty();
 	long size();
 	[Ref] SkeletalAnimationKeyframe at(long inIndex);
-	void push_back([Ref] SkeletalAnimationKeyframe value);
+	void push_back([Ref] SkeletalAnimationKeyframe inValue);
 	void reserve(unsigned long inSize);
 	void resize(unsigned long inSize);
 	void clear();
@@ -2744,6 +2747,7 @@ interface ArraySkeletonKeyframe {
 
 interface SkeletalAnimationAnimatedJoint {
 	void SkeletalAnimationAnimatedJoint();
+	
 	[Value] attribute JPHString mJointName;
 	[Value] attribute ArraySkeletonKeyframe mKeyframes;
 };
@@ -2753,7 +2757,7 @@ interface ArraySkeletonAnimatedJoint {
 	boolean empty();
 	long size();
 	[Ref] SkeletalAnimationAnimatedJoint at(long inIndex);
-	void push_back([Ref] SkeletalAnimationAnimatedJoint value);
+	void push_back([Ref] SkeletalAnimationAnimatedJoint inValue);
 	void reserve(unsigned long inSize);
 	void resize(unsigned long inSize);
 	void clear();
@@ -2771,27 +2775,27 @@ interface SkeletonPose {
 	void SkeletonPose();
 	void SetSkeleton([Const ]Skeleton inSkeleton);
 	[Const] Skeleton GetSkeleton();
-	void	SetRootOffset([Ref] Vec3 inOffset);
+	void SetRootOffset([Ref] Vec3 inOffset);
 	[Value] Vec3 GetRootOffset();
-
-	[Const,Ref] SkeletalAnimationJointState GetJoint(long inJoint);
-	[Const,Ref] ArrayMat44 GetJointMatrices();
-	[Const,Ref] Mat44 GetJointMatrix(long inJoint);
-
-	void	CalculateJointMatrices();
-	void	CalculateJointStates();
+	[Const, Ref] SkeletalAnimationJointState GetJoint(long inJoint);
+	[Const, Ref] ArrayMat44 GetJointMatrices();
+	[Const, Ref] Mat44 GetJointMatrix(long inJoint);
+	void CalculateJointMatrices();
+	void CalculateJointStates();
 };
 
 interface RagdollPart {
 	attribute TwoBodyConstraintSettings mToParent;
 };
+
 RagdollPart implements BodyCreationSettings;
+
 interface ArrayRagdollPart {
 	void ArrayRagdollPart();
 	boolean empty();
 	long size();
 	[Ref] RagdollPart at(long inIndex);
-	void push_back([Ref] RagdollPart value);
+	void push_back([Ref] RagdollPart inValue);
 	void reserve(unsigned long inSize);
 	void resize(unsigned long inSize);
 	void clear();
@@ -2801,12 +2805,13 @@ interface RagdollAdditionalConstraint {
 	attribute long[] mBodyIdx;
 	attribute TwoBodyConstraintSettings mConstraint;
 };
+
 interface ArrayRagdollAdditionalConstraint {
 	void ArrayRagdollAdditionalConstraint();
 	boolean empty();
 	long size();
 	[Ref] RagdollAdditionalConstraint at(long inIndex);
-	void push_back([Ref] RagdollAdditionalConstraint value);
+	void push_back([Ref] RagdollAdditionalConstraint inValue);
 	void reserve(unsigned long inSize);
 	void resize(unsigned long inSize);
 	void clear();
@@ -2817,15 +2822,14 @@ interface RagdollSettings {
 	boolean Stabilize();
 	Ragdoll CreateRagdoll(long inCollisionGroup, long inUserData, PhysicsSystem inSystem);
 	Skeleton GetSkeleton();
+	void DisableParentChildCollisions([Const] optional Mat44MemRef inJointMatrices, optional float inMinSeparationDistance);
+	void CalculateBodyIndexToConstraintIndex();
+	void CalculateConstraintIndexToBodyIdxPair();
+	
 	attribute Skeleton mSkeleton;
 	[Value] attribute ArrayRagdollPart mParts;
 	[Value] attribute ArrayRagdollAdditionalConstraint mAdditionalConstraints;
-	void DisableParentChildCollisions([Const] optional Mat44MemRef inJointMatrices, optional float inMinSeparationDistance);
-
-	void CalculateBodyIndexToConstraintIndex();
-	void CalculateConstraintIndexToBodyIdxPair();
 };
-
 
 interface Ragdoll {
 	void Ragdoll(PhysicsSystem inSystem);
@@ -2838,10 +2842,10 @@ interface Ragdoll {
 	void GetPose([Ref] SkeletonPose outPose, optional boolean inLockBodies);
 	void DriveToPoseUsingKinematics([Const, Ref] SkeletonPose inPose, float inDeltaTime, optional boolean inLockBodies);
 	void DriveToPoseUsingMotors([Const, Ref] SkeletonPose inPose);
-	void SetLinearAndAngularVelocity([Ref] Vec3 inLinearVelocity, [Ref] Vec3 inAngularVelocity, optional boolean inLockBodies);
-	void SetLinearVelocity([Ref] Vec3 inLinearVelocity, optional boolean inLockBodies);
-	void AddLinearVelocity([Ref] Vec3 inLinearVelocity, optional boolean inLockBodies);
-	void AddImpulse([Ref] Vec3 inImpulse, optional boolean inLockBodies);
+	void SetLinearAndAngularVelocity([Const, Ref] Vec3 inLinearVelocity, [Const, Ref] Vec3 inAngularVelocity, optional boolean inLockBodies);
+	void SetLinearVelocity([Const, Ref] Vec3 inLinearVelocity, optional boolean inLockBodies);
+	void AddLinearVelocity([Const, Ref] Vec3 inLinearVelocity, optional boolean inLockBodies);
+	void AddImpulse([Const, Ref] Vec3 inImpulse, optional boolean inLockBodies);
 	void GetRootTransform([Ref] Vec3 outPosition, [Ref] Quat outRotation, optional boolean inLockBodies);
 	long GetBodyCount();
 	[Value] BodyID GetBodyID(long inBodyIndex);
@@ -2849,9 +2853,9 @@ interface Ragdoll {
 	long GetConstraintCount();
 	[Value] AABox GetWorldSpaceBounds(optional boolean inLockBodies);
 	[Const] TwoBodyConstraint GetConstraint(long inConstraintIndex);
-
 	[Const] RagdollSettings GetRagdollSettings();
 };
+
 interface BroadPhaseLayerInterface {
 	unsigned long GetNumBroadPhaseLayers();
 };
