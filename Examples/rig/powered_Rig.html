@@ -65,13 +65,6 @@
             mAnimationTime += mDeltaTime;
 	          mPose.CalculateJointMatrices();
 	          mRagdoll.DriveToPoseUsingMotors(mPose);
-	          //mRagdoll.DriveToPoseUsingKinematics(mPose, mDeltaTime);
-
-            /*let bodyCount = mRagdoll.GetBodyCount();
-            for(let i=0; i < bodyCount; i++) {
-              const bodyID = mRagdoll.GetBodyID(i);
-              bodyInterface.ActivateBody(bodyID);
-            }; */
           }
         });
 
@@ -151,6 +144,12 @@
           mAnimation.Sample(0.0, mPose);
           mPose.CalculateJointMatrices();
           mRagdoll.SetPose(mPose);
+          //wake up, in case we tried to animate to a Pose and all motors 'finished'
+          let bodyCount = mRagdoll.GetBodyCount();
+          for(let i=0; i < bodyCount; i++) {
+            const bodyID = mRagdoll.GetBodyID(i);
+            bodyInterface.ActivateBody(bodyID);
+          };
         }
 
         dropdown.onchange = () => loadAnimation();
