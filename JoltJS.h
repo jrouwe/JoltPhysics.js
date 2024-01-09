@@ -40,6 +40,7 @@
 #include "Jolt/Physics/Constraints/SixDOFConstraint.h"
 #include "Jolt/Physics/Body/BodyInterface.h"
 #include "Jolt/Physics/Body/BodyCreationSettings.h"
+#include "Jolt/Physics/Ragdoll/Ragdoll.h"
 #include "Jolt/Physics/SoftBody/SoftBodyCreationSettings.h"
 #include "Jolt/Physics/SoftBody/SoftBodySharedSettings.h"
 #include "Jolt/Physics/Character/CharacterVirtual.h"
@@ -53,6 +54,9 @@
 #include "Jolt/Physics/Collision/BroadPhase/ObjectVsBroadPhaseLayerFilterMask.h"
 #include "Jolt/Physics/Collision/ObjectLayerPairFilterMask.h"
 #include "Jolt/Physics/Body/BodyActivationListener.h"
+#include "Jolt/Skeleton/SkeletalAnimation.h"
+#include "Jolt/Skeleton/SkeletonPose.h"
+#include "Jolt/Skeleton/Skeleton.h"
 
 #include <iostream>
 
@@ -69,6 +73,8 @@ using ArrayFloat = Array<float>;
 using ArrayUint = Array<uint>;
 using ArrayUint8 = Array<uint8>;
 using Vec3MemRef = Vec3;
+using Mat44MemRef = Mat44;
+using ArrayMat44 = Array<Mat44>;
 using FloatMemRef = float;
 using UintMemRef = uint;
 using Uint8MemRef = uint8;
@@ -102,6 +108,15 @@ using CastShapeAnyHitCollisionCollector = AnyHitCollisionCollector<CastShapeColl
 using ArrayWheelSettings = Array<Ref<WheelSettings>>;
 using ArrayVehicleAntiRollBar = Array<VehicleAntiRollBar>;
 using ArrayVehicleDifferentialSettings = Array<VehicleDifferentialSettings>;
+using SkeletalAnimationJointState = SkeletalAnimation::JointState;
+using SkeletalAnimationKeyframe = SkeletalAnimation::Keyframe;
+using SkeletalAnimationAnimatedJoint = SkeletalAnimation::AnimatedJoint;
+using ArraySkeletonKeyframe = Array<SkeletalAnimationKeyframe>;
+using ArraySkeletonAnimatedJoint = Array<SkeletalAnimationAnimatedJoint>;
+using RagdollPart = RagdollSettings::Part;
+using RagdollAdditionalConstraint = RagdollSettings::AdditionalConstraint;
+using ArrayRagdollPart = Array<RagdollPart>;
+using ArrayRagdollAdditionalConstraint = Array<RagdollAdditionalConstraint>;
 
 // Alias for EBodyType values to avoid clashes
 constexpr EBodyType EBodyType_RigidBody = EBodyType::RigidBody;
