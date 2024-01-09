@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>JoltPhysics.js demo</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<link rel="stylesheet" type="text/css" href="../style.css">
+	</head>
+	<body>
+		<div id="container">Loading...</div>
+		<div id="info">JoltPhysics.js Load Rig demo<br />
+			<label>Constraint Type: <select id="constraintTypes"></select></label>
+		</div>
+		<script src="../js/three/three.min.js"></script>
+		<script src="../js/three/OrbitControls.js"></script>
+		<script src="../js/three/WebGL.js"></script>
+		<script src="../js/three/stats.min.js"></script>
+		<script src="../js/example.js"></script>
+		<script src="../js/object_stream.js"></script>
+		<script src="../js/ragdoll_loader.js"></script>
+		<script type="module">
+			// In case you haven't built the library yourself, replace URL with: https://www.unpkg.com/jolt-physics/dist/jolt-physics.wasm-compat.js
+			import initJolt from './../js/jolt-physics.wasm-compat.js';
+
+			initJolt().then(async function (Jolt) {
+
+				const sTypes = ["Fixed", "Point", "Hinge", "Slider", "Cone", "Ragdoll"];
+
+				let sConstraintType = "Ragdoll";
+
+				// Initialize this example
+				initExample(Jolt, null);
+
+				scene.add(new THREE.AmbientLight(0xFFFFFF, 0.2));
+
+				// Create a basic floor
+				createFloor();
+
+				let bodyThreeJs = [];
+				let mRagdoll = undefined;
+
+				const dropdown = document.getElementById('constraintTypes');
+				sTypes.forEach(type => {
+					const option = document.createElement('option');
+					option.value = type;
+					option.innerText = type;
+					dropdown.appendChild(option);
+				});
+				dropdown.value = sConstraintType;
+
+				async function createRagDoll() {
+					const sConstraintType = dropdown.value;
+					// Load ragdoll
+					const mRagdollSettings = await RagdollLoader.load(Jolt, "../assets/Human/Human.tof", Jolt.EMotionType_Dynamic, sConstraintType);
+
+					bodyThreeJs.forEach(threeObject => {
+						scene.remove(threeObject);
+						const idx = dynamicObjects.indexOf(threeObject);
+						dynamicObjects.splice(idx, 1);
+					});
+					bodyThreeJs = [];
+
+					if (mRagdoll) {
+						mRagdoll.RemoveFromPhysicsSystem();
+						Jolt.destroy(mRagdoll);
+					}
+					// Create ragdoll
+					mRagdoll = mRagdollSettings.CreateRagdoll(0, 0, physicsSystem);
+					mRagdoll.AddToPhysicsSystem(Jolt.EActivation_Activate);
+
+					let bodyCount = mRagdoll.GetBodyCount();
+					for (let i = 0; i < bodyCount; i++) {
+						const bodyID = mRagdoll.GetBodyID(i);
+						let body = physicsSystem.GetBodyLockInterfaceNoLock().TryGetBody(bodyID);
+						addToThreeScene(body, 0xFF00FF);
+						bodyThreeJs.push(dynamicObjects[dynamicObjects.length - 1]);
+					}
+				}
+
+				dropdown.onchange = () => createRagDoll();
+
+				createRagDoll();
+
+				// Position the camera
+				camera.position.z = -4;
+				camera.position.y = 2;
+			});
+		</script>
+	</body>
+</html>

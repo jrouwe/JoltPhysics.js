@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 interface JPHString {
+	void JPHString(DOMString str, long length);
 	[Const] DOMString c_str(); // TODO: This is not a nice way to get a string from an interface
 	unsigned long size();
 };
@@ -15,6 +16,17 @@ interface ArrayVec3 {
 	void resize(unsigned long inSize);
 	void clear();
 	Vec3MemRef data();
+};
+
+interface ArrayMat44 {
+	boolean empty();
+	long size();
+	[Ref] Mat44 at(long inIndex);
+	void push_back([Const, Ref] Mat44 inValue);
+	void reserve(unsigned long inSize);
+	void resize(unsigned long inSize);
+	void clear();
+	Mat44MemRef data();
 };
 
 enum EBodyType {
@@ -176,6 +188,9 @@ enum ETireFrictionDirection {
 interface Vec3MemRef {
 };
 
+interface Mat44MemRef {
+};
+
 interface FloatMemRef {
 };
 
@@ -230,6 +245,23 @@ interface Vec3 {
 	float ReduceMax();
 	[Const, Value] Vec3 Sqrt();
 	[Const, Value] Vec3 GetSign();
+};
+
+interface Vec4 {
+	void Vec4();
+	void Vec4([Const, Ref] Vec4 inV);
+	void Vec4([Ref] Vec3 inV, float inW);
+	void Vec4(float inX, float inY, float inZ, float inW);
+	float GetX();
+	float GetY();
+	float GetZ();
+	float GetW();
+	void SetX(float inX);
+	void SetY(float inY);
+	void SetZ(float inZ);
+	void SetW(float inW);
+	void Set(float inX, float inY, float inZ, float inW);
+	[Operator="[]"] float GetComponent(unsigned long inCoordinate);
 };
 
 interface Vector2 {
@@ -331,6 +363,12 @@ interface Mat44 {
 	[Value] Mat44 PostTranslated([Const, Ref] Vec3 inTranslation);
 	[Value] Mat44 PreScaled([Const, Ref] Vec3 inScale);
 	[Value] Mat44 PostScaled([Const, Ref] Vec3 inScale);
+	void SetColumn3(long inCol, [Const, Ref] Vec3 inV);
+	void SetAxisX([Const, Ref] Vec3 inV);
+	void SetAxisY([Const, Ref] Vec3 inV);
+	void SetAxisZ([Const, Ref] Vec3 inV);
+	void SetTranslation([Const, Ref] Vec3 inV);
+	void SetColumn4(long inCol, [Const, Ref] Vec4 inV);
 };
 
 interface AABox {
@@ -340,6 +378,7 @@ interface AABox {
 
 	[Value] attribute Vec3 mMin;
 	[Value] attribute Vec3 mMax;
+	boolean Overlaps([Const, Ref] AABox inOther);
 };
 
 interface OrientedBox {
@@ -1906,7 +1945,10 @@ interface MassProperties {
 
 interface BodyCreationSettings {
 	void BodyCreationSettings([Const] Shape inShape, [Ref] Vec3 inPosition, [Ref] Quat inRotation, EMotionType inMotionType, unsigned long inObjectLayer);
-
+	[Const] ShapeSettings GetShapeSettings();
+	void SetShapeSettings([Const] ShapeSettings inShape);	
+	[Const] Shape GetShape();
+	void SetShape([Const] Shape inShape);	
 	[Value] attribute Vec3 mPosition;
 	[Value] attribute Quat mRotation;
 	[Value] attribute Vec3 mLinearVelocity;
@@ -2667,6 +2709,152 @@ interface MotorcycleController {
 };
 
 MotorcycleController implements WheeledVehicleController;
+
+interface Skeleton {
+	void Skeleton();
+	long AddJoint([Const, Ref] JPHString inName, long inParentIndex);
+	long GetJointCount();
+	boolean AreJointsCorrectlyOrdered();
+	void CalculateParentJointIndices();
+};
+
+interface SkeletalAnimationJointState {
+	void FromMatrix([Const, Ref] Mat44 inMatrix);
+	[Value] Mat44 ToMatrix();
+	
+	[Value] attribute Vec3 mTranslation;
+	[Value] attribute Quat mRotation;
+};
+
+interface SkeletalAnimationKeyframe {
+	void SkeletalAnimationKeyframe();
+	
+	attribute float mTime;
+};
+
+SkeletalAnimationKeyframe implements SkeletalAnimationJointState;
+
+interface ArraySkeletonKeyframe {
+	void ArraySkeletonKeyframe();
+	boolean empty();
+	long size();
+	[Ref] SkeletalAnimationKeyframe at(long inIndex);
+	void push_back([Ref] SkeletalAnimationKeyframe inValue);
+	void reserve(unsigned long inSize);
+	void resize(unsigned long inSize);
+	void clear();
+};
+
+interface SkeletalAnimationAnimatedJoint {
+	void SkeletalAnimationAnimatedJoint();
+	
+	[Value] attribute JPHString mJointName;
+	[Value] attribute ArraySkeletonKeyframe mKeyframes;
+};
+
+interface ArraySkeletonAnimatedJoint {
+	void ArraySkeletonAnimatedJoint();
+	boolean empty();
+	long size();
+	[Ref] SkeletalAnimationAnimatedJoint at(long inIndex);
+	void push_back([Ref] SkeletalAnimationAnimatedJoint inValue);
+	void reserve(unsigned long inSize);
+	void resize(unsigned long inSize);
+	void clear();
+};
+
+interface SkeletalAnimation {
+	void SkeletalAnimation();
+	float GetDuration();
+	void ScaleJoints(float inScale);
+	void Sample(float inTime, [Ref] SkeletonPose ioPose);
+	[Ref] ArraySkeletonAnimatedJoint GetAnimatedJoints();
+};
+
+interface SkeletonPose {
+	void SkeletonPose();
+	void SetSkeleton([Const ]Skeleton inSkeleton);
+	[Const] Skeleton GetSkeleton();
+	void SetRootOffset([Ref] Vec3 inOffset);
+	[Value] Vec3 GetRootOffset();
+	[Const, Ref] SkeletalAnimationJointState GetJoint(long inJoint);
+	[Const, Ref] ArrayMat44 GetJointMatrices();
+	[Const, Ref] Mat44 GetJointMatrix(long inJoint);
+	void CalculateJointMatrices();
+	void CalculateJointStates();
+};
+
+interface RagdollPart {
+	attribute TwoBodyConstraintSettings mToParent;
+};
+
+RagdollPart implements BodyCreationSettings;
+
+interface ArrayRagdollPart {
+	void ArrayRagdollPart();
+	boolean empty();
+	long size();
+	[Ref] RagdollPart at(long inIndex);
+	void push_back([Ref] RagdollPart inValue);
+	void reserve(unsigned long inSize);
+	void resize(unsigned long inSize);
+	void clear();
+};
+
+interface RagdollAdditionalConstraint {
+	attribute long[] mBodyIdx;
+	attribute TwoBodyConstraintSettings mConstraint;
+};
+
+interface ArrayRagdollAdditionalConstraint {
+	void ArrayRagdollAdditionalConstraint();
+	boolean empty();
+	long size();
+	[Ref] RagdollAdditionalConstraint at(long inIndex);
+	void push_back([Ref] RagdollAdditionalConstraint inValue);
+	void reserve(unsigned long inSize);
+	void resize(unsigned long inSize);
+	void clear();
+};
+
+interface RagdollSettings {
+	void RagdollSettings();
+	boolean Stabilize();
+	Ragdoll CreateRagdoll(long inCollisionGroup, long inUserData, PhysicsSystem inSystem);
+	Skeleton GetSkeleton();
+	void DisableParentChildCollisions([Const] optional Mat44MemRef inJointMatrices, optional float inMinSeparationDistance);
+	void CalculateBodyIndexToConstraintIndex();
+	void CalculateConstraintIndexToBodyIdxPair();
+	
+	attribute Skeleton mSkeleton;
+	[Value] attribute ArrayRagdollPart mParts;
+	[Value] attribute ArrayRagdollAdditionalConstraint mAdditionalConstraints;
+};
+
+interface Ragdoll {
+	void Ragdoll(PhysicsSystem inSystem);
+	void AddToPhysicsSystem(EActivation inActivationMode, optional boolean inLockBodies);
+	void RemoveFromPhysicsSystem(optional boolean inLockBodies);
+	void Activate(optional boolean inLockBodies);
+	boolean IsActive(optional boolean inLockBodies);
+	void SetGroupID(long inGroupID, optional boolean inLockBodies);
+	void SetPose([Const, Ref] SkeletonPose inPose, optional boolean inLockBodies);
+	void GetPose([Ref] SkeletonPose outPose, optional boolean inLockBodies);
+	void DriveToPoseUsingKinematics([Const, Ref] SkeletonPose inPose, float inDeltaTime, optional boolean inLockBodies);
+	void DriveToPoseUsingMotors([Const, Ref] SkeletonPose inPose);
+	void SetLinearAndAngularVelocity([Const, Ref] Vec3 inLinearVelocity, [Const, Ref] Vec3 inAngularVelocity, optional boolean inLockBodies);
+	void SetLinearVelocity([Const, Ref] Vec3 inLinearVelocity, optional boolean inLockBodies);
+	void AddLinearVelocity([Const, Ref] Vec3 inLinearVelocity, optional boolean inLockBodies);
+	void AddImpulse([Const, Ref] Vec3 inImpulse, optional boolean inLockBodies);
+	void GetRootTransform([Ref] Vec3 outPosition, [Ref] Quat outRotation, optional boolean inLockBodies);
+	long GetBodyCount();
+	[Value] BodyID GetBodyID(long inBodyIndex);
+	[Const, Ref] BodyIDVector GetBodyIDs(); 
+	long GetConstraintCount();
+	[Value] AABox GetWorldSpaceBounds(optional boolean inLockBodies);
+	[Const] TwoBodyConstraint GetConstraint(long inConstraintIndex);
+	[Const] RagdollSettings GetRagdollSettings();
+};
 
 interface BroadPhaseLayerInterface {
 	unsigned long GetNumBroadPhaseLayers();
