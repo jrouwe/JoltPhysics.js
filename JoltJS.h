@@ -118,6 +118,7 @@ using RagdollPart = RagdollSettings::Part;
 using RagdollAdditionalConstraint = RagdollSettings::AdditionalConstraint;
 using ArrayRagdollPart = Array<RagdollPart>;
 using ArrayRagdollAdditionalConstraint = Array<RagdollAdditionalConstraint>;
+using CompoundShapeSubShape = CompoundShape::SubShape;
 
 // Alias for EBodyType values to avoid clashes
 constexpr EBodyType EBodyType_RigidBody = EBodyType::RigidBody;

@@ -730,6 +730,22 @@ interface ConvexHullShape {
 
 ConvexHullShape implements ConvexShape;
 
+// Compound shape
+interface CompoundShapeSubShape {
+	[Value] Vec3 GetPositionCOM();
+	[Value] Quat GetRotation();
+
+	[Const] attribute Shape mShape;
+	attribute unsigned long mUserData;
+};
+
+interface CompoundShape {
+	long GetNumSubShapes();
+	[Const, Ref] CompoundShapeSubShape GetSubShape(long inIdx);
+};
+
+CompoundShape implements Shape;
+
 // Static compound
 interface StaticCompoundShapeSettings {
 	void StaticCompoundShapeSettings();
@@ -741,7 +757,7 @@ StaticCompoundShapeSettings implements ShapeSettings;
 interface StaticCompoundShape {
 };
 
-StaticCompoundShape implements Shape;
+StaticCompoundShape implements CompoundShape;
 
 // Decorated shape
 interface DecoratedShapeSettings {
@@ -766,6 +782,7 @@ ScaledShapeSettings implements DecoratedShapeSettings;
 
 interface ScaledShape {
 	void ScaledShape(Shape inShape, [Ref, Const] Vec3 inScale);
+	[Value] Vec3 GetScale();
 };
 
 ScaledShape implements DecoratedShape;
@@ -795,6 +812,8 @@ interface RotatedTranslatedShapeSettings {
 RotatedTranslatedShapeSettings implements DecoratedShapeSettings;
 
 interface RotatedTranslatedShape {
+	[Value] Quat GetRotation();	
+	[Value] Vec3 GetPosition();	
 };
 
 RotatedTranslatedShape implements DecoratedShape;
