@@ -44,6 +44,7 @@
 #include "Jolt/Physics/SoftBody/SoftBodyCreationSettings.h"
 #include "Jolt/Physics/SoftBody/SoftBodySharedSettings.h"
 #include "Jolt/Physics/SoftBody/SoftBodyShape.h"
+#include "Jolt/Physics/SoftBody/SoftBodyMotionProperties.h"
 #include "Jolt/Physics/Character/CharacterVirtual.h"
 #include "Jolt/Physics/Vehicle/VehicleConstraint.h"
 #include "Jolt/Physics/Vehicle/MotorcycleController.h"
@@ -88,6 +89,7 @@ using ArraySoftBodySharedSettingsVertex = Array<SoftBodySharedSettingsVertex>;
 using ArraySoftBodySharedSettingsFace = Array<SoftBodySharedSettingsFace>;
 using ArraySoftBodySharedSettingsEdge = Array<SoftBodySharedSettingsEdge>;
 using ArraySoftBodySharedSettingsVolume = Array<SoftBodySharedSettingsVolume>;
+using ArraySoftBodyVertex = Array<SoftBodyVertex>;
 using EGroundState = CharacterBase::EGroundState;
 using Vector2 = Vector<2>;
 using ArrayRayCastResult = Array<RayCastResult>;

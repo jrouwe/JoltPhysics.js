@@ -8,7 +8,9 @@
 	</head>
 	<body>
 		<div id="container">Loading...</div>
-		<div id="info">JoltPhysics.js soft body demo</div>
+		<div id="info">JoltPhysics.js soft body demo<br/>
+			<input type="checkbox" id="show-particles"><label>Show soft body particles</label>
+		</div>
 
 		<script src="js/three/three.min.js"></script>
 		<script src="js/three/OrbitControls.js"></script>
@@ -19,6 +21,8 @@
 		<script type="module">
 			// In case you haven't built the library yourself, replace URL with: https://www.unpkg.com/jolt-physics/dist/jolt-physics.wasm-compat.js
 			import initJolt from './js/jolt-physics.wasm-compat.js';
+
+			let markers = null;
 
 			initJolt().then(function (Jolt) {
 				let towerHeight = 11;
@@ -33,7 +37,7 @@
 					};
 
 				// Initialize this example
-				initExample(Jolt, null);
+				initExample(Jolt, onUpdate);
 
 				// Create a basic floor
 				createFloor();
@@ -113,6 +117,46 @@
 					creationSettings.mMassPropertiesOverride.mMass = 100.0;
 					let body = bodyInterface.CreateBody(creationSettings);
 					addToScene(body, colors[s]);
+				}
+
+				// Update function that draws the particle locations
+				function onUpdate(time, deltaTime) {
+					const showParticles = document.getElementById('show-particles');
+					if (showParticles.checked) {
+						const vertices = Jolt.castObject(body.GetMotionProperties(), Jolt.SoftBodyMotionProperties).GetVertices();
+						const transform = body.GetWorldTransform();
+
+						const points = [];
+						const material = new THREE.LineBasicMaterial({ color: 0xffff00 });
+
+						let n = vertices.size();
+						for (let i = 0; i < n; ++i) {
+							// Get vertex position in world space
+							let v = vertices.at(i);
+							let pos = transform.Multiply3x3(v.mPosition).Add(transform.GetTranslation());
+
+							// Add 3 lines
+							let x = pos.GetX(), y = pos.GetY(), z = pos.GetZ();
+							points.push(new THREE.Vector3(x - 0.1, y, z));
+							points.push(new THREE.Vector3(x + 0.1, y, z));
+							points.push(new THREE.Vector3(x, y - 0.1, z));
+							points.push(new THREE.Vector3(x, y + 0.1, z));
+							points.push(new THREE.Vector3(x, y, z - 0.1));
+							points.push(new THREE.Vector3(x, y, z + 0.1));
+						}
+						if (markers == null) {
+							const geometry = new THREE.BufferGeometry().setFromPoints(points);
+							markers = new THREE.LineSegments(geometry, material);
+							scene.add(markers);
+						}
+						else {
+							markers.geometry.setFromPoints(points);
+						}
+					}
+					else if (markers != null) {
+						scene.remove(markers);
+						markers = null;
+					}
 				}
 			});
 

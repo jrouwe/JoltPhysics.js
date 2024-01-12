@@ -2124,6 +2124,41 @@ interface SoftBodyCreationSettings {
 	attribute boolean mAllowSleeping;
 };
 
+interface SoftBodyVertex {
+	[Value] attribute Vec3 mPreviousPosition;
+	[Value] attribute Vec3 mPosition;
+	[Value] attribute Vec3 mVelocity;
+	attribute float mInvMass;
+};
+
+interface ArraySoftBodyVertex {
+	boolean empty();
+	long size();
+	[Ref] SoftBodyVertex at(long inIndex);
+	void push_back([Const, Ref] SoftBodyVertex inValue);
+	void reserve(unsigned long inSize);
+	void resize(unsigned long inSize);
+	void clear();
+};
+
+interface SoftBodyMotionProperties {
+	[Const] SoftBodySharedSettings GetSettings();
+	[Ref] ArraySoftBodyVertex GetVertices();
+	[Ref] SoftBodyVertex GetVertex(unsigned long inIndex);
+	[Const, Ref] PhysicsMaterialList GetMaterials();
+	[Const, Ref] ArraySoftBodySharedSettingsFace GetFaces();
+	[Const, Ref] SoftBodySharedSettingsFace GetFace(unsigned long inIndex);
+	unsigned long GetNumIterations();
+	void SetNumIterations(unsigned long inNumIterations);
+	float GetPressure();
+	void SetPressure(float inPressure);
+	boolean GetUpdatePosition();
+	void SetUpdatePosition(boolean inUpdatePosition);
+	[Const, Ref] AABox GetLocalBounds();
+};
+
+SoftBodyMotionProperties implements MotionProperties;
+
 interface SoftBodyShape {
 	[Const] unsigned long GetSubShapeIDBits();
 	[Const] unsigned long GetFaceIndex([Const, Ref] SubShapeID inSubShapeID);
