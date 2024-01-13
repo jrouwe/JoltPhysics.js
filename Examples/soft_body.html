@@ -60,41 +60,45 @@
 				sharedSettings.mVertices.at(vertexIndex(gridSize - 1, gridSize - 1)).mInvMass = 0.0;
 
 				// Create edges
-				for (let y = 0; y < gridSize; ++y)
+				const edge = new Jolt.SoftBodySharedSettingsEdge(0, 0, compliance);
+				const constraints = sharedSettings.mEdgeConstraints;
+				for (let y = 0; y < gridSize; ++y) {
 					for (let x = 0; x < gridSize; ++x) {
-						let v0 = vertexIndex(x, y);
+						edge.set_mVertex(0, vertexIndex(x, y));
 						if (x < gridSize - 1) {
-							let v1 = vertexIndex(x + 1, y);
-							sharedSettings.mEdgeConstraints.push_back(new Jolt.SoftBodySharedSettingsEdge(v0, v1, compliance));
+							edge.set_mVertex(1, vertexIndex(x + 1, y));
+							constraints.push_back(edge);
 						}
 						if (y < gridSize - 1) {
-							let v1 = vertexIndex(x, y + 1);
-							sharedSettings.mEdgeConstraints.push_back(new Jolt.SoftBodySharedSettingsEdge(v0, v1, compliance));
+							edge.set_mVertex(1, vertexIndex(x, y + 1));
+							constraints.push_back(edge);
 						}
 						if (x < gridSize - 1 && y < gridSize - 1) {
-							let v1 = vertexIndex(x + 1, y + 1);
-							sharedSettings.mEdgeConstraints.push_back(new Jolt.SoftBodySharedSettingsEdge(v0, v1, compliance));
+							edge.set_mVertex(1, vertexIndex(x + 1, y + 1));
+							constraints.push_back(edge);
 
-							v0 = vertexIndex(x + 1, y);
-							v1 = vertexIndex(x, y + 1);
-							sharedSettings.mEdgeConstraints.push_back(new Jolt.SoftBodySharedSettingsEdge(v0, v1, compliance));
+							edge.set_mVertex(0, vertexIndex(x + 1, y));
+							edge.set_mVertex(1, vertexIndex(x, y + 1));
+							constraints.push_back(edge);
 						}
 					}
+				}
 				sharedSettings.CalculateEdgeLengths();
 
 				// Create faces
-				for (let y = 0; y < gridSize - 1; ++y)
+				const face = new Jolt.SoftBodySharedSettingsFace(0, 0, 0, 0);
+				for (let y = 0; y < gridSize - 1; ++y) {
 					for (let x = 0; x < gridSize - 1; ++x) {
-						let v0 = vertexIndex(x, y);
-						let v1 = vertexIndex(x, y + 1);
-						let v2 = vertexIndex(x + 1, y + 1);
-						sharedSettings.AddFace(new Jolt.SoftBodySharedSettingsFace(v0, v1, v2, 0));
-
-						v1 = vertexIndex(x + 1, y + 1);
-						v2 = vertexIndex(x + 1, y);
-						sharedSettings.AddFace(new Jolt.SoftBodySharedSettingsFace(v0, v1, v2, 0));
+						face.set_mVertex(0, vertexIndex(x, y));
+						face.set_mVertex(1, vertexIndex(x, y + 1));
+						face.set_mVertex(2, vertexIndex(x + 1, y + 1));
+						sharedSettings.AddFace(face);
+						
+						face.set_mVertex(1, vertexIndex(x + 1, y + 1));
+						face.set_mVertex(2, vertexIndex(x + 1, y));
+						sharedSettings.AddFace(face);
 					}
-
+				}
 				sharedSettings.Optimize();
 
 				// Create soft body
