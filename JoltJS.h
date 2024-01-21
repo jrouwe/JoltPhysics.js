@@ -253,10 +253,12 @@ constexpr EMotorState EMotorState_Position = EMotorState::Position;
 constexpr ETransmissionMode ETransmissionMode_Auto = ETransmissionMode::Auto;
 constexpr ETransmissionMode ETransmissionMode_Manual = ETransmissionMode::Manual;
 
-// Alias for ETireFrictionDirection values to avoid clashes
-using ETireFrictionDirection = VehicleConstraint::ETireFrictionDirection;
-constexpr ETireFrictionDirection ETireFrictionDirection_Longitudinal = ETireFrictionDirection::Longitudinal;
-constexpr ETireFrictionDirection ETireFrictionDirection_Lateral = ETireFrictionDirection::Lateral;
+// Defining ETireFrictionDirection since we cannot pass references to float
+enum ETireFrictionDirection
+{
+	ETireFrictionDirection_Longitudinal,
+	ETireFrictionDirection_Lateral
+};
 
 // Alias for ESwingType values to avoid clashes
 constexpr ESwingType ESwingType_Cone = ESwingType::Cone;
@@ -558,8 +560,9 @@ public:
 
 	void					SetVehicleConstraint(VehicleConstraint &inConstraint)
 	{
-		inConstraint.SetCombineFriction([this](uint inWheelIndex, ETireFrictionDirection inTireFrictionDirection, float inTireFriction, const Body &inBody2, const SubShapeID &inSubShapeID2) {
-			return GetCombinedFriction(inWheelIndex, inTireFrictionDirection, inTireFriction, inBody2, inSubShapeID2);
+		inConstraint.SetCombineFriction([this](uint inWheelIndex, float &ioLongitudinalFriction, float &ioLateralFriction, const Body &inBody2, const SubShapeID &inSubShapeID2) {
+			ioLongitudinalFriction = GetCombinedFriction(inWheelIndex, ETireFrictionDirection_Longitudinal, ioLongitudinalFriction, inBody2, inSubShapeID2);
+			ioLateralFriction = GetCombinedFriction(inWheelIndex, ETireFrictionDirection_Lateral, ioLateralFriction, inBody2, inSubShapeID2);
 		});
 		inConstraint.SetPreStepCallback([this](VehicleConstraint &inVehicle, float inDeltaTime, PhysicsSystem &inPhysicsSystem) {
 			OnPreStepCallback(inVehicle, inDeltaTime, inPhysicsSystem);

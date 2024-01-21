@@ -1325,6 +1325,8 @@ interface Body {
 	boolean GetUseManifoldReduction();
 	void SetApplyGyroscopicForce(boolean inApply);
 	boolean GetApplyGyroscopicForce();
+	void SetEnhancedInternalEdgeRemoval(boolean inApply);
+	boolean GetEnhancedInternalEdgeRemoval();
 	unsigned long GetObjectLayer();
 	[Ref] CollisionGroup GetCollisionGroup();
 	boolean GetAllowSleeping();
@@ -2001,6 +2003,7 @@ interface BodyCreationSettings {
 	attribute boolean mCollideKinematicVsNonDynamic;
 	attribute boolean mApplyGyroscopicForce;
 	attribute EMotionQuality mMotionQuality;
+	attribute boolean mEnhancedInternalEdgeRemoval;
 	attribute boolean mAllowSleeping;
 	attribute float mFriction;
 	attribute float mRestitution;
@@ -2102,6 +2105,7 @@ interface SoftBodySharedSettings {
 	[Value] attribute ArraySoftBodySharedSettingsEdge mEdgeConstraints;
 	[Value] attribute ArraySoftBodySharedSettingsVolume mVolumeConstraints;
 	[Value] attribute PhysicsMaterialList mMaterials;
+	attribute float mVertexRadius;
 };
 
 interface SoftBodyCreationSettings {
