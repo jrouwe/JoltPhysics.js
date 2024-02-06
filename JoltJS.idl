@@ -568,6 +568,7 @@ interface ShapeResult {
 	boolean HasError();
 	[Const, Ref] JPHString GetError();
 	Shape Get();
+	void Clear();
 };
 
 // Shape

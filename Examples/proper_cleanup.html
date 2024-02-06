@@ -51,7 +51,9 @@
 				let boxPosition = new Jolt.Vec3(5, 0, 0);
 				compound.AddShape(boxPosition, Jolt.Quat.prototype.sIdentity(), box); // 'box' is now owned by 'compound'
 				Jolt.destroy(boxPosition);
-				let shape = compound.Create().Get();
+				let shapeResult = compound.Create();
+				let shape = shapeResult.Get();
+				shapeResult.Clear(); // We no longer need the shape result, it keeps a reference to 'shape' (which it will also release the next time you create another shape)
 				shape.AddRef(); // We want to own this shape so we can delete 'compound' which internally keeps a reference
 				Jolt.destroy(compound);
 
