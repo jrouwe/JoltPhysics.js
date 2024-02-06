@@ -350,6 +350,7 @@ public:
 		delete mTempAllocator;
 		delete Factory::sInstance;
 		Factory::sInstance = nullptr;
+		UnregisterTypes();
 	}
 
 	/// Step the world
