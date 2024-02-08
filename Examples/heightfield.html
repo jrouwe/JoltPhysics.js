@@ -85,7 +85,7 @@
 				// Create the body
 				const position = new Jolt.Vec3(x, -20, z); // The image tends towards 'white', so offset it down closer to zero
 				const rotation = new Jolt.Quat(0, 0, 0, 1)
-				var creationSettings = new Jolt.BodyCreationSettings(shape, position, rotation, Jolt.EBodyType_Static, LAYER_NON_MOVING);
+				var creationSettings = new Jolt.BodyCreationSettings(shape, position, rotation, Jolt.EMotionType_Static, LAYER_NON_MOVING);
 				let body = bodyInterface.CreateBody(creationSettings);
 				Jolt.destroy(creationSettings);
 				return body;

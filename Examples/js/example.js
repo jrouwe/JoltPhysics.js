@@ -203,7 +203,7 @@ function removeFromScene(threeObject) {
 
 function createFloor(size = 50) {
 	var shape = new Jolt.BoxShape(new Jolt.Vec3(size, 0.5, size), 0.05, null);
-	var creationSettings = new Jolt.BodyCreationSettings(shape, new Jolt.Vec3(0, -0.5, 0), new Jolt.Quat(0, 0, 0, 1), Jolt.EBodyType_Static, LAYER_NON_MOVING);
+	var creationSettings = new Jolt.BodyCreationSettings(shape, new Jolt.Vec3(0, -0.5, 0), new Jolt.Quat(0, 0, 0, 1), Jolt.EMotionType_Static, LAYER_NON_MOVING);
 	let body = bodyInterface.CreateBody(creationSettings);
 	Jolt.destroy(creationSettings);
 	addToScene(body, 0xc7c7c7);
@@ -345,7 +345,7 @@ function createVehicleTrack() {
 			});
 			const shape = hull.Create().Get();
 			tempVec.Set(0, 10, 0);
-			const creationSettings = new Jolt.BodyCreationSettings(shape, tempVec, mapRot, Jolt.EBodyType_Static, LAYER_NON_MOVING);
+			const creationSettings = new Jolt.BodyCreationSettings(shape, tempVec, mapRot, Jolt.EMotionType_Static, LAYER_NON_MOVING);
 			Jolt.destroy(hull);
 			const body = bodyInterface.CreateBody(creationSettings);
 			Jolt.destroy(creationSettings);
