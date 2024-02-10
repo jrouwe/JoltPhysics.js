@@ -3121,4 +3121,6 @@ interface JoltInterface {
 	TempAllocator GetTempAllocator();
 	ObjectLayerPairFilter GetObjectLayerPairFilter();
 	ObjectVsBroadPhaseLayerFilter GetObjectVsBroadPhaseLayerFilter();
+	static unsigned long long sGetTotalMemory();
+	static unsigned long long sGetFreeMemory();
 };

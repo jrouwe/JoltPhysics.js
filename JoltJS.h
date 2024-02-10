@@ -64,6 +64,9 @@
 #include "Jolt/Skeleton/Skeleton.h"
 
 #include <iostream>
+#include <malloc.h>
+#include <unistd.h>
+#include <emscripten/em_asm.h>
 
 using namespace JPH;
 using namespace std;
@@ -392,6 +395,23 @@ public:
 	ObjectVsBroadPhaseLayerFilter *GetObjectVsBroadPhaseLayerFilter()
 	{
 		return mObjectVsBroadPhaseLayerFilter;
+	}
+
+	/// Get the total reserved memory in bytes
+	/// See: https://github.com/emscripten-core/emscripten/blob/7459cab167138419168b5ac5eacf74702d5a3dae/test/core/test_mallinfo.c#L16-L18
+	static size_t			sGetTotalMemory()
+	{
+		return (size_t)EM_ASM_PTR(return HEAP8.length);
+	}
+
+	/// Get the amount of free memory in bytes
+	/// See: https://github.com/emscripten-core/emscripten/blob/7459cab167138419168b5ac5eacf74702d5a3dae/test/core/test_mallinfo.c#L20-L25
+	static size_t			sGetFreeMemory()
+	{
+		struct mallinfo i = mallinfo();
+		uintptr_t total_memory = sGetTotalMemory();
+		uintptr_t dynamic_top = (uintptr_t)sbrk(0);
+		return total_memory - dynamic_top + i.fordblks;
 	}
 
 private:

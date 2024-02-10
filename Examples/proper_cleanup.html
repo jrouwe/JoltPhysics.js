@@ -14,6 +14,9 @@
 			import initJolt from './js/jolt-physics.wasm-compat.js';
 
 			initJolt().then(function (Jolt) {
+				// Record how much memory we have in the beginning
+				const memoryFreeBefore = Jolt.JoltInterface.prototype.sGetFreeMemory();
+
 				// Create very simple object layer filter with only a single layer
 				const MY_LAYER = 0;
 				let objectFilter = new Jolt.ObjectLayerPairFilterTable(1);
@@ -87,6 +90,9 @@
 
 				// Clean up the jolt interface
 				Jolt.destroy(jolt);
+
+				// Record how much memory we have at the end
+				console.log("Memory leaked: " + (memoryFreeBefore - Jolt.JoltInterface.prototype.sGetFreeMemory()) + " bytes");
 			});
 		</script>
 	</body>
