@@ -1276,7 +1276,7 @@ PathConstraintPathJS implements PathConstraintPath;
 interface PathConstraintPathJS {
 	[Const] void PathConstraintPathJS();
 	[Const] float GetPathMaxFraction();
-	[Const] float GetClosestPoint(Vec3 inPosition);
+	[Const] float GetClosestPoint([Const] Vec3 inPosition, float inFractionHint);
 	[Const] void GetPointOnPath(float inFraction, Vec3 outPathPosition, Vec3 outPathTangent, Vec3 outPathNormal, Vec3 outPathBinormal);
 };
 
@@ -2307,8 +2307,8 @@ interface CharacterContactListenerJS {
 	void CharacterContactListenerJS();
 	void OnAdjustBodyVelocity([Const] CharacterVirtual inCharacter, [Const, Ref] Body inBody2, [Ref] Vec3 ioLinearVelocity, [Ref] Vec3 ioAngularVelocity);
 	boolean OnContactValidate([Const] CharacterVirtual inCharacter, [Const, Ref] BodyID inBodyID2, [Const, Ref] SubShapeID inSubShapeID2);
-	void OnContactAdded([Const] CharacterVirtual inCharacter, [Const, Ref] BodyID inBodyID2, [Const, Ref] SubShapeID inSubShapeID2, Vec3 inContactPosition, Vec3 inContactNormal, [Ref] CharacterContactSettings ioSettings);
-	void OnContactSolve([Const] CharacterVirtual inCharacter, [Const, Ref] BodyID inBodyID2, [Const, Ref] SubShapeID inSubShapeID2, Vec3 inContactPosition, Vec3 inContactNormal, Vec3 inContactVelocity, [Const] PhysicsMaterial inContactMaterial, Vec3 inCharacterVelocity, [Ref] Vec3 ioNewCharacterVelocity);
+	void OnContactAdded([Const] CharacterVirtual inCharacter, [Const, Ref] BodyID inBodyID2, [Const, Ref] SubShapeID inSubShapeID2, [Const] Vec3 inContactPosition, [Const] Vec3 inContactNormal, [Ref] CharacterContactSettings ioSettings);
+	void OnContactSolve([Const] CharacterVirtual inCharacter, [Const, Ref] BodyID inBodyID2, [Const, Ref] SubShapeID inSubShapeID2, [Const] Vec3 inContactPosition, [Const] Vec3 inContactNormal, [Const] Vec3 inContactVelocity, [Const] PhysicsMaterial inContactMaterial, [Const] Vec3 inCharacterVelocity, [Ref] Vec3 ioNewCharacterVelocity);
 };
 
 [Prefix="CharacterVirtual::"]
@@ -2471,6 +2471,8 @@ interface CharacterVirtual {
 	boolean GetMaxHitsExceeded();
 	[Value] Vec3 GetShapeOffset();
 	void SetShapeOffset([Const, Ref] Vec3 inShapeOffset);
+	unsigned long long GetUserData();
+	void SetUserData(unsigned long long inUserData);
 	[Value] Vec3 CancelVelocityTowardsSteepSlopes([Const, Ref] Vec3 inDesiredVelocity);
 	void Update(float inDeltaTime, [Const, Ref] Vec3 inGravity, [Const, Ref] BroadPhaseLayerFilter inBroadPhaseLayerFilter, [Const, Ref] ObjectLayerFilter inObjectLayerFilter, [Const, Ref] BodyFilter inBodyFilter, [Const, Ref] ShapeFilter inShapeFilter, [Ref] TempAllocator inAllocator);
 	boolean CanWalkStairs([Const, Ref] Vec3 inLinearVelocity);

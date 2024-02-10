@@ -240,11 +240,11 @@ constexpr EConstraintSubType EConstraintSubType_Pulley = EConstraintSubType::Pul
 
 /// Alias for EPathRotationConstraintType to avoid clash
 constexpr EPathRotationConstraintType EPathRotationConstraintType_Free = EPathRotationConstraintType::Free; 
-constexpr EPathRotationConstraintType EPathRotationConstraintType_ConstrainAroundTangent = EPathRotationConstraintType::ConstrainAroundTangent; 
-constexpr EPathRotationConstraintType EPathRotationConstraintType_ConstrainAroundNormal = EPathRotationConstraintType::ConstrainAroundNormal; 
-constexpr EPathRotationConstraintType EPathRotationConstraintType_ConstrainAroundBinormal = EPathRotationConstraintType::ConstrainAroundBinormal; 
-constexpr EPathRotationConstraintType EPathRotationConstraintType_ConstrainToPath = EPathRotationConstraintType::ConstaintToPath;  //typo in original
-constexpr EPathRotationConstraintType EPathRotationConstraintType_FullyConstrained = EPathRotationConstraintType::FullyConstrained; 
+constexpr EPathRotationConstraintType EPathRotationConstraintType_ConstrainAroundTangent = EPathRotationConstraintType::ConstrainAroundTangent;
+constexpr EPathRotationConstraintType EPathRotationConstraintType_ConstrainAroundNormal = EPathRotationConstraintType::ConstrainAroundNormal;
+constexpr EPathRotationConstraintType EPathRotationConstraintType_ConstrainAroundBinormal = EPathRotationConstraintType::ConstrainAroundBinormal;
+constexpr EPathRotationConstraintType EPathRotationConstraintType_ConstrainToPath = EPathRotationConstraintType::ConstainToPath;
+constexpr EPathRotationConstraintType EPathRotationConstraintType_FullyConstrained = EPathRotationConstraintType::FullyConstrained;
 
 // Alias for SixDOFConstraintSettings::EAxis to avoid clashes
 using SixDOFConstraintSettings_EAxis = SixDOFConstraintSettings::EAxis;
@@ -498,8 +498,8 @@ class CharacterContactListenerEm: public CharacterContactListener
 {
 public:
 	// JavaScript compatible virtual functions
-	virtual void			OnContactAdded(const CharacterVirtual *inCharacter, const BodyID &inBodyID2, const SubShapeID &inSubShapeID2, Vec3 *inContactPosition, Vec3 *inContactNormal, CharacterContactSettings &ioSettings) = 0;
-	virtual void			OnContactSolve(const CharacterVirtual *inCharacter, const BodyID &inBodyID2, const SubShapeID &inSubShapeID2, Vec3 *inContactPosition, Vec3 *inContactNormal, Vec3 *inContactVelocity, const PhysicsMaterial *inContactMaterial, Vec3 *inCharacterVelocity, Vec3 &ioNewCharacterVelocity) = 0;
+	virtual void			OnContactAdded(const CharacterVirtual *inCharacter, const BodyID &inBodyID2, const SubShapeID &inSubShapeID2, const Vec3 *inContactPosition, const Vec3 *inContactNormal, CharacterContactSettings &ioSettings) = 0;
+	virtual void			OnContactSolve(const CharacterVirtual *inCharacter, const BodyID &inBodyID2, const SubShapeID &inSubShapeID2, const Vec3 *inContactPosition, const Vec3 *inContactNormal, const Vec3 *inContactVelocity, const PhysicsMaterial *inContactMaterial, const Vec3 *inCharacterVelocity, Vec3 &ioNewCharacterVelocity) = 0;
 
 	// Functions that call the JavaScript compatible virtual functions
 	virtual void			OnContactAdded(const CharacterVirtual *inCharacter, const BodyID &inBodyID2, const SubShapeID &inSubShapeID2, RVec3Arg inContactPosition, Vec3Arg inContactNormal, CharacterContactSettings &ioSettings) override
@@ -596,9 +596,9 @@ public:
 class PathConstraintPathEm: public PathConstraintPath
 {
 public:
-	virtual float 			GetClosestPoint(Vec3Arg inPosition) const
+	virtual float 			GetClosestPoint(Vec3Arg inPosition, float inFractionHint) const
 	{
-		return GetClosestPoint(&inPosition);
+		return GetClosestPoint(&inPosition, inFractionHint);
 	}
 	
 	virtual void 			GetPointOnPath(float inFraction, Vec3 &outPathPosition, Vec3 &outPathTangent, Vec3 &outPathNormal, Vec3 &outPathBinormal) const
@@ -606,7 +606,7 @@ public:
 		GetPointOnPath(inFraction, &outPathPosition, &outPathTangent, &outPathNormal, &outPathBinormal);
 	}
 
-	virtual float 			GetClosestPoint(Vec3 *inPosition) const = 0;
+	virtual float 			GetClosestPoint(const Vec3 *inPosition, float inFractionHint) const = 0;
 	virtual void 			GetPointOnPath(float inFraction, Vec3 *outPathPosition, Vec3 *outPathTangent, Vec3 *outPathNormal, Vec3 *outPathBinormal) const = 0;
 };
 

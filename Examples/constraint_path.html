@@ -79,7 +79,7 @@
 			path.GetPathMaxFraction = () => pointResolution;
 			const tmp = new THREE.Vector3();
 			const tmp2 = new THREE.Vector3();
-			path.GetClosestPoint = (vecPtr) => {
+			path.GetClosestPoint = (vecPtr, fractionHint) => {
 				const jVec3 = Jolt.wrapPointer(vecPtr, Jolt.Vec3);
 				SetV3(jVec3, tmp2);
 				const body2Loc = tmp2;
