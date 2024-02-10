@@ -226,6 +226,7 @@ interface Vec3 {
 	[Value] static Vec3 sMin([Const, Ref] Vec3 inLHS, [Const, Ref] Vec3 inRHS);
 	[Value] static Vec3 sMax([Const, Ref] Vec3 inLHS, [Const, Ref] Vec3 inRHS);
 	[Value] static Vec3 sClamp([Const, Ref] Vec3 inValue, [Const, Ref] Vec3 inMin, [Const, Ref] Vec3 inMax);
+	[Value] static Vec3 sUnitSpherical(float inTheta, float inPhi);
 	[Operator="[]"] float GetComponent(unsigned long inCoordinate);
 	[Operator="=="] boolean Equals([Const, Ref] Vec3 inV);
 	[Operator="!="] boolean NotEquals([Const, Ref] Vec3 inV);
