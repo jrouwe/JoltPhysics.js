@@ -85,7 +85,7 @@ This project has only been compiled under Linux.
 
 * Install [emscripten](https://emscripten.org/) and ensure that its environment variables have been setup
 * Install [cmake](https://cmake.org/)
-* Run ```./build.sh``` for the optimized build or ```./build.sh Debug``` for the debug build
+* Run ```./build.sh``` for the optimized build, ```./build.sh Debug``` for the debug build or ```./build.sh Debug -DENABLE_MEMORY_PROFILER=ON``` for the debug build with memory tracking
 
 ## Running
 

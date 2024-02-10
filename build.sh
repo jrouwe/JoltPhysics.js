@@ -18,7 +18,7 @@ if [ $? -ne 0 ]; then
 	exit 1
 fi
 
-cmake -B Build/$BUILD_TYPE -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+cmake -B Build/$BUILD_TYPE -DCMAKE_BUILD_TYPE=$BUILD_TYPE "${@}"
 if [ $? -ne 0 ]; then
 	exit 1
 fi

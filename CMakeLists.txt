@@ -11,6 +11,9 @@ set(JOLT_HEADER_FILE ${CMAKE_CURRENT_SOURCE_DIR}/JoltJS.h)
 set(JOLT_IDL_FILE ${CMAKE_CURRENT_SOURCE_DIR}/JoltJS.idl)
 set(OUTPUT_FOLDER ${CMAKE_CURRENT_SOURCE_DIR}/dist/)
 
+# Option to turn on memory profiling
+option(ENABLE_MEMORY_PROFILER "Enable emscriptens memory profiler to help find leaks" OFF)
+
 # The configurations we support
 set(CMAKE_CONFIGURATION_TYPES "Debug;Release;Distribution")
 
@@ -42,6 +45,16 @@ set(TOTAL_MEMORY 67108864 CACHE STRING "Total Memory")
 # Enable for resizable heap, with some amount of slowness
 set(ALLOW_MEMORY_GROWTH 0 CACHE STRING "Allow Memory Growth")
 
+# Enable memory profiler
+if (ENABLE_MEMORY_PROFILER)
+	set(MEMORY_PROFILER_FLAG "--memoryprofiler")
+	set(INCLUDE_DEMANGLE_ALL_FLAG "-s DEFAULT_LIBRARY_FUNCS_TO_INCLUDE='$demangleAll'")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${MEMORY_PROFILER_FLAG}")
+else()
+	set(MEMORY_PROFILER_FLAG "")
+	set(INCLUDE_DEMANGLE_ALL_FLAG "")
+endif()
+
 set(EMCC_ARGS
   --extern-pre-js ${JOLT_FRONT_MATTER_FILE}
   --post-js glue.js
@@ -55,7 +68,9 @@ set(EMCC_ARGS
   -s NO_EXIT_RUNTIME=1
   -s NO_FILESYSTEM=1
   -s TOTAL_STACK=1048576
-  -s TOTAL_MEMORY=${TOTAL_MEMORY})
+  -s TOTAL_MEMORY=${TOTAL_MEMORY}
+  ${MEMORY_PROFILER_FLAG}
+  ${INCLUDE_DEMANGLE_ALL_FLAG})
 
 if ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
 	set(EMCC_ARGS 
@@ -88,7 +103,8 @@ set(EMCC_GLUE_ARGS
   -Wall
   -std=c++17
   -DJPH_OBJECT_LAYER_BITS=32
-  -include ${JOLT_HEADER_FILE})
+  -include ${JOLT_HEADER_FILE}
+  ${MEMORY_PROFILER_FLAG})
 
 # Can't find a way to automatically inherit settings set by target_compile_definitions, so hardcoding defines here
 if ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")

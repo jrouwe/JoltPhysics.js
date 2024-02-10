@@ -141,6 +141,11 @@ function initExample(Jolt, updateFunction) {
 		const warning = WebGL.getWebGLErrorMessage();
 		container.appendChild(warning);
 	}
+
+	// The memory profiler doesn't have an ID so we can't mess with it in css, set an ID here
+	let memoryprofilerCanvas = document.getElementById("memoryprofiler_canvas");
+	if (memoryprofilerCanvas)
+		memoryprofilerCanvas.parentElement.id = "memoryprofiler";
 }
 
 function renderExample() {
