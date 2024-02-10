@@ -155,7 +155,7 @@
 			const prePhysicsUpdate = (deltaTime) => {
 				if (isInLava) {
 					// Teleport the user back to the origin if they fall off the platform
-					_tmpVec3.Set(0,10,0);
+					_tmpVec3.Set(0, 10, 0);
 					character.SetPosition(_tmpVec3);
 					isInLava = false;
 				}
@@ -164,14 +164,14 @@
 					updateSettings.mStickToFloorStepDown = Jolt.Vec3.prototype.sZero();
 				} else {
 					const vec = characterUp.clone().multiplyScalar(-updateSettings.mStickToFloorStepDown.Length());
-					updateSettings.mStickToFloorStepDown.Set(vec.x,vec.y,vec.z);
+					updateSettings.mStickToFloorStepDown.Set(vec.x, vec.y, vec.z);
 				}
 
 				if (!enableWalkStairs) {
 					updateSettings.mWalkStairsStepUp = Jolt.Vec3.prototype.sZero();
 				} else {
 					const vec = characterUp.clone().multiplyScalar(updateSettings.mWalkStairsStepUp.Length());
-					updateSettings.mWalkStairsStepUp.Set(vec.x,vec.y,vec.z);
+					updateSettings.mWalkStairsStepUp.Set(vec.x, vec.y, vec.z);
 				}
 				characterUp.multiplyScalar(-physicsSystem.GetGravity().Length());
 				character.ExtendedUpdate(deltaTime,

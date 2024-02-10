@@ -1247,6 +1247,8 @@ SixDOFConstraint implements TwoBodyConstraint;
 
 interface PathConstraintSettings {
 	void PathConstraintSettings();
+	
+	[Const] attribute PathConstraintPath mPath;
 	[Value] attribute Vec3 mPathPosition;
 	[Value] attribute Quat mPathRotation;
 	attribute float mPathFraction;
@@ -1254,6 +1256,7 @@ interface PathConstraintSettings {
 	attribute EPathRotationConstraintType mRotationConstraintType;
 	[Value] attribute MotorSettings mPositionMotorSettings;
 };
+
 PathConstraintSettings implements TwoBodyConstraintSettings;
 
 interface PathConstraintPath {
@@ -1266,6 +1269,7 @@ interface PathConstraintPath {
 
 interface PathConstraintPathEm {
 };
+
 PathConstraintPathJS implements PathConstraintPath;
 
 [JSImplementation="PathConstraintPathEm"]
@@ -1290,10 +1294,12 @@ interface PathConstraint {
 	void SetTargetPathFraction(float inFraction);
 	float GetTargetPathFraction();
 };
+
 PathConstraint implements TwoBodyConstraint;
 
 interface PulleyConstraintSettings {
 	void PulleyConstraintSettings();
+	
 	attribute EConstraintSpace mSpace;
 	[Value] attribute Vec3 mBodyPoint1;
 	[Value] attribute Vec3 mFixedPoint1;
@@ -1303,6 +1309,7 @@ interface PulleyConstraintSettings {
 	attribute float mMinLength;
 	attribute float mMaxLength;
 };
+
 PulleyConstraintSettings implements TwoBodyConstraintSettings;
 
 interface PulleyConstraint {
@@ -1311,6 +1318,7 @@ interface PulleyConstraint {
 	float GetMaxLength();
 	float GetCurrentLength();	
 };
+
 PulleyConstraint implements TwoBodyConstraint;
 
 interface BodyID {
