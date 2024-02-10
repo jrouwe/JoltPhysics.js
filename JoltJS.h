@@ -596,18 +596,18 @@ public:
 class PathConstraintPathEm: public PathConstraintPath
 {
 public:
-	virtual float 		GetClosestPoint(Vec3Arg inPosition) const
+	virtual float 			GetClosestPoint(Vec3Arg inPosition) const
 	{
 		return GetClosestPoint(&inPosition);
 	}
 	
-	virtual void 		GetPointOnPath(float inFraction, Vec3 &outPathPosition, Vec3 &outPathTangent, Vec3 &outPathNormal, Vec3 &outPathBinormal) const
+	virtual void 			GetPointOnPath(float inFraction, Vec3 &outPathPosition, Vec3 &outPathTangent, Vec3 &outPathNormal, Vec3 &outPathBinormal) const
 	{
 		GetPointOnPath(inFraction, &outPathPosition, &outPathTangent, &outPathNormal, &outPathBinormal);
 	}
 
-	virtual float 		GetClosestPoint(Vec3 *inPosition) const = 0;
-	virtual void 		GetPointOnPath(float inFraction, Vec3 *outPathPosition, Vec3 *outPathTangent, Vec3 *outPathNormal, Vec3 *outPathBinormal) const = 0;
+	virtual float 			GetClosestPoint(Vec3 *inPosition) const = 0;
+	virtual void 			GetPointOnPath(float inFraction, Vec3 *outPathPosition, Vec3 *outPathTangent, Vec3 *outPathNormal, Vec3 *outPathBinormal) const = 0;
 };
 
 class HeightFieldShapeConstantValues 
