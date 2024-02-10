@@ -1322,6 +1322,44 @@ interface PulleyConstraint {
 
 PulleyConstraint implements TwoBodyConstraint;
 
+interface GearConstraintSettings {
+	void GearConstraintSettings();
+	void SetRatio(long inNumTeethGear1, long inNumTeethGear2);
+	
+	attribute EConstraintSpace mSpace;
+	[Value] attribute Vec3 mHingeAxis1;
+	[Value] attribute Vec3 mHingeAxis2;
+	attribute float mRatio;
+};
+
+GearConstraintSettings implements TwoBodyConstraintSettings;
+
+interface GearConstraint {
+	void SetConstraints([Const] Constraint inGear1, [Const] Constraint inGear2);
+	float GetTotalLambda();
+};
+
+GearConstraint implements TwoBodyConstraint;
+
+interface RackAndPinionConstraintSettings {
+	void RackAndPinionConstraintSettings();
+	void SetRatio(long inNumTeethRack, float inRackLength, long inNumTeethPinion);
+	
+	attribute EConstraintSpace mSpace;
+	[Value] attribute Vec3 mHingeAxis;
+	[Value] attribute Vec3 mSliderAxis;
+	attribute float mRatio;
+};
+
+RackAndPinionConstraintSettings implements TwoBodyConstraintSettings;
+
+interface RackAndPinionConstraint {
+	void SetConstraints([Const] Constraint inPinion, [Const] Constraint inRack);
+	float GetTotalLambda();
+};
+
+RackAndPinionConstraint implements TwoBodyConstraint;
+
 interface BodyID {
 	void BodyID();
 	void BodyID([Const, Ref] BodyID inID);
