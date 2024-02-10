@@ -190,6 +190,15 @@ enum ESwingType {
 	"ESwingType_Pyramid",
 };
 
+enum EPathRotationConstraintType {
+	"EPathRotationConstraintType_Free",
+	"EPathRotationConstraintType_ConstrainAroundTangent",
+	"EPathRotationConstraintType_ConstrainAroundNormal",
+	"EPathRotationConstraintType_ConstrainAroundBinormal",
+	"EPathRotationConstraintType_ConstrainToPath",
+	"EPathRotationConstraintType_FullyConstrained"
+};
+
 interface Vec3MemRef {
 };
 
@@ -1235,6 +1244,82 @@ interface SixDOFConstraint {
 };
 
 SixDOFConstraint implements TwoBodyConstraint;
+
+interface PathConstraintSettings {
+	void PathConstraintSettings();
+	
+	[Const] attribute PathConstraintPath mPath;
+	[Value] attribute Vec3 mPathPosition;
+	[Value] attribute Quat mPathRotation;
+	attribute float mPathFraction;
+	attribute float mMaxFrictionForce;
+	attribute EPathRotationConstraintType mRotationConstraintType;
+	[Value] attribute MotorSettings mPositionMotorSettings;
+};
+
+PathConstraintSettings implements TwoBodyConstraintSettings;
+
+interface PathConstraintPath {
+	boolean IsLooping();
+	void SetIsLooping(boolean inIsLooping);
+	unsigned long GetRefCount();
+	void AddRef();
+	void Release();
+};
+
+interface PathConstraintPathEm {
+};
+
+PathConstraintPathJS implements PathConstraintPath;
+
+[JSImplementation="PathConstraintPathEm"]
+interface PathConstraintPathJS {
+	[Const] void PathConstraintPathJS();
+	[Const] float GetPathMaxFraction();
+	[Const] float GetClosestPoint(Vec3 inPosition);
+	[Const] void GetPointOnPath(float inFraction, Vec3 outPathPosition, Vec3 outPathTangent, Vec3 outPathNormal, Vec3 outPathBinormal);
+};
+
+interface PathConstraint {
+	void SetPath([Const] PathConstraintPath inPath, float inPathFraction);
+	[Const] PathConstraintPath GetPath();
+	float GetPathFraction();
+	void SetMaxFrictionForce(float inFrictionForce);
+	float GetMaxFrictionForce();
+	[Ref] MotorSettings GetPositionMotorSettings();
+	void SetPositionMotorState(EMotorState inState);
+	EMotorState GetPositionMotorState();
+	void SetTargetVelocity(float inVelocity);
+	float GetTargetVelocity();
+	void SetTargetPathFraction(float inFraction);
+	float GetTargetPathFraction();
+};
+
+PathConstraint implements TwoBodyConstraint;
+
+interface PulleyConstraintSettings {
+	void PulleyConstraintSettings();
+	
+	attribute EConstraintSpace mSpace;
+	[Value] attribute Vec3 mBodyPoint1;
+	[Value] attribute Vec3 mFixedPoint1;
+	[Value] attribute Vec3 mBodyPoint2;
+	[Value] attribute Vec3 mFixedPoint2;
+	attribute float mRatio;
+	attribute float mMinLength;
+	attribute float mMaxLength;
+};
+
+PulleyConstraintSettings implements TwoBodyConstraintSettings;
+
+interface PulleyConstraint {
+	void SetLength(float inMinLength, float inMaxLength);
+	float GetMinLength();
+	float GetMaxLength();
+	float GetCurrentLength();	
+};
+
+PulleyConstraint implements TwoBodyConstraint;
 
 interface BodyID {
 	void BodyID();

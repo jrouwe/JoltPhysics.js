@@ -151,10 +151,12 @@
 				}
 			}
 
+			const _tmpVec3 = new Jolt.Vec3();
 			const prePhysicsUpdate = (deltaTime) => {
 				if (isInLava) {
 					// Teleport the user back to the origin if they fall off the platform
-					character.SetPosition(new Jolt.Vec3(0, 10, 0));
+					_tmpVec3.Set(0, 10, 0);
+					character.SetPosition(_tmpVec3);
 					isInLava = false;
 				}
 				const characterUp = wrapVec3(character.GetUp());
@@ -162,14 +164,14 @@
 					updateSettings.mStickToFloorStepDown = Jolt.Vec3.prototype.sZero();
 				} else {
 					const vec = characterUp.clone().multiplyScalar(-updateSettings.mStickToFloorStepDown.Length());
-					updateSettings.mStickToFloorStepDown = unwrapVec3(vec);
+					updateSettings.mStickToFloorStepDown.Set(vec.x, vec.y, vec.z);
 				}
 
 				if (!enableWalkStairs) {
 					updateSettings.mWalkStairsStepUp = Jolt.Vec3.prototype.sZero();
 				} else {
 					const vec = characterUp.clone().multiplyScalar(updateSettings.mWalkStairsStepUp.Length());
-					updateSettings.mWalkStairsStepUp = unwrapVec3(vec);
+					updateSettings.mWalkStairsStepUp.Set(vec.x, vec.y, vec.z);
 				}
 				characterUp.multiplyScalar(-physicsSystem.GetGravity().Length());
 				character.ExtendedUpdate(deltaTime,
@@ -199,7 +201,8 @@
 					// While in air we allow sliding
 					allowSliding = true;
 				}
-				const characterUpRotation = Jolt.Quat.prototype.sEulerAngles(new Jolt.Vec3(upRotationX, 0, upRotationZ));
+				_tmpVec3.Set(upRotationX, 0, upRotationZ);
+				const characterUpRotation = Jolt.Quat.prototype.sEulerAngles(_tmpVec3);
 				character.SetUp(characterUpRotation.RotateAxisY());
 				character.SetRotation(characterUpRotation);
 				const upRotation = wrapQuat(characterUpRotation);
@@ -240,7 +243,8 @@
 					newVelocity.add(currentHorizontalVelocity);
 				}
 
-				character.SetLinearVelocity(unwrapVec3(newVelocity));
+				_tmpVec3.Set(newVelocity.x, newVelocity.y, newVelocity.z);
+				character.SetLinearVelocity(_tmpVec3);
 			}
 
 			const setCrouched = (crouched, forceUpdate) => {

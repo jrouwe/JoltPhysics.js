@@ -35,6 +35,9 @@
 #include "Jolt/Physics/Constraints/DistanceConstraint.h"
 #include "Jolt/Physics/Constraints/HingeConstraint.h"
 #include "Jolt/Physics/Constraints/ConeConstraint.h"
+#include "Jolt/Physics/Constraints/PathConstraint.h"
+#include "Jolt/Physics/Constraints/PathConstraintPath.h"
+#include "Jolt/Physics/Constraints/PulleyConstraint.h"
 #include "Jolt/Physics/Constraints/SliderConstraint.h"
 #include "Jolt/Physics/Constraints/SwingTwistConstraint.h"
 #include "Jolt/Physics/Constraints/SixDOFConstraint.h"
@@ -234,6 +237,14 @@ constexpr EConstraintSubType EConstraintSubType_Vehicle = EConstraintSubType::Ve
 constexpr EConstraintSubType EConstraintSubType_RackAndPinion = EConstraintSubType::RackAndPinion;
 constexpr EConstraintSubType EConstraintSubType_Gear = EConstraintSubType::Gear;
 constexpr EConstraintSubType EConstraintSubType_Pulley = EConstraintSubType::Pulley;
+
+/// Alias for EPathRotationConstraintType to avoid clash
+constexpr EPathRotationConstraintType EPathRotationConstraintType_Free = EPathRotationConstraintType::Free; 
+constexpr EPathRotationConstraintType EPathRotationConstraintType_ConstrainAroundTangent = EPathRotationConstraintType::ConstrainAroundTangent; 
+constexpr EPathRotationConstraintType EPathRotationConstraintType_ConstrainAroundNormal = EPathRotationConstraintType::ConstrainAroundNormal; 
+constexpr EPathRotationConstraintType EPathRotationConstraintType_ConstrainAroundBinormal = EPathRotationConstraintType::ConstrainAroundBinormal; 
+constexpr EPathRotationConstraintType EPathRotationConstraintType_ConstrainToPath = EPathRotationConstraintType::ConstaintToPath;  //typo in original
+constexpr EPathRotationConstraintType EPathRotationConstraintType_FullyConstrained = EPathRotationConstraintType::FullyConstrained; 
 
 // Alias for SixDOFConstraintSettings::EAxis to avoid clashes
 using SixDOFConstraintSettings_EAxis = SixDOFConstraintSettings::EAxis;
@@ -580,6 +591,23 @@ public:
 	virtual void			OnPreStepCallback(VehicleConstraint &inVehicle, float inDeltaTime, PhysicsSystem &inPhysicsSystem) = 0;
 	virtual void			OnPostCollideCallback(VehicleConstraint &inVehicle, float inDeltaTime, PhysicsSystem &inPhysicsSystem) = 0;
 	virtual void			OnPostStepCallback(VehicleConstraint &inVehicle, float inDeltaTime, PhysicsSystem &inPhysicsSystem) = 0;
+};
+
+class PathConstraintPathEm: public PathConstraintPath
+{
+public:
+	virtual float 			GetClosestPoint(Vec3Arg inPosition) const
+	{
+		return GetClosestPoint(&inPosition);
+	}
+	
+	virtual void 			GetPointOnPath(float inFraction, Vec3 &outPathPosition, Vec3 &outPathTangent, Vec3 &outPathNormal, Vec3 &outPathBinormal) const
+	{
+		GetPointOnPath(inFraction, &outPathPosition, &outPathTangent, &outPathNormal, &outPathBinormal);
+	}
+
+	virtual float 			GetClosestPoint(Vec3 *inPosition) const = 0;
+	virtual void 			GetPointOnPath(float inFraction, Vec3 *outPathPosition, Vec3 *outPathTangent, Vec3 *outPathNormal, Vec3 *outPathBinormal) const = 0;
 };
 
 class HeightFieldShapeConstantValues 
