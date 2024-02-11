@@ -9,10 +9,8 @@
 <body>
 	<div id="container">Loading...</div>
 	<div id="info">
-		JoltPhysics.js 2d svg-based complex path constraint demo<br />
+		JoltPhysics.js 2d svg-based path constraint demo<br />
 		These examples sample SVGs to demonstrate more complex PathConstraints<br />
-		<div style="font-weight: bold;background: rgba(0.2,0.2,0.2,0.2);display:inline-block;padding:10px">
-		</div>
 	</div>
 
 	<script src="js/three/three.min.js"></script>
@@ -81,40 +79,39 @@
 			class SVGJoltPath extends Jolt.PathConstraintPathJS {
 				constructor(svgPath, velocity, scale, sampleRate) {
 					super();
-
-  let normalizedPathData = svgPath.getPathData({normalize: true});
-  svgPath.setPathData(normalizedPathData);
 					this._svgPath = svgPath;
 					this._velocity = velocity;
 					this._scale = scale || 1;
 					this._sampleRate = sampleRate || 1;
-					this._length = this._svgPath.getTotalLength();
 					this._tmpVec = [new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3()];
-					// calculate center and size for later re-centering and scaling the SVG
-					this._calcBoundingBox();
 
 					// Emscripten require properties, not methods, for these functions, so we can not just declare them as normal class methods
 					this.GetClosestPoint = this.getClosestPoint;
 					this.GetPathMaxFraction = this.getPathMaxFraction;
 					this.GetPointOnPath = this.getPointOnPath;
 
-					// This SVG's native sampling is slow, so pre-calculate the needed points. Reduce sample-rate for this demo, since 
 					this.points = [];
-					const pathLen = this.GetPathMaxFraction();
+					// This SVG's native sampling is slow, so pre-calculate the needed points. Reduce sample-rate for this demo, since 
+					const pathLen = this._svgPath.getTotalLength();
 					for (let i = 0; i < pathLen; i+=this._sampleRate) {
 						this.points.push(this._getPos(i, new THREE.Vector3()));
 					}
+					// calculate center and size for later re-centering and scaling the SVG
+					this._calcBoundingBox();
+					this.points.forEach(pos => {
+						pos.set((pos.x - this.bbox.center.x) / this.bbox.width * this._scale, 0, (pos.y - this.bbox.center.y) / this.bbox.height * this._scale)
+					})
+					this._length = this.points.length;
 				}
 
 				_calcBoundingBox() {
 					const bbox = this.bbox = {min: { x: Number.POSITIVE_INFINITY, y: Number.POSITIVE_INFINITY}, max: {x: -Number.POSITIVE_INFINITY, y: -Number.POSITIVE_INFINITY}}
-					for(let i=0; i< this._length; i++) {
-						const p = this._svgPath.getPointAtLength(i)
+					this.points.forEach(p => {
 						bbox.min.x = Math.min(bbox.min.x, p.x)
 						bbox.min.y = Math.min(bbox.min.y, p.y)
 						bbox.max.x = Math.max(bbox.max.x, p.x)
 						bbox.max.y = Math.max(bbox.max.y, p.y)
-					}
+					});
 					bbox.width = bbox.max.x - bbox.min.x;
 					bbox.height = bbox.max.y - bbox.min.y;
 					bbox.center = { x: 0, y: 0 };
@@ -160,8 +157,8 @@
 				}
 
 				_getPos(fraction, threeVec) {
-					const pos = this._svgPath.getPointAtLength((fraction + this._length) % this._length);
-					threeVec.set((pos.x - this.bbox.center.x) / this.bbox.width * this._scale, 0, (pos.y - this.bbox.center.y) / this.bbox.height * this._scale)
+					const pos = this._svgPath.getPointAtLength(fraction);
+					threeVec.set(pos.x, pos.y, 0);
 					return threeVec;
 				}
 
