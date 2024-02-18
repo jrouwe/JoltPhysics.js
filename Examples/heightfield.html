@@ -44,8 +44,8 @@
 				</filter>
 			</defs>
 			<rect x="0" y="0" width="256" height="256" filter="url(#turbulenceFilter)"></rect>
-			<text x="64" y="96" style="font-weight: bold; font-size:52px; fill: #f0f">JOLT</text>
-			<text x="16" y="168" style="font-weight: bold; font-size:52px; fill: #ff0">PHYSICS</text>
+			<text x="64" y="96" style="font-weight: bold; font-size: 52px; user-select: none; fill: #f0f">JOLT</text>
+			<text x="16" y="168" style="font-weight: bold; font-size: 52px; user-select: none; fill: #ff0">PHYSICS</text>
 		</svg>
 		<!-- used for both the extraction of image-data to a height map, and for the CanvasTexture used to render the displacement map on the THREE side -->
 		<canvas style="display: none" id="canvas" width="256" height="256"></canvas>
@@ -102,6 +102,7 @@
 				const terrain = heightFieldFromSVGl(img, -img.width * mapScale / 2, -img.width * mapScale / 2);
 
 				const displacementMap = new THREE.CanvasTexture(document.getElementById('canvas'));
+
 				// Creating the plane with displacement
 				const planeMesh = new THREE.Mesh(
 					new THREE.PlaneGeometry(img.width * mapScale, img.width * mapScale, 256, 256),
@@ -120,6 +121,7 @@
 				bodyInterface.AddBody(terrain.GetID(), Jolt.EActivation_Activate);
 				scene.add(planeMesh);
 
+				// Create a bunch of spheres to drop on the terrain
 				const position = new Jolt.Vec3(0, 0, 0);
 				for (let y = 0; y < 10; y++)
 					for (let x = 0; x < 10; x++) {
@@ -128,6 +130,39 @@
 						position.Set(px, 20, py);
 						createSphere(position, 1, Jolt.EMotionType_Dynamic, LAYER_MOVING, 0xFF0000);
 					}
+
+				// Add a click event to the SVG to modify the terrain
+				const READ_SIZE = 8; // must be multiple of block-size used in construction
+				const terrainShape = Jolt.castObject(terrain.GetShape(), Jolt.HeightFieldShape);
+				const tempBufferPtr = Jolt._webidl_malloc(READ_SIZE * READ_SIZE * 4);
+				const tempBuffer = new Float32Array(Jolt.HEAPF32.buffer, tempBufferPtr, READ_SIZE * READ_SIZE); // READ_SIZE grid
+
+				const canvas = displacementMap.source.data;
+				const ctx = canvas.getContext('2d');
+
+				const svgEle = document.getElementById("sampleImg");
+				svgEle.addEventListener('click', (mouseEvt) => {
+					const x = mouseEvt.offsetX / svgEle.clientWidth;
+					const y = mouseEvt.offsetY / svgEle.clientHeight;
+
+					const offsetX = Math.min(Math.max((Math.floor(x * 256) - 3) & ~1, 0), img.width - READ_SIZE); // offset left of click and make multiple of block size
+					const offsetY = Math.min(Math.max((Math.floor(y * 256) - 3) & ~1, 0), img.height - READ_SIZE); // offset up from click and make multiple of block size
+					const texData = ctx.getImageData(offsetX, offsetY, READ_SIZE, READ_SIZE);
+
+					terrainShape.GetHeights(offsetX, offsetY, READ_SIZE, READ_SIZE, tempBufferPtr, READ_SIZE)
+
+					tempBuffer.forEach((_o, i) => {
+						tempBuffer[i] -= 0.1;
+						for (let j = 0; j < 3; j++) {
+							texData.data[i * 4 + j] = tempBuffer[i] * 10;
+						}
+					});
+
+					terrainShape.SetHeights(offsetX, offsetY, READ_SIZE, READ_SIZE, tempBufferPtr, READ_SIZE, jolt.GetTempAllocator());
+					ctx.putImageData(texData, offsetX, offsetY);
+					displacementMap.needsUpdate = true;
+					dynamicObjects.forEach(obj => bodyInterface.ActivateBody(obj.userData.body.GetID())); // wake sleeping objects
+				})
 			});
 
 		</script>
