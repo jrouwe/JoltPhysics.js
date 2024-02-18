@@ -1432,7 +1432,7 @@ interface CollisionGroup {
 };
 
 interface Body {
-	[Value] BodyID GetID();
+	[Const, Ref] BodyID GetID();
 	boolean IsActive();
 	boolean IsRigidBody();
 	boolean IsSoftBody();
@@ -1651,10 +1651,10 @@ interface ContactSettings {
 
 interface SubShapeIDPair {
 	void SubShapeIDPair();
-	[Value] BodyID GetBody1ID();
-	[Value] SubShapeID GetSubShapeID1();
-	[Value] BodyID GetBody2ID();
-	[Value] SubShapeID GetSubShapeID2();
+	[Const, Ref] BodyID GetBody1ID();
+	[Const, Ref] SubShapeID GetSubShapeID1();
+	[Const, Ref] BodyID GetBody2ID();
+	[Const, Ref] SubShapeID GetSubShapeID2();
 };
 
 interface ContactListener {
@@ -2072,7 +2072,7 @@ interface BodyIDVector {
 interface PhysicsSystem {
 	void SetGravity([Const, Ref] Vec3 inGravity);
 	[Value] Vec3 GetGravity();
-	[Const, Value] PhysicsSettings GetPhysicsSettings();
+	[Const, Ref] PhysicsSettings GetPhysicsSettings();
 	void SetPhysicsSettings([Const, Ref] PhysicsSettings inPhysicsSettings);
 	unsigned long GetNumBodies();
 	unsigned long GetNumActiveBodies(EBodyType inBodyType);
