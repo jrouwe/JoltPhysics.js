@@ -129,6 +129,11 @@ enum ValidateResult {
 	"ValidateResult_RejectAllContactsForThisBodyPair"
 };
 
+enum SoftBodyValidateResult {
+	"SoftBodyValidateResult_AcceptContact",
+	"SoftBodyValidateResult_RejectContact",
+};
+
 enum EActiveEdgeMode {
 	"EActiveEdgeMode_CollideOnlyWithActive",
 	"EActiveEdgeMode_CollideWithAll"
@@ -879,6 +884,8 @@ interface HeightFieldShape {
 	boolean IsNoCollision(long inX, long inY);
 	void GetHeights(long inX, long inY, long inSizeX, long inSizeY, FloatMemRef outHeights, long inHeightsStride);
 	void SetHeights(long inX, long inY, long inSizeX, long inSizeY, FloatMemRef inHeights, long inHeightsStride, [Ref] TempAllocator inAllocator, optional float inActiveEdgeCosThresholdAngle);
+	void GetMaterials(long inX, long inY, long inSizeX, long inSizeY, Uint8MemRef outMaterials, long inMaterialsStride);
+	boolean SetMaterials(long inX, long inY, long inSizeX, long inSizeY, Uint8MemRef inMaterials, long inMaterialsStride, PhysicsMaterialList inMaterialList, [Ref] TempAllocator inAllocator);
 };
 
 HeightFieldShape implements Shape;
@@ -1375,6 +1382,8 @@ interface SubShapeID {
 
 interface MotionProperties {
 	EMotionQuality GetMotionQuality();
+	EAllowedDOFs GetAllowedDOFs();
+	boolean GetAllowSleeping();
 	[Value] Vec3 GetLinearVelocity();
 	void SetLinearVelocity([Const, Ref] Vec3 inVelocity);
 	void SetLinearVelocityClamped([Const, Ref] Vec3 inVelocity);
@@ -1386,17 +1395,34 @@ interface MotionProperties {
 	void SetMaxLinearVelocity(float inVelocity);
 	float GetMaxAngularVelocity();
 	void SetMaxAngularVelocity(float inVelocity);
+	void ClampLinearVelocity();
+	void ClampAngularVelocity();
 	float GetLinearDamping();
 	void SetLinearDamping(float inDamping);
 	float GetAngularDamping();
 	void SetAngularDamping(float inDamping);
+	void SetMassProperties(EAllowedDOFs inAllowedDOFs, [Const, Ref] MassProperties inMassProperties);
 	float GetInverseMass();
+	float GetInverseMassUnchecked();
 	void SetInverseMass(float inInvM);
 	[Value] Vec3 GetInverseInertiaDiagonal();
 	[Value] Quat GetInertiaRotation();
 	void SetInverseInertia([Const, Ref] Vec3 inInvI, [Const, Ref] Quat inRotation);
+	[Value] Mat44 GetLocalSpaceInverseInertia();
+	[Value] Mat44 GetInverseInertiaForRotation([Const, Ref] Mat44 inRotation);
+	[Value] Vec3 MultiplyWorldSpaceInverseInertiaByVector([Const, Ref] Quat inRotation, [Const, Ref] Vec3 inV);
+	[Value] Vec3 GetPointVelocityCOM([Const, Ref] Vec3 inPointRelativeToCOM);
+	[Value] Vec3 GetAccumulatedForce();
+	[Value] Vec3 GetAccumulatedTorque();
+	void ResetForce();
+	void ResetTorque();
+	void ResetMotion();
 	[Const, Value] Vec3 LockTranslation([Const, Ref] Vec3 inV);
 	[Const, Value] Vec3 LockAngular([Const, Ref] Vec3 inV);
+	void SetNumVelocityStepsOverride(unsigned long inN);
+	unsigned long GetNumVelocityStepsOverride();
+	void SetNumPositionStepsOverride(unsigned long inN);
+	unsigned long GetNumPositionStepsOverride();
 };
 
 interface GroupFilter {
@@ -1474,6 +1500,7 @@ interface Body {
 	[Const, Value] Vec3 GetAccumulatedTorque();
 	void ResetForce();
 	void ResetTorque();
+	void ResetMotion();
 	void AddImpulse([Const, Ref] Vec3 inImpulse);
 	void AddImpulse([Const, Ref] Vec3 inImpulse, [Const, Ref] Vec3 inPosition);
 	void AddAngularImpulse([Const, Ref] Vec3 inAngularImpulse);
@@ -1672,6 +1699,36 @@ interface ContactListenerJS {
 	void OnContactAdded([Const, Ref] Body inBody1, [Const, Ref] Body inBody2, [Const, Ref] ContactManifold inManifold, [Ref] ContactSettings ioSettings);
 	void OnContactPersisted([Const, Ref] Body inBody1, [Const, Ref] Body inBody2, [Const, Ref] ContactManifold inManifold, [Ref] ContactSettings ioSettings);
 	void OnContactRemoved([Const, Ref] SubShapeIDPair inSubShapePair);
+};
+
+interface SoftBodyManifold {
+	[Const, Ref] ArraySoftBodyVertex GetVertices();
+	boolean HasContact([Const, Ref] SoftBodyVertex inVertex);
+	[Value] Vec3 GetLocalContactPoint([Const, Ref] SoftBodyVertex inVertex);
+	[Value] Vec3 GetContactNormal([Const, Ref] SoftBodyVertex inVertex);
+	[Value] BodyID GetContactBodyID([Const, Ref] SoftBodyVertex inVertex);
+};
+
+interface SoftBodyContactSettings {
+	attribute float mInvMassScale1;
+	attribute float mInvMassScale2;
+	attribute float mInvInertiaScale2;
+	attribute boolean mIsSensor;
+};
+
+interface SoftBodyContactListener {
+};
+
+interface SoftBodyContactListenerEm {
+};
+
+SoftBodyContactListenerEm implements SoftBodyContactListener;
+
+[JSImplementation="SoftBodyContactListenerEm"]
+interface SoftBodyContactListenerJS {
+	void SoftBodyContactListenerJS();
+	long OnSoftBodyContactValidate([Const, Ref] Body inSoftBody, [Const, Ref] Body inOtherBody, SoftBodyContactSettings ioSettings);
+	void OnSoftBodyContactAdded([Const, Ref] Body inSoftBody, [Const, Ref] SoftBodyManifold inManifold);
 };
 
 interface RayCastBodyCollector {
@@ -2084,6 +2141,8 @@ interface PhysicsSystem {
 	void RemoveConstraint(Constraint inConstraint);
 	void SetContactListener(ContactListener inListener);
 	ContactListener GetContactListener();
+	void SetSoftBodyContactListener(SoftBodyContactListener inListener);
+	SoftBodyContactListener GetSoftBodyContactListener();
 	void OptimizeBroadPhase();
 	[Ref] BodyInterface GetBodyInterface();
 	[Ref] BodyInterface GetBodyInterfaceNoLock();

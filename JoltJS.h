@@ -50,6 +50,8 @@
 #include "Jolt/Physics/SoftBody/SoftBodySharedSettings.h"
 #include "Jolt/Physics/SoftBody/SoftBodyShape.h"
 #include "Jolt/Physics/SoftBody/SoftBodyMotionProperties.h"
+#include "Jolt/Physics/SoftBody/SoftBodyContactListener.h"
+#include "Jolt/Physics/SoftBody/SoftBodyManifold.h"
 #include "Jolt/Physics/Character/CharacterVirtual.h"
 #include "Jolt/Physics/Vehicle/VehicleConstraint.h"
 #include "Jolt/Physics/Vehicle/MotorcycleController.h"
@@ -215,6 +217,10 @@ constexpr ValidateResult ValidateResult_AcceptAllContactsForThisBodyPair = Valid
 constexpr ValidateResult ValidateResult_AcceptContact = ValidateResult::AcceptContact;
 constexpr ValidateResult ValidateResult_RejectContact = ValidateResult::RejectContact;
 constexpr ValidateResult ValidateResult_RejectAllContactsForThisBodyPair = ValidateResult::RejectAllContactsForThisBodyPair;
+
+// Alias for SoftBodyValidateResult values to avoid clashes
+constexpr SoftBodyValidateResult SoftBodyValidateResult_AcceptContact = SoftBodyValidateResult::AcceptContact;
+constexpr SoftBodyValidateResult SoftBodyValidateResult_RejectContact = SoftBodyValidateResult::RejectContact;
 
 // Alias for EActiveEdgeMode values to avoid clashes
 constexpr EActiveEdgeMode EActiveEdgeMode_CollideOnlyWithActive = EActiveEdgeMode::CollideOnlyWithActive;
@@ -512,6 +518,20 @@ public:
 	virtual ValidateResult	OnContactValidate(const Body &inBody1, const Body &inBody2, RVec3Arg inBaseOffset, const CollideShapeResult &inCollisionResult) override
 	{ 
 		return (ValidateResult)OnContactValidate(inBody1, inBody2, &inBaseOffset, inCollisionResult);
+	}
+};
+
+/// A wrapper around SoftBodyContactListener that is compatible with JavaScript
+class SoftBodyContactListenerEm: public SoftBodyContactListener
+{
+public:
+	// JavaScript compatible virtual functions
+	virtual int				OnSoftBodyContactValidate(const Body &inSoftBody, const Body &inOtherBody, SoftBodyContactSettings *ioSettings) = 0;
+
+	// Functions that call the JavaScript compatible virtual functions
+	virtual SoftBodyValidateResult	OnSoftBodyContactValidate(const Body &inSoftBody, const Body &inOtherBody, SoftBodyContactSettings &ioSettings)
+	{ 
+		return (SoftBodyValidateResult)OnSoftBodyContactValidate(inSoftBody, inOtherBody, &ioSettings);
 	}
 };
 
