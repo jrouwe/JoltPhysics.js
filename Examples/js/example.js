@@ -21,6 +21,8 @@ const DegreesToRadians = (deg) => deg * (Math.PI / 180.0);
 
 const wrapVec3 = (v) => new THREE.Vector3(v.GetX(), v.GetY(), v.GetZ());
 const unwrapVec3 = (v) => new Jolt.Vec3(v.x, v.y, v.z);
+const wrapRVec3 = wrapVec3;
+const unwrapRVec3 = (v) => new Jolt.RVec3(v.x, v.y, v.z);
 const wrapQuat = (q) => new THREE.Quaternion(q.GetX(), q.GetY(), q.GetZ(), q.GetW());
 const unwrapQuat = (q) => new Jolt.Quat(q.x, q.y, q.z, q.w);
 
@@ -111,6 +113,8 @@ function initPhysics() {
 	// Helper functions
 	Jolt.Vec3.prototype.ToString = function () { return `(${this.GetX()}, ${this.GetY()}, ${this.GetZ()})` };
 	Jolt.Vec3.prototype.Clone = function () { return new Jolt.Vec3(this.GetX(), this.GetY(), this.GetZ()); };
+	Jolt.RVec3.prototype.ToString = function () { return `(${this.GetX()}, ${this.GetY()}, ${this.GetZ()})` };
+	Jolt.RVec3.prototype.Clone = function () { return new Jolt.RVec3(this.GetX(), this.GetY(), this.GetZ()); };
 	Jolt.Quat.prototype.ToString = function () { return `(${this.GetX()}, ${this.GetY()}, ${this.GetZ()}, ${this.GetW()})` };
 	Jolt.Quat.prototype.Clone = function () { return new Jolt.Vec3(this.GetX(), this.GetY(), this.GetZ(), this.GetW()); };
 	Jolt.AABox.prototype.ToString = function () { return `[${this.mMax.ToString()}, ${this.mMin.ToString()}]`; };
@@ -208,7 +212,7 @@ function removeFromScene(threeObject) {
 
 function createFloor(size = 50) {
 	var shape = new Jolt.BoxShape(new Jolt.Vec3(size, 0.5, size), 0.05, null);
-	var creationSettings = new Jolt.BodyCreationSettings(shape, new Jolt.Vec3(0, -0.5, 0), new Jolt.Quat(0, 0, 0, 1), Jolt.EMotionType_Static, LAYER_NON_MOVING);
+	var creationSettings = new Jolt.BodyCreationSettings(shape, new Jolt.RVec3(0, -0.5, 0), new Jolt.Quat(0, 0, 0, 1), Jolt.EMotionType_Static, LAYER_NON_MOVING);
 	let body = bodyInterface.CreateBody(creationSettings);
 	Jolt.destroy(creationSettings);
 	addToScene(body, 0xc7c7c7);
@@ -324,7 +328,7 @@ function createMeshFloor(n, cellSize, maxHeight, posX, posY, posZ) {
 	Jolt.destroy(materials);
 
 	// Create body
-	let creationSettings = new Jolt.BodyCreationSettings(shape, new Jolt.Vec3(posX, posY, posZ), new Jolt.Quat(0, 0, 0, 1), Jolt.EMotionType_Static, LAYER_NON_MOVING);
+	let creationSettings = new Jolt.BodyCreationSettings(shape, new Jolt.RVec3(posX, posY, posZ), new Jolt.Quat(0, 0, 0, 1), Jolt.EMotionType_Static, LAYER_NON_MOVING);
 	let body = bodyInterface.CreateBody(creationSettings);
 	Jolt.destroy(creationSettings);
 	addToScene(body, 0xc7c7c7);
@@ -341,6 +345,7 @@ function createVehicleTrack() {
 
 	let tempVec = new Jolt.Vec3(0, 1, 0);
 	const mapRot = Jolt.Quat.prototype.sRotation(tempVec, 0.5 * Math.PI);
+	let tempRVec = new Jolt.RVec3(0, 0, 0);
 	track.forEach((type, tIdx) => {
 		type.forEach(block => {
 			const hull = new Jolt.ConvexHullShapeSettings;
@@ -349,8 +354,8 @@ function createVehicleTrack() {
 				hull.mPoints.push_back(tempVec);
 			});
 			const shape = hull.Create().Get();
-			tempVec.Set(0, 10, 0);
-			const creationSettings = new Jolt.BodyCreationSettings(shape, tempVec, mapRot, Jolt.EMotionType_Static, LAYER_NON_MOVING);
+			tempRVec.Set(0, 10, 0);
+			const creationSettings = new Jolt.BodyCreationSettings(shape, tempRVec, mapRot, Jolt.EMotionType_Static, LAYER_NON_MOVING);
 			Jolt.destroy(hull);
 			const body = bodyInterface.CreateBody(creationSettings);
 			Jolt.destroy(creationSettings);
@@ -359,13 +364,14 @@ function createVehicleTrack() {
 		});
 	});
 	Jolt.destroy(tempVec);
+	Jolt.destroy(tempRVec);
 }
 
 function addLine(from, to, color) {
 	const material = new THREE.LineBasicMaterial({ color: color });
 	const points = [];
-	points.push(wrapVec3(from));
-	points.push(wrapVec3(to));
+	points.push(wrapRVec3(from));
+	points.push(wrapRVec3(to));
 	const geometry = new THREE.BufferGeometry().setFromPoints(points);
 	const line = new THREE.Line(geometry, material);
 	scene.add(line);

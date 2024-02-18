@@ -25,7 +25,6 @@
 		// In case you haven't built the library yourself, replace URL with: https://www.unpkg.com/jolt-physics/dist/jolt-physics.wasm-compat.js
 		import initJolt from './js/jolt-physics.wasm-compat.js';
 
-
 		class Line3DMesh {
 
 			constructor(point1, point2, color) {
@@ -101,9 +100,8 @@
 			createFloor();
 
 			const rotation = new Jolt.Quat.prototype.sIdentity();
-			const position = new Jolt.Vec3();
+			const position = new Jolt.RVec3();
 			const size = new Jolt.Vec3(0.5, 0.1, 0.5);
-
 
 			let xOffset = -10;
 

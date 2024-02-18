@@ -61,7 +61,7 @@
 				Jolt.destroy(compound);
 
 				// Create the body
-				let bodyPosition = new Jolt.Vec3(1, 2, 3);
+				let bodyPosition = new Jolt.RVec3(1, 2, 3);
 				let bodyRotation = new Jolt.Quat(0, 0, 0, 1);
 				let creationSettings = new Jolt.BodyCreationSettings(shape, bodyPosition, bodyRotation, Jolt.EMotionType_Dynamic, MY_LAYER); // 'creationSettings' now holds a reference to 'shape'
 				Jolt.destroy(bodyPosition);

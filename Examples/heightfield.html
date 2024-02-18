@@ -83,7 +83,7 @@
 				let shape = shapeSettings.Create().Get();
 
 				// Create the body
-				const position = new Jolt.Vec3(x, -20, z); // The image tends towards 'white', so offset it down closer to zero
+				const position = new Jolt.RVec3(x, -20, z); // The image tends towards 'white', so offset it down closer to zero
 				const rotation = new Jolt.Quat(0, 0, 0, 1)
 				var creationSettings = new Jolt.BodyCreationSettings(shape, position, rotation, Jolt.EMotionType_Static, LAYER_NON_MOVING);
 				let body = bodyInterface.CreateBody(creationSettings);
@@ -122,7 +122,7 @@
 				scene.add(planeMesh);
 
 				// Create a bunch of spheres to drop on the terrain
-				const position = new Jolt.Vec3(0, 0, 0);
+				const position = new Jolt.RVec3(0, 0, 0);
 				for (let y = 0; y < 10; y++)
 					for (let x = 0; x < 10; x++) {
 						const px = -31 + x * 62 / 10;

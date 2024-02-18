@@ -105,7 +105,7 @@
 			const motorcycleShapeSettings = new Jolt.OffsetCenterOfMassShapeSettings(new Jolt.Vec3(0, -halfVehicleHeight, 0),
 				new Jolt.BoxShapeSettings(new Jolt.Vec3(halfVehicleWidth, halfVehicleHeight, halfVehicleLength)));
 			const motorcycleShape = motorcycleShapeSettings.Create().Get();
-			const motorcycleBodySettings = new Jolt.BodyCreationSettings(motorcycleShape, new Jolt.Vec3(...bodyPosition),
+			const motorcycleBodySettings = new Jolt.BodyCreationSettings(motorcycleShape, new Jolt.RVec3(...bodyPosition),
 				Jolt.Quat.prototype.sRotation(new Jolt.Vec3(0, 1, 0), Math.PI),
 				Jolt.EMotionType_Dynamic, LAYER_MOVING)
 			motorcycleBodySettings.mOverrideMassProperties = Jolt.EOverrideMassProperties_CalculateInertia;

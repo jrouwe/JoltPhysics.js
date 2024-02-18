@@ -113,11 +113,11 @@
 				}
 			}
 
-			const lavaObject = createBox(new Jolt.Vec3(0, -50, 0), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(1000, 2, 1000), Jolt.EMotionType_Static, LAYER_NON_MOVING, 0xcc2222);
+			const lavaObject = createBox(new Jolt.RVec3(0, -50, 0), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(1000, 2, 1000), Jolt.EMotionType_Static, LAYER_NON_MOVING, 0xcc2222);
 			const lavaObjectId = lavaObject.GetID().GetIndexAndSequenceNumber();
 			let isInLava = false;
 
-			const conveyorBeltObject = createBox(new Jolt.Vec3(0, 0, -10), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(10, 0.25, 2), Jolt.EMotionType_Static, LAYER_NON_MOVING, 0x2222cc);
+			const conveyorBeltObject = createBox(new Jolt.RVec3(0, 0, -10), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(10, 0.25, 2), Jolt.EMotionType_Static, LAYER_NON_MOVING, 0x2222cc);
 			const conveyorBeltObjectId = conveyorBeltObject.GetID().GetIndexAndSequenceNumber();
 
 			const characterContactListener = new Jolt.CharacterContactListenerJS();
@@ -152,11 +152,12 @@
 			}
 
 			const _tmpVec3 = new Jolt.Vec3();
+			const _tmpRVec3 = new Jolt.RVec3();
 			const prePhysicsUpdate = (deltaTime) => {
 				if (isInLava) {
 					// Teleport the user back to the origin if they fall off the platform
-					_tmpVec3.Set(0, 10, 0);
-					character.SetPosition(_tmpVec3);
+					_tmpRVec3.Set(0, 10, 0);
+					character.SetPosition(_tmpRVec3);
 					isInLava = false;
 				}
 				const characterUp = wrapVec3(character.GetUp());
@@ -275,27 +276,27 @@
 			// Create a basic floor
 			createFloor();
 
-			createBox(new Jolt.Vec3(-45, 1, 0), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(0.5, 2, 45), Jolt.EMotionType_Static, LAYER_NON_MOVING);
-			createBox(new Jolt.Vec3(45, 1, 0), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(0.5, 2, 45), Jolt.EMotionType_Static, LAYER_NON_MOVING);
+			createBox(new Jolt.RVec3(-45, 1, 0), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(0.5, 2, 45), Jolt.EMotionType_Static, LAYER_NON_MOVING);
+			createBox(new Jolt.RVec3(45, 1, 0), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(0.5, 2, 45), Jolt.EMotionType_Static, LAYER_NON_MOVING);
 
 			// Stairs
 			for (let j = 0; j < 5; j++) {
 				let stepHeight = 0.3 + 0.1 * j;
 				for (let i = 1; i < 10; i++) {
-					createBox(new Jolt.Vec3(15 + 5 * j, i * stepHeight - 0.5 + stepHeight / 2, -20 - i * 3), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(2, stepHeight / 2, 2), Jolt.EMotionType_Static, LAYER_NON_MOVING);
+					createBox(new Jolt.RVec3(15 + 5 * j, i * stepHeight - 0.5 + stepHeight / 2, -20 - i * 3), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(2, stepHeight / 2, 2), Jolt.EMotionType_Static, LAYER_NON_MOVING);
 				}
 			}
 
 			// Slopes
 			for (let i = 0; i < 10; i++) {
-				createBox(new Jolt.Vec3(-40 + 5 * i, 2, -25), Jolt.Quat.prototype.sRotation(new Jolt.Vec3(1, 0, 0), DegreesToRadians(70 - i * 5.0)), new Jolt.Vec3(2.5, 0.6, 8), Jolt.EMotionType_Static, LAYER_NON_MOVING);
+				createBox(new Jolt.RVec3(-40 + 5 * i, 2, -25), Jolt.Quat.prototype.sRotation(new Jolt.Vec3(1, 0, 0), DegreesToRadians(70 - i * 5.0)), new Jolt.Vec3(2.5, 0.6, 8), Jolt.EMotionType_Static, LAYER_NON_MOVING);
 			}
 
 			{
 				// Create a push-able block
 				const boxHalfExtent = 0.75;
 				let shape = new Jolt.BoxShape(new Jolt.Vec3(boxHalfExtent, boxHalfExtent, boxHalfExtent));
-				let creationSettings = new Jolt.BodyCreationSettings(shape, new Jolt.Vec3(-10.0, 5.0, 10.0),
+				let creationSettings = new Jolt.BodyCreationSettings(shape, new Jolt.RVec3(-10.0, 5.0, 10.0),
 					new Jolt.Quat.prototype.sIdentity(), Jolt.EMotionType_Dynamic, LAYER_MOVING);
 				creationSettings.mFriction = 0.1;
 				creationSettings.mOverrideMassProperties = Jolt.EOverrideMassProperties_CalculateInertia;
@@ -316,7 +317,7 @@
 			settings.mPenetrationRecoverySpeed = penetrationRecoverySpeed;
 			settings.mPredictiveContactDistance = predictiveContactDistance;
 			settings.mSupportingVolume = new Jolt.Plane(Jolt.Vec3.prototype.sAxisY(), -characterRadiusStanding);
-			character = new Jolt.CharacterVirtual(settings, Jolt.Vec3.prototype.sZero(), Jolt.Quat.prototype.sIdentity(), physicsSystem);
+			character = new Jolt.CharacterVirtual(settings, Jolt.RVec3.prototype.sZero(), Jolt.Quat.prototype.sIdentity(), physicsSystem);
 			character.SetListener(characterContactListener);
 
 			threeCharacter.geometry = threeStandingGeometry;

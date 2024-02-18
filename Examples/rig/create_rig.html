@@ -56,18 +56,18 @@
 					new Jolt.CapsuleShape(0.2, 0.06),		// Lower Leg R
 				];
 				const positions = [
-					new Jolt.Vec3(0, 1.15, 0),				// Lower Body
-					new Jolt.Vec3(0, 1.35, 0),				// Mid Body
-					new Jolt.Vec3(0, 1.55, 0),				// Upper Body
-					new Jolt.Vec3(0, 1.825, 0),				// Head
-					new Jolt.Vec3(-0.425, 1.55, 0),			// Upper Arm L
-					new Jolt.Vec3(0.425, 1.55, 0),			// Upper Arm R
-					new Jolt.Vec3(-0.8, 1.55, 0),			// Lower Arm L
-					new Jolt.Vec3(0.8, 1.55, 0),			// Lower Arm R
-					new Jolt.Vec3(-0.15, 0.8, 0),			// Upper Leg L
-					new Jolt.Vec3(0.15, 0.8, 0),			// Upper Leg R
-					new Jolt.Vec3(-0.15, 0.3, 0),			// Lower Leg L
-					new Jolt.Vec3(0.15, 0.3, 0),			// Lower Leg R
+					new Jolt.RVec3(0, 1.15, 0),				// Lower Body
+					new Jolt.RVec3(0, 1.35, 0),				// Mid Body
+					new Jolt.RVec3(0, 1.55, 0),				// Upper Body
+					new Jolt.RVec3(0, 1.825, 0),				// Head
+					new Jolt.RVec3(-0.425, 1.55, 0),			// Upper Arm L
+					new Jolt.RVec3(0.425, 1.55, 0),			// Upper Arm R
+					new Jolt.RVec3(-0.8, 1.55, 0),			// Lower Arm L
+					new Jolt.RVec3(0.8, 1.55, 0),			// Lower Arm R
+					new Jolt.RVec3(-0.15, 0.8, 0),			// Upper Leg L
+					new Jolt.RVec3(0.15, 0.8, 0),			// Upper Leg R
+					new Jolt.RVec3(-0.15, 0.3, 0),			// Lower Leg L
+					new Jolt.RVec3(0.15, 0.3, 0),			// Lower Leg R
 				];
 				const rotations = [
 					Jolt.Quat.prototype.sRotation(Jolt.Vec3.prototype.sAxisZ(), 0.5 * Math.PI),		// Lower Body
@@ -86,18 +86,18 @@
 
 				// World space constraint positions
 				const constraint_positions = [
-					new Jolt.Vec3.prototype.sZero(),		// Lower Body (unused, there's no parent)
-					new Jolt.Vec3(0, 1.25, 0),				// Mid Body
-					new Jolt.Vec3(0, 1.45, 0),				// Upper Body
-					new Jolt.Vec3(0, 1.65, 0),				// Head
-					new Jolt.Vec3(-0.225, 1.55, 0),			// Upper Arm L
-					new Jolt.Vec3(0.225, 1.55, 0),			// Upper Arm R
-					new Jolt.Vec3(-0.65, 1.55, 0),			// Lower Arm L
-					new Jolt.Vec3(0.65, 1.55, 0),			// Lower Arm R
-					new Jolt.Vec3(-0.15, 1.05, 0),			// Upper Leg L
-					new Jolt.Vec3(0.15, 1.05, 0),			// Upper Leg R
-					new Jolt.Vec3(-0.15, 0.55, 0),			// Lower Leg L
-					new Jolt.Vec3(0.15, 0.55, 0),			// Lower Leg R
+					new Jolt.RVec3.prototype.sZero(),		// Lower Body (unused, there's no parent)
+					new Jolt.RVec3(0, 1.25, 0),				// Mid Body
+					new Jolt.RVec3(0, 1.45, 0),				// Upper Body
+					new Jolt.RVec3(0, 1.65, 0),				// Head
+					new Jolt.RVec3(-0.225, 1.55, 0),		// Upper Arm L
+					new Jolt.RVec3(0.225, 1.55, 0),			// Upper Arm R
+					new Jolt.RVec3(-0.65, 1.55, 0),			// Lower Arm L
+					new Jolt.RVec3(0.65, 1.55, 0),			// Lower Arm R
+					new Jolt.RVec3(-0.15, 1.05, 0),			// Upper Leg L
+					new Jolt.RVec3(0.15, 1.05, 0),			// Upper Leg R
+					new Jolt.RVec3(-0.15, 0.55, 0),			// Lower Leg L
+					new Jolt.RVec3(0.15, 0.55, 0),			// Lower Leg R
 				];
 
 				// World space twist axis directions

@@ -37,7 +37,7 @@
 					filter.DisableCollision(z, z + 1);
 
 				let shape = new Jolt.BoxShape(new Jolt.Vec3(0.5, 0.5, 0.5), 0.05, null);
-				let creationSettings = new Jolt.BodyCreationSettings(shape, new Jolt.Vec3(-15, 20, 0), Jolt.Quat.prototype.sIdentity(), Jolt.EMotionType_Dynamic, LAYER_MOVING);
+				let creationSettings = new Jolt.BodyCreationSettings(shape, new Jolt.RVec3(-15, 20, 0), Jolt.Quat.prototype.sIdentity(), Jolt.EMotionType_Dynamic, LAYER_MOVING);
 				creationSettings.mCollisionGroup.SetGroupFilter(filter);
 
 				function createBody(creationSettings, z) {
@@ -123,7 +123,7 @@
 				creationSettings.mPosition.SetX(creationSettings.mPosition.GetX() + 5);
 				{
 					let constraintSettings = new Jolt.HingeConstraintSettings();
-					constraintSettings.mPoint1 = constraintSettings.mPoint2 = new Jolt.Vec3(creationSettings.mPosition.GetX(), creationSettings.mPosition.GetY() - 0.5, creationSettings.mPosition.GetZ());
+					constraintSettings.mPoint1 = constraintSettings.mPoint2 = new Jolt.RVec3(creationSettings.mPosition.GetX(), creationSettings.mPosition.GetY() - 0.5, creationSettings.mPosition.GetZ());
 					constraintSettings.mHingeAxis1 = constraintSettings.mHingeAxis2 = new Jolt.Vec3(1, 0, 0);
 					constraintSettings.mNormalAxis1 = constraintSettings.mNormalAxis2 = new Jolt.Vec3(0, 1, 0);
 					

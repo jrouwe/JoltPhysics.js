@@ -87,6 +87,8 @@ This project has only been compiled under Linux.
 * Install [cmake](https://cmake.org/)
 * Run ```./build.sh``` for the optimized build, ```./build.sh Debug``` for the debug build or ```./build.sh Debug -DENABLE_MEMORY_PROFILER=ON``` for the debug build with memory tracking
 
+You can also compile the project in double precision mode using ```./build.sh Distribution -DDOUBLE_PRECISION=ON```, currently no package is provided for this.
+
 ## Running
 
 By default the examples use the WASM version of Jolt. This requires serving the html file using a web server rather than opening the html file directly. Use e.g. [serve](https://www.npmjs.com/package/serve) to quickly host the file.

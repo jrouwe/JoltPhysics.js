@@ -34,7 +34,7 @@ include(FetchContent)
 FetchContent_Declare(
         JoltPhysics
         GIT_REPOSITORY "https://github.com/jrouwe/JoltPhysics"
-        GIT_TAG "c55ce1c8d5b4ade2d8e69d3c1fbeec71383db798"
+        GIT_TAG "20b1492288f6f0a5b12567ed1ea1db315914bd72"
 		SOURCE_SUBDIR "Build"
 )
 FetchContent_MakeAvailable(JoltPhysics)
@@ -121,6 +121,11 @@ elseif ("${CMAKE_BUILD_TYPE}" STREQUAL "Distribution")
 		-DNDEBUG)
 else()
 	message("Unknown CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
+endif()
+
+# Add double precision define
+if (DOUBLE_PRECISION)
+	set(EMCC_GLUE_ARGS ${EMCC_GLUE_ARGS} -DJPH_DOUBLE_PRECISION)
 endif()
 
 #######################################
