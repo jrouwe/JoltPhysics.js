@@ -1604,8 +1604,11 @@ interface BodyInterface {
 	boolean IsAdded([Const, Ref] BodyID inBodyID);
 	[Value] BodyID CreateAndAddBody([Const, Ref] BodyCreationSettings inSettings, EActivation inActivationMode);
 	[Value] BodyID CreateAndAddSoftBody([Const, Ref] SoftBodyCreationSettings inSettings, EActivation inActivationMode);
+	TwoBodyConstraint CreateConstraint([Const] TwoBodyConstraintSettings inSettings, [Const, Ref] BodyID inBodyID1, [Const, Ref] BodyID inBodyID2);
+	void ActivateConstraint([Const] TwoBodyConstraint inConstraint);
 	[Const] Shape GetShape([Const, Ref] BodyID inBodyID);
 	void SetShape([Const, Ref] BodyID inBodyID, [Const] Shape inShape, boolean inUpdateMassProperties, EActivation inActivationMode);
+	void NotifyShapeChanged([Const, Ref] BodyID inBodyID, [Const, Ref] Vec3 inPreviousCenterOfMass, boolean inUpdateMassProperties, EActivation inActivationMode);
 	void SetObjectLayer([Const, Ref] BodyID inBodyID, unsigned long inLayer);
 	unsigned long GetObjectLayer([Const, Ref] BodyID inBodyID);
 	void SetPositionAndRotation([Const, Ref] BodyID inBodyID, [Const, Ref] RVec3 inPosition, [Const, Ref] Quat inRotation, EActivation inActivationMode);
@@ -1615,6 +1618,8 @@ interface BodyInterface {
 	[Value] RVec3 GetPosition([Const, Ref] BodyID inBodyID);
 	void SetRotation([Const, Ref] BodyID inBodyID, [Const, Ref] Quat inRotation, EActivation inActivationMode);
 	[Value] Quat GetRotation([Const, Ref] BodyID inBodyID);
+	[Value] RMat44 GetWorldTransform([Const, Ref] BodyID inBodyID);
+	[Value] RMat44 GetCenterOfMassTransform([Const, Ref] BodyID inBodyID);
 	void MoveKinematic([Const, Ref] BodyID inBodyID, [Const, Ref] RVec3 inPosition, [Const, Ref] Quat inRotation, float inDeltaTime);
 	void ActivateBody([Const, Ref] BodyID inBodyID);
 	void DeactivateBody([Const, Ref] BodyID inBodyID);
