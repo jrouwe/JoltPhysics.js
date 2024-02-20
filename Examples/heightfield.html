@@ -209,7 +209,7 @@
 					rayCaster_3js.setFromCamera( pointerV2_3js, camera );
 					const { origin, direction } = rayCaster_3js.ray;
 					// Jolt Ray casts use the 'direction' vector length to limit our search, so use something sure to hit our target for this demo
-					direction.multiplyScalar(100)
+					direction.multiplyScalar(1000)
 					jRay.mOrigin.Set(origin.x, origin.y, origin.z)
 					jRay.mDirection.Set(direction.x, direction.y, direction.z);
 
@@ -224,14 +224,17 @@
 						const intersectThreeVector = origin.add(direction.multiplyScalar(jRayResult.mFraction));
 						cursorIndicator.position.copy(intersectThreeVector);
 						cursorIndicator.visible = true;
-						// Ideally, we should convert from world to local-space here, but we placed the mesh at 0,0,0 so can skip this
-						// Based on our location/rotation knowledge of the terrain, we can convert from world-space coordinates 
-						// X and Z correspond to image UV. The original Y corresponds to world-space elevation
-						const localPosition = intersectThreeVector.clone().multiplyScalar(1.0/(img.width * mapScale));
-						// Transformed results are -0.5 to 0.5 in both X and Z direction, mappable to our texture/HeightField
-						const { x, z } = localPosition;
+						// Using the Plane's world-matrix we can convert to local-space coordinates
+						// Three JS uses in-place modifications, so clone the matrix and vector so we do not disrupt their data. 
+						const localPosition = intersectThreeVector.clone().applyMatrix4(planeMesh.matrixWorld.clone().invert());
+						// X and Y correspond to image UV. The original Z corresponds to world-space elevation
+						localPosition.multiplyScalar(1.0/(img.width * mapScale));
+						// Transformed results are -0.5 to 0.5 in both X and Y direction, mappable to our texture/HeightField
+						const { x, y } = localPosition;
 						// preserve the true world-space vector for re-activating nearby Bodies
-						return { mapSpace: { x: x + 0.5, y: z + 0.5}, worldSpace: intersectThreeVector };
+						// invert the Y value, because the texture space coordinates use a different origin
+						// https://threejs.org/docs/#api/en/textures/Texture.flipY
+						return { mapSpace: { x: x + 0.5, y: -y + 0.5}, worldSpace: intersectThreeVector };
 					}
 					// On a failed hit, return null
 					return null;
