@@ -506,6 +506,7 @@ interface RRayCast {
 
 interface BroadPhaseCastResult {
 	void BroadPhaseCastResult();
+	void Reset();
 
 	[Value] attribute BodyID mBodyID;
 	attribute float mFraction;

@@ -116,12 +116,12 @@
 				const overlayMap = new THREE.CanvasTexture(visibleTextureCanvas);
 
 				// Creating the THREE JS plane with displacement
-				// Note: Jolt HeightField maps each pixel to a vertex, so actual terrain is a SIZE-1 grid   
+				// Note: Jolt HeightField maps each pixel to a vertex, so actual terrain is a SIZE-1 grid
 				const planeMesh = new THREE.Mesh(
 					new THREE.PlaneGeometry(img.width * mapScale, img.width * mapScale, IMAGE_SIZE, IMAGE_SIZE),
 					new THREE.MeshPhongMaterial({
 						displacementMap: displacementMap,
-						map: overlayMap, 
+						map: overlayMap,
 						displacementScale: 256 * 0.1, // This should match the Y multiplier used on the ShapeSettings inScale.
 						flatShading: true
 					})
@@ -144,19 +144,19 @@
 						position.Set(px, 20, py);
 						createSphere(position, 1, Jolt.EMotionType_Dynamic, LAYER_MOVING, 0xFF0000);
 					}
-				
+
 
 				// Allocate an 8x8 floating point array in memory, and map it against Jolt's HEAP for raw access
 				const READ_SIZE = 8;
 				const float32MemPointer = Jolt._webidl_malloc(READ_SIZE * READ_SIZE * 4);
-				const float32MemoryBuffer = new Float32Array(Jolt.HEAPF32.buffer, float32MemPointer, READ_SIZE*READ_SIZE);
+				const float32MemoryBuffer = new Float32Array(Jolt.HEAPF32.buffer, float32MemPointer, READ_SIZE * READ_SIZE);
 
 				// Update the THREE JS heightmap based on the current Float32 buffer
 				function updateThreeHeightMap(offsetX, offsetY) {
 					const textureImageData = displacementContext2D.getImageData(offsetX, offsetY, READ_SIZE, READ_SIZE);
 					float32MemoryBuffer.forEach((_o, i) => {
-						for(let j=0;j<3;j++) {
-							textureImageData.data[i*4+j] = float32MemoryBuffer[i] * 10;
+						for (let j = 0; j < 3; j++) {
+							textureImageData.data[i * 4 + j] = float32MemoryBuffer[i] * 10;
 						}
 					});
 					displacementContext2D.putImageData(textureImageData, offsetX, offsetY);
@@ -166,18 +166,18 @@
 
 				const terrainHeightFieldShape = Jolt.castObject(terrain.GetShape(), Jolt.HeightFieldShape);
 				// Given a percentage X,Y, alter the HeightField by a fixed float amount
-				function changeTerrainShape( fractionX, fractionY, amount) {
+				function changeTerrainShape(fractionX, fractionY, amount) {
 					// offset left of click and make multiple of block size
-					const offsetX = Math.min(Math.max((Math.floor( fractionX * IMAGE_SIZE) - 3) & -BLOCK_SIZE, 0), img.width - READ_SIZE); 
+					const offsetX = Math.min(Math.max((Math.floor(fractionX * IMAGE_SIZE) - 3) & -BLOCK_SIZE, 0), img.width - READ_SIZE);
 					// offset up from click and make multiple of block size.
-					const offsetY = Math.min(Math.max((Math.floor( fractionY * IMAGE_SIZE) - 3) & -BLOCK_SIZE, 0), img.height - READ_SIZE); 
+					const offsetY = Math.min(Math.max((Math.floor(fractionY * IMAGE_SIZE) - 3) & -BLOCK_SIZE, 0), img.height - READ_SIZE);
 					// Note: the bounding logic above will cause artifacts clicking along the terrain edges
 
 					terrainHeightFieldShape.GetHeights(offsetX, offsetY, READ_SIZE, READ_SIZE, float32MemPointer, READ_SIZE)
 
 					// Apply a flat amount of modification to all pixels in the selected region
 					float32MemoryBuffer.forEach((_o, f32Index) => {
-							float32MemoryBuffer[f32Index] += amount;
+						float32MemoryBuffer[f32Index] += amount;
 					})
 
 					const centerOfMass = terrain.GetCenterOfMassPosition();
@@ -203,38 +203,35 @@
 				cursorIndicator.visible = false;
 
 				function mouseEventToTerrainCoords(mouseEvt) {
-					pointerV2_3js.x = ( mouseEvt.clientX / window.innerWidth ) * 2 - 1;
-					pointerV2_3js.y = - ( mouseEvt.clientY / window.innerHeight ) * 2 + 1;
+					pointerV2_3js.x = (mouseEvt.clientX / window.innerWidth) * 2 - 1;
+					pointerV2_3js.y = - (mouseEvt.clientY / window.innerHeight) * 2 + 1;
 					// This is the stock Three JS picker logic
-					rayCaster_3js.setFromCamera( pointerV2_3js, camera );
+					rayCaster_3js.setFromCamera(pointerV2_3js, camera);
 					const { origin, direction } = rayCaster_3js.ray;
 					// Jolt Ray casts use the 'direction' vector length to limit our search, so use something sure to hit our target for this demo
 					direction.multiplyScalar(1000)
 					jRay.mOrigin.Set(origin.x, origin.y, origin.z)
 					jRay.mDirection.Set(direction.x, direction.y, direction.z);
 
-					// Failure to pick using a Ray will keep this mFraction value as-is
-					// CastRay in C++ would return a boolean on-hit, but WebIDL does not allow 2 calls of same name to have different return values
-					jRayResult.mFraction = 1000;
+					// Reset the result so we can check if there was a hit by checking if the fraction <= 1
+					jRayResult.Reset();
 					transformedShape.CastRay(jRay, jRayResult);
-					// Instead we check that the response is reasonable
-					// Hits will have a value between 0 and 1. Failures will keep the 1000 above
-					if(jRayResult.mFraction <= 1) {
+					if (jRayResult.mFraction <= 1) {
 						// mFraction is between 0 and 1. By multiplying the direction ray scalar, we turn it into a true offset of the hit, relative to the origin.
 						const intersectThreeVector = origin.add(direction.multiplyScalar(jRayResult.mFraction));
 						cursorIndicator.position.copy(intersectThreeVector);
 						cursorIndicator.visible = true;
 						// Using the Plane's world-matrix we can convert to local-space coordinates
-						// Three JS uses in-place modifications, so clone the matrix and vector so we do not disrupt their data. 
+						// Three JS uses in-place modifications, so clone the matrix and vector so we do not disrupt their data.
 						const localPosition = intersectThreeVector.clone().applyMatrix4(planeMesh.matrixWorld.clone().invert());
 						// X and Y correspond to image UV. The original Z corresponds to world-space elevation
-						localPosition.multiplyScalar(1.0/(img.width * mapScale));
+						localPosition.multiplyScalar(1.0 / (img.width * mapScale));
 						// Transformed results are -0.5 to 0.5 in both X and Y direction, mappable to our texture/HeightField
 						const { x, y } = localPosition;
 						// preserve the true world-space vector for re-activating nearby Bodies
 						// invert the Y value, because the texture space coordinates use a different origin
 						// https://threejs.org/docs/#api/en/textures/Texture.flipY
-						return { mapSpace: { x: x + 0.5, y: -y + 0.5}, worldSpace: intersectThreeVector };
+						return { mapSpace: { x: x + 0.5, y: -y + 0.5 }, worldSpace: intersectThreeVector };
 					}
 					// On a failed hit, return null
 					return null;
@@ -243,7 +240,7 @@
 				visibleCanvasContext2d.fillStyle = 'rgba(0,0,0,.4)';
 				controls.domElement.addEventListener('mousemove', (mouseEvt) => {
 					const coords = mouseEventToTerrainCoords(mouseEvt);
-					if(coords) {
+					if (coords) {
 						// remove any previous texture overlay
 						visibleCanvasContext2d.drawImage(img, 0, 0);
 						// Values between 0 and 1 in the height-field/texture space
@@ -268,7 +265,7 @@
 				const raiseLower = document.getElementById('raise-lower');
 				controls.domElement.addEventListener('click', (mouseEvt) => {
 					const coords = mouseEventToTerrainCoords(mouseEvt);
-					if(coords) {
+					if (coords) {
 						// Mobile devices will not have mouse-over, so draw the indicator here as well
 						visibleCanvasContext2d.drawImage(img, 0, 0);
 						// Values between 0 and 1 in the height-field/texture space
@@ -281,7 +278,7 @@
 						// Alter the terrain by this amount
 						changeTerrainShape(x, y, delta);
 
-						// select a region sure to encompass all changed spheres. This could be smaller with demo's values. 
+						// select a region sure to encompass all changed spheres. This could be smaller with demo's values.
 						aaboxMin.Set(coords.worldSpace.x - 6, coords.worldSpace.y - 6, coords.worldSpace.z - 6);
 						aaboxMax.Set(coords.worldSpace.x + 6, coords.worldSpace.y + 6, coords.worldSpace.z + 6);
 						// AABox does not support easy modification, so we are re-generating one per click
