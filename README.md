@@ -89,7 +89,7 @@ This project has only been compiled under Linux.
 
 You can also compile the project in double precision mode using ```./build.sh Distribution -DDOUBLE_PRECISION=ON```, currently no package is provided for this.
 
-Compile the project with multi threading enabled like this: ```./build.sh Distribution -DENABLE_MULTI_THREADING=ON```, note that due to a bug in Safari it doesn't work in that browser.
+Compile the project with multi threading enabled like this: ```./build.sh Distribution -DENABLE_MULTI_THREADING=ON```, note that due to a bug in Safari it doesn't work in that browser. Also callbacks from Jolt to JavaScript don't work in this mode. See [this](https://github.com/jrouwe/JoltPhysics.js/discussions/110) ticket.
 
 ## Running
 
