@@ -89,6 +89,8 @@ This project has only been compiled under Linux.
 
 You can also compile the project in double precision mode using ```./build.sh Distribution -DDOUBLE_PRECISION=ON```, currently no package is provided for this.
 
+Compile the project with multi threading enabled like this: ```./build.sh Distribution -DENABLE_MULTI_THREADING=ON```, note that due to a bug in Safari it doesn't work in that browser.
+
 ## Running
 
 By default the examples use the WASM version of Jolt. This requires serving the html file using a web server rather than opening the html file directly. Use e.g. [serve](https://www.npmjs.com/package/serve) to quickly host the file.

@@ -14,6 +14,12 @@ set(OUTPUT_FOLDER ${CMAKE_CURRENT_SOURCE_DIR}/dist/)
 # Option to turn on memory profiling
 option(ENABLE_MEMORY_PROFILER "Enable emscriptens memory profiler to help find leaks" OFF)
 
+# Option to turn on double precision
+option(DOUBLE_PRECISION "Compile the library in double precision mode" OFF)
+
+# Option to turn multi threading on
+option(ENABLE_MULTI_THREADING "Compile the library in multi threading mode (warning: doesn't work in Safari nor with any JS callbacks currently)'" OFF)
+
 # The configurations we support
 set(CMAKE_CONFIGURATION_TYPES "Debug;Release;Distribution")
 
@@ -28,6 +34,18 @@ set(GENERATE_DEBUG_SYMBOLS ON)
 
 # Use 32-bit object layers to support more bits in ObjectLayerPairFilterMask
 set(OBJECT_LAYER_BITS 32)
+
+# Enable multi threading
+if (ENABLE_MULTI_THREADING)
+	set(MULTI_THREADED_FLAG 
+		-pthread 
+		-s SHARED_MEMORY)
+	set(ENVIRONMENT_FLAG "-s ENVIRONMENT='web,node,worker'")
+	set(CMAKE_CXX_FLAGS "-pthread -s SHARED_MEMORY")
+else()
+	set(MULTI_THREADED_FLAG "")
+	set(ENVIRONMENT_FLAG "-s ENVIRONMENT='web,node'")
+endif()
 
 # Include Jolt
 include(FetchContent)
@@ -59,9 +77,10 @@ set(EMCC_ARGS
   --extern-pre-js ${JOLT_FRONT_MATTER_FILE}
   --post-js glue.js
   --closure=1
+  ${MULTI_THREADED_FLAG}
   -s ALLOW_MEMORY_GROWTH=${ALLOW_MEMORY_GROWTH}
   -s ALLOW_TABLE_GROWTH=1
-  -s ENVIRONMENT='web,node'
+  ${ENVIRONMENT_FLAG}
   -s EXPORT_ES6=1
   -s EXPORT_NAME="Jolt"
   -s MODULARIZE=1
@@ -102,6 +121,7 @@ set(EMCC_GLUE_ARGS
   -I${JoltPhysics_SOURCE_DIR}/..
   -Wall
   -std=c++17
+  ${MULTI_THREADED_FLAG}
   -DJPH_OBJECT_LAYER_BITS=32
   -include ${JOLT_HEADER_FILE}
   ${MEMORY_PROFILER_FLAG})
