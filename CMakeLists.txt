@@ -20,6 +20,9 @@ option(DOUBLE_PRECISION "Compile the library in double precision mode" OFF)
 # Option to turn multi threading on
 option(ENABLE_MULTI_THREADING "Compile the library in multi threading mode (warning: doesn't work in Safari nor with any JS callbacks currently)'" OFF)
 
+# Option to speed up compilation by only compiling the WASM compat version
+option(BUILD_WASM_COMPAT_ONLY "Compile online the WASM compat version of the library (speeds up compilation)" OFF)
+
 # The configurations we support
 set(CMAKE_CONFIGURATION_TYPES "Debug;Release;Distribution")
 
@@ -40,7 +43,9 @@ if (ENABLE_MULTI_THREADING)
 	set(MULTI_THREADED_FLAG 
 		-pthread 
 		-s SHARED_MEMORY)
-	set(ENVIRONMENT_FLAG "-s ENVIRONMENT='web,node,worker'")
+	set(ENVIRONMENT_FLAG
+		-s ENVIRONMENT='web,node,worker' 
+		-s PTHREAD_POOL_SIZE=16)
 	set(CMAKE_CXX_FLAGS "-pthread -s SHARED_MEMORY")
 else()
 	set(MULTI_THREADED_FLAG "")
@@ -166,23 +171,25 @@ add_custom_command(
   VERBATIM)
 add_custom_target(jolt-bindings ALL DEPENDS glue.js glue.o)
 
-if (NOT ENABLE_MULTI_THREADING) # Not compatible with multi threading due to error: 'void wasm::I64ToI32Lowering::visitStore(Store *): Assertion `!curr->isAtomic && "atomic store not implemented"' failed.'
-	add_custom_command(
-	  OUTPUT ${OUTPUT_FOLDER}jolt-physics.js
-	  COMMAND emcc glue.o $<TARGET_FILE:Jolt> ${EMCC_JS_ARGS} -o ${OUTPUT_FOLDER}jolt-physics.js
-	  DEPENDS jolt-bindings ${JOLT_FRONT_MATTER_FILE} ${JOLT_TARGETS} ${JOLT_IDL_FILE} ${JOLT_HEADER_FILE}
-	  COMMENT "Building JoltPhysics.js javascript"
-	  VERBATIM)
-	add_custom_target(jolt-javascript ALL DEPENDS ${OUTPUT_FOLDER}jolt-physics.js)
-endif()
+if (NOT BUILD_WASM_COMPAT_ONLY)
+	if (NOT ENABLE_MULTI_THREADING) # Not compatible with multi threading due to error: 'void wasm::I64ToI32Lowering::visitStore(Store *): Assertion `!curr->isAtomic && "atomic store not implemented"' failed.'
+		add_custom_command(
+		  OUTPUT ${OUTPUT_FOLDER}jolt-physics.js
+		  COMMAND emcc glue.o $<TARGET_FILE:Jolt> ${EMCC_JS_ARGS} -o ${OUTPUT_FOLDER}jolt-physics.js
+		  DEPENDS jolt-bindings ${JOLT_FRONT_MATTER_FILE} ${JOLT_TARGETS} ${JOLT_IDL_FILE} ${JOLT_HEADER_FILE}
+		  COMMENT "Building JoltPhysics.js javascript"
+		  VERBATIM)
+		add_custom_target(jolt-javascript ALL DEPENDS ${OUTPUT_FOLDER}jolt-physics.js)
+	endif()
 
-add_custom_command(
-  OUTPUT ${OUTPUT_FOLDER}jolt-physics.wasm.js ${OUTPUT_FOLDER}jolt-physics.wasm.wasm
-  COMMAND emcc glue.o $<TARGET_FILE:Jolt> ${EMCC_WASM_ARGS} -o ${OUTPUT_FOLDER}jolt-physics.wasm.js
-  DEPENDS jolt-bindings ${JOLT_FRONT_MATTER_FILE} ${JOLT_TARGETS} ${JOLT_IDL_FILE} ${JOLT_HEADER_FILE}
-  COMMENT "Building JoltPhysics.js webassembly"
-  VERBATIM)
-add_custom_target(jolt-wasm ALL DEPENDS ${OUTPUT_FOLDER}jolt-physics.wasm.js ${OUTPUT_FOLDER}jolt-physics.wasm.wasm)
+	add_custom_command(
+	  OUTPUT ${OUTPUT_FOLDER}jolt-physics.wasm.js ${OUTPUT_FOLDER}jolt-physics.wasm.wasm
+	  COMMAND emcc glue.o $<TARGET_FILE:Jolt> ${EMCC_WASM_ARGS} -o ${OUTPUT_FOLDER}jolt-physics.wasm.js
+	  DEPENDS jolt-bindings ${JOLT_FRONT_MATTER_FILE} ${JOLT_TARGETS} ${JOLT_IDL_FILE} ${JOLT_HEADER_FILE}
+	  COMMENT "Building JoltPhysics.js webassembly"
+	  VERBATIM)
+	add_custom_target(jolt-wasm ALL DEPENDS ${OUTPUT_FOLDER}jolt-physics.wasm.js ${OUTPUT_FOLDER}jolt-physics.wasm.wasm)
+endif()
 
 add_custom_command(
   OUTPUT ${OUTPUT_FOLDER}jolt-physics.wasm-compat.js

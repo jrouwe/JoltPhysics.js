@@ -424,7 +424,7 @@ public:
 
 private:
 	TempAllocatorImpl *		mTempAllocator;
-	JobSystemThreadPool		mJobSystem { cMaxPhysicsJobs, cMaxPhysicsBarriers, (int)thread::hardware_concurrency() - 1 };
+	JobSystemThreadPool		mJobSystem { cMaxPhysicsJobs, cMaxPhysicsBarriers, min<int>(thread::hardware_concurrency() - 1, 16) }; // Limit to 16 threads since we limit the webworker thread pool size to this as well
 	BroadPhaseLayerInterface *mBroadPhaseLayerInterface = nullptr;
 	ObjectVsBroadPhaseLayerFilter *mObjectVsBroadPhaseLayerFilter = nullptr;
 	ObjectLayerPairFilter *	mObjectLayerPairFilter = nullptr;
