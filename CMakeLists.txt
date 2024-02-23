@@ -156,45 +156,45 @@ endif()
 project("JoltPhysics.js")
 
 add_custom_command(
-  OUTPUT glue.cpp glue.js
-  BYPRODUCTS parser.out WebIDLGrammar.pkl
-  COMMAND ${PYTHON} ${WEBIDL_BINDER_SCRIPT} ${JOLT_IDL_FILE} glue
-  DEPENDS ${JOLT_IDL_FILE}
-  COMMENT "Generating JoltPhysics.js bindings"
-  VERBATIM)
+	OUTPUT glue.cpp glue.js
+	BYPRODUCTS parser.out WebIDLGrammar.pkl
+	COMMAND ${PYTHON} ${WEBIDL_BINDER_SCRIPT} ${JOLT_IDL_FILE} glue
+	DEPENDS ${JOLT_IDL_FILE}
+	COMMENT "Generating JoltPhysics.js bindings"
+	VERBATIM)
 
 add_custom_command(
-  OUTPUT glue.o
-  COMMAND emcc glue.cpp ${EMCC_GLUE_ARGS} -o glue.o
-  DEPENDS glue.cpp ${JOLT_HEADER_FILE}
-  COMMENT "Building JoltPhysics.js bindings"
-  VERBATIM)
+	OUTPUT glue.o
+	COMMAND emcc glue.cpp ${EMCC_GLUE_ARGS} -o glue.o
+	DEPENDS glue.cpp ${JOLT_HEADER_FILE}
+	COMMENT "Building JoltPhysics.js bindings"
+	VERBATIM)
 add_custom_target(jolt-bindings ALL DEPENDS glue.js glue.o)
 
 if (NOT BUILD_WASM_COMPAT_ONLY)
 	if (NOT ENABLE_MULTI_THREADING) # Not compatible with multi threading due to error: 'void wasm::I64ToI32Lowering::visitStore(Store *): Assertion `!curr->isAtomic && "atomic store not implemented"' failed.'
 		add_custom_command(
-		  OUTPUT ${OUTPUT_FOLDER}jolt-physics.js
-		  COMMAND emcc glue.o $<TARGET_FILE:Jolt> ${EMCC_JS_ARGS} -o ${OUTPUT_FOLDER}jolt-physics.js
-		  DEPENDS jolt-bindings ${JOLT_FRONT_MATTER_FILE} ${JOLT_TARGETS} ${JOLT_IDL_FILE} ${JOLT_HEADER_FILE}
-		  COMMENT "Building JoltPhysics.js javascript"
-		  VERBATIM)
+			OUTPUT ${OUTPUT_FOLDER}jolt-physics.js
+			COMMAND emcc glue.o $<TARGET_FILE:Jolt> ${EMCC_JS_ARGS} -o ${OUTPUT_FOLDER}jolt-physics.js
+			DEPENDS jolt-bindings ${JOLT_FRONT_MATTER_FILE} ${JOLT_TARGETS} ${JOLT_IDL_FILE} ${JOLT_HEADER_FILE}
+			COMMENT "Building JoltPhysics.js javascript"
+			VERBATIM)
 		add_custom_target(jolt-javascript ALL DEPENDS ${OUTPUT_FOLDER}jolt-physics.js)
 	endif()
 
 	add_custom_command(
-	  OUTPUT ${OUTPUT_FOLDER}jolt-physics.wasm.js ${OUTPUT_FOLDER}jolt-physics.wasm.wasm
-	  COMMAND emcc glue.o $<TARGET_FILE:Jolt> ${EMCC_WASM_ARGS} -o ${OUTPUT_FOLDER}jolt-physics.wasm.js
-	  DEPENDS jolt-bindings ${JOLT_FRONT_MATTER_FILE} ${JOLT_TARGETS} ${JOLT_IDL_FILE} ${JOLT_HEADER_FILE}
-	  COMMENT "Building JoltPhysics.js webassembly"
-	  VERBATIM)
+		OUTPUT ${OUTPUT_FOLDER}jolt-physics.wasm.js ${OUTPUT_FOLDER}jolt-physics.wasm.wasm
+		COMMAND emcc glue.o $<TARGET_FILE:Jolt> ${EMCC_WASM_ARGS} -o ${OUTPUT_FOLDER}jolt-physics.wasm.js
+		DEPENDS jolt-bindings ${JOLT_FRONT_MATTER_FILE} ${JOLT_TARGETS} ${JOLT_IDL_FILE} ${JOLT_HEADER_FILE}
+		COMMENT "Building JoltPhysics.js webassembly"
+		VERBATIM)
 	add_custom_target(jolt-wasm ALL DEPENDS ${OUTPUT_FOLDER}jolt-physics.wasm.js ${OUTPUT_FOLDER}jolt-physics.wasm.wasm)
 endif()
 
 add_custom_command(
-  OUTPUT ${OUTPUT_FOLDER}jolt-physics.wasm-compat.js
-  COMMAND emcc glue.o $<TARGET_FILE:Jolt> ${EMCC_WASM_COMPAT_ARGS} -o ${OUTPUT_FOLDER}jolt-physics.wasm-compat.js
-  DEPENDS jolt-bindings ${JOLT_FRONT_MATTER_FILE} ${JOLT_TARGETS} ${JOLT_IDL_FILE} ${JOLT_HEADER_FILE}
-  COMMENT "Building JoltPhysics.js compat webassembly"
-  VERBATIM)
+	OUTPUT ${OUTPUT_FOLDER}jolt-physics.wasm-compat.js
+	COMMAND emcc glue.o $<TARGET_FILE:Jolt> ${EMCC_WASM_COMPAT_ARGS} -o ${OUTPUT_FOLDER}jolt-physics.wasm-compat.js
+	DEPENDS jolt-bindings ${JOLT_FRONT_MATTER_FILE} ${JOLT_TARGETS} ${JOLT_IDL_FILE} ${JOLT_HEADER_FILE}
+	COMMENT "Building JoltPhysics.js compat webassembly"
+	VERBATIM)
 add_custom_target(jolt-wasm-compat ALL DEPENDS ${OUTPUT_FOLDER}jolt-physics.wasm-compat.js)
