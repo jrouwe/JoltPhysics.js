@@ -98,11 +98,12 @@ Additional options that can be provided to ```build.sh```:
 
 By default the examples use the WASM version of Jolt. This requires serving the html file using a web server rather than opening the html file directly.
 
-Go to the serveexamples folder and run
+Go open a terminal in this folder and run the following commands:
 
 ```
+cd serveexamples
 npm install
-node serveexamples
+npm run serve
 ```
 
 If you need to debug the C++ code take a look at [WASM debugging](https://developer.chrome.com/blog/wasm-debugging-2020/).

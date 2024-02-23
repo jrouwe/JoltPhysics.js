@@ -4,7 +4,7 @@
   "description": "Serves the JoltPhysics.js examples",
   "main": "serveexamples.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "serve": "node serveexamples.js"
   },
   "author": "",
   "license": "MIT",
