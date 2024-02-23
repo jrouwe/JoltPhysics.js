@@ -85,13 +85,25 @@ This project has only been compiled under Linux.
 
 * Install [emscripten](https://emscripten.org/) and ensure that its environment variables have been setup
 * Install [cmake](https://cmake.org/)
-* Run ```./build.sh``` for the optimized build, ```./build.sh Debug``` for the debug build or ```./build.sh Debug -DENABLE_MEMORY_PROFILER=ON``` for the debug build with memory tracking
+* Run ```./build.sh Distribution``` for the optimized build, ```./build.sh Debug``` for the debug build.
 
-You can also compile the project in double precision mode using ```./build.sh Distribution -DDOUBLE_PRECISION=ON```, currently no package is provided for this.
+Additional options that can be provided to ```build.sh```:
+
+* ```-DENABLE_MEMORY_PROFILER=ON``` will enable memory tracking to detect leaks.
+* ```-DDOUBLE_PRECISION=ON``` will enable the double precision mode. This allows worlds larger than a couple of km.
+* ```-DENABLE_MULTI_THREADING=ON``` will enable multi threading. Note that due to a bug in Safari this currently doesn't work in that brower. It is also incompatible with any JavaScript callback function that are triggered from web workers. See [this](https://github.com/jrouwe/JoltPhysics.js/discussions/110) ticket.
+* ```-DBUILD_WASM_COMPAT_ONLY=ON``` speeds up the build by only compiling the WASM compat version which the examples use.
 
 ## Running
 
-By default the examples use the WASM version of Jolt. This requires serving the html file using a web server rather than opening the html file directly. Use e.g. [serve](https://www.npmjs.com/package/serve) to quickly host the file.
+By default the examples use the WASM version of Jolt. This requires serving the html file using a web server rather than opening the html file directly.
+
+Go to the serveexamples folder and run
+
+```
+npm install
+node serveexamples
+```
 
 If you need to debug the C++ code take a look at [WASM debugging](https://developer.chrome.com/blog/wasm-debugging-2020/).
 
@@ -119,10 +131,6 @@ Reference counting objects start with a reference count of 0. If you want to kee
 The Body class is also a special case, it is destroyed through BodyInterface.DestroyBody(body.GetID()) (which internally destroys the Body).
 
 Almost everything else can be destroyed straight after it has been passed to Jolt. [An example that shows how to properly clean up using Jolt is here](https://github.com/jrouwe/JoltPhysics.js/blob/main/Examples/proper_cleanup.html).
-
-## Credits
-
-This project was started from the [Ammo.js](https://github.com/kripken/ammo.js) code, but little remains of it as the Jolt Physics API is very different from the Bullet API.
 
 ## License
 

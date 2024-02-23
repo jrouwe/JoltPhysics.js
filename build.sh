@@ -54,7 +54,7 @@ if [ $? -ne 0 ]; then
 	exit 1
 fi
 
-cp ./dist/jolt-physics.wasm-compat.js ./Examples/js/jolt-physics.wasm-compat.js
+cp ./dist/jolt-physics.wasm-compat*.js ./Examples/js/
 if [ $? -ne 0 ]; then
 	exit 1
 fi
