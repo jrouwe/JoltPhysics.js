@@ -2241,6 +2241,12 @@ interface PhysicsSystem {
 
 interface MassProperties {
 	void MassProperties();
+	void SetMassAndInertiaOfSolidBox([Const, Ref] Vec3 inBoxSize, float inDensity);
+	void ScaleToMass(float inMass);
+	[Value] static Vec3 sGetEquivalentSolidBoxSize(float inMass, [Const, Ref] Vec3 inInertiaDiagonal);
+	void Rotate([Const, Ref] Mat44 inRotation);
+	void Translate([Const, Ref] Vec3 inTranslation);
+	void Scale([Const, Ref] Vec3 inScale);
 
 	attribute float mMass;
 	[Value] attribute Mat44 mInertia;
