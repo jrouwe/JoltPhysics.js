@@ -887,6 +887,7 @@ interface OffsetCenterOfMassShapeSettings {
 OffsetCenterOfMassShapeSettings implements DecoratedShapeSettings;
 
 interface OffsetCenterOfMassShape {
+	void OffsetCenterOfMassShape([Const] Shape inShape, [Const, Ref] Vec3 inOffset);
 };
 
 OffsetCenterOfMassShape implements DecoratedShape;
