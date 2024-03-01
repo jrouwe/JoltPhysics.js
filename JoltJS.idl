@@ -1444,7 +1444,7 @@ RackAndPinionConstraint implements TwoBodyConstraint;
 
 interface BodyID {
 	void BodyID();
-	void BodyID([Const, Ref] BodyID inID);
+	void BodyID(unsigned long inIndexAndSequenceNumber);
 	unsigned long GetIndex();
 	unsigned long GetIndexAndSequenceNumber();
 };
