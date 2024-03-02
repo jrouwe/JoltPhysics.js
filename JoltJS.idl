@@ -2254,11 +2254,16 @@ interface MassProperties {
 };
 
 interface BodyCreationSettings {
+	void BodyCreationSettings();
 	void BodyCreationSettings([Const] Shape inShape, [Ref] RVec3 inPosition, [Ref] Quat inRotation, EMotionType inMotionType, unsigned long inObjectLayer);
 	[Const] ShapeSettings GetShapeSettings();
-	void SetShapeSettings([Const] ShapeSettings inShape);	
+	void SetShapeSettings([Const] ShapeSettings inShape);
+	[Value] ShapeResult ConvertShapeSettings();
 	[Const] Shape GetShape();
-	void SetShape([Const] Shape inShape);	
+	void SetShape([Const] Shape inShape);
+	boolean HasMassProperties();
+	[Value] MassProperties GetMassProperties();
+
 	[Value] attribute RVec3 mPosition;
 	[Value] attribute Quat mRotation;
 	[Value] attribute Vec3 mLinearVelocity;
