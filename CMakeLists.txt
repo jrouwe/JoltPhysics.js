@@ -20,6 +20,9 @@ option(DOUBLE_PRECISION "Compile the library in double precision mode" OFF)
 # Option to turn multi threading on
 option(ENABLE_MULTI_THREADING "Compile the library in multi threading mode (warning: doesn't work in Safari nor with any JS callbacks currently)'" OFF)
 
+# Option to turn on SIMD
+option(ENABLE_SIMD "Enable SIMD instructions (warning: last major browser to support this was Safari 16.4 in March 2023)" OFF)
+
 # Option to speed up compilation by only compiling the WASM compat version
 option(BUILD_WASM_COMPAT_ONLY "Compile online the WASM compat version of the library (speeds up compilation)" OFF)
 
@@ -55,12 +58,22 @@ else()
 	set(ENVIRONMENT_FLAG "-s ENVIRONMENT='web,node'")
 endif()
 
+# Enable SIMD flags
+if (ENABLE_SIMD)
+	set(ENABLE_SIMD_FLAG 
+		-msimd128 
+		-msse4.2)
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -msimd128 -msse4.2")
+else()
+	set(ENABLE_SIMD_FLAG "")
+endif()
+
 # Include Jolt
 include(FetchContent)
 FetchContent_Declare(
         JoltPhysics
         GIT_REPOSITORY "https://github.com/jrouwe/JoltPhysics"
-        GIT_TAG "34ed853d7275341738ca89b44174b851fd2cab3c"
+        GIT_TAG "c1d3e4c340728c091c5364b24ffa5fc6743baabf"
 		SOURCE_SUBDIR "Build"
 )
 FetchContent_MakeAvailable(JoltPhysics)
@@ -97,7 +110,8 @@ set(EMCC_ARGS
   -s TOTAL_STACK=1048576
   -s TOTAL_MEMORY=${TOTAL_MEMORY}
   ${MEMORY_PROFILER_FLAG}
-  ${INCLUDE_DEMANGLE_ALL_FLAG})
+  ${INCLUDE_DEMANGLE_ALL_FLAG}
+  ${ENABLE_SIMD_FLAG})
 
 if ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
 	set(EMCC_ARGS 
@@ -133,7 +147,8 @@ set(EMCC_GLUE_ARGS
   -DJPH_OBJECT_LAYER_BITS=32
   -DJPH_DISABLE_CUSTOM_ALLOCATOR
   -include ${JOLT_HEADER_FILE}
-  ${MEMORY_PROFILER_FLAG})
+  ${MEMORY_PROFILER_FLAG}
+  ${ENABLE_SIMD_FLAG})
 
 # Can't find a way to automatically inherit settings set by target_compile_definitions, so hardcoding defines here
 if ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
