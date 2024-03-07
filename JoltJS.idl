@@ -666,6 +666,7 @@ interface ShapeSettings {
 	void AddRef();
 	void Release();
 	[Value] ShapeResult Create();
+	void ClearCachedResult();
 
 	attribute unsigned long long mUserData;
 };
@@ -993,6 +994,7 @@ interface Constraint {
 	boolean IsActive();
 	unsigned long long GetUserData();
 	void SetUserData(unsigned long long inUserData);
+	void ResetWarmStart();
 };
 
 // Two body constraint
@@ -2326,6 +2328,26 @@ interface SoftBodySharedSettingsVolume {
 	attribute float mCompliance;
 };
 
+interface SoftBodySharedSettingsInvBind
+{
+	attribute unsigned long mJointIndex;
+	[Value] attribute Mat44 mInvBind;
+};
+
+interface SoftBodySharedSettingsSkinWeight
+{
+	attribute unsigned long mInvBindIndex;
+	attribute float mWeight;
+};
+
+interface SoftBodySharedSettingsSkinned
+{
+	attribute unsigned long mVertex;
+	[Value] attribute SoftBodySharedSettingsSkinWeight[] mWeights;
+	attribute float mMaxDistance;
+	attribute float mBackStop;
+};
+	
 interface ArraySoftBodySharedSettingsVertex {
 	boolean empty();
 	long size();
@@ -2366,6 +2388,26 @@ interface ArraySoftBodySharedSettingsVolume {
 	void clear();
 };
 
+interface ArraySoftBodySharedSettingsInvBind {
+	boolean empty();
+	long size();
+	[Ref] SoftBodySharedSettingsInvBind at(long inIndex);
+	void push_back([Const, Ref] SoftBodySharedSettingsInvBind inValue);
+	void reserve(unsigned long inSize);
+	void resize(unsigned long inSize);
+	void clear();
+};
+
+interface ArraySoftBodySharedSettingsSkinned {
+	boolean empty();
+	long size();
+	[Ref] SoftBodySharedSettingsSkinned at(long inIndex);
+	void push_back([Const, Ref] SoftBodySharedSettingsSkinned inValue);
+	void reserve(unsigned long inSize);
+	void resize(unsigned long inSize);
+	void clear();
+};
+
 interface SoftBodySharedSettings {
 	void SoftBodySharedSettings();
 	unsigned long GetRefCount();
@@ -2380,6 +2422,8 @@ interface SoftBodySharedSettings {
 	[Value] attribute ArraySoftBodySharedSettingsFace mFaces;
 	[Value] attribute ArraySoftBodySharedSettingsEdge mEdgeConstraints;
 	[Value] attribute ArraySoftBodySharedSettingsVolume mVolumeConstraints;
+	[Value] attribute ArraySoftBodySharedSettingsSkinned mSkinnedConstraints;
+	[Value] attribute ArraySoftBodySharedSettingsInvBind mInvBindMatrices;
 	[Value] attribute PhysicsMaterialList mMaterials;
 	attribute float mVertexRadius;
 };
@@ -2435,6 +2479,8 @@ interface SoftBodyMotionProperties {
 	boolean GetUpdatePosition();
 	void SetUpdatePosition(boolean inUpdatePosition);
 	[Const, Ref] AABox GetLocalBounds();
+	void CustomUpdate(float inDeltaTime, [Ref] Body ioSoftBody, [Ref] PhysicsSystem inSystem);
+	void SkinVertices([Const, Ref] RMat44 inRootTransform, Mat44MemRef inJointMatrices, unsigned long inNumJoints, boolean inHardSkinAll, [Ref] TempAllocator ioTempAllocator);
 };
 
 SoftBodyMotionProperties implements MotionProperties;
@@ -3211,6 +3257,7 @@ interface Ragdoll {
 	void SetGroupID(long inGroupID, optional boolean inLockBodies);
 	void SetPose([Const, Ref] SkeletonPose inPose, optional boolean inLockBodies);
 	void GetPose([Ref] SkeletonPose outPose, optional boolean inLockBodies);
+	void ResetWarmStart();
 	void DriveToPoseUsingKinematics([Const, Ref] SkeletonPose inPose, float inDeltaTime, optional boolean inLockBodies);
 	void DriveToPoseUsingMotors([Const, Ref] SkeletonPose inPose);
 	void SetLinearAndAngularVelocity([Const, Ref] Vec3 inLinearVelocity, [Const, Ref] Vec3 inAngularVelocity, optional boolean inLockBodies);

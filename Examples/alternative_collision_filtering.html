@@ -58,16 +58,16 @@
 				const sGetObjectLayer = function (group, mask) { return Jolt.ObjectLayerPairFilterMask.prototype.sGetObjectLayer(group, mask); }
 
 				// Create a basic floor that collides with everything
-				createBox(Jolt.RVec3.prototype.sZero(), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(50, 0.5, 50), Jolt.EMotionType_STATIC, sGetObjectLayer(GROUP_STATIC, GROUP_ALL));
+				createBox(Jolt.RVec3.prototype.sZero(), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(50, 0.5, 50), Jolt.EMotionType_Static, sGetObjectLayer(GROUP_STATIC, GROUP_ALL));
 
 				// 1st floor: Part of group static but colliding only with GROUP_FLOOR1
-				createBox(new Jolt.RVec3(0, 3, 0), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(5, 0.5, 5), Jolt.EMotionType_STATIC, sGetObjectLayer(GROUP_STATIC, GROUP_FLOOR1), 0x9f0000);
+				createBox(new Jolt.RVec3(0, 3, 0), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(5, 0.5, 5), Jolt.EMotionType_Static, sGetObjectLayer(GROUP_STATIC, GROUP_FLOOR1), 0x9f0000);
 
 				// 2nd floor: Part of group static but colliding only with GROUP_FLOOR2
-				createBox(new Jolt.RVec3(0, 6, 0), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(5, 0.5, 5), Jolt.EMotionType_STATIC, sGetObjectLayer(GROUP_STATIC, GROUP_FLOOR2), 0x009f00);
+				createBox(new Jolt.RVec3(0, 6, 0), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(5, 0.5, 5), Jolt.EMotionType_Static, sGetObjectLayer(GROUP_STATIC, GROUP_FLOOR2), 0x009f00);
 
 				// 3rd floor: Part of group static but colliding only with GROUP_FLOOR3
-				createBox(new Jolt.RVec3(0, 9, 0), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(5, 0.5, 5), Jolt.EMotionType_STATIC, sGetObjectLayer(GROUP_STATIC, GROUP_FLOOR3), 0x00009f);
+				createBox(new Jolt.RVec3(0, 9, 0), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(5, 0.5, 5), Jolt.EMotionType_Static, sGetObjectLayer(GROUP_STATIC, GROUP_FLOOR3), 0x00009f);
 
 				// Create dynamic objects that collide only with a specific floor or the ground floor
 				for (let x = 0; x < 10; x++)

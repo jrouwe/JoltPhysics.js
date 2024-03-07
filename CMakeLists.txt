@@ -35,6 +35,9 @@ set(INTERPROCEDURAL_OPTIMIZATION OFF)
 # Turn on symbols
 set(GENERATE_DEBUG_SYMBOLS ON)
 
+# Turn off custom allocator
+set(DISABLE_CUSTOM_ALLOCATOR ON)
+
 # Use 32-bit object layers to support more bits in ObjectLayerPairFilterMask
 set(OBJECT_LAYER_BITS 32)
 
@@ -57,7 +60,7 @@ include(FetchContent)
 FetchContent_Declare(
         JoltPhysics
         GIT_REPOSITORY "https://github.com/jrouwe/JoltPhysics"
-        GIT_TAG "733af810249191c49c6e3d61ceba97918249ff5b"
+        GIT_TAG "34ed853d7275341738ca89b44174b851fd2cab3c"
 		SOURCE_SUBDIR "Build"
 )
 FetchContent_MakeAvailable(JoltPhysics)
@@ -128,6 +131,7 @@ set(EMCC_GLUE_ARGS
   -std=c++17
   ${MULTI_THREADED_FLAG}
   -DJPH_OBJECT_LAYER_BITS=32
+  -DJPH_DISABLE_CUSTOM_ALLOCATOR
   -include ${JOLT_HEADER_FILE}
   ${MEMORY_PROFILER_FLAG})
 
