@@ -59,8 +59,8 @@
 					new Jolt.RVec3(0, 1.15, 0),				// Lower Body
 					new Jolt.RVec3(0, 1.35, 0),				// Mid Body
 					new Jolt.RVec3(0, 1.55, 0),				// Upper Body
-					new Jolt.RVec3(0, 1.825, 0),				// Head
-					new Jolt.RVec3(-0.425, 1.55, 0),			// Upper Arm L
+					new Jolt.RVec3(0, 1.825, 0),			// Head
+					new Jolt.RVec3(-0.425, 1.55, 0),		// Upper Arm L
 					new Jolt.RVec3(0.425, 1.55, 0),			// Upper Arm R
 					new Jolt.RVec3(-0.8, 1.55, 0),			// Lower Arm L
 					new Jolt.RVec3(0.8, 1.55, 0),			// Lower Arm R
@@ -69,24 +69,26 @@
 					new Jolt.RVec3(-0.15, 0.3, 0),			// Lower Leg L
 					new Jolt.RVec3(0.15, 0.3, 0),			// Lower Leg R
 				];
+
+				const rotateZ90 = Jolt.Quat.prototype.sRotation(Jolt.Vec3.prototype.sAxisZ(), 0.5 * Math.PI).Clone();
 				const rotations = [
-					Jolt.Quat.prototype.sRotation(Jolt.Vec3.prototype.sAxisZ(), 0.5 * Math.PI),		// Lower Body
-					Jolt.Quat.prototype.sRotation(Jolt.Vec3.prototype.sAxisZ(), 0.5 * Math.PI),		// Mid Body
-					Jolt.Quat.prototype.sRotation(Jolt.Vec3.prototype.sAxisZ(), 0.5 * Math.PI),		// Upper Body
-					Jolt.Quat.prototype.sIdentity(),									 			// Head
-					Jolt.Quat.prototype.sRotation(Jolt.Vec3.prototype.sAxisZ(), 0.5 * Math.PI),		// Upper Arm L
-					Jolt.Quat.prototype.sRotation(Jolt.Vec3.prototype.sAxisZ(), 0.5 * Math.PI),		// Upper Arm R
-					Jolt.Quat.prototype.sRotation(Jolt.Vec3.prototype.sAxisZ(), 0.5 * Math.PI),		// Lower Arm L
-					Jolt.Quat.prototype.sRotation(Jolt.Vec3.prototype.sAxisZ(), 0.5 * Math.PI),		// Lower Arm R
-					Jolt.Quat.prototype.sIdentity(),												// Upper Leg L
-					Jolt.Quat.prototype.sIdentity(),												// Upper Leg R
-					Jolt.Quat.prototype.sIdentity(),												// Lower Leg L
-					Jolt.Quat.prototype.sIdentity()									 				// Lower Leg R
+					rotateZ90,								// Lower Body
+					rotateZ90,								// Mid Body
+					rotateZ90,								// Upper Body
+					Jolt.Quat.prototype.sIdentity(),		// Head
+					rotateZ90,								// Upper Arm L
+					rotateZ90,								// Upper Arm R
+					rotateZ90,								// Lower Arm L
+					rotateZ90,								// Lower Arm R
+					Jolt.Quat.prototype.sIdentity(),		// Upper Leg L
+					Jolt.Quat.prototype.sIdentity(),		// Upper Leg R
+					Jolt.Quat.prototype.sIdentity(),		// Lower Leg L
+					Jolt.Quat.prototype.sIdentity()			// Lower Leg R
 				];
 
 				// World space constraint positions
 				const constraint_positions = [
-					new Jolt.RVec3.prototype.sZero(),		// Lower Body (unused, there's no parent)
+					Jolt.RVec3.prototype.sZero(),			// Lower Body (unused, there's no parent)
 					new Jolt.RVec3(0, 1.25, 0),				// Mid Body
 					new Jolt.RVec3(0, 1.45, 0),				// Upper Body
 					new Jolt.RVec3(0, 1.65, 0),				// Head
@@ -101,19 +103,21 @@
 				];
 
 				// World space twist axis directions
+				const minusAxisX = Jolt.Vec3.prototype.sAxisX().Mul(-1).Clone();
+				const minusAxisY = Jolt.Vec3.prototype.sAxisY().Mul(-1).Clone();
 				const twist_axis = [
-					Jolt.Vec3.prototype.sZero(),			// Lower Body (unused, there's no parent)
-					Jolt.Vec3.prototype.sAxisY(),			// Mid Body
-					Jolt.Vec3.prototype.sAxisY(),			// Upper Body
-					Jolt.Vec3.prototype.sAxisY(),			// Head
-					Jolt.Vec3.prototype.sAxisX(),			// Upper Arm L
-					Jolt.Vec3.prototype.sAxisX(),			// Upper Arm R
-					Jolt.Vec3.prototype.sAxisX().Mul(-1),	// Lower Arm L
-					Jolt.Vec3.prototype.sAxisX(),			// Lower Arm R
-					Jolt.Vec3.prototype.sAxisY().Mul(-1),	// Upper Leg L
-					Jolt.Vec3.prototype.sAxisY().Mul(-1),	// Upper Leg R
-					Jolt.Vec3.prototype.sAxisY().Mul(-1),	// Lower Leg L
-					Jolt.Vec3.prototype.sAxisY().Mul(-1),	// Lower Leg R
+					Jolt.Vec3.prototype.sZero(),		// Lower Body (unused, there's no parent)
+					Jolt.Vec3.prototype.sAxisY(),		// Mid Body
+					Jolt.Vec3.prototype.sAxisY(),		// Upper Body
+					Jolt.Vec3.prototype.sAxisY(),		// Head
+					Jolt.Vec3.prototype.sAxisX(),		// Upper Arm L
+					Jolt.Vec3.prototype.sAxisX(),		// Upper Arm R
+					minusAxisX ,						// Lower Arm L
+					Jolt.Vec3.prototype.sAxisX(),		// Lower Arm R
+					minusAxisY,							// Upper Leg L
+					minusAxisY,							// Upper Leg R
+					minusAxisY,							// Lower Leg L
+					minusAxisY,							// Lower Leg R
 				];
 
 				// Constraint limits
