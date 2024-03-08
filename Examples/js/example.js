@@ -116,7 +116,7 @@ function initPhysics() {
 	Jolt.RVec3.prototype.ToString = function () { return `(${this.GetX()}, ${this.GetY()}, ${this.GetZ()})` };
 	Jolt.RVec3.prototype.Clone = function () { return new Jolt.RVec3(this.GetX(), this.GetY(), this.GetZ()); };
 	Jolt.Quat.prototype.ToString = function () { return `(${this.GetX()}, ${this.GetY()}, ${this.GetZ()}, ${this.GetW()})` };
-	Jolt.Quat.prototype.Clone = function () { return new Jolt.Vec3(this.GetX(), this.GetY(), this.GetZ(), this.GetW()); };
+	Jolt.Quat.prototype.Clone = function () { return new Jolt.Quat(this.GetX(), this.GetY(), this.GetZ(), this.GetW()); };
 	Jolt.AABox.prototype.ToString = function () { return `[${this.mMax.ToString()}, ${this.mMin.ToString()}]`; };
 }
 
