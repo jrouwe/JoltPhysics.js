@@ -3190,13 +3190,14 @@ interface SkeletalAnimation {
 
 interface SkeletonPose {
 	void SkeletonPose();
-	void SetSkeleton([Const ]Skeleton inSkeleton);
+	void SetSkeleton([Const] Skeleton inSkeleton);
 	[Const] Skeleton GetSkeleton();
 	void SetRootOffset([Ref] RVec3 inOffset);
 	[Value] RVec3 GetRootOffset();
-	[Const, Ref] SkeletalAnimationJointState GetJoint(long inJoint);
-	[Const, Ref] ArrayMat44 GetJointMatrices();
-	[Const, Ref] Mat44 GetJointMatrix(long inJoint);
+	long GetJointCount();
+	[Ref] SkeletalAnimationJointState GetJoint(long inJoint);
+	[Ref] ArrayMat44 GetJointMatrices();
+	[Ref] Mat44 GetJointMatrix(long inJoint);
 	void CalculateJointMatrices();
 	void CalculateJointStates();
 };
