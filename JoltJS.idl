@@ -2268,6 +2268,7 @@ interface PhysicsSystem {
 	void RemoveStepListener(PhysicsStepListener inListener);
 	void SetBodyActivationListener(BodyActivationListener inListener);
 	[Const] BodyActivationListener GetBodyActivationListener();
+	boolean WereBodiesInContact([Const, Ref] BodyID inBodyID1, [Const, Ref] BodyID inBodyID2);
 };
 
 interface MassProperties {
