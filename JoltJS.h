@@ -93,18 +93,24 @@ using Uint8MemRef = uint8;
 using SoftBodySharedSettingsVertex = SoftBodySharedSettings::Vertex;
 using SoftBodySharedSettingsFace = SoftBodySharedSettings::Face;
 using SoftBodySharedSettingsEdge = SoftBodySharedSettings::Edge;
+using SoftBodySharedSettingsDihedralBend = SoftBodySharedSettings::DihedralBend;
 using SoftBodySharedSettingsVolume = SoftBodySharedSettings::Volume;
 using SoftBodySharedSettingsInvBind = SoftBodySharedSettings::InvBind;
 using SoftBodySharedSettingsSkinWeight = SoftBodySharedSettings::SkinWeight;
 using SoftBodySharedSettingsSkinned = SoftBodySharedSettings::Skinned;
+using SoftBodySharedSettingsLRA = SoftBodySharedSettings::LRA;
+using SoftBodySharedSettingsVertexAttributes = SoftBodySharedSettings::VertexAttributes;
 using CollideShapeResultFace = CollideShapeResult::Face;
 using ArraySoftBodySharedSettingsVertex = Array<SoftBodySharedSettingsVertex>;
 using ArraySoftBodySharedSettingsFace = Array<SoftBodySharedSettingsFace>;
 using ArraySoftBodySharedSettingsEdge = Array<SoftBodySharedSettingsEdge>;
+using ArraySoftBodySharedSettingsDihedralBend = Array<SoftBodySharedSettingsDihedralBend>;
 using ArraySoftBodySharedSettingsVolume = Array<SoftBodySharedSettingsVolume>;
 using ArraySoftBodySharedSettingsInvBind = Array<SoftBodySharedSettingsInvBind>;
 using ArraySoftBodySharedSettingsSkinWeight = Array<SoftBodySharedSettingsSkinWeight>;
 using ArraySoftBodySharedSettingsSkinned = Array<SoftBodySharedSettingsSkinned>;
+using ArraySoftBodySharedSettingsLRA = Array<SoftBodySharedSettingsLRA>;
+using ArraySoftBodySharedSettingsVertexAttributes = Array<SoftBodySharedSettingsVertexAttributes>;
 using ArraySoftBodyVertex = Array<SoftBodyVertex>;
 using EGroundState = CharacterBase::EGroundState;
 using Vector2 = Vector<2>;
@@ -291,6 +297,12 @@ enum ETireFrictionDirection
 // Alias for ESwingType values to avoid clashes
 constexpr ESwingType ESwingType_Cone = ESwingType::Cone;
 constexpr ESwingType ESwingType_Pyramid = ESwingType::Pyramid;
+
+// Alias for EBendType values to avoid clashes
+using SoftBodySharedSettings_EBendType = SoftBodySharedSettings::EBendType;
+constexpr SoftBodySharedSettings_EBendType SoftBodySharedSettings_EBendType_None = SoftBodySharedSettings::EBendType::None;
+constexpr SoftBodySharedSettings_EBendType SoftBodySharedSettings_EBendType_Distance = SoftBodySharedSettings::EBendType::Distance;
+constexpr SoftBodySharedSettings_EBendType SoftBodySharedSettings_EBendType_Dihedral = SoftBodySharedSettings::EBendType::Dihedral;
 
 // Callback for traces
 static void TraceImpl(const char *inFMT, ...)

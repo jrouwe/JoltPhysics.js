@@ -204,6 +204,12 @@ enum EPathRotationConstraintType {
 	"EPathRotationConstraintType_FullyConstrained"
 };
 
+enum SoftBodySharedSettings_EBendType {
+	"SoftBodySharedSettings_EBendType_None",
+	"SoftBodySharedSettings_EBendType_Distance",
+	"SoftBodySharedSettings_EBendType_Dihedral"
+};
+
 interface Vec3MemRef {
 };
 
@@ -2351,6 +2357,14 @@ interface SoftBodySharedSettingsEdge {
 	attribute float mCompliance;
 };
 
+interface SoftBodySharedSettingsDihedralBend {
+	void SoftBodySharedSettingsDihedralBend(unsigned long inVertex1, unsigned long inVertex2, unsigned long inVertex3, unsigned long inVertex4, float inCompliance);
+
+	attribute unsigned long[] mVertex;
+	attribute float mCompliance;
+	attribute float mInitialAngle;
+};
+
 interface SoftBodySharedSettingsVolume {
 	void SoftBodySharedSettingsVolume(unsigned long inVertex1, unsigned long inVertex2, unsigned long inVertex3, unsigned long inVertex4, float inCompliance);
 
@@ -2376,9 +2390,17 @@ interface SoftBodySharedSettingsSkinned
 	attribute unsigned long mVertex;
 	[Value] attribute SoftBodySharedSettingsSkinWeight[] mWeights;
 	attribute float mMaxDistance;
-	attribute float mBackStop;
+	attribute float mBackStopDistance;
+	attribute float mBackStopRadius;
 };
 	
+interface SoftBodySharedSettingsLRA {
+	void SoftBodySharedSettingsLRA(unsigned long inVertex1, unsigned long inVertex2, float inMaxDistance);
+
+	attribute unsigned long[] mVertex;
+	attribute float mMaxDistance;
+};
+
 interface ArraySoftBodySharedSettingsVertex {
 	boolean empty();
 	long size();
@@ -2404,6 +2426,16 @@ interface ArraySoftBodySharedSettingsEdge {
 	long size();
 	[Ref] SoftBodySharedSettingsEdge at(long inIndex);
 	void push_back([Const, Ref] SoftBodySharedSettingsEdge inValue);
+	void reserve(unsigned long inSize);
+	void resize(unsigned long inSize);
+	void clear();
+};
+
+interface ArraySoftBodySharedSettingsDihedralBend {
+	boolean empty();
+	long size();
+	[Ref] SoftBodySharedSettingsDihedralBend at(long inIndex);
+	void push_back([Const, Ref] SoftBodySharedSettingsDihedralBend inValue);
 	void reserve(unsigned long inSize);
 	void resize(unsigned long inSize);
 	void clear();
@@ -2439,22 +2471,58 @@ interface ArraySoftBodySharedSettingsSkinned {
 	void clear();
 };
 
+interface ArraySoftBodySharedSettingsLRA {
+	boolean empty();
+	long size();
+	[Ref] SoftBodySharedSettingsLRA at(long inIndex);
+	void push_back([Const, Ref] SoftBodySharedSettingsLRA inValue);
+	void reserve(unsigned long inSize);
+	void resize(unsigned long inSize);
+	void clear();
+};
+
+interface SoftBodySharedSettingsVertexAttributes {
+	void SoftBodySharedSettingsVertexAttributes();
+
+	attribute float mCompliance;
+	attribute float mShearCompliance;
+	attribute float mBendCompliance;
+};
+
+interface ArraySoftBodySharedSettingsVertexAttributes {
+	boolean empty();
+	long size();
+	[Ref] SoftBodySharedSettingsVertexAttributes at(long inIndex);
+	void push_back([Const, Ref] SoftBodySharedSettingsVertexAttributes inValue);
+	void reserve(unsigned long inSize);
+	void resize(unsigned long inSize);
+	void clear();
+	SoftBodySharedSettingsVertexAttributes data();
+};
+
 interface SoftBodySharedSettings {
 	void SoftBodySharedSettings();
 	unsigned long GetRefCount();
 	void AddRef();
 	void Release();
+	void CreateConstraints(SoftBodySharedSettingsVertexAttributes inVertexAttributes, unsigned long inVertexAttributesLength, optional SoftBodySharedSettings_EBendType inBendType, optional float inAngleTolerance);
 	void AddFace([Const, Ref] SoftBodySharedSettingsFace inFace);
 	void CalculateEdgeLengths();
+	void CalculateLRALengths();
+	void CalculateBendConstraintConstants();
 	void CalculateVolumeConstraintVolumes();
+	void CalculateSkinnedConstraintNormals();
 	void Optimize();
+	SoftBodySharedSettings Clone();
 
 	[Value] attribute ArraySoftBodySharedSettingsVertex mVertices;
 	[Value] attribute ArraySoftBodySharedSettingsFace mFaces;
 	[Value] attribute ArraySoftBodySharedSettingsEdge mEdgeConstraints;
+	[Value] attribute ArraySoftBodySharedSettingsDihedralBend mDihedralBendConstraints;
 	[Value] attribute ArraySoftBodySharedSettingsVolume mVolumeConstraints;
 	[Value] attribute ArraySoftBodySharedSettingsSkinned mSkinnedConstraints;
 	[Value] attribute ArraySoftBodySharedSettingsInvBind mInvBindMatrices;
+	[Value] attribute ArraySoftBodySharedSettingsLRA mLRAConstraints;
 	[Value] attribute PhysicsMaterialList mMaterials;
 	attribute float mVertexRadius;
 };
@@ -2509,6 +2577,10 @@ interface SoftBodyMotionProperties {
 	void SetPressure(float inPressure);
 	boolean GetUpdatePosition();
 	void SetUpdatePosition(boolean inUpdatePosition);
+	boolean GetEnableSkinConstraints();
+	void SetEnableSkinConstraints(boolean inEnableSkinConstraints);
+	float GetSkinnedMaxDistanceMultiplier();
+	void SetSkinnedMaxDistanceMultiplier(float inSkinnedMaxDistanceMultiplier);
 	[Const, Ref] AABox GetLocalBounds();
 	void CustomUpdate(float inDeltaTime, [Ref] Body ioSoftBody, [Ref] PhysicsSystem inSystem);
 	void SkinVertices([Const, Ref] RMat44 inRootTransform, Mat44MemRef inJointMatrices, unsigned long inNumJoints, boolean inHardSkinAll, [Ref] TempAllocator ioTempAllocator);

@@ -59,32 +59,6 @@
 				sharedSettings.mVertices.at(vertexIndex(0, gridSize - 1)).mInvMass = 0.0;
 				sharedSettings.mVertices.at(vertexIndex(gridSize - 1, gridSize - 1)).mInvMass = 0.0;
 
-				// Create edges
-				const edge = new Jolt.SoftBodySharedSettingsEdge(0, 0, compliance);
-				const constraints = sharedSettings.mEdgeConstraints;
-				for (let y = 0; y < gridSize; ++y) {
-					for (let x = 0; x < gridSize; ++x) {
-						edge.set_mVertex(0, vertexIndex(x, y));
-						if (x < gridSize - 1) {
-							edge.set_mVertex(1, vertexIndex(x + 1, y));
-							constraints.push_back(edge);
-						}
-						if (y < gridSize - 1) {
-							edge.set_mVertex(1, vertexIndex(x, y + 1));
-							constraints.push_back(edge);
-						}
-						if (x < gridSize - 1 && y < gridSize - 1) {
-							edge.set_mVertex(1, vertexIndex(x + 1, y + 1));
-							constraints.push_back(edge);
-
-							edge.set_mVertex(0, vertexIndex(x + 1, y));
-							edge.set_mVertex(1, vertexIndex(x, y + 1));
-							constraints.push_back(edge);
-						}
-					}
-				}
-				sharedSettings.CalculateEdgeLengths();
-
 				// Create faces
 				const face = new Jolt.SoftBodySharedSettingsFace(0, 0, 0, 0);
 				for (let y = 0; y < gridSize - 1; ++y) {
@@ -99,6 +73,14 @@
 						sharedSettings.AddFace(face);
 					}
 				}
+
+				// Create edges
+				const attributes = new Jolt.SoftBodySharedSettingsVertexAttributes();
+				attributes.mCompliance = compliance;
+				attributes.mShearCompliance = compliance;
+				sharedSettings.CreateConstraints(attributes, 1);
+
+				// Optimize shared settings
 				sharedSettings.Optimize();
 
 				// Create soft body
