@@ -1596,6 +1596,8 @@ interface Body {
 	[Value] RMat44 GetInverseCenterOfMassTransform();
 	[Value] AABox GetWorldSpaceBounds();
 	[Value] TransformedShape GetTransformedShape();
+	[Value] BodyCreationSettings GetBodyCreationSettings();
+	[Value] SoftBodyCreationSettings GetSoftBodyCreationSettings();
 	MotionProperties GetMotionProperties();
 	[Const, Value] Vec3 GetWorldSpaceSurfaceNormal([Const, Ref] SubShapeID inSubShapeID, [Const, Ref] RVec3 inPosition);
 	unsigned long long GetUserData();
