@@ -36,8 +36,8 @@
 
 				// Create ray
 				let ray = new Jolt.RRayCast;
-				ray.mOrigin = new Jolt.RVec3(-5, 1, -1);
-				ray.mDirection = new Jolt.Vec3(10, 0, 2);
+				ray.mOrigin.Set(-5, 1, -1);
+				ray.mDirection.Set(10, 0, 2);
 				let drawRay = (ray) => {
 					addLine(ray.mOrigin, ray.mOrigin.Clone().Add(ray.mDirection), 0xff0000);
 				};
@@ -83,14 +83,14 @@
 				collector.Reset();
 
 				// Move the ray
-				ray.mOrigin = new Jolt.RVec3(-5, 1, 4);
+				ray.mOrigin.Set(-5, 1, 4);
 				drawRay(ray);
 
 				// Cast the ray against the second box
 				physicsSystem.GetNarrowPhaseQuery().CastRay(ray, raySettings, collector, bpFilter, objectFilter, bodyFilter, shapeFilter);
 
 				// Move the ray
-				ray.mOrigin = new Jolt.RVec3(-5, 1, 9);
+				ray.mOrigin.Set(-5, 1, 9);
 				drawRay(ray);
 
 				// Cast the ray against the third box using a closest hit collector
@@ -102,7 +102,7 @@
 				}
 
 				// Move the ray
-				ray.mOrigin = new Jolt.RVec3(-5, 1, 14);
+				ray.mOrigin.Set(-5, 1, 14);
 				drawRay(ray);
 
 				// Turn off back face culling
@@ -118,7 +118,7 @@
 				}
 
 				// Move the ray
-				ray.mOrigin = new Jolt.RVec3(-5, 1, 19);
+				ray.mOrigin.Set(-5, 1, 19);
 				drawRay(ray);
 
 				// Cast the ray against the fifth box resetting the all hit collector
