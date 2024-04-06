@@ -1,0 +1,15 @@
+{
+	"name": "helloworld",
+	"version": "1.0.0",
+	"description": "HelloWorld demo for JoltPhysics.js",
+	"main": "HelloWorld.js",
+	"type": "module",
+	"scripts": {
+		"start": "node HelloWorld.js"
+	},
+	"author": "Jorrit Rouwe",
+	"license": "MIT",
+	"dependencies": {
+		"jolt-physics": "^0.22.0"
+	}
+}
