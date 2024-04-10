@@ -210,6 +210,12 @@ enum SoftBodySharedSettings_EBendType {
 	"SoftBodySharedSettings_EBendType_Dihedral"
 };
 
+enum SoftBodySharedSettings_ELRAType {
+ "SoftBodySharedSettings_ELRAType_None",
+ "SoftBodySharedSettings_ELRAType_EuclideanDistance",
+ "SoftBodySharedSettings_ELRAType_GeodesicDistance"
+};
+
 interface Vec3MemRef {
 };
 
@@ -2487,6 +2493,8 @@ interface SoftBodySharedSettingsVertexAttributes {
 	attribute float mCompliance;
 	attribute float mShearCompliance;
 	attribute float mBendCompliance;
+	attribute SoftBodySharedSettings_ELRAType mLRAType;
+	attribute float mLRAMaxDistanceMultiplier;
 };
 
 interface ArraySoftBodySharedSettingsVertexAttributes {

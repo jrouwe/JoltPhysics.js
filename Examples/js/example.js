@@ -170,8 +170,13 @@ function renderExample() {
 		objThree.position.copy(wrapVec3(body.GetPosition()));
 		objThree.quaternion.copy(wrapQuat(body.GetRotation()));
 
-		if (body.GetBodyType() == Jolt.EBodyType_SoftBody)
-			objThree.geometry = createMeshForShape(body.GetShape());
+		if (body.GetBodyType() == Jolt.EBodyType_SoftBody) {
+			if(objThree.userData.updateVertex) {
+				objThree.userData.updateVertex();
+			} else {
+				objThree.geometry = createMeshForShape(body.GetShape());
+			}
+		}
 	}
 
 	time += deltaTime;
@@ -258,10 +263,61 @@ function createMeshForShape(shape) {
 	return geometry;
 }
 
+function getSoftBodyMesh(body, material) {
+	const motionProperties = Jolt.castObject(body.GetMotionProperties(), Jolt.SoftBodyMotionProperties);
+	const vertexSettings = motionProperties.GetVertices();
+	const settings = motionProperties.GetSettings();
+
+	const faceData = settings.mFaces;
+	const softVertex = [];
+
+	// WARNING; Direct memory mapping to soft vertex positions ties this code to specific builds of Jolt
+	// where current Position is both F32 and located 16 bytes into SoftBodyVertex
+	function memoryMapVertex(i) {
+		const offset = Jolt.getPointer(vertexSettings.at(i));
+		return new Float32Array(Jolt.HEAPF32.buffer, 16+ offset, 3);
+	}
+
+	for(let i=0;i<faceData.size(); i++) {
+		const [v0, v1, v2] = new Uint32Array(Jolt.HEAP32.buffer, Jolt.getPointer(faceData.at(i)), 3);
+		softVertex.push(memoryMapVertex(v0))
+		softVertex.push(memoryMapVertex(v1))
+		softVertex.push(memoryMapVertex(v2))
+	}
+
+
+	// Get a view on the triangle data (does not make a copy)
+	let vertices = new Float32Array(settings.mFaces.size()*9);
+	for(let i=0;i<softVertex.length;i++) {
+		vertices.set(softVertex[i], i*3);
+	}
+
+	let buffer = new THREE.BufferAttribute(vertices, 3);
+
+	// Create a three mesh
+	let geometry = new THREE.BufferGeometry();
+	geometry.setAttribute('position', buffer);
+	geometry.computeVertexNormals();
+
+	material.side = THREE.DoubleSide;
+	const threeObject = new THREE.Mesh(geometry, material);
+	threeObject.userData.updateVertex = () => {
+		for(let i=0;i<softVertex.length;i++) {
+			vertices.set(softVertex[i], i*3);
+		}
+		geometry.computeVertexNormals();
+		geometry.getAttribute('position').needsUpdate = true;
+		geometry.getAttribute('normal').needsUpdate = true;
+
+	}
+	return threeObject;
+}
+
 function getThreeObjectForBody(body, color) {
 	let material = new THREE.MeshPhongMaterial({ color: color });
 
 	let threeObject;
+
 	let shape = body.GetShape();
 	switch (shape.GetSubType()) {
 		case Jolt.EShapeSubType_Box:
@@ -282,7 +338,10 @@ function getThreeObjectForBody(body, color) {
 			threeObject = new THREE.Mesh(new THREE.CylinderGeometry(cylinderShape.GetRadius(), cylinderShape.GetRadius(), 2 * cylinderShape.GetHalfHeight(), 20, 1), material);
 			break;
 		default:
-			threeObject = new THREE.Mesh(createMeshForShape(shape), material);
+			if (body.GetBodyType() == Jolt.EBodyType_SoftBody)
+				threeObject = getSoftBodyMesh(body, material);
+			else
+				threeObject = new THREE.Mesh(createMeshForShape(shape), material);
 			break;
 	}
 

@@ -304,6 +304,12 @@ constexpr SoftBodySharedSettings_EBendType SoftBodySharedSettings_EBendType_None
 constexpr SoftBodySharedSettings_EBendType SoftBodySharedSettings_EBendType_Distance = SoftBodySharedSettings::EBendType::Distance;
 constexpr SoftBodySharedSettings_EBendType SoftBodySharedSettings_EBendType_Dihedral = SoftBodySharedSettings::EBendType::Dihedral;
 
+// Alias for ELRAType values to avoid clashes
+using SoftBodySharedSettings_ELRAType = SoftBodySharedSettings::ELRAType;
+constexpr SoftBodySharedSettings_ELRAType SoftBodySharedSettings_ELRAType_None = SoftBodySharedSettings::ELRAType::None;
+constexpr SoftBodySharedSettings_ELRAType SoftBodySharedSettings_ELRAType_EuclideanDistance = SoftBodySharedSettings::ELRAType::EuclideanDistance;
+constexpr SoftBodySharedSettings_ELRAType SoftBodySharedSettings_ELRAType_GeodesicDistance = SoftBodySharedSettings::ELRAType::GeodesicDistance;
+
 // Callback for traces
 static void TraceImpl(const char *inFMT, ...)
 { 
