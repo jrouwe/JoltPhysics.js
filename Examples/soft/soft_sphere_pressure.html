@@ -34,13 +34,12 @@
 				const sphereSettings = SoftBodyCreator.CreateSphere(2.0);
 				const sphere = new Jolt.SoftBodyCreationSettings(sphereSettings, Jolt.RVec3.prototype.sZero(), Jolt.Quat.prototype.sIdentity(), LAYER_MOVING);
 
-				for (let i = 0; i <= 10; ++i)
-				{
+				for (let i = 0; i <= 10; ++i) {
 					sphere.mPosition.Set(-40 + i * 8, 10, 0);
 					sphere.mPressure = 1000.0 * i;
 					sphere.mUpdatePosition = false;
 					const body = bodyInterface.CreateSoftBody(sphere);
-					addToScene(body, (25* i) | 0x00aa00 | (((10-i)*25)<<16));
+					addToScene(body, (25 * i) | 0x00aa00 | (((10 - i) * 25) << 16));
 				}
 
 			});

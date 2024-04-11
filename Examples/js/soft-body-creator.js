@@ -2,6 +2,7 @@ class SoftBodyCreator {
 	static CreateCloth(inGridSizeX = 30, inGridSizeZ = 30, inGridSpacing = 0.75, inVertexGetInvMass = (_x, _y) => 1, inVertexPerturbation = (_x, _z) => ({ x: 0, y: 0, z: 0 }), inBendType = Jolt.SoftBodySharedSettings_EBendType_None, inVertexAttributes) {
 		const cOffsetX = -0.5 * inGridSpacing * (inGridSizeX - 1);
 		const cOffsetZ = -0.5 * inGridSpacing * (inGridSizeZ - 1);
+
 		// Create settings
 		const sharedSettings = new Jolt.SoftBodySharedSettings;
 		const v = new Jolt.SoftBodySharedSettingsVertex;
@@ -15,11 +16,13 @@ class SoftBodyCreator {
 				sharedSettings.mVertices.push_back(v);
 			}
 		Jolt.destroy(v);
+
 		// Function to get the vertex index of a point on the cloth
 		function vertex_index(inX, inY) {
 			return inX + inY * inGridSizeX;
 		}
 		sharedSettings.CalculateEdgeLengths();
+
 		// Create faces
 		const f = new Jolt.SoftBodySharedSettingsFace(0, 0, 0, 0);
 		for (let z = 0; z < inGridSizeZ - 1; ++z)
@@ -33,10 +36,10 @@ class SoftBodyCreator {
 				sharedSettings.AddFace(f);
 			}
 		Jolt.destroy(f);
+
 		if (inVertexAttributes) {
 			sharedSettings.CreateConstraints(inVertexAttributes, 1, inBendType);
-		}
-		else {
+		} else {
 			const inVertexAttributes = new Jolt.SoftBodySharedSettingsVertexAttributes();
 			inVertexAttributes.mCompliance = 1.0e-5;
 			inVertexAttributes.mShearCompliance = 1.0e-5;
@@ -44,22 +47,26 @@ class SoftBodyCreator {
 			sharedSettings.CreateConstraints(inVertexAttributes, 1, inBendType);
 			Jolt.destroy(inVertexAttributes);
 		}
+
 		// Optimize the settings
 		sharedSettings.Optimize();
 		return sharedSettings;
 	}
+
 	static CreateClothWithFixatedCorners(inGridSizeX = 30, inGridSizeZ = 30, inGridSpacing = 0.75) {
 		function inv_mass(inX, inZ) {
 			return (inX == 0 && inZ == 0)
 				|| (inX == inGridSizeX - 1 && inZ == 0)
 				|| (inX == 0 && inZ == inGridSizeZ - 1)
 				|| (inX == inGridSizeX - 1 && inZ == inGridSizeZ - 1) ? 0.0 : 1.0;
-		}
-		;
+		};
+
 		return this.CreateCloth(inGridSizeX, inGridSizeZ, inGridSpacing, inv_mass);
 	}
+
 	static CreateCube(inGridSize = 5, inGridSpacing = 0.5, edgeCompliance = 0, volumeCompliance = 0) {
 		const cOffset = -0.5 * inGridSpacing * (inGridSize - 1);
+
 		// Create settings
 		const sharedSettings = new Jolt.SoftBodySharedSettings;
 		const v = new Jolt.SoftBodySharedSettingsVertex;
@@ -72,12 +79,14 @@ class SoftBodyCreator {
 					sharedSettings.mVertices.push_back(v);
 				}
 		Jolt.destroy(v);
+
 		// Function to get the vertex index of a point on the cloth
 		const vertex_index = (inX, inY, inZ) => {
 			return inX + inY * inGridSize + inZ * inGridSize * inGridSize;
 		};
 		const sEdge = new Jolt.SoftBodySharedSettingsEdge(0, 0, 0);
 		sEdge.mCompliance = edgeCompliance;
+
 		// Create edges
 		for (let z = 0; z < inGridSize; ++z)
 			for (let y = 0; y < inGridSize; ++y)
@@ -102,6 +111,7 @@ class SoftBodyCreator {
 				}
 		Jolt.destroy(sEdge);
 		sharedSettings.CalculateEdgeLengths();
+
 		const tetra_indices = [
 			[[0, 0, 0], [0, 1, 1], [0, 0, 1], [1, 1, 1]],
 			[[0, 0, 0], [0, 1, 0], [0, 1, 1], [1, 1, 1]],
@@ -110,6 +120,7 @@ class SoftBodyCreator {
 			[[0, 0, 0], [1, 1, 0], [0, 1, 0], [1, 1, 1]],
 			[[0, 0, 0], [1, 0, 0], [1, 1, 0], [1, 1, 1]]
 		];
+
 		// Create volume constraints
 		const sVol = new Jolt.SoftBodySharedSettingsVolume(0, 0, 0, 0, 0);
 		sVol.mCompliance = volumeCompliance;
@@ -123,6 +134,7 @@ class SoftBodyCreator {
 					}
 		Jolt.destroy(sVol);
 		sharedSettings.CalculateVolumeConstraintVolumes();
+
 		// Create faces
 		const f = new Jolt.SoftBodySharedSettingsFace(0, 0, 0, 0);
 		for (let y = 0; y < inGridSize - 1; ++y)
@@ -177,13 +189,16 @@ class SoftBodyCreator {
 				sharedSettings.AddFace(f);
 			}
 		Jolt.destroy(f);
+
 		// Optimize the settings
 		sharedSettings.Optimize();
 		return sharedSettings;
 	}
+
 	static CreateSphere(inRadius = 1, inNumTheta = 10, inNumPhi = 20, inBendType = Jolt.SoftBodySharedSettings_EBendType_None, inVertexAttributes) {
 		const sharedSettings = new Jolt.SoftBodySharedSettings;
 		const v3 = new window.THREE.Vector3();
+
 		// Create settings
 		// NOTE: This is not how you should create a soft body sphere, we explicitly use polar coordinates to make the vertices unevenly distributed.
 		// Doing it this way tests the pressure algorithm as it receives non-uniform triangles. Better is to use uniform triangles,
@@ -202,6 +217,7 @@ class SoftBodyCreator {
 				sUnitSpherical(Math.PI * theta / (inNumTheta - 1), 2.0 * Math.PI * phi / inNumPhi);
 			}
 		Jolt.destroy(v);
+
 		function vertex_index(inTheta, inPhi) {
 			if (inTheta == 0)
 				return 0;
@@ -210,7 +226,6 @@ class SoftBodyCreator {
 			else
 				return 2 + (inTheta - 1) * inNumPhi + inPhi % inNumPhi;
 		}
-		sharedSettings.CalculateEdgeLengths();
 		const f = new Jolt.SoftBodySharedSettingsFace(0, 0, 0, 0);
 		for (let phi = 0; phi < inNumPhi; ++phi) {
 			for (let theta = 0; theta < inNumTheta - 2; ++theta) {
@@ -230,10 +245,10 @@ class SoftBodyCreator {
 			sharedSettings.AddFace(f);
 		}
 		Jolt.destroy(f);
+
 		if (inVertexAttributes) {
 			sharedSettings.CreateConstraints(inVertexAttributes, 1, inBendType);
-		}
-		else {
+		} else {
 			const inVertexAttributes = new Jolt.SoftBodySharedSettingsVertexAttributes();
 			inVertexAttributes.mCompliance = 1.0e-4;
 			inVertexAttributes.mShearCompliance = 1.0e-4;
@@ -241,6 +256,7 @@ class SoftBodyCreator {
 			sharedSettings.CreateConstraints(inVertexAttributes, 1, inBendType);
 			Jolt.destroy(inVertexAttributes);
 		}
+
 		// Optimize the settings
 		sharedSettings.Optimize();
 		return sharedSettings;

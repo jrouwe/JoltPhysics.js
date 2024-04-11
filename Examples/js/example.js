@@ -171,7 +171,7 @@ function renderExample() {
 		objThree.quaternion.copy(wrapQuat(body.GetRotation()));
 
 		if (body.GetBodyType() == Jolt.EBodyType_SoftBody) {
-			if(objThree.userData.updateVertex) {
+			if (objThree.userData.updateVertex) {
 				objThree.userData.updateVertex();
 			} else {
 				objThree.geometry = createMeshForShape(body.GetShape());
@@ -275,21 +275,20 @@ function getSoftBodyMesh(body, material) {
 	// where current Position is both F32 and located 16 bytes into SoftBodyVertex
 	function memoryMapVertex(i) {
 		const offset = Jolt.getPointer(vertexSettings.at(i));
-		return new Float32Array(Jolt.HEAPF32.buffer, 16+ offset, 3);
+		return new Float32Array(Jolt.HEAPF32.buffer, 16 + offset, 3);
 	}
 
-	for(let i=0;i<faceData.size(); i++) {
+	for (let i = 0; i < faceData.size(); i++) {
 		const [v0, v1, v2] = new Uint32Array(Jolt.HEAP32.buffer, Jolt.getPointer(faceData.at(i)), 3);
 		softVertex.push(memoryMapVertex(v0))
 		softVertex.push(memoryMapVertex(v1))
 		softVertex.push(memoryMapVertex(v2))
 	}
 
-
 	// Get a view on the triangle data (does not make a copy)
-	let vertices = new Float32Array(settings.mFaces.size()*9);
-	for(let i=0;i<softVertex.length;i++) {
-		vertices.set(softVertex[i], i*3);
+	let vertices = new Float32Array(settings.mFaces.size() * 9);
+	for (let i = 0; i < softVertex.length; i++) {
+		vertices.set(softVertex[i], i * 3);
 	}
 
 	let buffer = new THREE.BufferAttribute(vertices, 3);
@@ -302,13 +301,12 @@ function getSoftBodyMesh(body, material) {
 	material.side = THREE.DoubleSide;
 	const threeObject = new THREE.Mesh(geometry, material);
 	threeObject.userData.updateVertex = () => {
-		for(let i=0;i<softVertex.length;i++) {
-			vertices.set(softVertex[i], i*3);
+		for (let i = 0; i < softVertex.length; i++) {
+			vertices.set(softVertex[i], i * 3);
 		}
 		geometry.computeVertexNormals();
 		geometry.getAttribute('position').needsUpdate = true;
 		geometry.getAttribute('normal').needsUpdate = true;
-
 	}
 	return threeObject;
 }
