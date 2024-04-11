@@ -2562,6 +2562,12 @@ interface SoftBodyVertex {
 	attribute float mInvMass;
 };
 
+interface SoftBodyVertexTraits {
+	static readonly attribute unsigned long mPreviousPositionOffset;
+	static readonly attribute unsigned long mPositionOffset;
+	static readonly attribute unsigned long mVelocityOffset;
+};
+
 interface ArraySoftBodyVertex {
 	boolean empty();
 	long size();

@@ -267,15 +267,15 @@ function getSoftBodyMesh(body, material) {
 	const motionProperties = Jolt.castObject(body.GetMotionProperties(), Jolt.SoftBodyMotionProperties);
 	const vertexSettings = motionProperties.GetVertices();
 	const settings = motionProperties.GetSettings();
+	const positionOffset = Jolt.SoftBodyVertexTraits.prototype.mPositionOffset;
 
 	const faceData = settings.mFaces;
 	const softVertex = [];
 
-	// WARNING; Direct memory mapping to soft vertex positions ties this code to specific builds of Jolt
-	// where current Position is both F32 and located 16 bytes into SoftBodyVertex
+	// WARNING: The code uses direct memory mapping of properties in Jolt and makes assumptions about the memory layout.
 	function memoryMapVertex(i) {
 		const offset = Jolt.getPointer(vertexSettings.at(i));
-		return new Float32Array(Jolt.HEAPF32.buffer, 16 + offset, 3);
+		return new Float32Array(Jolt.HEAPF32.buffer, offset + positionOffset, 3);
 	}
 
 	for (let i = 0; i < faceData.size(); i++) {

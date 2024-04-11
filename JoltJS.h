@@ -310,6 +310,15 @@ constexpr SoftBodySharedSettings_ELRAType SoftBodySharedSettings_ELRAType_None =
 constexpr SoftBodySharedSettings_ELRAType SoftBodySharedSettings_ELRAType_EuclideanDistance = SoftBodySharedSettings::ELRAType::EuclideanDistance;
 constexpr SoftBodySharedSettings_ELRAType SoftBodySharedSettings_ELRAType_GeodesicDistance = SoftBodySharedSettings::ELRAType::GeodesicDistance;
 
+// Helper class to store information about the memory layout of SoftBodyVertex
+class SoftBodyVertexTraits
+{
+public:
+	static constexpr uint mPreviousPositionOffset = offsetof(SoftBodyVertex, mPreviousPosition);
+	static constexpr uint mPositionOffset = offsetof(SoftBodyVertex, mPosition);
+	static constexpr uint mVelocityOffset = offsetof(SoftBodyVertex, mVelocity);
+};
+
 // Callback for traces
 static void TraceImpl(const char *inFMT, ...)
 { 
