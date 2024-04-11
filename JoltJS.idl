@@ -210,6 +210,12 @@ enum SoftBodySharedSettings_EBendType {
 	"SoftBodySharedSettings_EBendType_Dihedral"
 };
 
+enum SoftBodySharedSettings_ELRAType {
+	"SoftBodySharedSettings_ELRAType_None",
+	"SoftBodySharedSettings_ELRAType_EuclideanDistance",
+	"SoftBodySharedSettings_ELRAType_GeodesicDistance"
+};
+
 interface Vec3MemRef {
 };
 
@@ -910,8 +916,8 @@ interface RotatedTranslatedShapeSettings {
 RotatedTranslatedShapeSettings implements DecoratedShapeSettings;
 
 interface RotatedTranslatedShape {
-	[Value] Quat GetRotation();	
-	[Value] Vec3 GetPosition();	
+	[Value] Quat GetRotation();
+	[Value] Vec3 GetPosition();
 };
 
 RotatedTranslatedShape implements DecoratedShape;
@@ -1338,7 +1344,7 @@ SixDOFConstraint implements TwoBodyConstraint;
 
 interface PathConstraintSettings {
 	void PathConstraintSettings();
-	
+
 	[Const] attribute PathConstraintPath mPath;
 	[Value] attribute Vec3 mPathPosition;
 	[Value] attribute Quat mPathRotation;
@@ -1390,7 +1396,7 @@ PathConstraint implements TwoBodyConstraint;
 
 interface PulleyConstraintSettings {
 	void PulleyConstraintSettings();
-	
+
 	attribute EConstraintSpace mSpace;
 	[Value] attribute RVec3 mBodyPoint1;
 	[Value] attribute RVec3 mFixedPoint1;
@@ -1407,7 +1413,7 @@ interface PulleyConstraint {
 	void SetLength(float inMinLength, float inMaxLength);
 	float GetMinLength();
 	float GetMaxLength();
-	float GetCurrentLength();	
+	float GetCurrentLength();
 };
 
 PulleyConstraint implements TwoBodyConstraint;
@@ -1415,7 +1421,7 @@ PulleyConstraint implements TwoBodyConstraint;
 interface GearConstraintSettings {
 	void GearConstraintSettings();
 	void SetRatio(long inNumTeethGear1, long inNumTeethGear2);
-	
+
 	attribute EConstraintSpace mSpace;
 	[Value] attribute Vec3 mHingeAxis1;
 	[Value] attribute Vec3 mHingeAxis2;
@@ -1434,7 +1440,7 @@ GearConstraint implements TwoBodyConstraint;
 interface RackAndPinionConstraintSettings {
 	void RackAndPinionConstraintSettings();
 	void SetRatio(long inNumTeethRack, float inRackLength, long inNumTeethPinion);
-	
+
 	attribute EConstraintSpace mSpace;
 	[Value] attribute Vec3 mHingeAxis;
 	[Value] attribute Vec3 mSliderAxis;
@@ -2393,7 +2399,7 @@ interface SoftBodySharedSettingsSkinned
 	attribute float mBackStopDistance;
 	attribute float mBackStopRadius;
 };
-	
+
 interface SoftBodySharedSettingsLRA {
 	void SoftBodySharedSettingsLRA(unsigned long inVertex1, unsigned long inVertex2, float inMaxDistance);
 
@@ -2487,6 +2493,8 @@ interface SoftBodySharedSettingsVertexAttributes {
 	attribute float mCompliance;
 	attribute float mShearCompliance;
 	attribute float mBendCompliance;
+	attribute SoftBodySharedSettings_ELRAType mLRAType;
+	attribute float mLRAMaxDistanceMultiplier;
 };
 
 interface ArraySoftBodySharedSettingsVertexAttributes {
@@ -2552,6 +2560,12 @@ interface SoftBodyVertex {
 	[Value] attribute Vec3 mPosition;
 	[Value] attribute Vec3 mVelocity;
 	attribute float mInvMass;
+};
+
+interface SoftBodyVertexTraits {
+	static readonly attribute unsigned long mPreviousPositionOffset;
+	static readonly attribute unsigned long mPositionOffset;
+	static readonly attribute unsigned long mVelocityOffset;
 };
 
 interface ArraySoftBodyVertex {
@@ -3241,14 +3255,14 @@ interface Skeleton {
 interface SkeletalAnimationJointState {
 	void FromMatrix([Const, Ref] Mat44 inMatrix);
 	[Value] Mat44 ToMatrix();
-	
+
 	[Value] attribute Vec3 mTranslation;
 	[Value] attribute Quat mRotation;
 };
 
 interface SkeletalAnimationKeyframe {
 	void SkeletalAnimationKeyframe();
-	
+
 	attribute float mTime;
 };
 
@@ -3267,7 +3281,7 @@ interface ArraySkeletonKeyframe {
 
 interface SkeletalAnimationAnimatedJoint {
 	void SkeletalAnimationAnimatedJoint();
-	
+
 	[Value] attribute JPHString mJointName;
 	[Value] attribute ArraySkeletonKeyframe mKeyframes;
 };
@@ -3346,7 +3360,7 @@ interface RagdollSettings {
 	void DisableParentChildCollisions([Const] optional Mat44MemRef inJointMatrices, optional float inMinSeparationDistance);
 	void CalculateBodyIndexToConstraintIndex();
 	void CalculateConstraintIndexToBodyIdxPair();
-	
+
 	attribute Skeleton mSkeleton;
 	[Value] attribute ArrayRagdollPart mParts;
 	[Value] attribute ArrayRagdollAdditionalConstraint mAdditionalConstraints;
@@ -3371,7 +3385,7 @@ interface Ragdoll {
 	void GetRootTransform([Ref] RVec3 outPosition, [Ref] Quat outRotation, optional boolean inLockBodies);
 	long GetBodyCount();
 	[Value] BodyID GetBodyID(long inBodyIndex);
-	[Const, Ref] BodyIDVector GetBodyIDs(); 
+	[Const, Ref] BodyIDVector GetBodyIDs();
 	long GetConstraintCount();
 	[Value] AABox GetWorldSpaceBounds(optional boolean inLockBodies);
 	[Const] TwoBodyConstraint GetConstraint(long inConstraintIndex);
