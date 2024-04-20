@@ -546,6 +546,7 @@ interface ShapeCast {
 	[Const, Value] readonly attribute Vec3 mScale;
 	[Const, Value] readonly attribute Mat44 mCenterOfMassStart;
 	[Const, Value] readonly attribute Vec3 mDirection;
+	[Const, Value] Vec3 GetPointOnRay(float inFraction);
 };
 
 interface RShapeCast {
@@ -555,6 +556,7 @@ interface RShapeCast {
 	[Const, Value] readonly attribute Vec3 mScale;
 	[Const, Value] readonly attribute RMat44 mCenterOfMassStart;
 	[Const, Value] readonly attribute Vec3 mDirection;
+	[Const, Value] RVec3 GetPointOnRay(float inFraction);
 };
 
 interface Plane {
