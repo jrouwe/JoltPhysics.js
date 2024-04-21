@@ -134,6 +134,11 @@ The Body class is also a special case, it is destroyed through BodyInterface.Des
 
 Almost everything else can be destroyed straight after it has been passed to Jolt. [An example that shows how to properly clean up using Jolt is here](https://github.com/jrouwe/JoltPhysics.js/blob/main/Examples/proper_cleanup.html).
 
+## Projects using JoltPhysics.js
+
+* [Babylon.js plugin](https://github.com/PhoenixIllusion/babylonjs-jolt-physics-plugin) - A plugin that replaces the default physics engine with Jolt.
+* [react-three-jolt](https://github.com/pmndrs/react-three-jolt) - Wraps Jolt to make it easy to use in react.
+
 ## License
 
 The project is distributed under the [MIT license](LICENSE).
