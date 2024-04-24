@@ -972,6 +972,8 @@ interface HeightFieldShape {
 	long GetBlockSize();
 	[Value] Vec3 GetPosition(long inX, long inY);
 	boolean IsNoCollision(long inX, long inY);
+	float GetMinHeightValue();
+	float GetMaxHeightValue();
 	void GetHeights(long inX, long inY, long inSizeX, long inSizeY, FloatMemRef outHeights, long inHeightsStride);
 	void SetHeights(long inX, long inY, long inSizeX, long inSizeY, FloatMemRef inHeights, long inHeightsStride, [Ref] TempAllocator inAllocator, optional float inActiveEdgeCosThresholdAngle);
 	void GetMaterials(long inX, long inY, long inSizeX, long inSizeY, Uint8MemRef outMaterials, long inMaterialsStride);
@@ -1674,6 +1676,7 @@ interface BodyInterface {
 	void AddForce([Const, Ref] BodyID inBodyID, [Const, Ref] Vec3 inForce, [Const, Ref] RVec3 inPoint);
 	void AddTorque([Const, Ref] BodyID inBodyID, [Const, Ref] Vec3 inTorque);
 	void AddForceAndTorque([Const, Ref] BodyID inBodyID, [Const, Ref] Vec3 inForce, [Const, Ref] Vec3 inTorque);
+	boolean ApplyBuoyancyImpulse([Const, Ref] BodyID inBodyID, [Const, Ref] RVec3 inSurfacePosition, [Const, Ref] Vec3 inSurfaceNormal, float inBuoyancy, float inLinearDrag, float inAngularDrag, [Const, Ref] Vec3 inFluidVelocity, [Const, Ref] Vec3 inGravity, float inDeltaTime);
 	void AddImpulse([Const, Ref] BodyID inBodyID, [Const, Ref] Vec3 inImpulse);
 	void AddImpulse([Const, Ref] BodyID inBodyID, [Const, Ref] Vec3 inImpulse, [Const, Ref] RVec3 inPosition);
 	void AddAngularImpulse([Const, Ref] BodyID inBodyID, [Const, Ref] Vec3 inAngularImpulse);
