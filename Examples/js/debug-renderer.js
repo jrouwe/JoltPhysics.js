@@ -29,15 +29,15 @@ class DebugRenderer {
 			this.initialized = true;
 		}
 	}
-    // Draws all bodies, assuming DrawSettings has mDrawShape enabled
+	// Draws all bodies, assuming DrawSettings has mDrawShape enabled
 	DrawBodies(system, inDrawSettings) {
 		this.renderer.DrawBodies(system, inDrawSettings);
 	}
-    // Draws constraint relationships as lines. Some constraints include additional Text Data
+	// Draws constraint relationships as lines. Some constraints include additional Text Data
 	DrawConstraints(system) {
 		this.renderer.DrawConstraints(system);
 	}
-    // Draws text indicating limits on constraints, such as the distance of a distance constraint
+	// Draws text indicating limits on constraints, such as the distance of a distance constraint
 	DrawConstraintLimits(system) {
 		this.renderer.DrawConstraintLimits(system);
 	}
@@ -66,7 +66,7 @@ class DebugRenderer {
 		const text = textDecoder.decode(Jolt.HEAPU8.subarray(inStringPtr, inStringPtr + inStringLen));
 		this.textList.push({ color, position, height, text });
 	}
-    // Assuming a Render Geometry/Batch has been created, the following is a request to render the Geometry at a given model location
+	// Assuming a Render Geometry/Batch has been created, the following is a request to render the Geometry at a given model location
 	drawGeometryWithID(inModelMatrix, inWorldSpaceBounds, inLODScaleSq, inModelColor, inGeometryID, inCullMode, inCastShadow, inDrawMode) {
 		const colorU32 = Jolt.wrapPointer(inModelColor, Jolt.Color).mU32 >>> 0;
 		const modelMatrix = Jolt.wrapPointer(inModelMatrix, Jolt.RMat44);
@@ -77,15 +77,15 @@ class DebugRenderer {
 		const matrix = new THREE.Matrix4().makeBasis(v0, v1, v2).setPosition(v3);
 		this.geometryList.push({ matrix: matrix, geometry: this.geometryCache[inGeometryID], color: colorU32, drawMode: inDrawMode, cullMode: inCullMode });
 	}
-    // On initializing the Renderer, or adding new rigid Mesh, the following methods will send the vertex data here to construct a Render Geometry
+	// On initializing the Renderer, or adding new rigid Mesh, the following methods will send the vertex data here to construct a Render Geometry
 	createTriangleBatchID(inTriangles, inTriangleCount) {
 		const batchID = this.geometryCache.length;
 		const { mPositionOffset, mNormalOffset, mUVOffset, mSize } = Jolt.DebugRendererVertexTraits.prototype;
 		const interleaveBufferF32 = new Float32Array(inTriangleCount * 3 * mSize / 4);
 
-        // Assuming a triangle is tightly packed (always 3 vertex with no leading or trailing space), we can treat the data chunk
-        // as a whole as if it was an interleaved vertex buffer, assuming no alignment issues such that element N+1 is more than (size) from element N+0
-        // This case is always true as of this coding, but should it not be, the following [else] case will extract just the 3 vertex
+		// Assuming a triangle is tightly packed (always 3 vertex with no leading or trailing space), we can treat the data chunk
+		// as a whole as if it was an interleaved vertex buffer, assuming no alignment issues such that element N+1 is more than (size) from element N+0
+		// This case is always true as of this coding, but should it not be, the following [else] case will extract just the 3 vertex
 		if (Jolt.DebugRendererTriangleTraits.prototype.mVOffset === 0 && Jolt.DebugRendererTriangleTraits.prototype.mSize === mSize * 3) {
 			interleaveBufferF32.set(new Float32Array(Jolt.HEAPF32.buffer, inTriangles, interleaveBufferF32.length));
 		}
@@ -112,7 +112,7 @@ class DebugRenderer {
 		interleaveBufferF32.set(new Float32Array(Jolt.HEAPF32.buffer, inVertices, interleaveBufferF32.length));
 		const index = new Uint32Array(inIndexCount);
 
-        // Unlike triangles, by definition this data will be an interleaved data buffer
+		// Unlike triangles, by definition this data will be an interleaved data buffer
 		index.set(Jolt.HEAPU32.subarray(inIndices / 4, inIndices / 4 + inIndexCount));
 		// Create a three mesh
 		const geometry = new THREE.BufferGeometry();
@@ -124,8 +124,8 @@ class DebugRenderer {
 		this.geometryCache.push(geometry);
 		return batchID;
 	}
-    // Debug Renderer supports applying color, Front and Back face culling, and drawing as solid or wire frame.
-    // These all correspond to different Three Materials, so cache them here.
+	// Debug Renderer supports applying color, Front and Back face culling, and drawing as solid or wire frame.
+	// These all correspond to different Three Materials, so cache them here.
 	getMeshMaterial(color, cullMode, drawMode) {
 		const key = `${color}|${cullMode}|${drawMode}`;
 		if (!this.materialCache[key]) {
@@ -149,11 +149,11 @@ class DebugRenderer {
 		}
 		return this.materialCache[key];
 	}
-    // The following call flushes all accumulated Draw calls to new or existing Meshes that have been cached.
-    // Line/Triangle calls are combined into single Meshes per material.
-    // Text3D calls trigger a lazy initialization of CSS3D Render to render the text as transformed DIVs
+	// The following call flushes all accumulated Draw calls to new or existing Meshes that have been cached.
+	// Line/Triangle calls are combined into single Meshes per material.
+	// Text3D calls trigger a lazy initialization of CSS3D Render to render the text as transformed DIVs
 	Render() {
-        // Clear previous frames meshes, in case this frame no longer has these meshes.
+		// Clear previous frames meshes, in case this frame no longer has these meshes.
 		[Object.values(this.lineMesh), Object.values(this.triangleMesh), this.meshList, this.textCache].forEach(meshes => {
 			meshes.forEach(mesh => mesh.visible = false);
 		});
@@ -205,7 +205,7 @@ class DebugRenderer {
 		this.textList.forEach(({ position, text, color, height }, i) => {
 			let mesh = this.textCache[i];
 			if (!this.css3dRender) {
-                // Lazy construct a CSS3D Renderer.
+				// Lazy construct a CSS3D Renderer.
 				this.css3dRender = new THREE.CSS3DRenderer();
 				const renderSize = new THREE.Vector2();
 				renderer.getSize(renderSize);
@@ -214,7 +214,7 @@ class DebugRenderer {
 				element.style.position = 'absolute';
 				element.style.left = element.style.right = element.style.top = element.style.bottom = '0';
 				document.getElementById('container')?.append(element);
-                window.addEventListener('resize', () => { renderer.getSize(renderSize); this.css3dRender.setSize(renderSize.x, renderSize.y);}, false);
+				window.addEventListener('resize', () => { renderer.getSize(renderSize); this.css3dRender.setSize(renderSize.x, renderSize.y); }, false);
 			}
 			if (!mesh) {
 				mesh = this.textCache[i] = new THREE.CSS3DObject(document.createElement('div'));
@@ -230,9 +230,9 @@ class DebugRenderer {
 			mesh.position.copy(position);
 			mesh.visible = true;
 		});
-        // Render the CSS 3D here (updates the DIV locations and css transforms)
+		// Render the CSS 3D here (updates the DIV locations and css transforms)
 		this.css3dRender && this.css3dRender.render(scene, camera);
-        // Clear the accumulators of [Draw] requests
+		// Clear the accumulators of [Draw] requests
 		this.geometryList = [];
 		this.textList = [];
 		this.lineCache = {};
@@ -244,14 +244,16 @@ class DebugRenderer {
 const BodyDrawSettingsMap = [
 	{ key: 'mDrawShape', label: 'Shape' },
 	{ key: 'mDrawShapeWireframe', label: 'Shape Wireframe' },
-	{ key: 'mDrawShapeColor', label: 'Shape Color', options: [
+	{
+		key: 'mDrawShapeColor', label: 'Shape Color', options: [
 			{ key: "EShapeColor_InstanceColor", label: 'Instance Color' },
 			{ key: "EShapeColor_ShapeTypeColor", label: 'Shape Type Color' },
 			{ key: "EShapeColor_MotionTypeColor", label: 'Motion Color' },
 			{ key: "EShapeColor_SleepColor", label: 'Sleep Color' },
 			{ key: "EShapeColor_IslandColor", label: 'Island Color' },
 			{ key: "EShapeColor_MaterialColor", label: 'Material Color' }
-		] },
+		]
+	},
 	{ key: 'mDrawBoundingBox', label: 'Bounding Box' },
 	{ key: 'mDrawCenterOfMassTransform', label: 'Center of Mass Transform' },
 	{ key: 'mDrawWorldTransform', label: 'World Transform' },
@@ -296,13 +298,13 @@ class RenderWidget {
 	}
 	init() {
 		// The scene and all existing lights should be visible in Layers 0x1 and 0x2
-		scene.traverse((x) => {if(x.isLight) x.layers.mask = 3});
+		scene.traverse((x) => { if (x.isLight) x.layers.mask = 3 });
 		scene.layers.mask = 3;
 		const renderMask = document.createElement('select');
 		renderMask.innerHTML = `<option value='1' selected>ORIGINAL</option><option value='2'>DEBUG</option><option value='3'>BOTH</option>`;
 		renderMask.onchange = () => { camera.layers.mask = parseInt(renderMask.value, 10); }
 		this.domElement.append(renderMask);
-	  this.addCheckBox('Draw Bodies', this.drawBodies, (checked) => this.drawBodies = checked);
+		this.addCheckBox('Draw Bodies', this.drawBodies, (checked) => this.drawBodies = checked);
 		this.addCheckBox('Draw Constraints', this.drawConstraints, (checked) => this.drawConstraints = checked);
 		BodyDrawSettingsMap.forEach(item => {
 			if (item.header) {
