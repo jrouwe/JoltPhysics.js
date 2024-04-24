@@ -1,0 +1,92 @@
+
+enum ECullMode {
+  "ECullMode_CullBackFace",
+  "ECullMode_CullFrontFace",
+  "ECullMode_Off" 
+};
+
+enum ECastShadow {
+  "ECastShadow_On" ,
+  "ECastShadow_Off" ,
+};
+
+enum EDrawMode {
+  "EDrawMode_Solid",
+  "EDrawMode_Wireframe",
+};
+
+enum EShapeColor {
+		"EShapeColor_InstanceColor",
+		"EShapeColor_ShapeTypeColor",
+		"EShapeColor_MotionTypeColor",
+		"EShapeColor_SleepColor",
+		"EShapeColor_IslandColor",
+		"EShapeColor_MaterialColor"
+};
+
+interface Color {
+  attribute unsigned long mU32;
+};
+
+interface BodyManagerDrawSettings {
+		void BodyManagerDrawSettings();
+		attribute boolean mDrawGetSupportFunction;
+		attribute boolean mDrawSupportDirection;
+		attribute boolean mDrawGetSupportingFace;
+		attribute boolean mDrawShape;
+		attribute boolean mDrawShapeWireframe;
+		attribute EShapeColor mDrawShapeColor;
+		attribute boolean mDrawBoundingBox;
+		attribute boolean mDrawCenterOfMassTransform;
+		attribute boolean mDrawWorldTransform;
+		attribute boolean mDrawVelocity;
+		attribute boolean mDrawMassAndInertia;
+		attribute boolean mDrawSleepStats;
+		attribute boolean mDrawSoftBodyVertices;
+		attribute boolean mDrawSoftBodyVertexVelocities;
+		attribute boolean mDrawSoftBodyEdgeConstraints;
+		attribute boolean mDrawSoftBodyBendConstraints;
+		attribute boolean mDrawSoftBodyVolumeConstraints;
+		attribute boolean mDrawSoftBodySkinConstraints;
+		attribute boolean mDrawSoftBodyLRAConstraints;
+		attribute boolean mDrawSoftBodyPredictedBounds;
+};
+
+interface DebugRendererVertexTraits
+{
+	static readonly attribute unsigned long mPositionOffset;
+	static readonly attribute unsigned long mNormalOffset;
+	static readonly attribute unsigned long mUVOffset;
+	static readonly attribute unsigned long mSize;
+};
+
+interface DebugRendererTriangleTraits
+{
+	static readonly attribute unsigned long mVOffset;
+	static readonly attribute unsigned long mSize;
+};
+
+
+interface DebugRendererEm { 
+	void Initialize();
+  void DrawBodies(PhysicsSystem system, BodyManagerDrawSettings inDrawSettings);
+  void DrawBodies(PhysicsSystem system);
+  void DrawConstraints(PhysicsSystem system);
+  void DrawConstraintLimits(PhysicsSystem system);
+  void DrawConstraintReferenceFrame(PhysicsSystem system);
+  void DrawShape(Shape inShape, [Const] RMat44 inModelMatrix, [Const] RVec3 inScale, [Const] Color inColor, boolean inDrawWireFrame);
+  void DrawBody(Body body, [Const] Color inColor, boolean inDrawWireFrame);
+  void DrawConstraint(Constraint inConstraint);
+};
+
+[JSImplementation="DebugRendererEm"]
+interface DebugRendererJS: DebugRendererEm {
+  void DebugRendererJS();
+  void DrawLine([Const] RVec3 inFrom, [Const] RVec3 inTo, [Const] Color inColor);
+  void DrawTriangle([Const] RVec3 inV1, [Const] RVec3 inV2,[Const]  RVec3 inV3, [Const] Color inColor, ECastShadow inCastShadow);
+  void DrawText3D([Const] RVec3 inPosition, [Const] any inString, unsigned long inStringLen, [Const] Color inColor, float inHeight);
+  
+  void DrawGeometryWithID([Const] RMat44 inModelMatrix, [Const] AABox inWorldSpaceBounds, float inLODScaleSq, Color inModelColor, [Const] unsigned long inGeometryID, ECullMode inCullMode, ECastShadow inCastShadow, EDrawMode inDrawMode);
+  unsigned long CreateTriangleBatchID([Const] any inTriangles, long inTriangleCount);
+  unsigned long CreateTriangleBatchIDWithIndex([Const] any inVertices, long inVertexCount, [Const] any inIndices, long inIndexCount);
+};

@@ -10,6 +10,7 @@ set(JOLT_FRONT_MATTER_FILE ${CMAKE_CURRENT_SOURCE_DIR}/front-matter.js)
 set(JOLT_HEADER_FILE ${CMAKE_CURRENT_SOURCE_DIR}/JoltJS.h)
 set(JOLT_IDL_FILE ${CMAKE_CURRENT_SOURCE_DIR}/JoltJS.idl)
 set(OUTPUT_FOLDER ${CMAKE_CURRENT_SOURCE_DIR}/dist/)
+set(JOLT_TYPING ${OUTPUT_FOLDER}/types.d.ts)
 
 # Option to turn on memory profiling
 option(ENABLE_MEMORY_PROFILER "Enable emscriptens memory profiler to help find leaks" OFF)
@@ -110,6 +111,7 @@ set(EMCC_ARGS
   -s TOTAL_STACK=1048576
   -s TOTAL_MEMORY=${TOTAL_MEMORY}
   ${MEMORY_PROFILER_FLAG}
+	${DEBUG_RENDER_FLAG}
   ${INCLUDE_DEMANGLE_ALL_FLAG}
   ${ENABLE_SIMD_FLAG})
 
@@ -148,14 +150,17 @@ set(EMCC_GLUE_ARGS
   -DJPH_DISABLE_CUSTOM_ALLOCATOR
   -include ${JOLT_HEADER_FILE}
   ${MEMORY_PROFILER_FLAG}
+	${DEBUG_RENDER_FLAG}
   ${ENABLE_SIMD_FLAG})
 
 # Can't find a way to automatically inherit settings set by target_compile_definitions, so hardcoding defines here
 if ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
+	set(JOLT_IDL_FILE ${JOLT_IDL_FILE} ${CMAKE_CURRENT_SOURCE_DIR}/JoltJS-DebugRenderer.idl )
 	set(EMCC_GLUE_ARGS
 		${EMCC_GLUE_ARGS}
 		-DJPH_DEBUG_RENDERER -DJPH_PROFILE_ENABLED -D_DEBUG)
 elseif ("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
+	set(JOLT_IDL_FILE ${JOLT_IDL_FILE} ${CMAKE_CURRENT_SOURCE_DIR}/JoltJS-DebugRenderer.idl )
 	set(EMCC_GLUE_ARGS
 		${EMCC_GLUE_ARGS}
 		-DJPH_DEBUG_RENDERER -DJPH_PROFILE_ENABLED -DNDEBUG)
@@ -175,9 +180,17 @@ endif()
 project("JoltPhysics.js")
 
 add_custom_command(
-	OUTPUT glue.cpp glue.js
+	OUTPUT ${JOLT_TYPING}
+	COMMAND npx webidl-dts-gen -e -d -i jolt.idl -o ${JOLT_TYPING} -n Jolt
+	DEPENDS jolt.idl
+	COMMENT "Generating JoltPhysics.js bindings"
+	VERBATIM)
+
+add_custom_command(
+	OUTPUT glue.cpp glue.js jolt.idl
 	BYPRODUCTS parser.out WebIDLGrammar.pkl
-	COMMAND ${PYTHON} ${WEBIDL_BINDER_SCRIPT} ${JOLT_IDL_FILE} glue
+	COMMAND cat ${JOLT_IDL_FILE} > jolt.idl
+	COMMAND ${PYTHON} ${WEBIDL_BINDER_SCRIPT} jolt.idl glue
 	DEPENDS ${JOLT_IDL_FILE}
 	COMMENT "Generating JoltPhysics.js bindings"
 	VERBATIM)
@@ -188,7 +201,7 @@ add_custom_command(
 	DEPENDS glue.cpp ${JOLT_HEADER_FILE}
 	COMMENT "Building JoltPhysics.js bindings"
 	VERBATIM)
-add_custom_target(jolt-bindings ALL DEPENDS glue.js glue.o)
+add_custom_target(jolt-bindings ALL DEPENDS glue.js glue.o ${JOLT_TYPING})
 
 if (NOT BUILD_WASM_COMPAT_ONLY)
 	if (NOT ENABLE_MULTI_THREADING # Not compatible with multi threading due to error: 'void wasm::I64ToI32Lowering::visitStore(Store *): Assertion `!curr->isAtomic && "atomic store not implemented"' failed.'
