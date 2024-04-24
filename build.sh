@@ -28,11 +28,6 @@ if [ $? -ne 0 ]; then
 	exit 1
 fi
 
-npx webidl-dts-gen -e -d -i ./JoltJS.idl -o ./dist/types.d.ts -n Jolt
-if [ $? -ne 0 ]; then
-	exit 1
-fi
-
 cat > ./dist/jolt-physics.d.ts << EOF
 import Jolt from "./types";
 
