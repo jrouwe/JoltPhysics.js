@@ -111,7 +111,6 @@ set(EMCC_ARGS
   -s TOTAL_STACK=1048576
   -s TOTAL_MEMORY=${TOTAL_MEMORY}
   ${MEMORY_PROFILER_FLAG}
-	${DEBUG_RENDER_FLAG}
   ${INCLUDE_DEMANGLE_ALL_FLAG}
   ${ENABLE_SIMD_FLAG})
 
@@ -150,7 +149,6 @@ set(EMCC_GLUE_ARGS
   -DJPH_DISABLE_CUSTOM_ALLOCATOR
   -include ${JOLT_HEADER_FILE}
   ${MEMORY_PROFILER_FLAG}
-	${DEBUG_RENDER_FLAG}
   ${ENABLE_SIMD_FLAG})
 
 # Can't find a way to automatically inherit settings set by target_compile_definitions, so hardcoding defines here
