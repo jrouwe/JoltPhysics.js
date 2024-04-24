@@ -32,16 +32,17 @@
 
 	initJolt().then(function (Jolt) {
 
-		const lineUpdates = [];
-		// Initialize this example
-		const debugRendererWidget = new RenderWidget(Jolt);
-		initExample(Jolt, () => {
-			lineUpdates.forEach(func => func());
-
-			debugRendererWidget.render();
-		});
-		debugRendererWidget.init();
-		document.body.appendChild(debugRendererWidget.domElement);
+		if(Jolt.DebugRendererJS) {
+			// Initialize this example
+			const debugRendererWidget = new RenderWidget(Jolt);
+			initExample(Jolt, () => {
+				debugRendererWidget.render();
+			});
+			debugRendererWidget.init();
+			document.body.appendChild(debugRendererWidget.domElement);
+		} else {
+			initExample(Jolt);
+		}
 
 		// Better position the camera
 		camera.position.set(10, 30, 30);

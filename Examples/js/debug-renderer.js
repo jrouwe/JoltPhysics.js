@@ -295,14 +295,12 @@ class RenderWidget {
 		button.onclick = () => { this.domElement.classList.toggle('collapsed'); collapsed = !collapsed; button.innerText = collapsed ? 'SHOW' : 'HIDE'; };
 	}
 	init() {
-		const dirLight = new THREE.DirectionalLight(0xffffff, 1);
-		dirLight.position.set(10, 10, 5);
-		dirLight.layers.set(1);
-		scene.add(dirLight);
+		// The scene and all existing lights should be visible in Layers 0x1 and 0x2
+		scene.traverse((x) => {if(x.isLight) x.layers.mask = 3});
 		scene.layers.mask = 3;
 		const renderMask = document.createElement('select');
 		renderMask.innerHTML = `<option value='1' selected>ORIGINAL</option><option value='2'>DEBUG</option><option value='3'>BOTH</option>`;
-		renderMask.onchange = () => camera.layers.mask = parseInt(renderMask.value, 10);
+		renderMask.onchange = () => { camera.layers.mask = parseInt(renderMask.value, 10); }
 		this.domElement.append(renderMask);
 	  this.addCheckBox('Draw Bodies', this.drawBodies, (checked) => this.drawBodies = checked);
 		this.addCheckBox('Draw Constraints', this.drawConstraints, (checked) => this.drawConstraints = checked);
