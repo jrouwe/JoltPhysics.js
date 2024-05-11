@@ -442,6 +442,7 @@ interface Mat44 {
 	void SetAxisZ([Const, Ref] Vec3 inV);
 	void SetTranslation([Const, Ref] Vec3 inV);
 	void SetColumn4(long inCol, [Const, Ref] Vec4 inV);
+	[Value] Vec4 GetColumn4(long inCol);
 };
 
 interface RMat44 {
@@ -474,6 +475,7 @@ interface RMat44 {
 	void SetAxisZ([Const, Ref] Vec3 inV);
 	void SetTranslation([Const, Ref] RVec3 inV);
 	void SetColumn4(long inCol, [Const, Ref] Vec4 inV);
+	[Value] Vec4 GetColumn4(long inCol);
 };
 
 interface AABox {
