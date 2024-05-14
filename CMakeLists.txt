@@ -42,6 +42,9 @@ set(GENERATE_DEBUG_SYMBOLS ON)
 # Turn off custom allocator
 set(DISABLE_CUSTOM_ALLOCATOR ON)
 
+# Turn off ObjectStream
+set(ENABLE_OBJECT_STREAM OFF)
+
 # Use 32-bit object layers to support more bits in ObjectLayerPairFilterMask
 set(OBJECT_LAYER_BITS 32)
 
@@ -74,7 +77,7 @@ include(FetchContent)
 FetchContent_Declare(
         JoltPhysics
         GIT_REPOSITORY "https://github.com/jrouwe/JoltPhysics"
-        GIT_TAG "31df98494db62e4580cc84f15b1c5d9d6a9859d7"
+        GIT_TAG "edd7b5d48ed0de4769e37968e76b879f9caa2b32"
 		SOURCE_SUBDIR "Build"
 )
 FetchContent_MakeAvailable(JoltPhysics)
