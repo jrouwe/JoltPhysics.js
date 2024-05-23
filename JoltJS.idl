@@ -1660,6 +1660,7 @@ interface BodyInterface {
 	void ActivateBodiesInAABox([Const, Ref] AABox inBox, [Const, Ref] BroadPhaseLayerFilter inBroadPhaseLayerFilter, [Const, Ref] ObjectLayerFilter inObjectLayerFilter);
 	void DeactivateBody([Const, Ref] BodyID inBodyID);
 	boolean IsActive([Const, Ref] BodyID inBodyID);
+	void ResetSleepTimer([Const, Ref] BodyID inBodyID);
 	EBodyType GetBodyType([Const, Ref] BodyID inBodyID);
 	void SetMotionType([Const, Ref] BodyID inBodyID, EMotionType inMotionType, EActivation inActivationMode);
 	EMotionType GetMotionType([Const, Ref] BodyID inBodyID);
@@ -2959,6 +2960,10 @@ interface VehicleConstraint {
 	void VehicleConstraint([Ref] Body inVehicleBody, [Const, Ref] VehicleConstraintSettings inSettings);
 	void SetMaxPitchRollAngle(float inMaxPitchRollAngle);
 	void SetVehicleCollisionTester([Const] VehicleCollisionTester inTester);
+	void OverrideGravity([Const, Ref] Vec3 inGravity);
+	boolean IsGravityOverridden();
+	[Value] Vec3 GetGravityOverride();
+	void ResetGravityOverride();
 	[Value] Vec3 GetLocalUp();
 	[Value] Vec3 GetLocalForward();
 	[Value] Vec3 GetWorldUp();
