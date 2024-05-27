@@ -1675,10 +1675,10 @@ interface BodyInterface {
 	float GetGravityFactor([Const, Ref] BodyID inBodyID);
 	void SetUseManifoldReduction([Const, Ref] BodyID inBodyID, boolean inUseReduction);
 	boolean GetUseManifoldReduction([Const, Ref] BodyID inBodyID);
-	void AddForce([Const, Ref] BodyID inBodyID, [Const, Ref] Vec3 inForce);
-	void AddForce([Const, Ref] BodyID inBodyID, [Const, Ref] Vec3 inForce, [Const, Ref] RVec3 inPoint);
-	void AddTorque([Const, Ref] BodyID inBodyID, [Const, Ref] Vec3 inTorque);
-	void AddForceAndTorque([Const, Ref] BodyID inBodyID, [Const, Ref] Vec3 inForce, [Const, Ref] Vec3 inTorque);
+	void AddForce([Const, Ref] BodyID inBodyID, [Const, Ref] Vec3 inForce, EActivation inActivationMode);
+	void AddForce([Const, Ref] BodyID inBodyID, [Const, Ref] Vec3 inForce, [Const, Ref] RVec3 inPoint, EActivation inActivationMode);
+	void AddTorque([Const, Ref] BodyID inBodyID, [Const, Ref] Vec3 inTorque, EActivation inActivationMode);
+	void AddForceAndTorque([Const, Ref] BodyID inBodyID, [Const, Ref] Vec3 inForce, [Const, Ref] Vec3 inTorque, EActivation inActivationMode);
 	boolean ApplyBuoyancyImpulse([Const, Ref] BodyID inBodyID, [Const, Ref] RVec3 inSurfacePosition, [Const, Ref] Vec3 inSurfaceNormal, float inBuoyancy, float inLinearDrag, float inAngularDrag, [Const, Ref] Vec3 inFluidVelocity, [Const, Ref] Vec3 inGravity, float inDeltaTime);
 	void AddImpulse([Const, Ref] BodyID inBodyID, [Const, Ref] Vec3 inImpulse);
 	void AddImpulse([Const, Ref] BodyID inBodyID, [Const, Ref] Vec3 inImpulse, [Const, Ref] RVec3 inPosition);
