@@ -22,6 +22,7 @@
 #include "Jolt/Physics/Collision/Shape/CylinderShape.h"
 #include "Jolt/Physics/Collision/Shape/ConvexHullShape.h"
 #include "Jolt/Physics/Collision/Shape/StaticCompoundShape.h"
+#include "Jolt/Physics/Collision/Shape/MutableCompoundShape.h"
 #include "Jolt/Physics/Collision/Shape/ScaledShape.h"
 #include "Jolt/Physics/Collision/Shape/OffsetCenterOfMassShape.h"
 #include "Jolt/Physics/Collision/Shape/RotatedTranslatedShape.h"
@@ -89,6 +90,8 @@ using ArrayFloat = Array<float>;
 using ArrayUint = Array<uint>;
 using ArrayUint8 = Array<uint8>;
 using Vec3MemRef = Vec3;
+using QuatMemRef = Quat;
+using ArrayQuat = Array<Quat>;
 using Mat44MemRef = Mat44;
 using ArrayMat44 = Array<Mat44>;
 using FloatMemRef = float;

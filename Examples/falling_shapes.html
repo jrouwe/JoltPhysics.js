@@ -38,12 +38,12 @@
 
 				function generateObject() {
 
-					let numTypes = 8;
+					let numTypes = 9;
 					let objectType = Math.ceil(Math.random() * numTypes);
 
 					let shape = null;
 
-					let colors = [0xff0000, 0xd9b1a3, 0x4d4139, 0xccad33, 0xf2ff40, 0x00ff00, 0x165943, 0x567371, 0x80d5ff, 0x69778c, 0xbeb6f2, 0x7159b3, 0x73004d, 0xd90074, 0xff8091, 0xbf3030, 0x592400, 0xa66c29, 0xb3aa86, 0x296600, 0x00e600, 0x66ccaa, 0x00eeff, 0x3d9df2, 0x000e33, 0x3d00e6, 0xb300a7, 0xff80d5, 0x330d17, 0x59332d, 0xff8c40, 0x33210d, 0x403c00, 0x89d96c, 0x0d3312, 0x0d3330, 0x005c73, 0x0066ff, 0x334166, 0x1b0066, 0x4d3949, 0xbf8faf, 0x59000c]
+					let colors = [0xff0000, 0xd9b1a3, 0x4d4139, 0xccad33, 0xf2ff40, 0x00ff00, 0x165943, 0x567371, 0x80d5ff, 0x69778c, 0xbeb6f2, 0x7159b3, 0x73004d, 0xd90074, 0xff8091, 0xbf3030, 0x592400, 0xa66c29, 0xb3aa86, 0x296600, 0x00e600, 0x66ccaa, 0x00eeff, 0x3d9df2, 0x000e33, 0x3d00e6, 0xb300a7, 0xff80d5, 0x330d17, 0x59332d, 0xff8c40, 0x33210d, 0x403c00, 0x89d96c, 0x0d3312, 0x0d3330, 0x005c73, 0x0066ff, 0x334166, 0x1b0066, 0x4d3949, 0xbf8faf, 0x59000c, 0x0000ff]
 
 					switch (objectType) {
 						case 1: {
@@ -97,7 +97,7 @@
 						}
 
 						case 7: {
-							// Compound shape
+							// Static compound shape
 							let shapeSettings = new Jolt.StaticCompoundShapeSettings();
 							let l = 1.0 + Math.random();
 							let r2 = 0.5 + 0.5 * Math.random();
@@ -110,6 +110,19 @@
 						}
 
 						case 8: {
+							// Mutable compound shape
+							let shapeSettings = new Jolt.MutableCompoundShapeSettings();
+							let l = 1.0 + Math.random();
+							let r2 = 0.5 + 0.5 * Math.random();
+							let r1 = 0.5 * r2;
+							shapeSettings.AddShape(new Jolt.Vec3(-l, 0, 0), Jolt.Quat.prototype.sIdentity(), new Jolt.SphereShapeSettings(r2));
+							shapeSettings.AddShape(new Jolt.Vec3(l, 0, 0), Jolt.Quat.prototype.sIdentity(), new Jolt.BoxShapeSettings(Jolt.Vec3.prototype.sReplicate(r2)));
+							shapeSettings.AddShape(new Jolt.Vec3(0, 0, 0), Jolt.Quat.prototype.sRotation(new Jolt.Vec3(0, 0, 1), 0.5 * Math.PI), new Jolt.CapsuleShapeSettings(l, r1));
+							shape = shapeSettings.Create().Get();
+							break;
+						}
+
+						case 9: {
 							// Sphere with COM offset
 							let radius = 0.5;
 							shape = new Jolt.OffsetCenterOfMassShapeSettings(new Jolt.Vec3(0, -0.1 * radius, 0), new Jolt.SphereShapeSettings(radius, null)).Create().Get();

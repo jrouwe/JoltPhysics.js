@@ -18,6 +18,17 @@ interface ArrayVec3 {
 	Vec3MemRef data();
 };
 
+interface ArrayQuat {
+	boolean empty();
+	long size();
+	[Ref] Quat at(long inIndex);
+	void push_back([Const, Ref] Quat inValue);
+	void reserve(unsigned long inSize);
+	void resize(unsigned long inSize);
+	void clear();
+	QuatMemRef data();
+};
+
 interface ArrayMat44 {
 	boolean empty();
 	long size();
@@ -217,6 +228,9 @@ enum SoftBodySharedSettings_ELRAType {
 };
 
 interface Vec3MemRef {
+};
+
+interface QuatMemRef {
 };
 
 interface Mat44MemRef {
@@ -838,6 +852,12 @@ interface ConvexHullShape {
 ConvexHullShape implements ConvexShape;
 
 // Compound shape
+interface CompoundShapeSettings {
+	void AddShape([Const, Ref] Vec3 inPosition, [Const, Ref] Quat inRotation, [Const] ShapeSettings inShape, unsigned long inUserData);
+};
+
+CompoundShapeSettings implements ShapeSettings;
+
 interface CompoundShapeSubShape {
 	[Value] Vec3 GetPositionCOM();
 	[Value] Quat GetRotation();
@@ -856,15 +876,32 @@ CompoundShape implements Shape;
 // Static compound
 interface StaticCompoundShapeSettings {
 	void StaticCompoundShapeSettings();
-	void AddShape([Const, Ref] Vec3 inPosition, [Const, Ref] Quat inRotation, [Const] ShapeSettings inShape, unsigned long inUserData);
 };
 
-StaticCompoundShapeSettings implements ShapeSettings;
+StaticCompoundShapeSettings implements CompoundShapeSettings;
 
 interface StaticCompoundShape {
 };
 
 StaticCompoundShape implements CompoundShape;
+
+// Mutable compound
+interface MutableCompoundShapeSettings {
+	void MutableCompoundShapeSettings();
+};
+
+MutableCompoundShapeSettings implements CompoundShapeSettings;
+
+interface MutableCompoundShape {
+	unsigned long AddShape([Const, Ref] Vec3 inPosition, [Const, Ref] Quat inRotation, Shape inShape, unsigned long inUserData);
+	void RemoveShape(unsigned long inIndex);
+	void ModifyShape(unsigned long inIndex, [Const, Ref] Vec3 inPosition, [Const, Ref] Quat inRotation);
+	void ModifyShape(unsigned long inIndex, [Const, Ref] Vec3 inPosition, [Const, Ref] Quat inRotation, Shape inShape);
+	void ModifyShapes(unsigned long inStartIndex, unsigned long inNumber, Vec3MemRef inPositions, QuatMemRef inRotations);
+	void AdjustCenterOfMass();
+};
+
+MutableCompoundShape implements CompoundShape;
 
 // Decorated shape
 interface DecoratedShapeSettings {
