@@ -3036,6 +3036,21 @@ interface VehicleConstraintCallbacksJS {
 	void OnPostStepCallback([Ref] VehicleConstraint inVehicle, float inDeltaTime, [Ref] PhysicsSystem inPhysicsSystem);
 };
 
+interface TireMaxImpulseCallbackResult {
+	attribute float mLongitudinalImpulse;
+	attribute float mLateralImpulse;
+};
+
+interface WheeledVehicleControllerCallbacksEm {
+	void SetWheeledVehicleController([Ref] WheeledVehicleController inController);
+};
+
+[JSImplementation="WheeledVehicleControllerCallbacksEm"]
+interface WheeledVehicleControllerCallbacksJS {
+	void WheeledVehicleControllerCallbacksJS();
+	void OnTireMaxImpulseCallback(unsigned long inWheelIndex, TireMaxImpulseCallbackResult outResult, float inSuspensionImpulse, float inLongitudinalFriction, float inLateralFriction, float inLongitudinalSlip, float inLateralSlip, float inDeltaTime);
+};
+
 interface WheelSettings {
 	void WheelSettings();
 	unsigned long GetRefCount();

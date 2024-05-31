@@ -675,6 +675,39 @@ public:
 	virtual void			OnPostStepCallback(VehicleConstraint &inVehicle, float inDeltaTime, PhysicsSystem &inPhysicsSystem) = 0;
 };
 
+/// The tire max impulse callback returns multiple parameters, so we need to store them in a class
+class TireMaxImpulseCallbackResult
+{
+public:
+	float					mLongitudinalImpulse;
+	float					mLateralImpulse;
+};
+
+/// A wrapper around the wheeled vehicle controller callbacks that is compatible with JavaScript
+class WheeledVehicleControllerCallbacksEm
+{
+public:
+	virtual					~WheeledVehicleControllerCallbacksEm() = default;
+
+	void					SetWheeledVehicleController(WheeledVehicleController &inController)
+	{
+		inController.SetTireMaxImpulseCallback([this](uint inWheelIndex, float &outLongitudinalImpulse, float &outLateralImpulse, float inSuspensionImpulse, float inLongitudinalFriction, float inLateralFriction, float inLongitudinalSlip, float inLateralSlip, float inDeltaTime) {
+			// Pre-fill the structure with default calculated values
+			TireMaxImpulseCallbackResult result;
+			result.mLongitudinalImpulse = inLongitudinalFriction * inSuspensionImpulse;
+			result.mLateralImpulse = inLateralFriction * inSuspensionImpulse;
+
+			OnTireMaxImpulseCallback(inWheelIndex, &result, inSuspensionImpulse, inLongitudinalFriction, inLateralFriction, inLongitudinalSlip, inLateralSlip, inDeltaTime);
+
+			// Read the results
+			outLongitudinalImpulse = result.mLongitudinalImpulse;
+			outLateralImpulse = result.mLateralImpulse;
+		});
+	}
+
+	virtual void			OnTireMaxImpulseCallback(uint inWheelIndex, TireMaxImpulseCallbackResult *outResult, float inSuspensionImpulse, float inLongitudinalFriction, float inLateralFriction, float inLongitudinalSlip, float inLateralSlip, float inDeltaTime) = 0;
+};
+
 class PathConstraintPathEm: public PathConstraintPath
 {
 public:

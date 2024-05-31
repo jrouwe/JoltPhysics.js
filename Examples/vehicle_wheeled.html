@@ -224,6 +224,16 @@
 			physicsSystem.AddConstraint(constraint);
 			const controller = Jolt.castObject(constraint.GetController(), Jolt.WheeledVehicleController);
 
+			// Optional step: Set the vehicle controller callbacks
+			let controllerCallbacks = new Jolt.WheeledVehicleControllerCallbacksJS();
+			controllerCallbacks.OnTireMaxImpulseCallback = (wheelIndex, result, suspensionImpulse, longitudinalFriction, lateralFriction, longitudinalSlip, lateralSlip, deltaTime) => {
+				result = Jolt.wrapPointer(result, Jolt.TireMaxImpulseCallbackResult);
+				// This is the default calculation which will is pre-filled in result (just repeating it here)
+				result.mLongitudinalImpulse = longitudinalFriction * suspensionImpulse;
+				result.mLateralImpulse = lateralFriction * suspensionImpulse;
+			};
+			controllerCallbacks.SetWheeledVehicleController(controller);
+
 			const modelWheels = [];
 			for (let i = 0; i < vehicle.mWheels.size(); i++) {
 				modelWheels.push(createThreeWheel(constraint, i, car));
