@@ -722,6 +722,7 @@ interface Shape {
 	[Value] TransformedShape GetSubShapeTransformedShape([Const, Ref] SubShapeID inSubShapeID, [Const, Ref] Vec3 inPositionCOM, [Const, Ref] Quat inRotation, [Const, Ref] Vec3 inScale, [Ref] SubShapeID outRemainder);
 	float GetVolume();
 	boolean IsValidScale([Const, Ref] Vec3 inScale);
+	[Value] Vec3 MakeScaleValid([Const, Ref] Vec3 inScale);
 	[Value] ShapeResult ScaleShape([Const, Ref] Vec3 inScale);
 };
 
@@ -996,6 +997,7 @@ interface HeightFieldShapeSettings {
 	attribute long mSampleCount;
 	attribute float mMinHeightValue;
 	attribute float mMaxHeightValue;
+	attribute unsigned long mMaterialsCapacity;
 	attribute long mBlockSize;
 	attribute long mBitsPerSample;
 	[Value] attribute ArrayFloat mHeightSamples;
@@ -1591,6 +1593,7 @@ interface CollisionGroup {
 	unsigned long GetSubGroupID();
 };
 
+[NoDelete]
 interface Body {
 	[Const, Ref] BodyID GetID();
 	boolean IsActive();
@@ -2714,9 +2717,22 @@ interface CharacterContactListenerJS {
 	void CharacterContactListenerJS();
 	void OnAdjustBodyVelocity([Const] CharacterVirtual inCharacter, [Const, Ref] Body inBody2, [Ref] Vec3 ioLinearVelocity, [Ref] Vec3 ioAngularVelocity);
 	boolean OnContactValidate([Const] CharacterVirtual inCharacter, [Const, Ref] BodyID inBodyID2, [Const, Ref] SubShapeID inSubShapeID2);
+	boolean OnCharacterContactValidate([Const] CharacterVirtual inCharacter, [Const] CharacterVirtual inOtherCharacter, [Const, Ref] SubShapeID inSubShapeID2);
 	void OnContactAdded([Const] CharacterVirtual inCharacter, [Const, Ref] BodyID inBodyID2, [Const, Ref] SubShapeID inSubShapeID2, [Const] RVec3 inContactPosition, [Const] Vec3 inContactNormal, [Ref] CharacterContactSettings ioSettings);
+	void OnCharacterContactAdded([Const] CharacterVirtual inCharacter, [Const] CharacterVirtual inOtherCharacter, [Const, Ref] SubShapeID inSubShapeID2, [Const] RVec3 inContactPosition, [Const] Vec3 inContactNormal, [Ref] CharacterContactSettings ioSettings);
 	void OnContactSolve([Const] CharacterVirtual inCharacter, [Const, Ref] BodyID inBodyID2, [Const, Ref] SubShapeID inSubShapeID2, [Const] RVec3 inContactPosition, [Const] Vec3 inContactNormal, [Const] Vec3 inContactVelocity, [Const] PhysicsMaterial inContactMaterial, [Const] Vec3 inCharacterVelocity, [Ref] Vec3 ioNewCharacterVelocity);
+	void OnCharacterContactSolve([Const] CharacterVirtual inCharacter, [Const] CharacterVirtual inOtherCharacter, [Const, Ref] SubShapeID inSubShapeID2, [Const] RVec3 inContactPosition, [Const] Vec3 inContactNormal, [Const] Vec3 inContactVelocity, [Const] PhysicsMaterial inContactMaterial, [Const] Vec3 inCharacterVelocity, [Ref] Vec3 ioNewCharacterVelocity);
 };
+
+interface CharacterVsCharacterCollision {
+};
+
+interface CharacterVsCharacterCollisionSimple {
+	void Add(CharacterVirtual inCharacter);
+	void Remove(CharacterVirtual inCharacter);
+};
+
+CharacterVsCharacterCollisionSimple implements CharacterVsCharacterCollision;
 
 [Prefix="CharacterVirtual::"]
 interface ExtendedUpdateSettings {
@@ -2855,6 +2871,7 @@ interface CharacterBase {
 interface CharacterVirtual {
 	void CharacterVirtual([Const] CharacterVirtualSettings inSettings, [Ref] RVec3 inPosition, [Ref] Quat inRotation, PhysicsSystem inSystem);
 	void SetListener(CharacterContactListener inListener);
+	void SetCharacterVsCharacterCollision(CharacterVsCharacterCollision inCharacterVsCharacterCollision);
 	CharacterContactListener GetListener();
 	[Value] Vec3 GetLinearVelocity();
 	void SetLinearVelocity([Const, Ref] Vec3 inLinearVelocity);

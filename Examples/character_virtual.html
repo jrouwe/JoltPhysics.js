@@ -136,7 +136,12 @@
 					isInLava = true; // Can't modify velocity or position at this point, marking that we want to teleport
 				return true;
 			}
+			characterContactListener.OnCharacterContactValidate = (character, otherCharacter, subShapeID2) => {
+				return true;
+			}
 			characterContactListener.OnContactAdded = (character, bodyID2, subShapeID2, contactPosition, contactNormal, settings) => {
+			}
+			characterContactListener.OnCharacterContactAdded = (character, otherCharacter, subShapeID2, contactPosition, contactNormal, settings) => {
 			}
 			characterContactListener.OnContactSolve = (character, bodyID2, subShapeID2, contactPosition, contactNormal, contactVelocity, contactMaterial, characterVelocity, newCharacterVelocity) => {
 				// Don't allow the player to slide down static not-too-steep surfaces when not actively moving and when not on a moving platform
@@ -149,6 +154,8 @@
 					newCharacterVelocity.SetY(0);
 					newCharacterVelocity.SetZ(0);
 				}
+			}
+			characterContactListener.OnCharacterContactSolve = (character, otherCharacter, subShapeID2, contactPosition, contactNormal, contactVelocity, contactMaterial, characterVelocity, newCharacterVelocity) => {
 			}
 
 			const _tmpVec3 = new Jolt.Vec3();
