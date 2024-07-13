@@ -67,9 +67,10 @@ if (ENABLE_SIMD)
 	set(ENABLE_SIMD_FLAG 
 		-msimd128 
 		-msse4.2)
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -msimd128 -msse4.2")
+	set(USE_WASM_SIMD ON)
 else()
 	set(ENABLE_SIMD_FLAG "")
+	set(USE_WASM_SIMD OFF)
 endif()
 
 # Include Jolt
@@ -77,7 +78,7 @@ include(FetchContent)
 FetchContent_Declare(
         JoltPhysics
         GIT_REPOSITORY "https://github.com/jrouwe/JoltPhysics"
-        GIT_TAG "6e0b867a246731d69e7535440aff436e54dc99bf"
+        GIT_TAG "256a61aeeab86ec248f597c31edb2d0ecb2080d4"
 		SOURCE_SUBDIR "Build"
 )
 FetchContent_MakeAvailable(JoltPhysics)
