@@ -52,6 +52,7 @@ set(OBJECT_LAYER_BITS 32)
 if (ENABLE_MULTI_THREADING)
 	set(MULTI_THREADED_FLAG 
 		-pthread 
+		--post-js  ${CMAKE_CURRENT_SOURCE_DIR}/multi-threaded.js
 		-s SHARED_MEMORY)
 	set(ENVIRONMENT_FLAG
 		-s ENVIRONMENT='web,node,worker' 
