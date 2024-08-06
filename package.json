@@ -27,7 +27,7 @@
   },
   "scripts": {
     "build": "sh build.sh",
-    "examples": "http-server ./Examples"
+    "examples": "node serveexamples/serveexamples.cjs"
   },
   "homepage": "https://github.com/jrouwe/JoltPhysics.js",
   "repository": "https://github.com/jrouwe/JoltPhysics.js.git",
@@ -60,7 +60,7 @@
     "wasm"
   ],
   "devDependencies": {
-    "http-server": "^14.1.1",
+    "express": "^4.19.2",
     "webidl-dts-gen": "^1.11.0"
   }
 }
