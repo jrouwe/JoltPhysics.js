@@ -1173,6 +1173,12 @@ interface HingeConstraintSettings {
 HingeConstraintSettings implements TwoBodyConstraintSettings;
 
 interface HingeConstraint {
+	[Value] Vec3 GetLocalSpacePoint1();
+	[Value] Vec3 GetLocalSpacePoint2();
+	[Value] Vec3 GetLocalSpaceHingeAxis1();
+	[Value] Vec3 GetLocalSpaceHingeAxis2();
+	[Value] Vec3 GetLocalSpaceNormalAxis1();
+	[Value] Vec3 GetLocalSpaceNormalAxis2();
 	float GetCurrentAngle();
 	void SetMaxFrictionTorque(float inFrictionTorque);
 	float GetMaxFrictionTorque();
