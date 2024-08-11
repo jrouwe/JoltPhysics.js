@@ -2699,6 +2699,8 @@ interface CharacterVirtualSettings {
 	attribute unsigned long mMaxNumHits;
 	attribute float mHitReductionCosMaxAngle;
 	attribute float mPenetrationRecoverySpeed;
+	[Const] attribute Shape mInnerBodyShape;
+	attribute unsigned long mInnerBodyLayer;
 };
 
 CharacterVirtualSettings implements CharacterBaseSettings;
@@ -2885,6 +2887,7 @@ interface CharacterVirtual {
 	void SetPosition([Const, Ref] RVec3 inPosition);
 	[Value] Quat GetRotation();
 	void SetRotation([Const, Ref] Quat inRotation);
+	[Value] RVec3 GetCenterOfMassPosition();
 	[Value] RMat44 GetWorldTransform();
 	[Value] RMat44 GetCenterOfMassTransform();
 	float GetMass();
@@ -2903,6 +2906,7 @@ interface CharacterVirtual {
 	void SetShapeOffset([Const, Ref] Vec3 inShapeOffset);
 	unsigned long long GetUserData();
 	void SetUserData(unsigned long long inUserData);
+	[Value] BodyID GetInnerBodyID();
 	[Value] Vec3 CancelVelocityTowardsSteepSlopes([Const, Ref] Vec3 inDesiredVelocity);
 	void Update(float inDeltaTime, [Const, Ref] Vec3 inGravity, [Const, Ref] BroadPhaseLayerFilter inBroadPhaseLayerFilter, [Const, Ref] ObjectLayerFilter inObjectLayerFilter, [Const, Ref] BodyFilter inBodyFilter, [Const, Ref] ShapeFilter inShapeFilter, [Ref] TempAllocator inAllocator);
 	boolean CanWalkStairs([Const, Ref] Vec3 inLinearVelocity);
@@ -2912,6 +2916,8 @@ interface CharacterVirtual {
 	void RefreshContacts([Const, Ref] BroadPhaseLayerFilter inBroadPhaseLayerFilter, [Const, Ref] ObjectLayerFilter inObjectLayerFilter, [Const, Ref] BodyFilter inBodyFilter, [Const, Ref] ShapeFilter inShapeFilter, [Ref] TempAllocator inAllocator);
 	void UpdateGroundVelocity();
 	boolean SetShape([Const] Shape inShape, float inMaxPenetrationDepth, [Const, Ref] BroadPhaseLayerFilter inBroadPhaseLayerFilter, [Const, Ref] ObjectLayerFilter inObjectLayerFilter, [Const, Ref] BodyFilter inBodyFilter, [Const, Ref] ShapeFilter inShapeFilter, [Ref] TempAllocator inAllocator);
+	void SetInnerBodyShape([Const] Shape inShape);
+	[Value] TransformedShape GetTransformedShape();
 };
 
 CharacterVirtual implements CharacterBase;
