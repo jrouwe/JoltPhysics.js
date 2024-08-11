@@ -78,7 +78,7 @@ include(FetchContent)
 FetchContent_Declare(
         JoltPhysics
         GIT_REPOSITORY "https://github.com/jrouwe/JoltPhysics"
-        GIT_TAG "33394b357fe36ae1d1f58f55f1bbab45186eff85"
+        GIT_TAG "760974d733ed24ea268a3bb9a8ef391b8ac503c7"
 		SOURCE_SUBDIR "Build"
 )
 FetchContent_MakeAvailable(JoltPhysics)
@@ -100,6 +100,8 @@ else()
 endif()
 
 set(EMCC_ARGS
+  -fno-rtti
+  -fno-exceptions
   --extern-pre-js ${JOLT_FRONT_MATTER_FILE}
   --post-js glue.js
   --closure=1
@@ -148,6 +150,8 @@ set(EMCC_GLUE_ARGS
   -I${JoltPhysics_SOURCE_DIR}/..
   -Wall
   -std=c++17
+  -fno-rtti
+  -fno-exceptions
   ${MULTI_THREADED_FLAG}
   -DJPH_OBJECT_LAYER_BITS=32
   -DJPH_DISABLE_CUSTOM_ALLOCATOR
