@@ -20,6 +20,7 @@
 #include "Jolt/Physics/Collision/Shape/CapsuleShape.h"
 #include "Jolt/Physics/Collision/Shape/TaperedCapsuleShape.h"
 #include "Jolt/Physics/Collision/Shape/CylinderShape.h"
+#include "Jolt/Physics/Collision/Shape/TaperedCylinderShape.h"
 #include "Jolt/Physics/Collision/Shape/ConvexHullShape.h"
 #include "Jolt/Physics/Collision/Shape/StaticCompoundShape.h"
 #include "Jolt/Physics/Collision/Shape/MutableCompoundShape.h"
@@ -28,6 +29,8 @@
 #include "Jolt/Physics/Collision/Shape/RotatedTranslatedShape.h"
 #include "Jolt/Physics/Collision/Shape/MeshShape.h"
 #include "Jolt/Physics/Collision/Shape/HeightFieldShape.h"
+#include "Jolt/Physics/Collision/Shape/PlaneShape.h"
+#include "Jolt/Physics/Collision/Shape/EmptyShape.h"
 #include "Jolt/Physics/Collision/CollisionCollectorImpl.h"
 #include "Jolt/Physics/Collision/GroupFilterTable.h"
 #include "Jolt/Physics/Collision/CollideShape.h"
@@ -174,6 +177,8 @@ constexpr EShapeType EShapeType_Compound = EShapeType::Compound;
 constexpr EShapeType EShapeType_Decorated = EShapeType::Decorated;
 constexpr EShapeType EShapeType_Mesh = EShapeType::Mesh;
 constexpr EShapeType EShapeType_HeightField = EShapeType::HeightField;
+constexpr EShapeType EShapeType_Plane = EShapeType::Plane;
+constexpr EShapeType EShapeType_Empty = EShapeType::Empty;
 
 // Alias for EShapeSubType values to avoid clashes
 constexpr EShapeSubType EShapeSubType_Sphere = EShapeSubType::Sphere;
@@ -181,6 +186,7 @@ constexpr EShapeSubType EShapeSubType_Box = EShapeSubType::Box;
 constexpr EShapeSubType EShapeSubType_Capsule = EShapeSubType::Capsule;
 constexpr EShapeSubType EShapeSubType_TaperedCapsule = EShapeSubType::TaperedCapsule;
 constexpr EShapeSubType EShapeSubType_Cylinder = EShapeSubType::Cylinder;
+constexpr EShapeSubType EShapeSubType_TaperedCylinder = EShapeSubType::TaperedCylinder;
 constexpr EShapeSubType EShapeSubType_ConvexHull = EShapeSubType::ConvexHull;
 constexpr EShapeSubType EShapeSubType_StaticCompound = EShapeSubType::StaticCompound;
 constexpr EShapeSubType EShapeSubType_MutableCompound = EShapeSubType::MutableCompound;
@@ -189,6 +195,8 @@ constexpr EShapeSubType EShapeSubType_Scaled = EShapeSubType::Scaled;
 constexpr EShapeSubType EShapeSubType_OffsetCenterOfMass = EShapeSubType::OffsetCenterOfMass;
 constexpr EShapeSubType EShapeSubType_Mesh = EShapeSubType::Mesh;
 constexpr EShapeSubType EShapeSubType_HeightField = EShapeSubType::HeightField;
+constexpr EShapeSubType EShapeSubType_Plane = EShapeSubType::Plane;
+constexpr EShapeSubType EShapeSubType_Empty = EShapeSubType::Empty;
 
 // Alias for EConstraintSpace values to avoid clashes
 constexpr EConstraintSpace EConstraintSpace_LocalToBodyCOM = EConstraintSpace::LocalToBodyCOM;
@@ -616,10 +624,10 @@ public:
 		mInstance = inVehicleConstraint;
 	}
 
-	virtual void			OnStep(float inDeltaTime, PhysicsSystem &inPhysicsSystem) override
+	virtual void			OnStep(const PhysicsStepListenerContext &inContext) override
 	{
-		PhysicsStepListener* instance = mInstance;
-		instance->OnStep(inDeltaTime, inPhysicsSystem);
+		PhysicsStepListener *instance = mInstance;
+		instance->OnStep(inContext);
 	}
 
 private:
@@ -670,21 +678,21 @@ public:
 			ioLongitudinalFriction = GetCombinedFriction(inWheelIndex, ETireFrictionDirection_Longitudinal, ioLongitudinalFriction, inBody2, inSubShapeID2);
 			ioLateralFriction = GetCombinedFriction(inWheelIndex, ETireFrictionDirection_Lateral, ioLateralFriction, inBody2, inSubShapeID2);
 		});
-		inConstraint.SetPreStepCallback([this](VehicleConstraint &inVehicle, float inDeltaTime, PhysicsSystem &inPhysicsSystem) {
-			OnPreStepCallback(inVehicle, inDeltaTime, inPhysicsSystem);
+		inConstraint.SetPreStepCallback([this](VehicleConstraint &inVehicle, const PhysicsStepListenerContext &inContext) {
+			OnPreStepCallback(inVehicle, inContext);
 		});
-		inConstraint.SetPostCollideCallback([this](VehicleConstraint &inVehicle, float inDeltaTime, PhysicsSystem &inPhysicsSystem) {
-			OnPostCollideCallback(inVehicle, inDeltaTime, inPhysicsSystem);
+		inConstraint.SetPostCollideCallback([this](VehicleConstraint &inVehicle, const PhysicsStepListenerContext &inContext) {
+			OnPostCollideCallback(inVehicle, inContext);
 		});
-		inConstraint.SetPostStepCallback([this](VehicleConstraint &inVehicle, float inDeltaTime, PhysicsSystem &inPhysicsSystem) {
-			OnPostStepCallback(inVehicle, inDeltaTime, inPhysicsSystem);
+		inConstraint.SetPostStepCallback([this](VehicleConstraint &inVehicle, const PhysicsStepListenerContext &inContext) {
+			OnPostStepCallback(inVehicle, inContext);
 		});
 	}
 
 	virtual float			GetCombinedFriction(unsigned int inWheelIndex, ETireFrictionDirection inTireFrictionDirection, float inTireFriction, const Body &inBody2, const SubShapeID &inSubShapeID2) = 0;
-	virtual void			OnPreStepCallback(VehicleConstraint &inVehicle, float inDeltaTime, PhysicsSystem &inPhysicsSystem) = 0;
-	virtual void			OnPostCollideCallback(VehicleConstraint &inVehicle, float inDeltaTime, PhysicsSystem &inPhysicsSystem) = 0;
-	virtual void			OnPostStepCallback(VehicleConstraint &inVehicle, float inDeltaTime, PhysicsSystem &inPhysicsSystem) = 0;
+	virtual void			OnPreStepCallback(VehicleConstraint &inVehicle, const PhysicsStepListenerContext &inContext) = 0;
+	virtual void			OnPostCollideCallback(VehicleConstraint &inVehicle, const PhysicsStepListenerContext &inContext) = 0;
+	virtual void			OnPostStepCallback(VehicleConstraint &inVehicle, const PhysicsStepListenerContext &inContext) = 0;
 };
 
 /// The tire max impulse callback returns multiple parameters, so we need to store them in a class

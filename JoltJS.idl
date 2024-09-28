@@ -66,7 +66,9 @@ enum EShapeType {
 	"EShapeType_Compound",
 	"EShapeType_Decorated",
 	"EShapeType_Mesh",
-	"EShapeType_HeightField"
+	"EShapeType_HeightField",
+	"EShapeType_Plane",
+	"EShapeType_Empty"
 };
 
 enum EShapeSubType {
@@ -75,6 +77,7 @@ enum EShapeSubType {
 	"EShapeSubType_Capsule",
 	"EShapeSubType_TaperedCapsule",
 	"EShapeSubType_Cylinder",
+	"EShapeSubType_TaperedCylinder",
 	"EShapeSubType_ConvexHull",
 	"EShapeSubType_StaticCompound",
 	"EShapeSubType_MutableCompound",
@@ -82,7 +85,9 @@ enum EShapeSubType {
 	"EShapeSubType_Scaled",
 	"EShapeSubType_OffsetCenterOfMass",
 	"EShapeSubType_Mesh",
-	"EShapeSubType_HeightField"
+	"EShapeSubType_HeightField",
+	"EShapeSubType_Plane",
+	"EShapeSubType_Empty"
 };
 
 enum EConstraintSpace {
@@ -584,7 +589,9 @@ interface Plane {
 	[Const, Value] Plane sFromPointAndNormal([Const, Ref] Vec3 inPoint, [Const, Ref] Vec3 inNormal);
 	[Const, Value] Plane sFromPointsCCW([Const, Ref] Vec3 inPoint1, [Const, Ref] Vec3 inPoint2, [Const, Ref] Vec3 inPoint3);
 	[Const, Value] Plane Offset(float inDistance);
+	[Const, Value] Plane Scaled([Const, Ref] Vec3 inScale);
 	[Const, Value] Plane GetTransformed([Const, Ref] Mat44 inTransform);
+	[Const, Value] Vec3 ProjectPointOnPlane([Const, Ref] Vec3 inPoint);
 	float SignedDistance([Const, Ref] Vec3 inPoint);
 };
 
@@ -634,10 +641,11 @@ interface PhysicsMaterialList {
 
 interface Triangle {
 	void Triangle();
-	void Triangle([Const, Ref] Vec3 inV1, [Const, Ref] Vec3 inV2, [Const, Ref] Vec3 inV3);
+	void Triangle([Const, Ref] Vec3 inV1, [Const, Ref] Vec3 inV2, [Const, Ref] Vec3 inV3, optional unsigned long inMaterialIndex, optional unsigned long inUserData);
 
 	[Value] attribute Float3[] mV;
 	attribute unsigned long mMaterialIndex;
+	attribute unsigned long mUserData;
 };
 
 interface TriangleList {
@@ -664,10 +672,11 @@ interface VertexList {
 
 interface IndexedTriangle {
 	void IndexedTriangle();
-	void IndexedTriangle(unsigned long inI1, unsigned long inI2, unsigned long inI3, unsigned long inMaterialIndex);
+	void IndexedTriangle(unsigned long inI1, unsigned long inI2, unsigned long inI3, unsigned long inMaterialIndex, optional unsigned long inUserData);
 
 	attribute unsigned long[] mIdx;
 	attribute unsigned long mMaterialIndex;
+	attribute unsigned long mUserData;
 };
 
 interface IndexedTriangleList {
@@ -716,6 +725,7 @@ interface Shape {
 	unsigned long GetSubShapeIDBitsRecursive();
 	float GetInnerRadius();
 	[Value] MassProperties GetMassProperties();
+	[Const] Shape GetLeafShape([Const, Ref] SubShapeID inSubShapeID, [Ref] SubShapeID outRemainder);
 	[Const] PhysicsMaterial GetMaterial([Const, Ref] SubShapeID inSubShapeID);
 	[Value] Vec3 GetSurfaceNormal([Const, Ref] SubShapeID inSubShapeID, [Const, Ref] Vec3 inLocalSurfacePosition);
 	unsigned long long GetSubShapeUserData([Const, Ref] SubShapeID inSubShapeID);
@@ -801,6 +811,27 @@ interface CylinderShape {
 
 CylinderShape implements ConvexShape;
 
+// TaperedCylinder
+interface TaperedCylinderShapeSettings {
+	void TaperedCylinderShapeSettings(float inHalfHeightOfTaperedCylinder, float inTopRadius, float inBottomRadius, optional float inConvexRadius, [Const] optional PhysicsMaterial inMaterial);
+
+	attribute float mHalfHeight;
+	attribute float mTopRadius;
+	attribute float mBottomRadius;
+	attribute float mConvexRadius;
+};
+
+TaperedCylinderShapeSettings implements ConvexShapeSettings;
+
+interface TaperedCylinderShape {
+	float GetHalfHeight();
+	float GetTopRadius();
+	float GetBottomRadius();
+	float GetConvexRadius();
+};
+
+TaperedCylinderShape implements ConvexShape;
+
 // Capsule
 interface CapsuleShapeSettings {
 	void CapsuleShapeSettings(float inHalfHeight, float inRadius, [Const] optional PhysicsMaterial inMaterial);
@@ -831,6 +862,9 @@ interface TaperedCapsuleShapeSettings {
 TaperedCapsuleShapeSettings implements ConvexShapeSettings;
 
 interface TaperedCapsuleShape {
+	float GetHalfHeight();
+	float GetTopRadius();
+	float GetBottomRadius();
 };
 
 TaperedCapsuleShape implements ConvexShape;
@@ -976,11 +1010,13 @@ interface MeshShapeSettings {
 	[Value] attribute PhysicsMaterialList mMaterials;
 	attribute unsigned long mMaxTrianglesPerLeaf;
 	attribute float mActiveEdgeCosThresholdAngle;
+	attribute boolean mPerTriangleUserData;
 };
 
 MeshShapeSettings implements ShapeSettings;
 
 interface MeshShape {
+	unsigned long GetTriangleUserData([Const, Ref] SubShapeID inSubShapeID);
 };
 
 MeshShape implements Shape;
@@ -1022,6 +1058,40 @@ interface HeightFieldShape {
 };
 
 HeightFieldShape implements Shape;
+
+// Plane
+interface PlaneShapeSettings {
+	void PlaneShapeSettings([Const, Ref] Plane inPlane, [Const] optional PhysicsMaterial inMaterial, optional float inHalfExtent);
+
+	[Value] attribute Plane mPlane;
+	[Const] attribute PhysicsMaterial mMaterial;
+	attribute float mHalfExtent;
+};
+
+PlaneShapeSettings implements ShapeSettings;
+
+interface PlaneShape {
+	void PlaneShape([Const, Ref] Plane inPlane, [Const] optional PhysicsMaterial inMaterial, optional float inHalfExtent);
+	[Value] Plane GetPlane();
+	float GetHalfExtent();
+};
+
+PlaneShape implements Shape;
+
+// Empty
+interface EmptyShapeSettings {
+	void EmptyShapeSettings();
+
+	[Value] attribute Vec3 mCenterOfMass;
+};
+
+EmptyShapeSettings implements ShapeSettings;
+
+interface EmptyShape {
+	void EmptyShape([Const, Ref] optional Vec3 inCenterOfMass);
+};
+
+EmptyShape implements Shape;
 
 // Constraint
 interface ConstraintSettings {
@@ -1894,6 +1964,8 @@ interface SoftBodyManifold {
 	[Value] Vec3 GetLocalContactPoint([Const, Ref] SoftBodyVertex inVertex);
 	[Value] Vec3 GetContactNormal([Const, Ref] SoftBodyVertex inVertex);
 	[Value] BodyID GetContactBodyID([Const, Ref] SoftBodyVertex inVertex);
+	unsigned long GetNumSensorContacts();
+	[Value] BodyID GetSensorContactBodyID(unsigned long inIndex);
 };
 
 interface SoftBodyContactSettings {
@@ -1986,8 +2058,10 @@ interface BroadPhaseQuery {
 
 interface RayCastSettings {
 	void RayCastSettings();
+	void SetBackFaceMode(EBackFaceMode inBackFaceMode);
 
-	attribute EBackFaceMode mBackFaceMode;
+	attribute EBackFaceMode mBackFaceModeTriangles;
+	attribute EBackFaceMode mBackFaceModeConvex;
 	attribute boolean mTreatConvexAsSolid;
 };
 
@@ -2283,13 +2357,20 @@ interface NarrowPhaseQuery {
 	void CollectTransformedShapes([Const, Ref] AABox inBox, [Ref] TransformedShapeCollector ioCollector, [Const, Ref] BroadPhaseLayerFilter inBroadPhaseLayerFilter, [Const, Ref] ObjectLayerFilter inObjectLayerFilter, [Const, Ref] BodyFilter inBodyFilter, [Const, Ref] ShapeFilter inShapeFilter);
 };
 
+interface PhysicsStepListenerContext {
+	attribute float mDeltaTime;
+	attribute boolean mIsFirstStep;
+	attribute boolean mIsLastStep;
+	attribute PhysicsSystem mPhysicsSystem;
+};
+
 interface PhysicsStepListener {
 };
 
 [JSImplementation="PhysicsStepListener"]
 interface PhysicsStepListenerJS {
 	void PhysicsStepListenerJS();
-	void OnStep(float inDeltaTime, [Ref] PhysicsSystem inSystem);
+	void OnStep([Const, Ref] PhysicsStepListenerContext inContext);
 };
 
 interface BodyActivationListener {
@@ -3068,9 +3149,9 @@ interface VehicleConstraintCallbacksEm {
 interface VehicleConstraintCallbacksJS {
 	void VehicleConstraintCallbacksJS();
 	float GetCombinedFriction(unsigned long inWheelIndex, ETireFrictionDirection inTireFrictionDirection, float inTireFriction, [Const, Ref] Body inBody2, [Const, Ref] SubShapeID inSubShapeID2);
-	void OnPreStepCallback([Ref] VehicleConstraint inVehicle, float inDeltaTime, [Ref] PhysicsSystem inPhysicsSystem);
-	void OnPostCollideCallback([Ref] VehicleConstraint inVehicle, float inDeltaTime, [Ref] PhysicsSystem inPhysicsSystem);
-	void OnPostStepCallback([Ref] VehicleConstraint inVehicle, float inDeltaTime, [Ref] PhysicsSystem inPhysicsSystem);
+	void OnPreStepCallback([Ref] VehicleConstraint inVehicle, [Const, Ref] PhysicsStepListenerContext inContext);
+	void OnPostCollideCallback([Ref] VehicleConstraint inVehicle, [Const, Ref] PhysicsStepListenerContext inContext);
+	void OnPostStepCallback([Ref] VehicleConstraint inVehicle, [Const, Ref] PhysicsStepListenerContext inContext);
 };
 
 interface TireMaxImpulseCallbackResult {

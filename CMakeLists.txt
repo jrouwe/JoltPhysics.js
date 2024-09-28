@@ -78,7 +78,7 @@ include(FetchContent)
 FetchContent_Declare(
         JoltPhysics
         GIT_REPOSITORY "https://github.com/jrouwe/JoltPhysics"
-        GIT_TAG "760974d733ed24ea268a3bb9a8ef391b8ac503c7"
+        GIT_TAG "4c68c799d1f344f2d50523acb8888f0c3bad8e6c"
 		SOURCE_SUBDIR "Build"
 )
 FetchContent_MakeAvailable(JoltPhysics)
