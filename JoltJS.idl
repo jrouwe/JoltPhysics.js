@@ -1814,9 +1814,23 @@ interface BodyInterface {
 	void InvalidateContactCache([Const, Ref] BodyID inBodyID);
 };
 
+interface StateRecorderFilter {
+};
+
+[JSImplementation="StateRecorderFilter"]
+interface StateRecorderFilterJS {
+	void StateRecorderFilterJS();
+	[Const] boolean ShouldSaveBody([Const, Ref] Body inBody);
+	[Const] boolean ShouldSaveConstraint([Const, Ref] Constraint inConstraint);
+	[Const] boolean ShouldSaveContact([Const, Ref] BodyID inBody1, [Const, Ref] BodyID inBody2);
+	[Const] boolean ShouldRestoreContact([Const, Ref] BodyID inBody1, [Const, Ref] BodyID inBody2);
+};
+
 interface StateRecorder {
 	void SetValidating(boolean inValidating);
 	boolean	IsValidating();
+	void SetIsLastPart(boolean inIsLastPart);
+	boolean IsLastPart();
 };
 
 interface StateRecorderImpl {
@@ -2419,8 +2433,8 @@ interface PhysicsSystem {
 	[Const, Ref] BroadPhaseQuery GetBroadPhaseQuery();
 	[Const, Ref] NarrowPhaseQuery GetNarrowPhaseQuery();
 	[Const, Ref] NarrowPhaseQuery GetNarrowPhaseQueryNoLock();
-	void SaveState([Ref] StateRecorder inStream, optional EStateRecorderState inState = "EStateRecorderState_All");
-	boolean	RestoreState([Ref] StateRecorder inStream);
+	void SaveState([Ref] StateRecorder inStream, optional EStateRecorderState inState = "EStateRecorderState_All", optional StateRecorderFilter inFilter);
+	boolean	RestoreState([Ref] StateRecorder inStream, optional StateRecorderFilter inFilter);
 	void AddStepListener(PhysicsStepListener inListener);
 	void RemoveStepListener(PhysicsStepListener inListener);
 	void SetBodyActivationListener(BodyActivationListener inListener);
