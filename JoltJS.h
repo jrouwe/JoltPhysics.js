@@ -745,6 +745,25 @@ public:
 	virtual void 			GetPointOnPath(float inFraction, Vec3 *outPathPosition, Vec3 *outPathTangent, Vec3 *outPathNormal, Vec3 *outPathBinormal) const = 0;
 };
 
+class StateRecorderEm : public StateRecorder
+{
+public:
+	// Unfortunately WebIDL doesn't support size_t so we need to map it to unsigned int
+	virtual void		WriteBytes(const void *inData, unsigned int inNumBytes) = 0;
+	virtual void		ReadBytes(void *outData, unsigned int inNumBytes) = 0;
+
+private:
+	virtual void		WriteBytes(const void *inData, size_t inNumBytes) override
+	{
+		WriteBytes(inData, (unsigned int)inNumBytes);
+	}
+
+	virtual void		ReadBytes(void *outData, size_t inNumBytes) override
+	{
+		ReadBytes(outData, (unsigned int)inNumBytes);
+	}
+};
+
 class HeightFieldShapeConstantValues 
 {
 public:
