@@ -91,7 +91,6 @@ Additional options that can be provided to ```build.sh```:
 
 * ```-DENABLE_MEMORY_PROFILER=ON``` will enable memory tracking to detect leaks.
 * ```-DDOUBLE_PRECISION=ON``` will enable the double precision mode. This allows worlds larger than a couple of km.
-* ```-DENABLE_SIMD=ON``` will enable SIMD instructions. Safari 16.4 was the last major browser to support this (in March 2023).
 * ```-DBUILD_WASM_COMPAT_ONLY=ON``` speeds up the build by only compiling the WASM compat version which the examples use.
 
 ## Running

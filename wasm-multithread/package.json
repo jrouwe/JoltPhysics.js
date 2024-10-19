@@ -1,0 +1,5 @@
+{
+  "type": "module",
+  "main": "../dist/jolt-physics.multithread.wasm.js",
+  "types": "../dist/jolt-physics.multithread.wasm.d.ts"
+}
