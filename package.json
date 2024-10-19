@@ -1,6 +1,6 @@
 {
   "name": "jolt-physics",
-  "version": "0.24.0",
+  "version": "0.27.0",
   "description": "A WebAssembly port of JoltPhysics, a rigid body physics and collision detection library, suitable for games and VR applications",
   "type": "module",
   "main": "dist/jolt-physics.wasm-compat.js",
@@ -27,7 +27,7 @@
   },
   "scripts": {
     "build": "sh build.sh",
-    "examples": "http-server ./Examples"
+    "examples": "node serveexamples/serveexamples.cjs"
   },
   "homepage": "https://github.com/jrouwe/JoltPhysics.js",
   "repository": "https://github.com/jrouwe/JoltPhysics.js.git",
@@ -60,7 +60,7 @@
     "wasm"
   ],
   "devDependencies": {
-    "http-server": "^14.1.1",
+    "express": "^4.19.2",
     "webidl-dts-gen": "^1.11.0"
   }
 }

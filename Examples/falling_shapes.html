@@ -38,7 +38,7 @@
 
 				function generateObject() {
 
-					let numTypes = 9;
+					let numTypes = 10;
 					let objectType = Math.ceil(Math.random() * numTypes);
 
 					let shape = null;
@@ -71,6 +71,15 @@
 						}
 
 						case 4: {
+							// Tapered cylinder
+							let topRadius = 0.1 + Math.random();
+							let bottomRadius = 0.5 + Math.random();
+							let halfHeight = 0.5 * (topRadius + bottomRadius + Math.random());
+							shape = new Jolt.TaperedCylinderShapeSettings(halfHeight, topRadius, bottomRadius, null).Create().Get();
+							break;
+						}
+
+						case 5: {
 							// Capsule
 							let radius = 0.5 + Math.random();
 							let halfHeight = 0.5 + 0.5 * Math.random();
@@ -78,7 +87,7 @@
 							break;
 						}
 
-						case 5: {
+						case 6: {
 							// Tapered capsule
 							let topRadius = 0.1 + Math.random();
 							let bottomRadius = 0.5 + Math.random();
@@ -87,7 +96,7 @@
 							break;
 						}
 
-						case 6: {
+						case 7: {
 							// Convex hull
 							let hull = new Jolt.ConvexHullShapeSettings;
 							for (let p = 0; p < 10; ++p)
@@ -96,7 +105,7 @@
 							break;
 						}
 
-						case 7: {
+						case 8: {
 							// Static compound shape
 							let shapeSettings = new Jolt.StaticCompoundShapeSettings();
 							let l = 1.0 + Math.random();
@@ -109,7 +118,7 @@
 							break;
 						}
 
-						case 8: {
+						case 9: {
 							// Mutable compound shape
 							let shapeSettings = new Jolt.MutableCompoundShapeSettings();
 							let l = 1.0 + Math.random();
@@ -122,7 +131,7 @@
 							break;
 						}
 
-						case 9: {
+						case 10: {
 							// Sphere with COM offset
 							let radius = 0.5;
 							shape = new Jolt.OffsetCenterOfMassShapeSettings(new Jolt.Vec3(0, -0.1 * radius, 0), new Jolt.SphereShapeSettings(radius, null)).Create().Get();

@@ -216,9 +216,9 @@
 				body2 = Jolt.wrapPointer(body2, Jolt.Body);
 				return Math.sqrt(tireFriction * body2.GetFriction()); // This is the default calculation
 			};
-			callbacks.OnPreStepCallback = (vehicle, deltaTime, physicsSystem) => { };
-			callbacks.OnPostCollideCallback = (vehicle, deltaTime, physicsSystem) => { };
-			callbacks.OnPostStepCallback = (vehicle, deltaTime, physicsSystem) => { };
+			callbacks.OnPreStepCallback = (vehicle, stepContext) => { };
+			callbacks.OnPostCollideCallback = (vehicle, stepContext) => { };
+			callbacks.OnPostStepCallback = (vehicle, stepContext) => { };
 			callbacks.SetVehicleConstraint(constraint);
 
 			physicsSystem.AddConstraint(constraint);

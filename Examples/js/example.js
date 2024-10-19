@@ -268,36 +268,25 @@ function getSoftBodyMesh(body, material) {
 	const vertexSettings = motionProperties.GetVertices();
 	const settings = motionProperties.GetSettings();
 	const positionOffset = Jolt.SoftBodyVertexTraits.prototype.mPositionOffset;
-
 	const faceData = settings.mFaces;
+
+	// Get a view on the triangle data
 	const softVertex = [];
-
-	// WARNING: The code uses direct memory mapping of properties in Jolt and makes assumptions about the memory layout.
-	function memoryMapVertex(i) {
-		const offset = Jolt.getPointer(vertexSettings.at(i));
-		return new Float32Array(Jolt.HEAPF32.buffer, offset + positionOffset, 3);
+	for (let i = 0; i < vertexSettings.size(); i++) {
+		softVertex.push(new Float32Array(Jolt.HEAP32.buffer, Jolt.getPointer(vertexSettings.at(i))+positionOffset, 3));
 	}
 
+	// Define faces (indices of vertices for the triangles)
+	const faces = new Uint32Array(faceData.size()*3);
 	for (let i = 0; i < faceData.size(); i++) {
-		const [v0, v1, v2] = new Uint32Array(Jolt.HEAP32.buffer, Jolt.getPointer(faceData.at(i)), 3);
-		softVertex.push(memoryMapVertex(v0))
-		softVertex.push(memoryMapVertex(v1))
-		softVertex.push(memoryMapVertex(v2))
+		faces.set(new Uint32Array(Jolt.HEAP32.buffer, Jolt.getPointer(faceData.at(i)), 3), i * 3);
 	}
-
-	// Get a view on the triangle data (does not make a copy)
-	let vertices = new Float32Array(settings.mFaces.size() * 9);
-	for (let i = 0; i < softVertex.length; i++) {
-		vertices.set(softVertex[i], i * 3);
-	}
-
-	let buffer = new THREE.BufferAttribute(vertices, 3);
-
+	
 	// Create a three mesh
 	let geometry = new THREE.BufferGeometry();
-	geometry.setAttribute('position', buffer);
-	geometry.computeVertexNormals();
-
+	let vertices = new Float32Array(vertexSettings.size() * 3);
+	geometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
+	geometry.setIndex(new THREE.BufferAttribute(faces, 1));
 	material.side = THREE.DoubleSide;
 	const threeObject = new THREE.Mesh(geometry, material);
 	threeObject.userData.updateVertex = () => {
@@ -308,6 +297,7 @@ function getSoftBodyMesh(body, material) {
 		geometry.getAttribute('position').needsUpdate = true;
 		geometry.getAttribute('normal').needsUpdate = true;
 	}
+	threeObject.userData.updateVertex();
 	return threeObject;
 }
 

@@ -39,7 +39,38 @@
 				const snapshots = [];
 				const buttons = [document.getElementById('tick-0'), document.getElementById('tick-1'), document.getElementById('tick-2'), document.getElementById('tick-3')]
 				buttons.forEach((e, i) => {
-					snapshots.push(new Jolt.StateRecorderImpl());
+					if ((i & 1) == 0) {
+						// Use StateRecorderImpl to save/restore the state
+						snapshots.push(new Jolt.StateRecorderImpl());
+					} else {
+						// Use StateRecorderJS to allow saving/restoring state to a custom buffer that can e.g. be sent over the network
+						let recorder = new Jolt.StateRecorderJS();
+						recorder.buffer = new ArrayBuffer(100 * 1024); // Left out resizing logic for simplicity
+						recorder.writePos = 0;
+						recorder.readPos = 0;
+						recorder.ReadBytes = (data, size) => {
+							let d = new Uint8Array(Jolt.HEAP8.buffer, data, size);
+							for (let j = 0; j < size; j++) {
+								d[j] = recorder.buffer[recorder.readPos++];
+							}
+						};
+						recorder.WriteBytes = (data, size) => {
+							let d = new Uint8Array(Jolt.HEAP8.buffer, data, size);
+							for (let j = 0; j < size; j++) {
+								recorder.buffer[recorder.writePos++] = d[j];
+							}
+						};
+						recorder.IsEOF = () => {
+							return recorder.readPos >= recorder.writePos;
+						};
+						recorder.IsFailed = () => {
+							return false;
+						};
+						recorder.Rewind = () => {
+							recorder.readPos = 0;
+						};
+						snapshots.push(recorder);
+					}
 					e.isSet = false;
 					e.addEventListener('click', () => {
 						if (e.disabled == false) {

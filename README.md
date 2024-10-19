@@ -102,10 +102,11 @@ By default the examples use the WASM version of Jolt. This requires serving the 
 Go open a terminal in this folder and run the following commands:
 
 ```
-cd serveexamples
 npm install
-npm run serve
+npm run examples
 ```
+
+Then navigate to: http://localhost:3000/
 
 If you need to debug the C++ code take a look at [WASM debugging](https://developer.chrome.com/blog/wasm-debugging-2020/).
 
