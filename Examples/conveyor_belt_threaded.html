@@ -8,7 +8,7 @@
 	</head>
 	<body>
 		<div id="container">Loading...</div>
-		<div id="info">JoltPhysics.js conveyor belt demo<br />
+		<div id="info">JoltPhysics.js multi threaded conveyor belt demo<br />
 			This demo shows how to use the contact listener to modify object angular and linear velocity
 		</div>
 
@@ -17,7 +17,6 @@
 		<script src="js/three/WebGL.js"></script>
 		<script src="js/three/stats.min.js"></script>
 		<script src="js/example.js"></script>
-
 
 		<script id="workerScript" type="module">
 			import * as THREE from 'https://cdnjs.cloudflare.com/ajax/libs/three.js/0.161.0/three.module.js';
@@ -93,14 +92,13 @@
 
 
 		<script type="module">
-			// In case you haven't built the library yourself, replace URL with: https://www.unpkg.com/jolt-physics/dist/jolt-physics.wasm-compat.js
-			// In case you haven't built the library yourself, replace URL with: https://www.unpkg.com/jolt-physics/dist/jolt-physics.wasm-compat.js
+			// In case you haven't built the library yourself, replace URL with: https://www.unpkg.com/jolt-physics/dist/jolt-physics.multithread.wasm-compat.js
 			import initJolt from './js/jolt-physics.multithread.wasm-compat.js';
 
 			initJolt().then(function (Jolt) {
 
 				const contactListener = new Jolt.ContactListenerJS();
-				const workerUrl = URL.createObjectURL(new Blob([ document.getElementById('workerScript').innerHTML ], { type: 'text/javascript' }));
+				const workerUrl = URL.createObjectURL(new Blob([document.getElementById('workerScript').innerHTML], { type: 'text/javascript' }));
 				const workerParams = {
 					contactListenerPtr: Jolt.getPointer(contactListener),
 					angularBelt: new Uint32Array(new SharedArrayBuffer(4)),
@@ -173,7 +171,7 @@
 				workerParams.angularBelt[0] = angularBelt.GetID().GetIndexAndSequenceNumber();
 				workerParams.linearBelts.set(linearBelts.map(belt => belt.GetID().GetIndexAndSequenceNumber()));
 				onWorker(Jolt, workerParams);
-				
+
 				physicsSystem.SetContactListener(contactListener);
 			});
 		</script>

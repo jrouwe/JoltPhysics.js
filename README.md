@@ -92,7 +92,6 @@ Additional options that can be provided to ```build.sh```:
 * ```-DENABLE_MEMORY_PROFILER=ON``` will enable memory tracking to detect leaks.
 * ```-DDOUBLE_PRECISION=ON``` will enable the double precision mode. This allows worlds larger than a couple of km.
 * ```-DENABLE_SIMD=ON``` will enable SIMD instructions. Safari 16.4 was the last major browser to support this (in March 2023).
-* ```-DENABLE_MULTI_THREADING=ON``` will enable multi threading. Note that due to a bug in Safari this currently doesn't work in that brower. It is also incompatible with any JavaScript callback function that are triggered from web workers. See [this](https://github.com/jrouwe/JoltPhysics.js/discussions/110) ticket.
 * ```-DBUILD_WASM_COMPAT_ONLY=ON``` speeds up the build by only compiling the WASM compat version which the examples use.
 
 ## Running
