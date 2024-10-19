@@ -1,66 +1,82 @@
 {
-  "name": "jolt-physics",
-  "version": "0.27.0",
-  "description": "A WebAssembly port of JoltPhysics, a rigid body physics and collision detection library, suitable for games and VR applications",
-  "type": "module",
-  "main": "dist/jolt-physics.wasm-compat.js",
-  "types": "dist/jolt-physics.wasm-compat.d.ts",
-  "exports": {
-    ".": {
-      "types": "./dist/jolt-physics.wasm-compat.d.ts",
-      "default": "./dist/jolt-physics.wasm-compat.js"
-    },
-    "./wasm": {
-      "types": "./dist/jolt-physics.wasm.d.ts",
-      "default": "./dist/jolt-physics.wasm.js"
-    },
-    "./wasm-compat": {
-      "types": "./dist/jolt-physics.wasm-compat.d.ts",
-      "default": "./dist/jolt-physics.wasm-compat.js"
-    },
-    "./asm": {
-      "types": "./dist/jolt-physics.d.ts",
-      "default": "./dist/jolt-physics.js"
-    },
-    "./jolt-physics.wasm.wasm": "./dist/jolt-physics.wasm.wasm",
-    "./package.json": "./package.json"
-  },
-  "scripts": {
-    "build": "sh build.sh",
-    "examples": "node serveexamples/serveexamples.cjs"
-  },
-  "homepage": "https://github.com/jrouwe/JoltPhysics.js",
-  "repository": "https://github.com/jrouwe/JoltPhysics.js.git",
-  "author": "jrouwe",
-  "license": "MIT",
-  "files": [
-    "README.md",
-    "LICENSE",
-    "./dist/jolt-physics.js",
-    "./dist/jolt-physics.d.ts",
-    "./dist/jolt-physics.wasm-compat.js",
-    "./dist/jolt-physics.wasm-compat.d.ts",
-    "./dist/jolt-physics.wasm.js",
-    "./dist/jolt-physics.wasm.d.ts",
-    "./dist/jolt-physics.wasm.wasm",
-    "./dist/types.d.ts",
-    "asm",
-    "wasm",
-    "wasm-compat"
-  ],
-  "keywords": [
-    "physics",
-    "physics-engine",
-    "physics-simulation",
-    "simulation",
-    "game-engine",
-    "vr",
-    "game-development",
-    "webassembly",
-    "wasm"
-  ],
-  "devDependencies": {
-    "express": "^4.19.2",
-    "webidl-dts-gen": "^1.11.0"
-  }
+	"name": "jolt-physics",
+	"version": "0.27.0",
+	"description": "A WebAssembly port of JoltPhysics, a rigid body physics and collision detection library, suitable for games and VR applications",
+	"type": "module",
+	"main": "dist/jolt-physics.wasm-compat.js",
+	"types": "dist/jolt-physics.wasm-compat.d.ts",
+	"exports": {
+		".": {
+			"types": "./dist/jolt-physics.wasm-compat.d.ts",
+			"default": "./dist/jolt-physics.wasm-compat.js"
+		},
+		"./wasm": {
+			"types": "./dist/jolt-physics.wasm.d.ts",
+			"default": "./dist/jolt-physics.wasm.js"
+		},
+		"./wasm-compat": {
+			"types": "./dist/jolt-physics.wasm-compat.d.ts",
+			"default": "./dist/jolt-physics.wasm-compat.js"
+		},
+		"./asm": {
+			"types": "./dist/jolt-physics.d.ts",
+			"default": "./dist/jolt-physics.js"
+		},
+		"./wasm-multithread": {
+			"types": "./dist/jolt-physics.multithread.wasm.d.ts",
+			"default": "./dist/jolt-physics.multithread.wasm.js"
+		},
+		"./wasm-compat-multithread": {
+			"types": "./dist/jolt-physics.multithread.wasm-compat.d.ts",
+			"default": "./dist/jolt-physics.multithread.wasm-compat.js"
+		},
+		"./jolt-physics.wasm.wasm": "./dist/jolt-physics.wasm.wasm",
+		"./jolt-physics.multithread.wasm.wasm": "./dist/jolt-physics.multithread.wasm.wasm",
+		"./package.json": "./package.json"
+	},
+	"scripts": {
+		"build": "sh build.sh",
+		"examples": "node serveexamples/serveexamples.cjs"
+	},
+	"homepage": "https://github.com/jrouwe/JoltPhysics.js",
+	"repository": "https://github.com/jrouwe/JoltPhysics.js.git",
+	"author": "jrouwe",
+	"license": "MIT",
+	"files": [
+		"README.md",
+		"LICENSE",
+		"./dist/jolt-physics.js",
+		"./dist/jolt-physics.d.ts",
+		"./dist/jolt-physics.wasm-compat.js",
+		"./dist/jolt-physics.wasm-compat.d.ts",
+		"./dist/jolt-physics.wasm.js",
+		"./dist/jolt-physics.wasm.d.ts",
+		"./dist/jolt-physics.wasm.wasm",
+		"./dist/jolt-physics.multithread.wasm-compat.js",
+		"./dist/jolt-physics.multithread.wasm-compat.d.ts",
+		"./dist/jolt-physics.multithread.wasm.js",
+		"./dist/jolt-physics.multithread.wasm.d.ts",
+		"./dist/jolt-physics.multithread.wasm.wasm",
+		"./dist/types.d.ts",
+		"asm",
+		"wasm",
+		"wasm-compat",
+		"wasm-multithread",
+		"wasm-compat-multithread"
+	],
+	"keywords": [
+		"physics",
+		"physics-engine",
+		"physics-simulation",
+		"simulation",
+		"game-engine",
+		"vr",
+		"game-development",
+		"webassembly",
+		"wasm"
+	],
+	"devDependencies": {
+		"express": "^4.19.2",
+		"webidl-dts-gen": "^1.11.0"
+	}
 }

@@ -1,4 +1,5 @@
 #!/bin/sh
+set -e
 
 if [ -z $1 ] 
 then
@@ -9,24 +10,14 @@ else
 fi
 
 rm -rf ./dist
-if [ $? -ne 0 ]; then
-	exit 1
-fi
 
 mkdir dist
-if [ $? -ne 0 ]; then
-	exit 1
-fi
 
-cmake -B Build/$BUILD_TYPE -DCMAKE_BUILD_TYPE=$BUILD_TYPE "${@}"
-if [ $? -ne 0 ]; then
-	exit 1
-fi
+cmake -B Build/$BUILD_TYPE/ST -DCMAKE_BUILD_TYPE=$BUILD_TYPE "${@}"
+cmake --build Build/$BUILD_TYPE/ST -j`nproc`
 
-cmake --build Build/$BUILD_TYPE -j`nproc`
-if [ $? -ne 0 ]; then
-	exit 1
-fi
+cmake -B Build/$BUILD_TYPE/MT -DENABLE_MULTI_THREADING=ON -DENABLE_SIMD=ON -DCMAKE_BUILD_TYPE=$BUILD_TYPE "${@}"
+cmake --build Build/$BUILD_TYPE/MT -j`nproc` --target jolt-wasm-compat jolt-wasm
 
 cat > ./dist/jolt-physics.d.ts << EOF
 import Jolt from "./types";
@@ -35,21 +26,11 @@ export default Jolt;
 export * from "./types";
 
 EOF
-if [ $? -ne 0 ]; then
-	exit 1
-fi
 
 cp ./dist/jolt-physics.d.ts ./dist/jolt-physics.wasm.d.ts
-if [ $? -ne 0 ]; then
-	exit 1
-fi
-
 cp ./dist/jolt-physics.d.ts ./dist/jolt-physics.wasm-compat.d.ts
-if [ $? -ne 0 ]; then
-	exit 1
-fi
+cp ./dist/jolt-physics.d.ts ./dist/jolt-physics.multithread.d.ts
+cp ./dist/jolt-physics.d.ts ./dist/jolt-physics.multithread.wasm.d.ts
+cp ./dist/jolt-physics.d.ts ./dist/jolt-physics.multithread.wasm-compat.d.ts
 
-cp ./dist/jolt-physics.wasm-compat*.js ./Examples/js/
-if [ $? -ne 0 ]; then
-	exit 1
-fi
+cp ./dist/jolt-physics*.wasm-compat.js ./Examples/js/
