@@ -4,7 +4,7 @@
 		<title>JoltPhysics.js demo</title>
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
-		<script src="js/coi-serviceworker.min.js"></script>
+		<script src="coi-serviceworker.min.js"></script>
 		<link rel="stylesheet" type="text/css" href="style.css">
 	</head>
 	<body>
@@ -20,7 +20,7 @@
 		<script src="js/example.js"></script>
 
 		<script id="workerScript" type="module">
-			import * as THREE from 'https://cdnjs.cloudflare.com/ajax/libs/three.js/0.161.0/three.module.js';
+			import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.min.js';
 
 			const wrapQuat = (q) => new THREE.Quaternion(q.GetX(), q.GetY(), q.GetZ(), q.GetW());
 			const wrapVec3 = (v) => new THREE.Vector3(v.GetX(), v.GetY(), v.GetZ());
@@ -171,7 +171,7 @@
 
 				workerParams.angularBelt[0] = angularBelt.GetID().GetIndexAndSequenceNumber();
 				workerParams.linearBelts.set(linearBelts.map(belt => belt.GetID().GetIndexAndSequenceNumber()));
-				onWorker(Jolt, workerParams);
+				globalThis.onWorker(Jolt, workerParams);
 
 				physicsSystem.SetContactListener(contactListener);
 			});
