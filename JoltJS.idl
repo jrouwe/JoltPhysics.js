@@ -379,6 +379,9 @@ interface Quat {
 	[Value] static Quat sFromTo([Const, Ref] Vec3 inFrom, [Const, Ref] Vec3 inTo);
 	[Operator="=="] boolean Equals([Const, Ref] Quat inQ);
 	[Operator="!="] boolean NotEquals([Const, Ref] Quat inQ);
+	[Operator="*", Value] Quat MulQuat([Const, Ref] Quat inQ);
+	[Operator="*", Value] Vec3 MulVec3([Const, Ref] Vec3 inV);
+	[Operator="*", Value] Quat MulFloat(float inV);
 	boolean IsClose([Const, Ref] Quat inQ, optional float inMaxDistSq);
 	boolean IsNormalized(optional float inTolerance);
 	float Length();
