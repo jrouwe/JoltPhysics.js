@@ -20,12 +20,15 @@
 		<script src="js/example.js"></script>
 
 		<script id="workerScript" type="module">
-			import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.min.js';
-
-			const wrapQuat = (q) => new THREE.Quaternion(q.GetX(), q.GetY(), q.GetZ(), q.GetW());
-			const wrapVec3 = (v) => new THREE.Vector3(v.GetX(), v.GetY(), v.GetZ());
-			const DegreesToRadians = (deg) => deg * (Math.PI / 180.0);
 			const onWorker = globalThis.onWorker = async (Jolt, args) => {
+				Jolt.Vec3.prototype.Clone = function () { return new Jolt.Vec3(this.GetX(), this.GetY(), this.GetZ()); };
+				Jolt.RVec3.prototype.Clone = function () { return new Jolt.RVec3(this.GetX(), this.GetY(), this.GetZ()); };
+				Jolt.Quat.prototype.Clone = function () { return new Jolt.Quat(this.GetX(), this.GetY(), this.GetZ(), this.GetW()); };
+				const DegreesToRadians = (deg) => deg * (Math.PI / 180.0);
+
+				const cLocalSpaceVelocity = new Jolt.Vec3(0, 0, -10.0);
+				const cLocalSpaceAngularVelocity = new Jolt.Vec3(0, DegreesToRadians(10.0), 0);
+
 				const { contactListenerPtr, linearBelts, angularBelt } = args;
 				const contactListener = Jolt.wrapPointer(contactListenerPtr, Jolt.ContactListenerJS);
 
@@ -37,20 +40,19 @@
 
 					const body1ID = body1.GetID().GetIndexAndSequenceNumber();
 					const body2ID = body2.GetID().GetIndexAndSequenceNumber();
-					const rotation1 = wrapQuat(body1.GetRotation());
-					const rotation2 = wrapQuat(body2.GetRotation());
+					const rotation1 = body1.GetRotation().Clone(); // Next call to GetRotation() will overwrite rotation1
+					const rotation2 = body2.GetRotation();
 
 					const body1LinearBelt = linearBelts.find(belt => belt == body1ID)
 					const body2LinearBelt = linearBelts.find(belt => belt == body2ID)
 					if (body1LinearBelt || body2LinearBelt) {
 						// Determine the world space surface velocity of both bodies
-						const cLocalSpaceVelocity = new THREE.Vector3(0, 0, -10.0);
-						const body1LinearSurfaceVelocity = body1LinearBelt ? cLocalSpaceVelocity.applyQuaternion(rotation1) : new THREE.Vector3(0, 0, 0);
-						const body2LinearSurfaceVelocity = body2LinearBelt ? cLocalSpaceVelocity.applyQuaternion(rotation2) : new THREE.Vector3(0, 0, 0);
+						const body1LinearSurfaceVelocity = body1LinearBelt ? rotation1.MulVec3(cLocalSpaceVelocity).Clone() : new Jolt.Vec3(0, 0, 0);
+						const body2LinearSurfaceVelocity = body2LinearBelt ? rotation2.MulVec3(cLocalSpaceVelocity).Clone() : new Jolt.Vec3(0, 0, 0);
 
 						// Calculate the relative surface velocity
-						const v = body2LinearSurfaceVelocity.sub(body1LinearSurfaceVelocity);
-						settings.mRelativeLinearSurfaceVelocity.Set(v.x, v.y, v.z);
+						body2LinearSurfaceVelocity.Sub(body1LinearSurfaceVelocity);
+						settings.mRelativeLinearSurfaceVelocity = body2LinearSurfaceVelocity;
 					}
 
 					const angularBodyId = angularBelt[0];
@@ -58,23 +60,19 @@
 					const body2Angular = body2ID == angularBodyId;
 					if (body1Angular || body2Angular) {
 						// Determine the world space angular surface velocity of both bodies
-						const cLocalSpaceAngularVelocity = new THREE.Vector3(0, DegreesToRadians(10.0), 0);
-						const body1AngularSurfaceVelocity = body1Angular ? cLocalSpaceAngularVelocity.applyQuaternion(rotation1) : new THREE.Vector3(0, 0, 0);
-						const body2AngularSurfaceVelocity = body2Angular ? cLocalSpaceAngularVelocity.applyQuaternion(rotation2) : new THREE.Vector3(0, 0, 0);
+						const body1AngularSurfaceVelocity = body1Angular ? rotation1.MulVec3(cLocalSpaceAngularVelocity).Clone() : new Jolt.Vec3(0, 0, 0);
+						const body2AngularSurfaceVelocity = body2Angular ? rotation2.MulVec3(cLocalSpaceAngularVelocity).Clone() : new Jolt.Vec3(0, 0, 0);
 
 						// Note that the angular velocity is the angular velocity around body 1's center of mass, so we need to add the linear velocity of body 2's center of mass
-						const COM1 = wrapVec3(body1.GetCenterOfMassPosition());
-						const COM2 = wrapVec3(body2.GetCenterOfMassPosition());
-						const body2LinearSurfaceVelocity = body2Angular ?
-							body2AngularSurfaceVelocity.cross(COM1.clone().sub(COM2)) : new THREE.Vector3(0, 0, 0);
+						const COM1 = body1.GetCenterOfMassPosition().Clone();
+						const COM2 = body2.GetCenterOfMassPosition();
+						const body2LinearSurfaceVelocity = body2Angular ? body2AngularSurfaceVelocity.Cross(COM1.Sub(COM2)).Clone() : new Jolt.Vec3(0, 0, 0);
 
 						// Calculate the relative angular surface velocity
-						const rls = body2LinearSurfaceVelocity;
-						settings.mRelativeLinearSurfaceVelocity.Set(rls.x, rls.y, rls.z);
-						const ras = body2AngularSurfaceVelocity.sub(body1AngularSurfaceVelocity);
-						settings.mRelativeAngularSurfaceVelocity.Set(ras.x, ras.y, ras.z);
+						settings.mRelativeLinearSurfaceVelocity = body2LinearSurfaceVelocity;
+						body2AngularSurfaceVelocity.Sub(body1AngularSurfaceVelocity);
+						settings.mRelativeAngularSurfaceVelocity = body2AngularSurfaceVelocity;
 					}
-
 				};
 				contactListener.OnContactPersisted = (body1, body2, manifold, settings) => {
 					// Same behavior as contact added
