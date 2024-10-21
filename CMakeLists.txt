@@ -109,6 +109,7 @@ set(EMCC_ARGS
   --post-js glue.js
   --closure=1
   ${MULTI_THREADED_FLAG}
+  --post-js ${CMAKE_CURRENT_SOURCE_DIR}/helpers.js
   -s ALLOW_MEMORY_GROWTH=${ALLOW_MEMORY_GROWTH}
   -s ALLOW_TABLE_GROWTH=1
   ${ENVIRONMENT_FLAG}

@@ -21,9 +21,6 @@
 
 		<script id="workerScript" type="module">
 			const onWorker = globalThis.onWorker = async (Jolt, args) => {
-				Jolt.Vec3.prototype.Clone = function () { return new Jolt.Vec3(this.GetX(), this.GetY(), this.GetZ()); };
-				Jolt.RVec3.prototype.Clone = function () { return new Jolt.RVec3(this.GetX(), this.GetY(), this.GetZ()); };
-				Jolt.Quat.prototype.Clone = function () { return new Jolt.Quat(this.GetX(), this.GetY(), this.GetZ(), this.GetW()); };
 				const DegreesToRadians = (deg) => deg * (Math.PI / 180.0);
 
 				const cLocalSpaceVelocity = new Jolt.Vec3(0, 0, -10.0);
