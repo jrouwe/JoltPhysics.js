@@ -59,8 +59,6 @@ class Dummy:
 parser = argparse.ArgumentParser()
 parser.add_argument('--wasm64', action='store_true', default=False,
                     help='Build for wasm64')
-parser.add_argument('--thread_safe', action='store_true', default=False,
-                    help='Emit temporaries as "static thread_local" to avoid race conditions')
 parser.add_argument('infile')
 parser.add_argument('outfile')
 options = parser.parse_args()
@@ -390,7 +388,7 @@ def type_to_cdec(raw):
 
 def render_function(class_name, func_name, sigs, return_type, non_pointer,
                     copy, operator, constructor, is_static, func_scope,
-                    call_content=None, const=False, array_attribute=False, thread_safe=False):
+                    call_content=None, const=False, array_attribute=False):
   legacy_mode = CHECKS not in ['ALL', 'FAST']
   all_checks = CHECKS == 'ALL'
 
@@ -626,13 +624,10 @@ def render_function(class_name, func_name, sigs, return_type, non_pointer,
     basic_return = 'return ' if constructor or return_type != 'Void' else ''
     return_prefix = basic_return
     return_postfix = ''
-    storage_attribute = ''
     if non_pointer:
       return_prefix += '&'
-    if thread_safe:
-      storage_attribute = 'thread_local '
     if copy:
-      pre += '  static %s%s temp;\n' % (storage_attribute, type_to_c(return_type, non_pointing=True))
+      pre += '  static thread_local %s temp;\n' % type_to_c(return_type, non_pointing=True)
       return_prefix += '(temp = '
       return_postfix += ', &temp)'
 
@@ -770,8 +765,7 @@ for name in names:
                     constructor,
                     is_static=m.isStatic(),
                     func_scope=m.parentScope.identifier.name,
-                    const=m.getExtendedAttribute('Const'),
-                    thread_safe=options.thread_safe)
+                    const=m.getExtendedAttribute('Const'))
     mid_js += ['\n']
     if constructor:
       mid_js += build_constructor(name)
@@ -813,8 +807,7 @@ for name in names:
                     func_scope=interface,
                     call_content=get_call_content,
                     const=m.getExtendedAttribute('Const'),
-                    array_attribute=m.type.isArray(),
-                    thread_safe=options.thread_safe)
+                    array_attribute=m.type.isArray())
 
     if m.readonly:
       mid_js += [r'''
@@ -836,8 +829,7 @@ Object.defineProperty(%s.prototype, '%s', { get: %s.prototype.%s });
                       func_scope=interface,
                       call_content=set_call_content,
                       const=m.getExtendedAttribute('Const'),
-                      array_attribute=m.type.isArray(),
-                      thread_safe=options.thread_safe)
+                      array_attribute=m.type.isArray())
       mid_js += [r'''
 /** @suppress {checkTypes} */
 Object.defineProperty(%s.prototype, '%s', { get: %s.prototype.%s, set: %s.prototype.%s });
@@ -855,8 +847,7 @@ Object.defineProperty(%s.prototype, '%s', { get: %s.prototype.%s, set: %s.protot
                     False,
                     False,
                     func_scope=interface,
-                    call_content='delete self',
-                    thread_safe=options.thread_safe)
+                    call_content='delete self')
 
   # Emit C++ class implementation that calls into JS implementation
 

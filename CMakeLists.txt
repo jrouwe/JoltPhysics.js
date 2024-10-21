@@ -59,12 +59,10 @@ if (ENABLE_MULTI_THREADING)
 		-s PTHREAD_POOL_SIZE=16)
 	set(CMAKE_CXX_FLAGS "-pthread -s SHARED_MEMORY")
 	set(OUTPUT_BASE_NAME "${OUTPUT_FOLDER}jolt-physics.multithread")
-	set(WEBIDL_PARAMS "--thread_safe")
 else()
 	set(MULTI_THREADED_FLAG "")
 	set(ENVIRONMENT_FLAG "-s ENVIRONMENT='web,node'")
 	set(OUTPUT_BASE_NAME "${OUTPUT_FOLDER}jolt-physics")
-	set(WEBIDL_PARAMS "")
 endif()
 
 # Enable SIMD flags
@@ -201,7 +199,7 @@ add_custom_command(
 	OUTPUT glue.cpp glue.js jolt.idl
 	BYPRODUCTS parser.out WebIDLGrammar.pkl
 	COMMAND cat ${JOLT_IDL_FILE} > jolt.idl
-	COMMAND ${PYTHON} ${WEBIDL_BINDER_SCRIPT} jolt.idl glue ${WEBIDL_PARAMS}
+	COMMAND ${PYTHON} ${WEBIDL_BINDER_SCRIPT} jolt.idl glue
 	DEPENDS ${JOLT_IDL_FILE}
 	COMMENT "Generating JoltPhysics.js bindings"
 	VERBATIM)
