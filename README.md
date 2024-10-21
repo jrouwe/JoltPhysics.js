@@ -13,10 +13,12 @@ Go to the [demos page](https://jrouwe.github.io/JoltPhysics.js/) to see the proj
 
 ## Using
 
-This library comes in 3 flavours:
+This library comes in 5 flavours:
 - `wasm-compat` - A WASM version with the WASM file (encoded in base64) embedded in the bundle
 - `wasm` - A WASM version with a separate WASM file
 - `asm` - A JavaScript version that uses [asm.js](https://developer.mozilla.org/en-US/docs/Games/Tools/asm.js)
+- `wasm-compat-multithread` - Same as `wasm-compat` but with multi threading and SIMD enabled.
+- `wasm-multithread` - Same as `wasm` but with multi threading and SIMD enabled.
 
 See [falling_shapes.html](Examples/falling_shapes.html) for a example on how to use the library.
 
@@ -46,6 +48,12 @@ import Jolt from 'jolt-physics/wasm';
 
 // asm.js
 import Jolt from 'jolt-physics/asm';
+
+// WASM embedded in the bundle, multithread and SIMD enabled
+import Jolt from 'jolt-physics/wasm-compat-multithread';
+
+// WASM, multithread and SIMD enabled
+import Jolt from 'jolt-physics/wasm-multithread';
 ```
 
 You can also import esm bundles with unpkg:
@@ -95,7 +103,7 @@ Additional options that can be provided to ```build.sh```:
 
 ## Running
 
-By default the examples use the WASM version of Jolt. This requires serving the html file using a web server rather than opening the html file directly.
+By default the examples use the WASM compat version of Jolt. This requires serving the html file using a web server rather than opening the html file directly.
 
 Go open a terminal in this folder and run the following commands:
 
