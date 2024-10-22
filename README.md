@@ -17,8 +17,8 @@ This library comes in 5 flavours:
 - `wasm-compat` - A WASM version with the WASM file (encoded in base64) embedded in the bundle
 - `wasm` - A WASM version with a separate WASM file
 - `asm` - A JavaScript version that uses [asm.js](https://developer.mozilla.org/en-US/docs/Games/Tools/asm.js)
-- `wasm-compat-multithread` - Same as `wasm-compat` but with multi threading and SIMD enabled.
-- `wasm-multithread` - Same as `wasm` but with multi threading and SIMD enabled.
+- `wasm-compat-multithread` - Same as `wasm-compat` but with multi threading enabled.
+- `wasm-multithread` - Same as `wasm` but with multi threading enabled.
 
 See [falling_shapes.html](Examples/falling_shapes.html) for a example on how to use the library.
 
@@ -49,10 +49,10 @@ import Jolt from 'jolt-physics/wasm';
 // asm.js
 import Jolt from 'jolt-physics/asm';
 
-// WASM embedded in the bundle, multithread and SIMD enabled
+// WASM embedded in the bundle, multithread enabled
 import Jolt from 'jolt-physics/wasm-compat-multithread';
 
-// WASM, multithread and SIMD enabled
+// WASM, multithread enabled
 import Jolt from 'jolt-physics/wasm-multithread';
 ```
 
@@ -99,6 +99,7 @@ Additional options that can be provided to ```build.sh```:
 
 * ```-DENABLE_MEMORY_PROFILER=ON``` will enable memory tracking to detect leaks.
 * ```-DDOUBLE_PRECISION=ON``` will enable the double precision mode. This allows worlds larger than a couple of km.
+* ```-DENABLE_SIMD=ON``` will enable SIMD instructions. Safari 16.4 was the last major browser to support this (in March 2023).
 * ```-DBUILD_WASM_COMPAT_ONLY=ON``` speeds up the build by only compiling the WASM compat version which the examples use.
 
 ## Running

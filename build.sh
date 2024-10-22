@@ -16,7 +16,7 @@ mkdir dist
 cmake -B Build/$BUILD_TYPE/ST -DCMAKE_BUILD_TYPE=$BUILD_TYPE "${@}"
 cmake --build Build/$BUILD_TYPE/ST -j`nproc`
 
-cmake -B Build/$BUILD_TYPE/MT -DENABLE_MULTI_THREADING=ON -DENABLE_SIMD=ON -DCMAKE_BUILD_TYPE=$BUILD_TYPE "${@}"
+cmake -B Build/$BUILD_TYPE/MT -DENABLE_MULTI_THREADING=ON -DCMAKE_BUILD_TYPE=$BUILD_TYPE "${@}"
 cmake --build Build/$BUILD_TYPE/MT -j`nproc`
 
 cat > ./dist/jolt-physics.d.ts << EOF
