@@ -20,13 +20,13 @@ This library comes in 5 flavours:
 - `wasm-compat-multithread` - Same as `wasm-compat` but with multi threading enabled.
 - `wasm-multithread` - Same as `wasm` but with multi threading enabled.
 
-See [falling_shapes.html](Examples/falling_shapes.html) for a example on how to use the library.
+See [falling_shapes.html](Examples/falling_shapes.html) for an example on how to use the library.
 
 ### Documentation
 
 The interface of the library is the same as the C++ interface of JoltPhysics, this means that you can use the [C++ documentation](https://jrouwe.github.io/JoltPhysics/) as reference.
 
-Almost all of the Jolt interface has been exposed. Check [JoltJS.idl](https://github.com/jrouwe/JoltPhysics.js/blob/main/JoltJS.idl) if a particular interface has been exposed. If not, edit [JoltJS.idl](https://github.com/jrouwe/JoltPhysics.js/blob/main/JoltJS.idl) and [JoltJS.h](https://github.com/jrouwe/JoltPhysics.js/blob/main/JoltJS.h) and send a pull request, or open an issue.
+Almost the entire Jolt interface has been exposed. Check [JoltJS.idl](https://github.com/jrouwe/JoltPhysics.js/blob/main/JoltJS.idl) if a particular interface has been exposed. If not, edit [JoltJS.idl](https://github.com/jrouwe/JoltPhysics.js/blob/main/JoltJS.idl) and [JoltJS.h](https://github.com/jrouwe/JoltPhysics.js/blob/main/JoltJS.h) and send a pull request, or open an issue.
 
 ### Installation
 
@@ -106,7 +106,7 @@ Additional options that can be provided to ```build.sh```:
 
 By default the examples use the WASM compat version of Jolt. This requires serving the html file using a web server rather than opening the html file directly.
 
-Go open a terminal in this folder and run the following commands:
+Open a terminal in this folder and run the following commands:
 
 ```
 npm install
