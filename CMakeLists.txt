@@ -36,8 +36,13 @@ set(FLOATING_POINT_EXCEPTIONS_ENABLED OFF)
 # Turn off LTO
 set(INTERPROCEDURAL_OPTIMIZATION OFF)
 
-# Turn on symbols
-set(GENERATE_DEBUG_SYMBOLS ON)
+# Override debug symbols
+if ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
+	set(GENERATE_DEBUG_SYMBOLS ON)
+	set(JPH_DEBUG_SYMBOL_FORMAT "source-map" CACHE STRING "")
+else()
+	set(GENERATE_DEBUG_SYMBOLS OFF)
+endif()
 
 # Turn off custom allocator
 set(DISABLE_CUSTOM_ALLOCATOR ON)
@@ -81,7 +86,7 @@ include(FetchContent)
 FetchContent_Declare(
         JoltPhysics
         GIT_REPOSITORY "https://github.com/jrouwe/JoltPhysics"
-        GIT_TAG "e4debe8683e72548996e95ac6ad064be418b85ea"
+        GIT_TAG "9c718ebb022424885ac0cdacff2938a18bd245e8"
 		SOURCE_SUBDIR "Build"
 )
 FetchContent_MakeAvailable(JoltPhysics)
@@ -127,7 +132,7 @@ set(EMCC_ARGS
 if ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
 	set(EMCC_ARGS 
 		${EMCC_ARGS} 
-		-g
+		-g${JPH_DEBUG_SYMBOL_FORMAT}
 		-s ASSERTIONS)
 else()
 	set(EMCC_ARGS 
