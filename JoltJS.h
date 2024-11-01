@@ -369,6 +369,7 @@ public:
 	uint					mMaxBodyPairs = 65536;
 	uint					mMaxContactConstraints = 10240;
 	uint					mTempAllocatorSize = 10 * 1024 * 1024;
+	uint					mMaxWorkerThreads = 16;
 	BroadPhaseLayerInterface *mBroadPhaseLayerInterface = nullptr;
 	ObjectVsBroadPhaseLayerFilter *mObjectVsBroadPhaseLayerFilter = nullptr;
 	ObjectLayerPairFilter *	mObjectLayerPairFilter = nullptr;
@@ -394,6 +395,10 @@ public:
 		// Init temp allocator
 		mTempAllocator = new TempAllocatorImpl(inSettings.mTempAllocatorSize);
 
+		// Limit to 16 threads since we limit the webworker thread pool size to this as well
+		int num_workers = min<int>(thread::hardware_concurrency() - 1, min<int>(inSettings.mMaxWorkerThreads, 16));
+		mJobSystem = new JobSystemThreadPool(cMaxPhysicsJobs, cMaxPhysicsBarriers, num_workers); 
+
 		// Check required objects
 		if (inSettings.mBroadPhaseLayerInterface == nullptr || inSettings.mObjectVsBroadPhaseLayerFilter == nullptr || inSettings.mObjectLayerPairFilter == nullptr)
 			Trace("Error: BroadPhaseLayerInterface, ObjectVsBroadPhaseLayerFilter and ObjectLayerPairFilter must be provided");
@@ -417,6 +422,7 @@ public:
 		delete mBroadPhaseLayerInterface;
 		delete mObjectVsBroadPhaseLayerFilter;
 		delete mObjectLayerPairFilter;
+		delete mJobSystem;
 		delete mTempAllocator;
 		delete Factory::sInstance;
 		Factory::sInstance = nullptr;
@@ -426,7 +432,7 @@ public:
 	/// Step the world
 	void					Step(float inDeltaTime, int inCollisionSteps)
 	{
-		mPhysicsSystem->Update(inDeltaTime, inCollisionSteps, mTempAllocator, &mJobSystem);
+		mPhysicsSystem->Update(inDeltaTime, inCollisionSteps, mTempAllocator, mJobSystem);
 	}
 
 	/// Access to the physics system
@@ -471,8 +477,8 @@ public:
 	}
 
 private:
-	TempAllocatorImpl *		mTempAllocator;
-	JobSystemThreadPool		mJobSystem { cMaxPhysicsJobs, cMaxPhysicsBarriers, min<int>(thread::hardware_concurrency() - 1, 16) }; // Limit to 16 threads since we limit the webworker thread pool size to this as well
+	TempAllocatorImpl *		mTempAllocator = nullptr;
+	JobSystemThreadPool *	mJobSystem = nullptr;
 	BroadPhaseLayerInterface *mBroadPhaseLayerInterface = nullptr;
 	ObjectVsBroadPhaseLayerFilter *mObjectVsBroadPhaseLayerFilter = nullptr;
 	ObjectLayerPairFilter *	mObjectLayerPairFilter = nullptr;

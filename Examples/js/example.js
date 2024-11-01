@@ -104,6 +104,7 @@ function initPhysics() {
 
 	// Initialize Jolt
 	settings = new Jolt.JoltSettings();
+	settings.mMaxWorkerThreads = 3; // Limit the number of worker threads to 3 (for a total of 4 threads working on the simulation). Note that this value will always be clamped against the number of CPUs in the system - 1.
 	setupCollisionFiltering(settings);
 	jolt = new Jolt.JoltInterface(settings);
 	Jolt.destroy(settings);

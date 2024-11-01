@@ -3677,6 +3677,7 @@ interface JoltSettings {
 	attribute unsigned long mMaxBodies;
 	attribute unsigned long mMaxBodyPairs;
 	attribute unsigned long mMaxContactConstraints;
+	attribute unsigned long mMaxWorkerThreads;
 	attribute BroadPhaseLayerInterface mBroadPhaseLayerInterface;
 	attribute ObjectVsBroadPhaseLayerFilter mObjectVsBroadPhaseLayerFilter;
 	attribute ObjectLayerPairFilter mObjectLayerPairFilter;
