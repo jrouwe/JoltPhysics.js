@@ -304,7 +304,7 @@
 				const boxHalfExtent = 0.75;
 				let shape = new Jolt.BoxShape(new Jolt.Vec3(boxHalfExtent, boxHalfExtent, boxHalfExtent));
 				let creationSettings = new Jolt.BodyCreationSettings(shape, new Jolt.RVec3(-10.0, 5.0, 10.0),
-					new Jolt.Quat.prototype.sIdentity(), Jolt.EMotionType_Dynamic, LAYER_MOVING);
+					Jolt.Quat.prototype.sIdentity(), Jolt.EMotionType_Dynamic, LAYER_MOVING);
 				creationSettings.mFriction = 0.1;
 				creationSettings.mOverrideMassProperties = Jolt.EOverrideMassProperties_CalculateInertia;
 				creationSettings.mMassPropertiesOverride.mMass = 1;
