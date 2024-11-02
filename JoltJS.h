@@ -97,6 +97,8 @@ using QuatMemRef = Quat;
 using ArrayQuat = Array<Quat>;
 using Mat44MemRef = Mat44;
 using ArrayMat44 = Array<Mat44>;
+using BodyIDMemRef = BodyID;
+using ArrayBodyID = Array<BodyID>;
 using FloatMemRef = float;
 using UintMemRef = uint;
 using Uint8MemRef = uint8;
@@ -153,6 +155,7 @@ using RagdollAdditionalConstraint = RagdollSettings::AdditionalConstraint;
 using ArrayRagdollPart = Array<RagdollPart>;
 using ArrayRagdollAdditionalConstraint = Array<RagdollAdditionalConstraint>;
 using CompoundShapeSubShape = CompoundShape::SubShape;
+using BodyInterface_AddState = void;
 
 // Alias for EBodyType values to avoid clashes
 constexpr EBodyType EBodyType_RigidBody = EBodyType::RigidBody;

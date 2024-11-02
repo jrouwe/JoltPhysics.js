@@ -40,6 +40,17 @@ interface ArrayMat44 {
 	Mat44MemRef data();
 };
 
+interface ArrayBodyID {
+	boolean empty();
+	long size();
+	[Ref] BodyID at(long inIndex);
+	void push_back([Const, Ref] BodyID inValue);
+	void reserve(unsigned long inSize);
+	void resize(unsigned long inSize);
+	void clear();
+	BodyIDMemRef data();
+};
+
 enum EBodyType {
 	"EBodyType_RigidBody",
 	"EBodyType_SoftBody"
@@ -239,6 +250,9 @@ interface QuatMemRef {
 };
 
 interface Mat44MemRef {
+};
+
+interface BodyIDMemRef {
 };
 
 interface FloatMemRef {
@@ -1741,6 +1755,10 @@ interface Body {
 	void SetUserData(unsigned long long inUserData);
 };
 
+[NoDelete]
+interface BodyInterface_AddState {
+};
+
 interface BodyInterface {
 	Body CreateBody([Const, Ref] BodyCreationSettings inSettings);
 	Body CreateSoftBody([Const, Ref] SoftBodyCreationSettings inSettings);
@@ -1753,11 +1771,16 @@ interface BodyInterface {
 	boolean AssignBodyID(Body ioBody, [Const, Ref] BodyID inBodyID);
 	Body UnassignBodyID([Const, Ref] BodyID inBodyID);
 	void DestroyBody([Const, Ref] BodyID inBodyID);
+	void DestroyBodies(BodyIDMemRef inBodyIDs, long inNumber);
 	void AddBody([Const, Ref] BodyID inBodyID, EActivation inActivationMode);
 	void RemoveBody([Const, Ref] BodyID inBodyID);
 	boolean IsAdded([Const, Ref] BodyID inBodyID);
 	[Value] BodyID CreateAndAddBody([Const, Ref] BodyCreationSettings inSettings, EActivation inActivationMode);
 	[Value] BodyID CreateAndAddSoftBody([Const, Ref] SoftBodyCreationSettings inSettings, EActivation inActivationMode);
+	BodyInterface_AddState AddBodiesPrepare(BodyIDMemRef ioBodies, long inNumber);
+	void AddBodiesFinalize(BodyIDMemRef ioBodies, long inNumber, BodyInterface_AddState inAddState, EActivation inActivationMode);
+	void AddBodiesAbort(BodyIDMemRef ioBodies, long inNumber, BodyInterface_AddState inAddState);
+	void RemoveBodies(BodyIDMemRef ioBodies, long inNumber);
 	TwoBodyConstraint CreateConstraint([Const] TwoBodyConstraintSettings inSettings, [Const, Ref] BodyID inBodyID1, [Const, Ref] BodyID inBodyID2);
 	void ActivateConstraint([Const] TwoBodyConstraint inConstraint);
 	[Const] Shape GetShape([Const, Ref] BodyID inBodyID);
