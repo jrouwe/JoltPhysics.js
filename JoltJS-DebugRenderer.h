@@ -124,7 +124,7 @@ public:
 		inSystem->DrawConstraintReferenceFrame(this);
 	}
 
-	void			DrawShape(Shape *inShape, const RMat44 *inModelMatrix, const RVec3 *inScale, const Color *inColor, bool inDrawWireFrame)
+	void			DrawShape(Shape *inShape, const RMat44 *inModelMatrix, const Vec3 *inScale, const Color *inColor, bool inDrawWireFrame)
 	{
 		inShape->Draw(this, *inModelMatrix, *inScale, *inColor, false, inDrawWireFrame);
 	}

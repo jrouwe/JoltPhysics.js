@@ -80,7 +80,7 @@ interface DebugRendererEm {
 	void DrawConstraints(PhysicsSystem system);
 	void DrawConstraintLimits(PhysicsSystem system);
 	void DrawConstraintReferenceFrame(PhysicsSystem system);
-	void DrawShape(Shape inShape, [Const] RMat44 inModelMatrix, [Const] RVec3 inScale, [Const] Color inColor, boolean inDrawWireFrame);
+	void DrawShape(Shape inShape, [Const] RMat44 inModelMatrix, [Const] Vec3 inScale, [Const] Color inColor, boolean inDrawWireFrame);
 	void DrawBody(Body body, [Const] Color inColor, boolean inDrawWireFrame);
 	void DrawConstraint(Constraint inConstraint);
 };
