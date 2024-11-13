@@ -617,6 +617,9 @@ interface AABox {
 	[Operator="!="] boolean NotEquals([Const, Ref] AABox inB);
 	void SetEmpty();
 	boolean IsValid();
+	[BindTo="Encapsulate"] void EncapsulateVec3([Const, Ref] Vec3 inV);
+	[BindTo="Encapsulate"] void EncapsulateAABox([Const, Ref] AABox inBox);
+	[BindTo="Encapsulate"] void EncapsulateTriangle([Const, Ref] Triangle inTriangle);
 	[Value] AABox Intersect([Const, Ref] AABox inOther);
 	void EnsureMinimalEdgeLength(float inMinEdgeLength);
 	void ExpandBy([Const, Ref] Vec3 inV);
@@ -624,12 +627,20 @@ interface AABox {
 	[Value] Vec3 GetSize();
 	float GetSurfaceArea();
 	float GetVolume();
+	[BindTo="Contains"] boolean ContainsVec3([Const, Ref] Vec3 inOther);
+	[BindTo="Contains"] boolean ContainsRVec3([Const, Ref] RVec3 inOther);
+	[BindTo="Overlaps"] boolean OverlapsAABox([Const, Ref] AABox inOther);
+	[BindTo="Overlaps"] boolean OverlapsPlane([Const, Ref] AABox inOther);
+	[BindTo="Translate"] void TranslateVec3([Const, Ref] Vec3 inOther);
+	[BindTo="Translate"] void TranslateRVec3([Const, Ref] RVec3 inOther);
+	[BindTo="Transformed", Value] AABox TransformedMat44([Const, Ref] Mat44 inOther);
+	[BindTo="Transformed", Value] AABox TransformedRMat44([Const, Ref] RMat44 inOther);
+	[Value] AABox Scaled([Const, Ref] Vec3 inScale);
 	[Value] Vec3 GetClosestPoint([Const, Ref] Vec3 inV);
 	float GetSqDistanceTo([Const, Ref] Vec3 inV);
 
 	[Value] attribute Vec3 mMin;
 	[Value] attribute Vec3 mMax;
-	boolean Overlaps([Const, Ref] AABox inOther);
 };
 
 interface OrientedBox {
@@ -1609,6 +1620,12 @@ interface PathConstraintPath {
 	void AddRef();
 	void Release();
 };
+
+interface PathConstraintPathHermite {
+	void AddPoint([Const, Ref] Vec3 inPosition, [Const, Ref] Vec3 inTangent, [Const, Ref] Vec3 inNormal);
+};
+
+PathConstraintPathHermite implements PathConstraintPath;
 
 interface PathConstraintPathEm {
 };

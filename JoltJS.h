@@ -40,7 +40,7 @@
 #include "Jolt/Physics/Constraints/HingeConstraint.h"
 #include "Jolt/Physics/Constraints/ConeConstraint.h"
 #include "Jolt/Physics/Constraints/PathConstraint.h"
-#include "Jolt/Physics/Constraints/PathConstraintPath.h"
+#include "Jolt/Physics/Constraints/PathConstraintPathHermite.h"
 #include "Jolt/Physics/Constraints/PulleyConstraint.h"
 #include "Jolt/Physics/Constraints/SliderConstraint.h"
 #include "Jolt/Physics/Constraints/SwingTwistConstraint.h"
