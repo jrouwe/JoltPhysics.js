@@ -1258,6 +1258,8 @@ interface Constraint {
 	unsigned long long GetUserData();
 	void SetUserData(unsigned long long inUserData);
 	void ResetWarmStart();
+	void SaveState([Ref] StateRecorder inStream);
+	void RestoreState([Ref] StateRecorder inStream);
 };
 
 // Two body constraint
@@ -1878,6 +1880,8 @@ interface Body {
 	[Const, Value] Vec3 GetWorldSpaceSurfaceNormal([Const, Ref] SubShapeID inSubShapeID, [Const, Ref] RVec3 inPosition);
 	unsigned long long GetUserData();
 	void SetUserData(unsigned long long inUserData);
+	void SaveState([Ref] StateRecorder inStream);
+	void RestoreState([Ref] StateRecorder inStream);
 };
 
 [NoDelete]
@@ -3139,6 +3143,8 @@ interface CharacterBase {
 	[Value] Vec3 GetGroundVelocity();
 	[Const] PhysicsMaterial GetGroundMaterial();
 	[Value] BodyID GetGroundBodyID();
+	void SaveState([Ref] StateRecorder inStream);
+	void RestoreState([Ref] StateRecorder inStream);
 };
 
 interface CharacterVirtual {
