@@ -92,6 +92,8 @@
 				Jolt.destroy(jolt);
 
 				// Record how much memory we have at the end
+				// Note that this will show a small leak which is due to the use of thread_locals.
+				// See: https://github.com/jrouwe/JoltPhysics.js/discussions/222#discussioncomment-11381106
 				console.log("Memory leaked: " + (memoryFreeBefore - Jolt.JoltInterface.prototype.sGetFreeMemory()) + " bytes");
 			});
 		</script>
