@@ -506,10 +506,12 @@ interface Mat44 {
 	[Value] static Mat44 sRotationY(float inY);
 	[Value] static Mat44 sRotationZ(float inZ);
 	[Value] static Mat44 sRotation([Const, Ref] Quat inQ);
+	[Value, BindTo="sRotation"] static Mat44 sRotationAxisAngle([Const, Ref] Vec3 inAxis, float inAngle);
 	[Value] static Mat44 sTranslation([Const, Ref] Vec3 inTranslation);
 	[Value] static Mat44 sRotationTranslation([Const, Ref] Quat inRotation, [Const, Ref] Vec3 inTranslation);
 	[Value] static Mat44 sInverseRotationTranslation([Const, Ref] Quat inRotation, [Const, Ref] Vec3 inTranslation);
 	[Value] static Mat44 sScale(float inScale);
+	[Value, BindTo="sScale"] static Mat44 sScaleVec3([Const, Ref] Vec3 inScale);
 	[Value] static Mat44 sOuterProduct([Const, Ref] Vec3 inV1, [Const, Ref] Vec3 inV2);
 	[Value] static Mat44 sCrossProduct([Const, Ref] Vec3 inV);
 	[Value] static Mat44 sQuatLeftMultiply([Const, Ref] Quat inQ);
@@ -530,6 +532,7 @@ interface Mat44 {
 	boolean IsClose([Const, Ref] Mat44 inM, optional float inMaxDistSq);
 	[Operator="+=", Const, Ref] Mat44 Add([Const, Ref] Mat44 inM);
 	[Operator="*", Value] Mat44 MulFloat(float inV);
+	[Operator="*", Value] Mat44 MulMat44([Const, Ref] Mat44 inM);
 	[Operator="*", Value] Vec3 MulVec3([Const, Ref] Vec3 inV);
 	[Operator="*", Value] Vec4 MulVec4([Const, Ref] Vec4 inV);
 	[Operator="+", Value] Mat44 AddMat44([Const, Ref] Mat44 inM);
@@ -613,6 +616,7 @@ interface AABox {
 	void AABox([Const, Ref] Vec3 inMin, [Const, Ref] Vec3 inMax);
 	[Value] static AABox sBiggest();
 	[Value] static AABox sFromTwoPoints([Const, Ref] Vec3 inP1, [Const, Ref] Vec3 inP2);
+	[Value] static AABox sFromTriangle([Const, Ref] VertexList inVertices, [Const, Ref] IndexedTriangle inTriangle);
 	[Operator="=="] boolean Equals([Const, Ref] AABox inB);
 	[Operator="!="] boolean NotEquals([Const, Ref] AABox inB);
 	void SetEmpty();
@@ -620,10 +624,12 @@ interface AABox {
 	[BindTo="Encapsulate"] void EncapsulateVec3([Const, Ref] Vec3 inV);
 	[BindTo="Encapsulate"] void EncapsulateAABox([Const, Ref] AABox inBox);
 	[BindTo="Encapsulate"] void EncapsulateTriangle([Const, Ref] Triangle inTriangle);
+	[BindTo="Encapsulate"] void EncapsulateIndexedTriangle([Const, Ref] VertexList inVertices, [Const, Ref] IndexedTriangle inTriangle);
 	[Value] AABox Intersect([Const, Ref] AABox inOther);
 	void EnsureMinimalEdgeLength(float inMinEdgeLength);
 	void ExpandBy([Const, Ref] Vec3 inV);
 	[Value] Vec3 GetCenter();
+	[Value] Vec3 GetExtent();
 	[Value] Vec3 GetSize();
 	float GetSurfaceArea();
 	float GetVolume();
