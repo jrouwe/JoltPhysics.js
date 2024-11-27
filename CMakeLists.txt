@@ -64,10 +64,17 @@ if (ENABLE_MULTI_THREADING)
 		-s PTHREAD_POOL_SIZE=16)
 	set(CMAKE_CXX_FLAGS "-pthread -s SHARED_MEMORY")
 	set(OUTPUT_BASE_NAME "${OUTPUT_FOLDER}jolt-physics.multithread")
+	set(REMOVE_THREAD_LOCAL "")
 else()
 	set(MULTI_THREADED_FLAG "")
 	set(ENVIRONMENT_FLAG "-s ENVIRONMENT='web,node'")
 	set(OUTPUT_BASE_NAME "${OUTPUT_FOLDER}jolt-physics")
+	# Tried to keep this multi-platform since windows/mac/linux all treat -i different,
+	# though this creates extra backup file in a non-tracked folder.
+	# Removing 'thread_local' from the generated binding code fixes a small 'residual' allocation
+	# in the proper_cleanup.html demo and it is not needed when in single threaded mode.
+	# See: https://github.com/jrouwe/JoltPhysics.js/discussions/222#discussioncomment-11381106	
+	set(REMOVE_THREAD_LOCAL sed -i.bak -e "s:thread_local::g" glue.cpp)
 endif()
 
 # Enable SIMD flags
@@ -206,6 +213,7 @@ add_custom_command(
 	BYPRODUCTS parser.out WebIDLGrammar.pkl
 	COMMAND cat ${JOLT_IDL_FILE} > jolt.idl
 	COMMAND ${PYTHON} ${WEBIDL_BINDER_SCRIPT} jolt.idl glue
+	COMMAND ${REMOVE_THREAD_LOCAL}
 	DEPENDS ${JOLT_IDL_FILE}
 	COMMENT "Generating JoltPhysics.js bindings"
 	VERBATIM)
