@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>JoltPhysics.js demo</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<link rel="stylesheet" type="text/css" href="style.css">
+	</head>
+	<body>
+		<div id="container">Loading...</div>
+		<div id="info">JoltPhysics.js motor demo<br/>
+		A windmill using powered hinge constraints and a block on a powered slider constraint.</div>
+
+		<script src="js/three/three.min.js"></script>
+		<script src="js/three/OrbitControls.js"></script>
+		<script src="js/three/WebGL.js"></script>
+		<script src="js/three/stats.min.js"></script>
+		<script src="js/example.js"></script>
+
+		<script type="module">
+			// In case you haven't built the library yourself, replace URL with: https://www.unpkg.com/jolt-physics/dist/jolt-physics.wasm-compat.js
+			import initJolt from './js/jolt-physics.wasm-compat.js';
+
+			initJolt().then(function (Jolt) {
+				// Initialize this example
+				initExample(Jolt, null);
+				camera.position.z += 35;
+
+				// Create a basic floor
+				createFloor();
+
+				const makeWindmill = () => {
+					// Create a box to rotate the wings around
+					const box = createBox(new Jolt.RVec3(0, 10, 0), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(0.25, 0.25, 0.25), Jolt.EMotionType_Static, LAYER_NON_MOVING);
+
+					// Create the wings as a compound shape
+					let wingsShapeSettings = new Jolt.StaticCompoundShapeSettings();
+					wingsShapeSettings.AddShape(new Jolt.Vec3(5, 0, 0), Jolt.Quat.prototype.sIdentity(), new Jolt.BoxShapeSettings(new Jolt.Vec3(4, 0.5, 0.5), 0.05, null))
+					wingsShapeSettings.AddShape(new Jolt.Vec3(-5, 0, 0), Jolt.Quat.prototype.sIdentity(), new Jolt.BoxShapeSettings(new Jolt.Vec3(4, 0.5, 0.5), 0.05, null))
+					wingsShapeSettings.AddShape(new Jolt.Vec3(0, 5, 0), Jolt.Quat.prototype.sIdentity(), new Jolt.BoxShapeSettings(new Jolt.Vec3(0.5, 4, 0.5), 0.05, null))
+					wingsShapeSettings.AddShape(new Jolt.Vec3(0, -5, 0), Jolt.Quat.prototype.sIdentity(), new Jolt.BoxShapeSettings(new Jolt.Vec3(0.5, 4, 0.5), 0.05, null))
+					let wingsShape = wingsShapeSettings.Create().Get();
+					const wingsCreationSettings = new Jolt.BodyCreationSettings(wingsShape, new Jolt.RVec3(0, 10, 0), Jolt.Quat.prototype.sIdentity(), Jolt.EMotionType_Dynamic, LAYER_MOVING);
+					let wing = bodyInterface.CreateBody(wingsCreationSettings);
+					addToScene(wing, 0xff0000);
+
+					// Constrain the wings to the box using a powered hinge
+					let c = new Jolt.HingeConstraintSettings();
+					c.mPoint1 = c.mPoint2 = wingsCreationSettings.mPosition;
+					c.mHingeAxis1.Set(0, 0, 1);
+					c.mHingeAxis2 = c.mHingeAxis1;
+					c.mNormalAxis1.Set(1, 0, 0);
+					c.mNormalAxis2 = c.mNormalAxis;
+					const joint = c.Create(box, wing);
+					const hinge = Jolt.castObject(joint, Jolt.HingeConstraint);
+					physicsSystem.AddConstraint(hinge);
+					hinge.SetMotorState(Jolt.EMotorState_Velocity);
+					hinge.SetTargetAngularVelocity(-5);
+
+					// Sphere moving towards the wings
+					const sphere = createSphere(new Jolt.RVec3(-20, 2, 0), 2, Jolt.EMotionType_Dynamic, LAYER_MOVING, 0x118811);
+					sphere.GetMotionProperties().SetInverseMass(1.0 / 15);
+					sphere.AddImpulse(new Jolt.Vec3(250.0, 0, 0));
+					sphere.SetRestitution(0.45);
+
+					// Create a wall for the ball to bounce against
+					const target = createBox(new Jolt.RVec3(-25, 15, 0), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(0.2, 15, 5), Jolt.EMotionType_Static, LAYER_NON_MOVING, 0x661122);
+
+					// Invisible right wall because the sphere gets lost sometimes
+					createBox(new Jolt.RVec3(50, 0, 0), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(0.2, 150, 50), Jolt.EMotionType_Static, LAYER_NON_MOVING, 0x661122);
+					dynamicObjects.pop().visible = false;
+
+					// Invisible top wall
+					createBox(new Jolt.RVec3(0, 75, 0), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(150, 0.2, 50), Jolt.EMotionType_Static, LAYER_NON_MOVING, 0x661122);
+					dynamicObjects.pop().visible = false;
+				}
+
+				const createSlider = () => {
+					const platform = createBox(new Jolt.RVec3(18, 0.25, 0), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(12.5, 0.25, 2), Jolt.EMotionType_Static, LAYER_NON_MOVING, 0x993333);
+					const target = createBox(new Jolt.RVec3(30, 2, 0), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(0.5, 2, 2), Jolt.EMotionType_Static, LAYER_NON_MOVING, 0x666633);
+					const box = createBox(new Jolt.RVec3(15, 1.25, 0), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(0.75, 0.75, 0.75), Jolt.EMotionType_Dynamic, LAYER_MOVING, 0x003366);
+
+					// Place irregular reference points along slider axis to show precise location control
+					const colors = [0xFF0000, 0x00FF00, 0x0000FF, 0xFFFF00];
+					const offsets = [0, 4, 13, 21];
+					colors.forEach((color, index) => {
+						createBox(new Jolt.RVec3(28 - offsets[index], 2, -2.75), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(1, 4, 0.75), Jolt.EMotionType_Static, LAYER_NON_MOVING, color);
+					})
+
+					const c = new Jolt.SliderConstraintSettings();
+					c.mPoint1.Set(15, 1.25, 0);
+					c.mPoint2.Set(28, 1.25, 0);
+					c.mSliderAxis1.Set(1, 0, 0);
+					c.mSliderAxis2 = c.mSliderAxis1;
+					c.mNormalAxis1.Set(0, 1, 0);
+					c.mNormalAxis2 = c.mNormalAxis1;
+					const joint = c.Create(box, target);
+					const slider = Jolt.castObject(joint, Jolt.SliderConstraint);
+					physicsSystem.AddConstraint(slider);
+					slider.SetMotorState(Jolt.EMotorState_Position);
+					slider.SetTargetPosition(0);
+
+					let pTime = 0;
+					let counter = 4; // Starts the motor counter closer to the initial spawn point
+					onExampleUpdate = (time, deltaTime) => {
+						if (time - pTime > 1.0) {
+							pTime = time;
+							// Creates a sequence going from -n to n, and set to absolute to wrap the sequence to up/down stepping
+							const index = Math.abs(counter++ % (offsets.length * 2 - 2) - (offsets.length - 1));
+							slider.SetTargetPosition(offsets[index]);
+							bodyInterface.ActivateBody(box.GetID());
+						}
+					}
+				}
+
+				makeWindmill();
+				createSlider();
+			});
+		</script>
+	</body>
+</html>

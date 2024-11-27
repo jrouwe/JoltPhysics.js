@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<title>JoltPhysics.js demo</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+	<link rel="stylesheet" type="text/css" href="style.css">
+</head>
+<body>
+	<div id="container">Loading...</div>
+	<div id="info">
+		JoltPhysics.js Debug Renderer<br />
+		This demo shows various debug renderer settings<br />
+		Left: This demonstrates some data shown for Constraint drawing. Different constraints have different data displayed.<br />
+		Center: The bouncing ball demonstrates the velocity vector data and items falling asleep (sleep stats, shape color: sleep)<br />
+		Right: The cloth demonstrates Soft Body settings: vertices, velocities, edge, and bend constraints.
+	</div>
+
+	<script src="js/three/three.min.js"></script>
+	<script src="js/three/OrbitControls.js"></script>
+	<script src="js/three/WebGL.js"></script>
+	<script src="js/three/stats.min.js"></script>
+	<script src="js/three/CSS3DRenderer.js"></script>
+	<script src="js/debug-renderer.js"></script>
+	<script src="js/example.js"></script>
+	<script src="js/soft-body-creator.js"></script>
+
+	<script type="module">
+		// In case you haven't built the library yourself, replace URL with: https://www.unpkg.com/jolt-physics/dist/jolt-physics.wasm-compat.js
+		import initJolt from './js/jolt-physics.wasm-compat.js';
+
+		initJolt().then(function (Jolt) {
+
+			if (Jolt.DebugRendererJS) {
+				// Initialize this example
+				const debugRendererWidget = new RenderWidget(Jolt);
+				initExample(Jolt, () => {
+					debugRendererWidget.render();
+				});
+				debugRendererWidget.init();
+				document.body.appendChild(debugRendererWidget.domElement);
+			} else {
+				initExample(Jolt);
+			}
+
+			// Better position the camera
+			camera.position.set(10, 30, 30);
+
+			// Create a basic floor
+			createFloor();
+
+			function xorshift32(a) {
+				a = new Uint32Array([a]);
+				return function () {
+					let x = a[0];
+					x ^= x << 13;
+					x ^= x >> 17;
+					x ^= x << 5;
+					a[0] = x;
+					return a[0] / 0xFFFFFFFF;
+				}
+			}
+
+			const cNumVerticesX = 10;
+			const cNumVerticesZ = 30;
+			const cVertexSpacing = 0.5;
+			const inv_mass = (x, z) => z < 2 ? 0 : 1;
+			const random_float = (v) => 0.2 * v - 0.1;
+			const perturbation = (seed) => {
+				const random = xorshift32(seed);
+				return (_x, inZ) => ({
+					x: random_float(random()),
+					y: inZ & 1 ? 0.1 : -0.1,
+					z: random_float(random())
+				});
+			}
+
+			const rotation = Jolt.Quat.prototype.sIdentity();
+			const position = new Jolt.RVec3();
+			{
+				// Cloth with dihedral bend constraints
+				const cloth_settings = SoftBodyCreator.CreateCloth(cNumVerticesX, cNumVerticesZ, cVertexSpacing, inv_mass, perturbation(1234), Jolt.SoftBodySharedSettings_EBendType_Dihedral);
+				position.Set(5, 10, 0);
+				const cloth = new Jolt.SoftBodyCreationSettings(cloth_settings, position, rotation, LAYER_MOVING);
+				const body = bodyInterface.CreateSoftBody(cloth);
+				addToScene(body, 0x0000aa);
+			}
+
+			for (let i = 0; i < 3; i++) {
+				position.Set(-3 + i * 1.5, 4, 0);
+				const ball = createSphere(position, 0.5, Jolt.EMotionType_Dynamic, LAYER_MOVING);
+				ball.SetRestitution(0.6 + 0.2 * i);
+			}
+
+			let shape = new Jolt.BoxShape(new Jolt.Vec3(0.5, 0.5, 0.5), 0.05, null);
+			let creationSettings = new Jolt.BodyCreationSettings(shape, new Jolt.RVec3(-15, 20, 0), Jolt.Quat.prototype.sIdentity(), Jolt.EMotionType_Dynamic, LAYER_MOVING);
+
+			function createBody(creationSettings, z) {
+				creationSettings.mMotionType = z == 0 ? Jolt.EMotionType_Static : Jolt.EMotionType_Dynamic;
+				creationSettings.mObjectLayer = z == 0 ? LAYER_NON_MOVING : LAYER_MOVING;
+				creationSettings.mPosition.SetZ(z);
+				creationSettings.mCollisionGroup.SetSubGroupID(z);
+
+				let body = bodyInterface.CreateBody(creationSettings);
+				addToScene(body, 0xff0000);
+
+				// Add an impulse (gravity is really boring, many constraints look the same)
+				if (z == 9)
+					body.AddImpulse(new Jolt.Vec3(1000, 0, 0));
+
+				return body;
+			}
+
+			// Distance constraint
+			creationSettings.mCollisionGroup.SetGroupID(creationSettings.mCollisionGroup.GetGroupID() + 1);
+			creationSettings.mPosition.SetX(creationSettings.mPosition.GetX() + 5);
+			{
+				let constraintSettings = new Jolt.DistanceConstraintSettings();
+				constraintSettings.mPoint1 = constraintSettings.mPoint2 = creationSettings.mPosition;
+				constraintSettings.mMinDistance = 0;
+				constraintSettings.mMaxDistance = 1;
+				let prevBody = null;
+
+				for (let z = 0; z < 10; ++z) {
+					let body = createBody(creationSettings, z);
+
+					if (prevBody != null) {
+						constraintSettings.mPoint1.SetZ(z - 0.5);
+						constraintSettings.mPoint2.SetZ(z - 0.5);
+						physicsSystem.AddConstraint(constraintSettings.Create(prevBody, body));
+					}
+
+					prevBody = body;
+				}
+			}
+		});
+	</script>
+</body>
+</html>
