@@ -1764,6 +1764,7 @@ interface MotionProperties {
 	[Value] Vec3 GetInverseInertiaDiagonal();
 	[Value] Quat GetInertiaRotation();
 	void SetInverseInertia([Const, Ref] Vec3 inInvI, [Const, Ref] Quat inRotation);
+	void ScaleToMass(float inMass);
 	[Value] Mat44 GetLocalSpaceInverseInertia();
 	[Value] Mat44 GetInverseInertiaForRotation([Const, Ref] Mat44 inRotation);
 	[Value] Vec3 MultiplyWorldSpaceInverseInertiaByVector([Const, Ref] Quat inRotation, [Const, Ref] Vec3 inV);
@@ -2541,6 +2542,7 @@ interface NarrowPhaseQuery {
 	void CastRay([Const, Ref] RRayCast inRay, [Const, Ref] RayCastSettings inRayCastSettings, [Ref] CastRayCollector ioCollector, [Const, Ref] BroadPhaseLayerFilter inBroadPhaseLayerFilter, [Const, Ref] ObjectLayerFilter inObjectLayerFilter, [Const, Ref] BodyFilter inBodyFilter, [Const, Ref] ShapeFilter inShapeFilter);
 	void CollidePoint([Const, Ref] RVec3 inPoint, [Ref] CollidePointCollector ioCollector, [Const, Ref] BroadPhaseLayerFilter inBroadPhaseLayerFilter, [Const, Ref] ObjectLayerFilter inObjectLayerFilter, [Const, Ref] BodyFilter inBodyFilter, [Const, Ref] ShapeFilter inShapeFilter);
 	void CollideShape([Const] Shape inShape, [Const, Ref] Vec3 inShapeScale, [Const, Ref] RMat44 inCenterOfMassTransform, [Const, Ref] CollideShapeSettings inCollideShapeSettings, [Const, Ref] RVec3 inBaseOffset, [Ref] CollideShapeCollector ioCollector, [Const, Ref] BroadPhaseLayerFilter inBroadPhaseLayerFilter, [Const, Ref] ObjectLayerFilter inObjectLayerFilter, [Const, Ref] BodyFilter inBodyFilter, [Const, Ref] ShapeFilter inShapeFilter);
+	void CollideShapeWithInternalEdgeRemoval([Const] Shape inShape, [Const, Ref] Vec3 inShapeScale, [Const, Ref] RMat44 inCenterOfMassTransform, [Const, Ref] CollideShapeSettings inCollideShapeSettings, [Const, Ref] RVec3 inBaseOffset, [Ref] CollideShapeCollector ioCollector, [Const, Ref] BroadPhaseLayerFilter inBroadPhaseLayerFilter, [Const, Ref] ObjectLayerFilter inObjectLayerFilter, [Const, Ref] BodyFilter inBodyFilter, [Const, Ref] ShapeFilter inShapeFilter);
 	void CastShape([Const, Ref] RShapeCast inShapeCast, [Const, Ref] ShapeCastSettings inShapeCastSettings, [Const, Ref] RVec3 inBaseOffset, [Ref] CastShapeCollector ioCollector, [Const, Ref] BroadPhaseLayerFilter inBroadPhaseLayerFilter, [Const, Ref] ObjectLayerFilter inObjectLayerFilter, [Const, Ref] BodyFilter inBodyFilter, [Const, Ref] ShapeFilter inShapeFilter);
 	void CollectTransformedShapes([Const, Ref] AABox inBox, [Ref] TransformedShapeCollector ioCollector, [Const, Ref] BroadPhaseLayerFilter inBroadPhaseLayerFilter, [Const, Ref] ObjectLayerFilter inObjectLayerFilter, [Const, Ref] BodyFilter inBodyFilter, [Const, Ref] ShapeFilter inShapeFilter);
 };
@@ -3572,6 +3574,7 @@ interface VehicleController {
 	unsigned long GetRefCount();
 	void AddRef();
 	void Release();
+	[Ref] VehicleConstraint GetConstraint();
 };
 
 interface WheeledVehicleController {
