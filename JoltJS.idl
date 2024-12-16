@@ -3013,6 +3013,7 @@ interface CharacterVsCharacterCollision {
 };
 
 interface CharacterVsCharacterCollisionSimple {
+	void CharacterVsCharacterCollisionSimple();
 	void Add(CharacterVirtual inCharacter);
 	void Remove(CharacterVirtual inCharacter);
 };
