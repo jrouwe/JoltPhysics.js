@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>JoltPhysics.js demo</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<link rel="stylesheet" type="text/css" href="../style.css">
+	</head>
+	<body>
+		<div id="container">Loading...</div>
+		<div id="info">JoltPhysics.js Soft Cubes<br />Edge compliance strength on X Axis, stronger towards right<br /> Volume compliance strength on Z axis, stronger towards camera</div>
+
+		<script src="../js/three/three.min.js"></script>
+		<script src="../js/three/OrbitControls.js"></script>
+		<script src="../js/three/WebGL.js"></script>
+		<script src="../js/three/stats.min.js"></script>
+		<script src="../js/example.js"></script>
+		<script src="../js/soft-body-creator.js"></script>
+
+		<script type="module">
+			// In case you haven't built the library yourself, replace URL with: https://www.unpkg.com/jolt-physics/dist/jolt-physics.wasm-compat.js
+			import initJolt from '../js/jolt-physics.wasm-compat.js';
+
+			const jelly = {
+				color: 0xffffff,
+				transmission: 0.9,
+				opacity: 0.7,
+				metalness: 0,
+				roughness: 0.2,
+				ior: 2.5,
+				thickness: 2.5,
+				attenuationColor: 0xffffff,
+				attenuationDistance: 0.25,
+				specularIntensity: 1,
+				specularColor: 0xffffff,
+				lightIntensity: 1,
+				exposure: 1
+			};
+
+			initJolt().then(async function (Jolt) {
+				// Initialize this example
+				initExample(Jolt, null);
+
+				const texLoader = new window.THREE.TextureLoader();
+				const checkerTexture = texLoader.load('data:image/gif;base64,R0lGODdhAgACAIABAAAAAP///ywAAAAAAgACAAACA0QCBQA7');
+				checkerTexture.wrapS = checkerTexture.wrapT = window.THREE.RepeatWrapping;
+				checkerTexture.offset.set(0, 0);
+				checkerTexture.repeat.set(10, 10);
+				checkerTexture.magFilter = window.THREE.NearestFilter;
+
+				createFloor();
+				const floor = dynamicObjects[dynamicObjects.length - 1];
+				let checkerMat = new window.THREE.MeshPhongMaterial({ color: 0xdddddd });
+				checkerMat.map = checkerTexture;
+				floor.material = checkerMat;
+
+				camera.position.y -= 4;
+				camera.position.z -= 4;
+
+				const position = new Jolt.RVec3();
+				const rotAxis = new Jolt.Vec3(1, 0, 0);
+				const rotation = Jolt.Quat.prototype.sRotation(rotAxis, -Math.PI / 4);
+
+				function createGelCube(edgeCompliance, volumeCompliance, x, y, z, color) {
+					// Create shared settings
+					const sharedSettings = SoftBodyCreator.CreateCube(8, 0.2, edgeCompliance, volumeCompliance);
+					position.Set(x, y, z)
+					const bodyCreationSettings = new Jolt.SoftBodyCreationSettings(sharedSettings, position, rotation, LAYER_MOVING);
+					bodyCreationSettings.mPressure = 2;
+					bodyCreationSettings.mObjectLayer = LAYER_MOVING;
+					const body = bodyInterface.CreateSoftBody(bodyCreationSettings);
+					addToScene(body, 0xffffff);
+
+					Jolt.destroy(bodyCreationSettings);
+
+					const mesh = dynamicObjects[dynamicObjects.length - 1];
+					const jellyMaterial = new window.THREE.MeshPhysicalMaterial(jelly);
+					const [r, g, b] = color;
+					jellyMaterial.attenuationColor.setRGB(r, g, b);
+					mesh.material = jellyMaterial;
+				}
+
+				// Compliance in constraints are calculated here in 10^negative values and are inverse-values, so closer to 0 is closer to infinity
+				// These will be very, very small floating values to maintain cube-like structure
+				// Most values of even 10e-3 (0.0001) are too large to maintain structural integrity and we need to go even smaller towards -7 or -8
+				for (let y = 0; y < 4; y++)
+					for (let x = 0; x < 4; x++)
+						createGelCube(Math.pow(10, -3 - y), Math.pow(10, -6 - x), -10 + x * 5, 12, -10 + y * 5, [0.7 + 0.1 * y, 0.7 + x * .1, 1 - y * 0.1]);
+			});
+		</script>
+	</body>
+</html>
