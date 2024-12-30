@@ -895,6 +895,7 @@ interface ConvexShapeSettings {
 ConvexShapeSettings implements ShapeSettings;
 
 interface ConvexShape {
+	void SetMaterial([Const] PhysicsMaterial inMaterial);
 	float GetDensity();
 	void SetDensity(float inDensity);
 };
@@ -1070,7 +1071,7 @@ interface MutableCompoundShapeSettings {
 MutableCompoundShapeSettings implements CompoundShapeSettings;
 
 interface MutableCompoundShape {
-	unsigned long AddShape([Const, Ref] Vec3 inPosition, [Const, Ref] Quat inRotation, Shape inShape, unsigned long inUserData);
+	unsigned long AddShape([Const, Ref] Vec3 inPosition, [Const, Ref] Quat inRotation, Shape inShape, unsigned long inUserData, optional long inIndex);
 	void RemoveShape(unsigned long inIndex);
 	void ModifyShape(unsigned long inIndex, [Const, Ref] Vec3 inPosition, [Const, Ref] Quat inRotation);
 	void ModifyShape(unsigned long inIndex, [Const, Ref] Vec3 inPosition, [Const, Ref] Quat inRotation, Shape inShape);
@@ -1214,6 +1215,7 @@ PlaneShapeSettings implements ShapeSettings;
 
 interface PlaneShape {
 	void PlaneShape([Const, Ref] Plane inPlane, [Const] optional PhysicsMaterial inMaterial, optional float inHalfExtent);
+	void SetMaterial([Const] PhysicsMaterial inMaterial);
 	[Value] Plane GetPlane();
 	float GetHalfExtent();
 };
@@ -2622,6 +2624,8 @@ interface PhysicsSystem {
 	void SetBodyActivationListener(BodyActivationListener inListener);
 	[Const] BodyActivationListener GetBodyActivationListener();
 	boolean WereBodiesInContact([Const, Ref] BodyID inBodyID1, [Const, Ref] BodyID inBodyID2);
+	void SetSimShapeFilter([Const] SimShapeFilter inShapeFilter);
+	[Const] SimShapeFilter GetSimShapeFilter();
 };
 
 interface MassProperties {
@@ -3160,6 +3164,16 @@ interface ShapeFilterJS {
 interface ShapeFilterJS2 {
 	void ShapeFilterJS2();
 	[Const] boolean ShouldCollide([Const] Shape inShape1, [Const, Ref] SubShapeID inSubShapeIDOfShape1, [Const] Shape inShape2, [Const, Ref] SubShapeID inSubShapeIDOfShape2);
+};
+
+interface SimShapeFilter {
+	void SimShapeFilter();
+};
+
+[JSImplementation="SimShapeFilter"]
+interface SimShapeFilterJS {
+	void SimShapeFilterJS();
+	[Const] boolean ShouldCollide([Const, Ref] Body inBody1, [Const] Shape inShape1, [Const, Ref] SubShapeID inSubShapeIDOfShape1, [Const, Ref] Body inBody2, [Const] Shape inShape2, [Const, Ref] SubShapeID inSubShapeIDOfShape2);
 };
 
 interface CharacterBase {
@@ -3712,6 +3726,8 @@ interface ArraySkeletonAnimatedJoint {
 
 interface SkeletalAnimation {
 	void SkeletalAnimation();
+	void SetIsLooping(boolean inLooping);
+	boolean IsLooping();
 	float GetDuration();
 	void ScaleJoints(float inScale);
 	void Sample(float inTime, [Ref] SkeletonPose ioPose);
