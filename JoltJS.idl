@@ -3032,6 +3032,33 @@ interface ExtendedUpdateSettings {
 	[Value] attribute Vec3 mWalkStairsStepDownExtra;
 };
 
+interface CharacterVirtualContact {
+	[Const] boolean IsSameBody([Const, Ref] CharacterVirtualContact inOther);
+
+	[Value] attribute RVec3 mPosition;
+	[Value] attribute Vec3 mLinearVelocity;
+	[Value] attribute Vec3 mContactNormal;
+	[Value] attribute Vec3 mSurfaceNormal;
+	attribute float mDistance;
+	attribute float mFraction;
+	[Value] attribute BodyID mBodyB;
+	attribute CharacterVirtual mCharacterB;
+	[Value] attribute SubShapeID mSubShapeIDB;
+	attribute EMotionType mMotionTypeB;
+	attribute boolean mIsSensorB;
+	attribute unsigned long long mUserData;
+	[Const] attribute PhysicsMaterial mMaterial;
+	attribute boolean mHadCollision;
+	attribute boolean mWasDiscarded;
+	attribute boolean mCanPushCharacter;
+};
+
+interface ArrayCharacterVirtualContact {
+	boolean empty();
+	long size();
+	[Const, Ref] CharacterVirtualContact at(long inIndex);
+};
+
 interface TempAllocator {
 };
 
@@ -3198,6 +3225,9 @@ interface CharacterVirtual {
 	boolean SetShape([Const] Shape inShape, float inMaxPenetrationDepth, [Const, Ref] BroadPhaseLayerFilter inBroadPhaseLayerFilter, [Const, Ref] ObjectLayerFilter inObjectLayerFilter, [Const, Ref] BodyFilter inBodyFilter, [Const, Ref] ShapeFilter inShapeFilter, [Ref] TempAllocator inAllocator);
 	void SetInnerBodyShape([Const] Shape inShape);
 	[Value] TransformedShape GetTransformedShape();
+	boolean HasCollidedWith([Const, Ref] BodyID inBodyID);
+	[BindTo="HasCollidedWith"] boolean HasCollidedWithCharacter(CharacterVirtual inCharacter);
+	[Value] ArrayCharacterVirtualContact GetActiveContacts();
 };
 
 CharacterVirtual implements CharacterBase;

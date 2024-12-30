@@ -158,6 +158,8 @@ using ArrayRagdollPart = Array<RagdollPart>;
 using ArrayRagdollAdditionalConstraint = Array<RagdollAdditionalConstraint>;
 using CompoundShapeSubShape = CompoundShape::SubShape;
 using BodyInterface_AddState = void;
+using CharacterVirtualContact = CharacterVirtual::Contact;
+using ArrayCharacterVirtualContact = Array<CharacterVirtualContact>;
 
 // Alias for EBodyType values to avoid clashes
 constexpr EBodyType EBodyType_RigidBody = EBodyType::RigidBody;
