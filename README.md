@@ -145,6 +145,7 @@ Almost everything else can be destroyed straight after it has been passed to Jol
 ## Projects using JoltPhysics.js
 
 * [Babylon.js plugin](https://github.com/PhoenixIllusion/babylonjs-jolt-physics-plugin) - A plugin that replaces the default physics engine with Jolt.
+* [GDevelop](https://gdevelop.io/) - An Open-source, cross-platform 2D/3D/multiplayer game engine. See [announcement](https://github.com/4ian/GDevelop/releases/tag/v5.5.220).
 * [react-three-jolt](https://github.com/pmndrs/react-three-jolt) - Wraps Jolt to make it easy to use in react-three-fiber.
 * [r3f-jolt](https://github.com/sajal353/r3f-jolt) - Another wrapper for react-three-fiber.
 
