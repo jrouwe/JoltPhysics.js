@@ -1898,8 +1898,8 @@ interface BodyInterface_AddState {
 interface BodyInterface {
 	Body CreateBody([Const, Ref] BodyCreationSettings inSettings);
 	Body CreateSoftBody([Const, Ref] SoftBodyCreationSettings inSettings);
-	void CreateBodyWithID([Const, Ref] BodyID inBodyID, [Const, Ref] BodyCreationSettings inSettings);
-	void CreateSoftBodyWithID([Const, Ref] BodyID inBodyID, [Const, Ref] SoftBodyCreationSettings inSettings);
+	Body CreateBodyWithID([Const, Ref] BodyID inBodyID, [Const, Ref] BodyCreationSettings inSettings);
+	Body CreateSoftBodyWithID([Const, Ref] BodyID inBodyID, [Const, Ref] SoftBodyCreationSettings inSettings);
 	Body CreateBodyWithoutID([Const, Ref] BodyCreationSettings inSettings);
 	Body CreateSoftBodyWithoutID([Const, Ref] SoftBodyCreationSettings inSettings);
 	void DestroyBodyWithoutID(Body inBody);
