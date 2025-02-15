@@ -333,6 +333,11 @@ constexpr SoftBodySharedSettings_ELRAType SoftBodySharedSettings_ELRAType_None =
 constexpr SoftBodySharedSettings_ELRAType SoftBodySharedSettings_ELRAType_EuclideanDistance = SoftBodySharedSettings::ELRAType::EuclideanDistance;
 constexpr SoftBodySharedSettings_ELRAType SoftBodySharedSettings_ELRAType_GeodesicDistance = SoftBodySharedSettings::ELRAType::GeodesicDistance;
 
+// Alias for EBuildQuality
+using MeshShapeSettings_EBuildQuality = MeshShapeSettings::EBuildQuality;
+constexpr MeshShapeSettings_EBuildQuality MeshShapeSettings_EBuildQuality_FavorRuntimePerformance = MeshShapeSettings::EBuildQuality::FavorRuntimePerformance;
+constexpr MeshShapeSettings_EBuildQuality MeshShapeSettings_EBuildQuality_FavorBuildSpeed = MeshShapeSettings::EBuildQuality::FavorBuildSpeed;
+
 // Helper class to store information about the memory layout of SoftBodyVertex
 class SoftBodyVertexTraits
 {
@@ -603,7 +608,9 @@ class CharacterContactListenerEm: public CharacterContactListener
 public:
 	// JavaScript compatible virtual functions
 	virtual void			OnContactAdded(const CharacterVirtual *inCharacter, const BodyID &inBodyID2, const SubShapeID &inSubShapeID2, const RVec3 *inContactPosition, const Vec3 *inContactNormal, CharacterContactSettings &ioSettings) = 0;
+	virtual void			OnContactPersisted(const CharacterVirtual *inCharacter, const BodyID &inBodyID2, const SubShapeID &inSubShapeID2, const RVec3 *inContactPosition, const Vec3 *inContactNormal, CharacterContactSettings &ioSettings) = 0;
 	virtual void			OnCharacterContactAdded(const CharacterVirtual *inCharacter, const CharacterVirtual *inOtherCharacter, const SubShapeID &inSubShapeID2, const RVec3 *inContactPosition, const Vec3 *inContactNormal, CharacterContactSettings &ioSettings) = 0;
+	virtual void			OnCharacterContactPersisted(const CharacterVirtual *inCharacter, const CharacterVirtual *inOtherCharacter, const SubShapeID &inSubShapeID2, const RVec3 *inContactPosition, const Vec3 *inContactNormal, CharacterContactSettings &ioSettings) = 0;
 	virtual void			OnContactSolve(const CharacterVirtual *inCharacter, const BodyID &inBodyID2, const SubShapeID &inSubShapeID2, const RVec3 *inContactPosition, const Vec3 *inContactNormal, const Vec3 *inContactVelocity, const PhysicsMaterial *inContactMaterial, const Vec3 *inCharacterVelocity, Vec3 &ioNewCharacterVelocity) = 0;
 	virtual void			OnCharacterContactSolve(const CharacterVirtual *inCharacter, const CharacterVirtual *inOtherCharacter, const SubShapeID &inSubShapeID2, const RVec3 *inContactPosition, const Vec3 *inContactNormal, const Vec3 *inContactVelocity, const PhysicsMaterial *inContactMaterial, const Vec3 *inCharacterVelocity, Vec3 &ioNewCharacterVelocity) = 0;
 
@@ -613,9 +620,19 @@ public:
 		OnContactAdded(inCharacter, inBodyID2, inSubShapeID2, &inContactPosition, &inContactNormal, ioSettings);
 	}
 
+	virtual void			OnContactPersisted(const CharacterVirtual *inCharacter, const BodyID &inBodyID2, const SubShapeID &inSubShapeID2, RVec3Arg inContactPosition, Vec3Arg inContactNormal, CharacterContactSettings &ioSettings) override
+	{ 
+		OnContactPersisted(inCharacter, inBodyID2, inSubShapeID2, &inContactPosition, &inContactNormal, ioSettings);
+	}
+
 	virtual void			OnCharacterContactAdded(const CharacterVirtual *inCharacter, const CharacterVirtual *inOtherCharacter, const SubShapeID &inSubShapeID2, RVec3Arg inContactPosition, Vec3Arg inContactNormal, CharacterContactSettings &ioSettings) override
 	{ 
 		OnCharacterContactAdded(inCharacter, inOtherCharacter, inSubShapeID2, &inContactPosition, &inContactNormal, ioSettings);
+	}
+
+	virtual void			OnCharacterContactPersisted(const CharacterVirtual *inCharacter, const CharacterVirtual *inOtherCharacter, const SubShapeID &inSubShapeID2, RVec3Arg inContactPosition, Vec3Arg inContactNormal, CharacterContactSettings &ioSettings) override
+	{ 
+		OnCharacterContactPersisted(inCharacter, inOtherCharacter, inSubShapeID2, &inContactPosition, &inContactNormal, ioSettings);
 	}
 
 	virtual void			OnContactSolve(const CharacterVirtual *inCharacter, const BodyID &inBodyID2, const SubShapeID &inSubShapeID2, RVec3Arg inContactPosition, Vec3Arg inContactNormal, Vec3Arg inContactVelocity, const PhysicsMaterial *inContactMaterial, Vec3Arg inCharacterVelocity, Vec3 &ioNewCharacterVelocity) override

@@ -141,7 +141,15 @@
 			}
 			characterContactListener.OnContactAdded = (character, bodyID2, subShapeID2, contactPosition, contactNormal, settings) => {
 			}
+			characterContactListener.OnContactPersisted = (character, bodyID2, subShapeID2, contactPosition, contactNormal, settings) => {
+			}
+			characterContactListener.OnContactRemoved = (character, bodyID2, subShapeID2) => {
+			}
 			characterContactListener.OnCharacterContactAdded = (character, otherCharacter, subShapeID2, contactPosition, contactNormal, settings) => {
+			}
+			characterContactListener.OnCharacterContactPersisted = (character, otherCharacter, subShapeID2, contactPosition, contactNormal, settings) => {
+			}
+			characterContactListener.OnCharacterContactRemoved = (character, otherCharacterID, subShapeID2) => {
 			}
 			characterContactListener.OnContactSolve = (character, bodyID2, subShapeID2, contactPosition, contactNormal, contactVelocity, contactMaterial, characterVelocity, newCharacterVelocity) => {
 				// Don't allow the player to slide down static not-too-steep surfaces when not actively moving and when not on a moving platform

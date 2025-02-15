@@ -254,6 +254,11 @@ enum SoftBodySharedSettings_ELRAType {
 	"SoftBodySharedSettings_ELRAType_GeodesicDistance"
 };
 
+enum MeshShapeSettings_EBuildQuality {
+	"MeshShapeSettings_EBuildQuality_FavorRuntimePerformance",
+	"MeshShapeSettings_EBuildQuality_FavorBuildSpeed"
+};
+
 interface Vec3MemRef {
 };
 
@@ -283,6 +288,7 @@ interface Vec3 {
 	void Vec3([Const, Ref] Float3 inV);
 	void Vec3(float inX, float inY, float inZ);
 	[Value] static Vec3 sZero();
+	[Value] static Vec3 sOne();
 	[Value] static Vec3 sAxisX();
 	[Value] static Vec3 sAxisY();
 	[Value] static Vec3 sAxisZ();
@@ -345,6 +351,7 @@ interface RVec3 {
 	void RVec3();
 	void RVec3(double inX, double inY, double inZ);
 	[Value] static RVec3 sZero();
+	[Value] static RVec3 sOne();
 	[Value] static RVec3 sAxisX();
 	[Value] static RVec3 sAxisY();
 	[Value] static RVec3 sAxisZ();
@@ -393,6 +400,7 @@ interface Vec4 {
 	void Vec4([Ref] Vec3 inV, float inW);
 	void Vec4(float inX, float inY, float inZ, float inW);
 	[Value] static Vec4 sZero();
+	[Value] static Vec4 sOne();
 	[Value] static Vec4 sReplicate(float inV);
 	[Value] static Vec4 sMin([Const, Ref] Vec4 inLHS, [Const, Ref] Vec4 inRHS);
 	[Value] static Vec4 sMax([Const, Ref] Vec4 inLHS, [Const, Ref] Vec4 inRHS);
@@ -1154,6 +1162,7 @@ interface MeshShapeSettings {
 	attribute unsigned long mMaxTrianglesPerLeaf;
 	attribute float mActiveEdgeCosThresholdAngle;
 	attribute boolean mPerTriangleUserData;
+	attribute MeshShapeSettings_EBuildQuality mBuildQuality;
 };
 
 MeshShapeSettings implements ShapeSettings;
@@ -2050,7 +2059,7 @@ interface PhysicsSettings {
 	attribute float mPenetrationSlop;
 	attribute float mLinearCastThreshold;
 	attribute float mLinearCastMaxPenetration;
-	attribute float mManifoldToleranceSq;
+	attribute float mManifoldTolerance;
 	attribute float mMaxPenetrationDistance;
 	attribute float mBodyPairCacheMaxDeltaPositionSq;
 	attribute float mBodyPairCacheCosMaxDeltaRotationDiv2;
@@ -2964,9 +2973,18 @@ interface CharacterBaseSettings {
 	[Const] attribute Shape mShape;
 };
 
+interface CharacterID {
+	void CharacterID();
+	unsigned long GetValue();
+	boolean IsInvalid();
+	[Value] static CharacterID sNextCharacterID();
+	static void sSetNextCharacterID(unsigned long inNextValue);
+};
+
 interface CharacterVirtualSettings {
 	void CharacterVirtualSettings();
 
+	[Value] attribute CharacterID mID;
 	attribute float mMass;
 	attribute float mMaxStrength;
 	[Value] attribute Vec3 mShapeOffset;
@@ -2981,6 +2999,7 @@ interface CharacterVirtualSettings {
 	attribute float mHitReductionCosMaxAngle;
 	attribute float mPenetrationRecoverySpeed;
 	[Const] attribute Shape mInnerBodyShape;
+	[Value] attribute BodyID mInnerBodyIDOverride;
 	attribute unsigned long mInnerBodyLayer;
 };
 
@@ -3008,7 +3027,11 @@ interface CharacterContactListenerJS {
 	boolean OnContactValidate([Const] CharacterVirtual inCharacter, [Const, Ref] BodyID inBodyID2, [Const, Ref] SubShapeID inSubShapeID2);
 	boolean OnCharacterContactValidate([Const] CharacterVirtual inCharacter, [Const] CharacterVirtual inOtherCharacter, [Const, Ref] SubShapeID inSubShapeID2);
 	void OnContactAdded([Const] CharacterVirtual inCharacter, [Const, Ref] BodyID inBodyID2, [Const, Ref] SubShapeID inSubShapeID2, [Const] RVec3 inContactPosition, [Const] Vec3 inContactNormal, [Ref] CharacterContactSettings ioSettings);
+	void OnContactPersisted([Const] CharacterVirtual inCharacter, [Const, Ref] BodyID inBodyID2, [Const, Ref] SubShapeID inSubShapeID2, [Const] RVec3 inContactPosition, [Const] Vec3 inContactNormal, [Ref] CharacterContactSettings ioSettings);
+	void OnContactRemoved([Const] CharacterVirtual inCharacter, [Const, Ref] BodyID inBodyID2, [Const, Ref] SubShapeID inSubShapeID2);
 	void OnCharacterContactAdded([Const] CharacterVirtual inCharacter, [Const] CharacterVirtual inOtherCharacter, [Const, Ref] SubShapeID inSubShapeID2, [Const] RVec3 inContactPosition, [Const] Vec3 inContactNormal, [Ref] CharacterContactSettings ioSettings);
+	void OnCharacterContactPersisted([Const] CharacterVirtual inCharacter, [Const] CharacterVirtual inOtherCharacter, [Const, Ref] SubShapeID inSubShapeID2, [Const] RVec3 inContactPosition, [Const] Vec3 inContactNormal, [Ref] CharacterContactSettings ioSettings);
+	void OnCharacterContactRemoved([Const] CharacterVirtual inCharacter, [Const, Ref] CharacterID inOtherCharacter, [Const, Ref] SubShapeID inSubShapeID2);
 	void OnContactSolve([Const] CharacterVirtual inCharacter, [Const, Ref] BodyID inBodyID2, [Const, Ref] SubShapeID inSubShapeID2, [Const] RVec3 inContactPosition, [Const] Vec3 inContactNormal, [Const] Vec3 inContactVelocity, [Const] PhysicsMaterial inContactMaterial, [Const] Vec3 inCharacterVelocity, [Ref] Vec3 ioNewCharacterVelocity);
 	void OnCharacterContactSolve([Const] CharacterVirtual inCharacter, [Const] CharacterVirtual inOtherCharacter, [Const, Ref] SubShapeID inSubShapeID2, [Const] RVec3 inContactPosition, [Const] Vec3 inContactNormal, [Const] Vec3 inContactVelocity, [Const] PhysicsMaterial inContactMaterial, [Const] Vec3 inCharacterVelocity, [Ref] Vec3 ioNewCharacterVelocity);
 };
@@ -3046,10 +3069,11 @@ interface CharacterVirtualContact {
 	attribute float mDistance;
 	attribute float mFraction;
 	[Value] attribute BodyID mBodyB;
-	attribute CharacterVirtual mCharacterB;
+	[Value] attribute CharacterID mCharacterIDB;
 	[Value] attribute SubShapeID mSubShapeIDB;
 	attribute EMotionType mMotionTypeB;
 	attribute boolean mIsSensorB;
+	[Const] attribute CharacterVirtual mCharacterB;
 	attribute unsigned long long mUserData;
 	[Const] attribute PhysicsMaterial mMaterial;
 	attribute boolean mHadCollision;
@@ -3199,6 +3223,7 @@ interface CharacterBase {
 
 interface CharacterVirtual {
 	void CharacterVirtual([Const] CharacterVirtualSettings inSettings, [Ref] RVec3 inPosition, [Ref] Quat inRotation, PhysicsSystem inSystem);
+	[Value] CharacterID GetID();
 	void SetListener(CharacterContactListener inListener);
 	void SetCharacterVsCharacterCollision(CharacterVsCharacterCollision inCharacterVsCharacterCollision);
 	CharacterContactListener GetListener();
@@ -3228,6 +3253,8 @@ interface CharacterVirtual {
 	unsigned long long GetUserData();
 	void SetUserData(unsigned long long inUserData);
 	[Value] BodyID GetInnerBodyID();
+	void StartTrackingContactChanges();
+	void FinishTrackingContactChanges();
 	[Value] Vec3 CancelVelocityTowardsSteepSlopes([Const, Ref] Vec3 inDesiredVelocity);
 	void Update(float inDeltaTime, [Const, Ref] Vec3 inGravity, [Const, Ref] BroadPhaseLayerFilter inBroadPhaseLayerFilter, [Const, Ref] ObjectLayerFilter inObjectLayerFilter, [Const, Ref] BodyFilter inBodyFilter, [Const, Ref] ShapeFilter inShapeFilter, [Ref] TempAllocator inAllocator);
 	boolean CanWalkStairs([Const, Ref] Vec3 inLinearVelocity);
@@ -3240,6 +3267,7 @@ interface CharacterVirtual {
 	void SetInnerBodyShape([Const] Shape inShape);
 	[Value] TransformedShape GetTransformedShape();
 	boolean HasCollidedWith([Const, Ref] BodyID inBodyID);
+	[BindTo="HasCollidedWith"] boolean HasCollidedWithCharacterID([Const, Ref] CharacterID inCharacterID);
 	[BindTo="HasCollidedWith"] boolean HasCollidedWithCharacter(CharacterVirtual inCharacter);
 	[Value] ArrayCharacterVirtualContact GetActiveContacts();
 };
@@ -3622,9 +3650,6 @@ interface VehicleControllerSettings {
 };
 
 interface VehicleController {
-	unsigned long GetRefCount();
-	void AddRef();
-	void Release();
 	[Ref] VehicleConstraint GetConstraint();
 };
 
