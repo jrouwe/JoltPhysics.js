@@ -3223,7 +3223,7 @@ interface CharacterBase {
 
 interface CharacterVirtual {
 	void CharacterVirtual([Const] CharacterVirtualSettings inSettings, [Ref] RVec3 inPosition, [Ref] Quat inRotation, PhysicsSystem inSystem);
-	[Value] CharacterID GetID();
+	[Const, Ref] CharacterID GetID();
 	void SetListener(CharacterContactListener inListener);
 	void SetCharacterVsCharacterCollision(CharacterVsCharacterCollision inCharacterVsCharacterCollision);
 	CharacterContactListener GetListener();
