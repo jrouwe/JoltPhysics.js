@@ -93,7 +93,7 @@ include(FetchContent)
 FetchContent_Declare(
         JoltPhysics
         GIT_REPOSITORY "https://github.com/jrouwe/JoltPhysics"
-        GIT_TAG "cf1302a12407ab1ab20f525e966df2f0551cb483"
+        GIT_TAG "v5.3.0"
 		SOURCE_SUBDIR "Build"
 )
 FetchContent_MakeAvailable(JoltPhysics)
@@ -151,10 +151,14 @@ endif()
 
 set(EMCC_JS_ARGS ${EMCC_ARGS}
   -s AGGRESSIVE_VARIABLE_ELIMINATION=1
-  -s ELIMINATE_DUPLICATE_FUNCTIONS=1
-  -s LEGACY_VM_SUPPORT=1
+  -s ELIMINATE_DUPLICATE_FUNCTIONS=1  
   -s SINGLE_FILE=1
   -s WASM=0)
+
+if (NOT ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug"))
+	# LEGACY_VM_SUPPORT does not currently work in debug builds, see: https://github.com/emscripten-core/emscripten/issues/23687
+	set(EMCC_JS_ARGS ${EMCC_JS_ARGS} -s LEGACY_VM_SUPPORT=1)
+endif()
 
 set(EMCC_WASM_ARGS ${EMCC_ARGS}
   -s BINARYEN_IGNORE_IMPLICIT_TRAPS=1

@@ -1977,6 +1977,8 @@ interface BodyInterface {
 	float GetGravityFactor([Const, Ref] BodyID inBodyID);
 	void SetUseManifoldReduction([Const, Ref] BodyID inBodyID, boolean inUseReduction);
 	boolean GetUseManifoldReduction([Const, Ref] BodyID inBodyID);
+	void SetCollisionGroup([Const, Ref] BodyID inBodyID, [Const, Ref] CollisionGroup inCollisionGroup);
+	[Const, Ref] CollisionGroup GetCollisionGroup([Const, Ref] BodyID inBodyID);
 	void AddForce([Const, Ref] BodyID inBodyID, [Const, Ref] Vec3 inForce, EActivation inActivationMode);
 	void AddForce([Const, Ref] BodyID inBodyID, [Const, Ref] Vec3 inForce, [Const, Ref] RVec3 inPoint, EActivation inActivationMode);
 	void AddTorque([Const, Ref] BodyID inBodyID, [Const, Ref] Vec3 inTorque, EActivation inActivationMode);
@@ -3398,6 +3400,7 @@ interface VehicleConstraint {
 	[Const] Wheel GetWheel(unsigned long inIdx);
 	[Value] Mat44 GetWheelLocalTransform(unsigned long inWheelIndex, [Ref] Vec3 inWheelRight, [Ref] Vec3 inWheelUp);
 	[Value] RMat44 GetWheelWorldTransform(unsigned long inWheelIndex, [Ref] Vec3 inWheelRight, [Ref] Vec3 inWheelUp);
+	[Ref] ArrayVehicleAntiRollBar GetAntiRollBars();
 	void SetNumStepsBetweenCollisionTestActive(unsigned long inSteps);
 	[Const] unsigned long GetNumStepsBetweenCollisionTestActive();
 	void SetNumStepsBetweenCollisionTestInactive(unsigned long inSteps);
