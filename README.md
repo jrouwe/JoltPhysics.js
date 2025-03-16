@@ -13,11 +13,13 @@ Go to the [demos page](https://jrouwe.github.io/JoltPhysics.js/) to see the proj
 
 ## Using
 
-This library comes in 5 flavours:
+This library comes in 7 flavours:
 - `wasm-compat` - A WASM version with the WASM file (encoded in base64) embedded in the bundle
+- `debug-wasm-compat` - Same as `wasm-compat` but with debug checking enabled (outputs errors to the console and enables the debug renderer).
 - `wasm` - A WASM version with a separate WASM file
 - `asm` - A JavaScript version that uses [asm.js](https://developer.mozilla.org/en-US/docs/Games/Tools/asm.js)
 - `wasm-compat-multithread` - Same as `wasm-compat` but with multi threading enabled.
+- `debug-wasm-compat-multithread` - Same as `wasm-compat-multithread` but with debug checking enabled (outputs errors to the console and enables the debug renderer).
 - `wasm-multithread` - Same as `wasm` but with multi threading enabled.
 
 See [falling_shapes.html](Examples/falling_shapes.html) for an example on how to use the library.
@@ -43,6 +45,9 @@ The different flavours are available via entrypoints on the npm package:
 import Jolt from 'jolt-physics';
 import Jolt from 'jolt-physics/wasm-compat';
 
+// WASM embedded in the bundle, debug checking enabled (outputs errors to the console and enables the debug renderer)
+import Jolt from 'jolt-physics/debug-wasm-compat';
+
 // WASM
 import Jolt from 'jolt-physics/wasm';
 
@@ -51,6 +56,9 @@ import Jolt from 'jolt-physics/asm';
 
 // WASM embedded in the bundle, multithread enabled
 import Jolt from 'jolt-physics/wasm-compat-multithread';
+
+// WASM embedded in the bundle, multithread enabled, debug checking enabled (outputs errors to the console and enables the debug renderer)
+import Jolt from 'jolt-physics/debug-wasm-compat-multithread';
 
 // WASM, multithread enabled
 import Jolt from 'jolt-physics/wasm-multithread';
@@ -93,13 +101,13 @@ This project has only been compiled under Linux.
 
 * Install [emscripten](https://emscripten.org/) and ensure that its environment variables have been setup
 * Install [cmake](https://cmake.org/)
-* Run ```./build.sh Distribution``` for the optimized build, ```./build.sh Debug``` for the debug build.
+* Run ```./build.sh``` to build both the Debug and Distribution build, ```./build.sh Debug``` for only the Debug build.
 
 Additional options that can be provided to ```build.sh```:
 
 * ```-DENABLE_MEMORY_PROFILER=ON``` will enable memory tracking to detect leaks.
 * ```-DDOUBLE_PRECISION=ON``` will enable the double precision mode. This allows worlds larger than a couple of km.
-* ```-DENABLE_SIMD=ON``` will enable SIMD instructions. Safari 16.4 was the last major browser to support this (in March 2023).
+* ```-DENABLE_SIMD=ON``` will enable SIMD instructions. Safari 16.4 was the last major browser to support this (in March 2023). The multithreaded builds have this on by default.
 * ```-DBUILD_WASM_COMPAT_ONLY=ON``` speeds up the build by only compiling the WASM compat version which the examples use.
 * ```-DCROSS_PLATFORM_DETERMINISTIC=ON``` builds the library so that it produces the same results as the native version of the library. For more info [click here](https://jrouwe.github.io/JoltPhysics/#deterministic-simulation).
 
@@ -114,7 +122,7 @@ npm install
 npm run examples
 ```
 
-Then navigate to: http://localhost:3000/
+Then navigate to: [http://localhost:3000/](http://localhost:3000/)
 
 If you need to debug the C++ code take a look at [WASM debugging](https://developer.chrome.com/blog/wasm-debugging-2020/).
 

@@ -13,7 +13,8 @@
 		This demo shows various debug renderer settings<br />
 		Left: This demonstrates some data shown for Constraint drawing. Different constraints have different data displayed.<br />
 		Center: The bouncing ball demonstrates the velocity vector data and items falling asleep (sleep stats, shape color: sleep)<br />
-		Right: The cloth demonstrates Soft Body settings: vertices, velocities, edge, and bend constraints.
+		Right: The cloth demonstrates Soft Body settings: vertices, velocities, edge, and bend constraints.<br />
+		Note that this requires the Debug build of the library!
 	</div>
 
 	<script src="js/three/three.min.js"></script>
@@ -26,8 +27,8 @@
 	<script src="js/soft-body-creator.js"></script>
 
 	<script type="module">
-		// In case you haven't built the library yourself, replace URL with: https://www.unpkg.com/jolt-physics/dist/jolt-physics.wasm-compat.js
-		import initJolt from './js/jolt-physics.wasm-compat.js';
+		// In case you haven't built the library yourself, replace URL with: https://www.unpkg.com/jolt-physics/dist/jolt-physics.debug.wasm-compat.js
+		import initJolt from './js/jolt-physics.debug.wasm-compat.js';
 
 		initJolt().then(function (Jolt) {
 

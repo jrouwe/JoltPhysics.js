@@ -1,6 +1,6 @@
 {
 	"name": "jolt-physics",
-	"version": "0.32.0",
+	"version": "0.33.0",
 	"description": "A WebAssembly port of JoltPhysics, a rigid body physics and collision detection library, suitable for games and VR applications",
 	"type": "module",
 	"main": "dist/jolt-physics.wasm-compat.js",
@@ -18,6 +18,10 @@
 			"types": "./dist/jolt-physics.wasm-compat.d.ts",
 			"default": "./dist/jolt-physics.wasm-compat.js"
 		},
+		"./debug-wasm-compat": {
+			"types": "./dist/jolt-physics.debug.wasm-compat.d.ts",
+			"default": "./dist/jolt-physics.debug.wasm-compat.js"
+		},
 		"./asm": {
 			"types": "./dist/jolt-physics.d.ts",
 			"default": "./dist/jolt-physics.js"
@@ -29,6 +33,10 @@
 		"./wasm-compat-multithread": {
 			"types": "./dist/jolt-physics.multithread.wasm-compat.d.ts",
 			"default": "./dist/jolt-physics.multithread.wasm-compat.js"
+		},
+		"./debug-wasm-compat-multithread": {
+			"types": "./dist/jolt-physics.debug.multithread.wasm-compat.d.ts",
+			"default": "./dist/jolt-physics.debug.multithread.wasm-compat.js"
 		},
 		"./jolt-physics.wasm.wasm": "./dist/jolt-physics.wasm.wasm",
 		"./jolt-physics.multithread.wasm.wasm": "./dist/jolt-physics.multithread.wasm.wasm",
@@ -49,11 +57,15 @@
 		"./dist/jolt-physics.d.ts",
 		"./dist/jolt-physics.wasm-compat.js",
 		"./dist/jolt-physics.wasm-compat.d.ts",
+		"./dist/jolt-physics.debug.wasm-compat.js",
+		"./dist/jolt-physics.debug.wasm-compat.d.ts",
 		"./dist/jolt-physics.wasm.js",
 		"./dist/jolt-physics.wasm.d.ts",
 		"./dist/jolt-physics.wasm.wasm",
 		"./dist/jolt-physics.multithread.wasm-compat.js",
 		"./dist/jolt-physics.multithread.wasm-compat.d.ts",
+		"./dist/jolt-physics.debug.multithread.wasm-compat.js",
+		"./dist/jolt-physics.debug.multithread.wasm-compat.d.ts",
 		"./dist/jolt-physics.multithread.wasm.js",
 		"./dist/jolt-physics.multithread.wasm.d.ts",
 		"./dist/jolt-physics.multithread.wasm.wasm",
@@ -61,8 +73,10 @@
 		"asm",
 		"wasm",
 		"wasm-compat",
+		"debug-wasm-compat",
 		"wasm-multithread",
-		"wasm-compat-multithread"
+		"wasm-compat-multithread",
+		"debug-wasm-compat-multithread"
 	],
 	"keywords": [
 		"physics",
