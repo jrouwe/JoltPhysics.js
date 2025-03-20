@@ -101,11 +101,14 @@ FetchContent_MakeAvailable(JoltPhysics)
 # Default is 64*1024*1024 = 64MB
 set(INITIAL_MEMORY 67108864 CACHE STRING "Initial Memory")
 
-# Default is 128*1024*1024 = 128MB
-set(MAXIMUM_MEMORY 134217728 CACHE STRING "Maximum Memory")
-
-# Enable for resizable heap, with some amount of slowness
-set(ALLOW_MEMORY_GROWTH 0 CACHE STRING "Allow Memory Growth")
+# Enable resizable heap, with some amount of slowness. Default is 128*1024*1024 = 128MB
+if (ENABLE_MEMORY_GROWTH)
+	set(MEMORY_GROWTH_FLAG
+		-s ALLOW_MEMORY_GROWTH=1
+		-s MAXIMUM_MEMORY=134217728)
+else()
+	set(MEMORY_GROWTH_FLAG "")
+endif()
 
 # Enable memory profiler
 if (ENABLE_MEMORY_PROFILER)
@@ -125,7 +128,7 @@ set(EMCC_ARGS
   --closure=1
   ${MULTI_THREADED_FLAG}
   --post-js ${CMAKE_CURRENT_SOURCE_DIR}/helpers.js
-  -s ALLOW_MEMORY_GROWTH=${ALLOW_MEMORY_GROWTH}
+  ${MEMORY_GROWTH_FLAG}
   -s ALLOW_TABLE_GROWTH=1
   -s WASM_BIGINT=0
   ${ENVIRONMENT_FLAG}
@@ -136,7 +139,6 @@ set(EMCC_ARGS
   -s NO_FILESYSTEM=1
   -s STACK_SIZE=1048576
   -s INITIAL_MEMORY=${INITIAL_MEMORY}
-  -s MAXIMUM_MEMORY=${MAXIMUM_MEMORY}
   ${MEMORY_PROFILER_FLAG}
   ${INCLUDE_DEMANGLE_ALL_FLAG}
   ${ENABLE_SIMD_FLAG})
