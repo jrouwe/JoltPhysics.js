@@ -55,12 +55,12 @@ set(OBJECT_LAYER_BITS 32)
 
 # Enable multi threading
 if (ENABLE_MULTI_THREADING)
-	set(MULTI_THREADED_FLAG 
-		-pthread 
+	set(MULTI_THREADED_FLAG
+		-pthread
 		--post-js ${CMAKE_CURRENT_SOURCE_DIR}/multi-threaded.js
 		-s SHARED_MEMORY)
 	set(ENVIRONMENT_FLAG
-		-s ENVIRONMENT='web,node,worker' 
+		-s ENVIRONMENT='web,node,worker'
 		-s PTHREAD_POOL_SIZE=16)
 	set(CMAKE_CXX_FLAGS "-pthread -s SHARED_MEMORY")
 	set(OUTPUT_BASE_NAME "${OUTPUT_FOLDER}jolt-physics.multithread")
@@ -73,14 +73,14 @@ else()
 	# though this creates extra backup file in a non-tracked folder.
 	# Removing 'thread_local' from the generated binding code fixes a small 'residual' allocation
 	# in the proper_cleanup.html demo and it is not needed when in single threaded mode.
-	# See: https://github.com/jrouwe/JoltPhysics.js/discussions/222#discussioncomment-11381106	
+	# See: https://github.com/jrouwe/JoltPhysics.js/discussions/222#discussioncomment-11381106
 	set(REMOVE_THREAD_LOCAL sed -i.bak -e "s:thread_local::g" glue.cpp)
 endif()
 
 # Enable SIMD flags
 if (ENABLE_SIMD)
-	set(ENABLE_SIMD_FLAG 
-		-msimd128 
+	set(ENABLE_SIMD_FLAG
+		-msimd128
 		-msse4.2)
 	set(USE_WASM_SIMD ON)
 else()
@@ -99,10 +99,16 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(JoltPhysics)
 
 # Default is 64*1024*1024 = 64MB
-set(TOTAL_MEMORY 67108864 CACHE STRING "Total Memory")
+set(INITIAL_MEMORY 67108864 CACHE STRING "Initial Memory")
 
-# Enable for resizable heap, with some amount of slowness
-set(ALLOW_MEMORY_GROWTH 0 CACHE STRING "Allow Memory Growth")
+# Enable resizable heap, with some amount of slowness. Default is 128*1024*1024 = 128MB
+if (ENABLE_MEMORY_GROWTH)
+	set(MEMORY_GROWTH_FLAG
+		-s ALLOW_MEMORY_GROWTH=1
+		-s MAXIMUM_MEMORY=134217728)
+else()
+	set(MEMORY_GROWTH_FLAG "")
+endif()
 
 # Enable memory profiler
 if (ENABLE_MEMORY_PROFILER)
@@ -122,7 +128,7 @@ set(EMCC_ARGS
   --closure=1
   ${MULTI_THREADED_FLAG}
   --post-js ${CMAKE_CURRENT_SOURCE_DIR}/helpers.js
-  -s ALLOW_MEMORY_GROWTH=${ALLOW_MEMORY_GROWTH}
+  ${MEMORY_GROWTH_FLAG}
   -s ALLOW_TABLE_GROWTH=1
   -s WASM_BIGINT=0
   ${ENVIRONMENT_FLAG}
@@ -132,27 +138,25 @@ set(EMCC_ARGS
   -s NO_EXIT_RUNTIME=1
   -s NO_FILESYSTEM=1
   -s STACK_SIZE=1048576
-  -s TOTAL_STACK=1048576
-  -s INITIAL_MEMORY=134217728
-  -s TOTAL_MEMORY=${TOTAL_MEMORY}
+  -s INITIAL_MEMORY=${INITIAL_MEMORY}
   ${MEMORY_PROFILER_FLAG}
   ${INCLUDE_DEMANGLE_ALL_FLAG}
   ${ENABLE_SIMD_FLAG})
 
 if ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
-	set(EMCC_ARGS 
-		${EMCC_ARGS} 
+	set(EMCC_ARGS
+		${EMCC_ARGS}
 		-g${JPH_DEBUG_SYMBOL_FORMAT}
 		-s ASSERTIONS)
 else()
-	set(EMCC_ARGS 
-		${EMCC_ARGS} 
+	set(EMCC_ARGS
+		${EMCC_ARGS}
 		-O3)
 endif()
 
 set(EMCC_JS_ARGS ${EMCC_ARGS}
   -s AGGRESSIVE_VARIABLE_ELIMINATION=1
-  -s ELIMINATE_DUPLICATE_FUNCTIONS=1  
+  -s ELIMINATE_DUPLICATE_FUNCTIONS=1
   -s SINGLE_FILE=1
   -s WASM=0)
 
