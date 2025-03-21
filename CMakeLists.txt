@@ -27,6 +27,15 @@ option(ENABLE_SIMD "Enable SIMD instructions (warning: last major browser to sup
 # Option to speed up compilation by only compiling the WASM compat version
 option(BUILD_WASM_COMPAT_ONLY "Compile online the WASM compat version of the library (speeds up compilation)" OFF)
 
+# Enable for resizable heap, with some amount of slowness
+option(ALLOW_MEMORY_GROWTH "Allow Memory Growth" OFF)
+
+# Default initial memory size is 64*1024*1024 = 64MB
+set(INITIAL_MEMORY 67108864 CACHE STRING "Initial Memory")
+
+# Default maximum memory size is 128*1024*1024 = 128MB (only used when ALLOW_MEMORY_GROWTH is true)
+set(MAXIMUM_MEMORY 134217728 CACHE STRING "Maximum Memory")
+
 # The configurations we support
 set(CMAKE_CONFIGURATION_TYPES "Debug;Release;Distribution")
 
@@ -98,14 +107,11 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(JoltPhysics)
 
-# Default is 64*1024*1024 = 64MB
-set(INITIAL_MEMORY 67108864 CACHE STRING "Initial Memory")
-
 # Enable resizable heap, with some amount of slowness. Default is 128*1024*1024 = 128MB
-if (ENABLE_MEMORY_GROWTH)
+if (ALLOW_MEMORY_GROWTH)
 	set(MEMORY_GROWTH_FLAG
 		-s ALLOW_MEMORY_GROWTH=1
-		-s MAXIMUM_MEMORY=134217728)
+		-s MAXIMUM_MEMORY=${MAXIMUM_MEMORY})
 else()
 	set(MEMORY_GROWTH_FLAG "")
 endif()
