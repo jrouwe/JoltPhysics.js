@@ -30,11 +30,11 @@ option(BUILD_WASM_COMPAT_ONLY "Compile online the WASM compat version of the lib
 # Enable for resizable heap, with some amount of slowness
 option(ALLOW_MEMORY_GROWTH "Allow Memory Growth" OFF)
 
-# Default initial memory size is 64*1024*1024 = 64MB
-set(INITIAL_MEMORY 67108864 CACHE STRING "Initial Memory")
+# Default initial memory size is 128*1024*1024 = 128MB
+set(INITIAL_MEMORY 134217728 CACHE STRING "Initial Memory")
 
-# Default maximum memory size is 128*1024*1024 = 128MB (only used when ALLOW_MEMORY_GROWTH is true)
-set(MAXIMUM_MEMORY 134217728 CACHE STRING "Maximum Memory")
+# Default maximum memory size is 2*1024*1024*1024 = 2GB (only used when ALLOW_MEMORY_GROWTH is true)
+set(MAXIMUM_MEMORY 2147483648 CACHE STRING "Maximum Memory")
 
 # The configurations we support
 set(CMAKE_CONFIGURATION_TYPES "Debug;Release;Distribution")
