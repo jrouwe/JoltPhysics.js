@@ -37,6 +37,9 @@ then
 	cp ./dist/jolt-physics.multithread.wasm-compat.js ./dist/jolt-physics.debug.multithread.wasm-compat.js
 fi
 
+# Update the worker URL in the copied wasm-compat.js files
+sed -i "s:jolt-physics.multithread.wasm-compat.js:jolt-physics.debug.multithread.wasm-compat.js:g" ./dist/jolt-physics.debug.multithread.wasm-compat.js
+
 cat > ./dist/jolt-physics.d.ts << EOF
 import Jolt from "./types";
 
