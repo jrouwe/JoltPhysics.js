@@ -3,7 +3,10 @@ if (ENVIRONMENT_IS_PTHREAD) {
 	const _invokeEntryPoint = invokeEntryPoint;
 	invokeEntryPoint = (ptr, arg) => {
 		if (arg.script) {
-			import(arg.script).then(module => {
+			// Workaround for bug: https://github.com/jrouwe/JoltPhysics.js/issues/245
+			// '("ReplaceWithImport"+arg.script)' should be 'import(arg.script)'
+			// This gets replaced by sed during the build process.
+			("ReplaceWithImport"+arg.script).then(module => {
 				module.default(Module, arg.params).then(() => _invokeEntryPoint(ptr, arg.value));
 			})
 		} else {

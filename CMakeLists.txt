@@ -86,6 +86,10 @@ else()
 	set(REMOVE_THREAD_LOCAL sed -i.bak -e "s:thread_local::g" glue.cpp)
 endif()
 
+# Replace '("ReplaceWithImport"' with 'import(' in the generated JS code to workaround a bug in emscripten
+# See: https://github.com/jrouwe/JoltPhysics.js/issues/245
+set(REPLACE_IMPORT sed -i -e "s:(\"ReplaceWithImport\"+:import(:g")
+
 # Enable SIMD flags
 if (ENABLE_SIMD)
 	set(ENABLE_SIMD_FLAG
@@ -164,12 +168,8 @@ set(EMCC_JS_ARGS ${EMCC_ARGS}
   -s AGGRESSIVE_VARIABLE_ELIMINATION=1
   -s ELIMINATE_DUPLICATE_FUNCTIONS=1
   -s SINGLE_FILE=1
+  -s LEGACY_VM_SUPPORT=1
   -s WASM=0)
-
-if (NOT ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug"))
-	# LEGACY_VM_SUPPORT does not currently work in debug builds, see: https://github.com/emscripten-core/emscripten/issues/23687
-	set(EMCC_JS_ARGS ${EMCC_JS_ARGS} -s LEGACY_VM_SUPPORT=1)
-endif()
 
 set(EMCC_WASM_ARGS ${EMCC_ARGS}
   -s BINARYEN_IGNORE_IMPLICIT_TRAPS=1
@@ -258,6 +258,7 @@ if (NOT BUILD_WASM_COMPAT_ONLY)
 	add_custom_command(
 		OUTPUT ${OUTPUT_BASE_NAME}.wasm.js ${OUTPUT_BASE_NAME}.wasm.wasm
 		COMMAND emcc glue.o $<TARGET_FILE:Jolt> ${EMCC_WASM_ARGS} -o ${OUTPUT_BASE_NAME}.wasm.js
+		COMMAND ${REPLACE_IMPORT} ${OUTPUT_BASE_NAME}.wasm.js
 		DEPENDS jolt-bindings ${JOLT_FRONT_MATTER_FILE} ${JOLT_TARGETS} ${JOLT_IDL_FILE} ${JOLT_HEADER_FILE}
 		COMMENT "Building JoltPhysics.js webassembly"
 		VERBATIM)
@@ -267,6 +268,7 @@ endif()
 add_custom_command(
 	OUTPUT ${OUTPUT_BASE_NAME}.wasm-compat.js
 	COMMAND emcc glue.o $<TARGET_FILE:Jolt> ${EMCC_WASM_COMPAT_ARGS} -o ${OUTPUT_BASE_NAME}.wasm-compat.js
+	COMMAND ${REPLACE_IMPORT} ${OUTPUT_BASE_NAME}.wasm-compat.js
 	DEPENDS jolt-bindings ${JOLT_FRONT_MATTER_FILE} ${JOLT_TARGETS} ${JOLT_IDL_FILE} ${JOLT_HEADER_FILE}
 	COMMENT "Building JoltPhysics.js compat webassembly"
 	VERBATIM)
