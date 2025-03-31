@@ -8,6 +8,7 @@ interface JPHString {
 };
 
 interface ArrayVec3 {
+	void ArrayVec3();
 	boolean empty();
 	long size();
 	[Ref] Vec3 at(long inIndex);
@@ -19,6 +20,7 @@ interface ArrayVec3 {
 };
 
 interface ArrayQuat {
+	void ArrayQuat();
 	boolean empty();
 	long size();
 	[Ref] Quat at(long inIndex);
@@ -30,6 +32,7 @@ interface ArrayQuat {
 };
 
 interface ArrayMat44 {
+	void ArrayMat44();
 	boolean empty();
 	long size();
 	[Ref] Mat44 at(long inIndex);
@@ -41,6 +44,7 @@ interface ArrayMat44 {
 };
 
 interface ArrayBodyID {
+	void ArrayBodyID();
 	boolean empty();
 	long size();
 	[Ref] BodyID at(long inIndex);
@@ -52,6 +56,7 @@ interface ArrayBodyID {
 };
 
 interface ArrayBodyPtr {
+	void ArrayBodyPtr();
 	boolean empty();
 	long size();
 	Body at(long inIndex);
@@ -2294,6 +2299,7 @@ interface CastRayCollectorJS {
 };
 
 interface ArrayRayCastResult {
+	void ArrayRayCastResult();
 	boolean empty();
 	long size();
 	[Ref] RayCastResult at(long inIndex);
@@ -2356,6 +2362,7 @@ interface CollidePointCollectorJS {
 };
 
 interface ArrayCollidePointResult {
+	void ArrayCollidePointResult();
 	boolean empty();
 	long size();
 	[Ref] CollidePointResult at(long inIndex);
@@ -2428,6 +2435,7 @@ interface CollideShapeCollectorJS {
 };
 
 interface ArrayCollideShapeResult {
+	void ArrayCollideShapeResult();
 	boolean empty();
 	long size();
 	[Ref] CollideShapeResult at(long inIndex);
@@ -2503,6 +2511,7 @@ interface CastShapeCollectorJS {
 };
 
 interface ArrayShapeCastResult {
+	void ArrayShapeCastResult();
 	boolean empty();
 	long size();
 	[Ref] ShapeCastResult at(long inIndex);
@@ -2762,6 +2771,7 @@ interface SoftBodySharedSettingsLRA {
 };
 
 interface ArraySoftBodySharedSettingsVertex {
+	void ArraySoftBodySharedSettingsVertex();
 	boolean empty();
 	long size();
 	[Ref] SoftBodySharedSettingsVertex at(long inIndex);
@@ -2772,6 +2782,7 @@ interface ArraySoftBodySharedSettingsVertex {
 };
 
 interface ArraySoftBodySharedSettingsFace {
+	void ArraySoftBodySharedSettingsFace();
 	boolean empty();
 	long size();
 	[Ref] SoftBodySharedSettingsFace at(long inIndex);
@@ -2782,6 +2793,7 @@ interface ArraySoftBodySharedSettingsFace {
 };
 
 interface ArraySoftBodySharedSettingsEdge {
+	void ArraySoftBodySharedSettingsEdge();
 	boolean empty();
 	long size();
 	[Ref] SoftBodySharedSettingsEdge at(long inIndex);
@@ -2792,6 +2804,7 @@ interface ArraySoftBodySharedSettingsEdge {
 };
 
 interface ArraySoftBodySharedSettingsDihedralBend {
+	void ArraySoftBodySharedSettingsDihedralBend();
 	boolean empty();
 	long size();
 	[Ref] SoftBodySharedSettingsDihedralBend at(long inIndex);
@@ -2802,6 +2815,7 @@ interface ArraySoftBodySharedSettingsDihedralBend {
 };
 
 interface ArraySoftBodySharedSettingsVolume {
+	void ArraySoftBodySharedSettingsVolume();
 	boolean empty();
 	long size();
 	[Ref] SoftBodySharedSettingsVolume at(long inIndex);
@@ -2812,6 +2826,7 @@ interface ArraySoftBodySharedSettingsVolume {
 };
 
 interface ArraySoftBodySharedSettingsInvBind {
+	void ArraySoftBodySharedSettingsInvBind();
 	boolean empty();
 	long size();
 	[Ref] SoftBodySharedSettingsInvBind at(long inIndex);
@@ -2822,6 +2837,7 @@ interface ArraySoftBodySharedSettingsInvBind {
 };
 
 interface ArraySoftBodySharedSettingsSkinned {
+	void ArraySoftBodySharedSettingsSkinned();
 	boolean empty();
 	long size();
 	[Ref] SoftBodySharedSettingsSkinned at(long inIndex);
@@ -2832,6 +2848,7 @@ interface ArraySoftBodySharedSettingsSkinned {
 };
 
 interface ArraySoftBodySharedSettingsLRA {
+	void ArraySoftBodySharedSettingsLRA();
 	boolean empty();
 	long size();
 	[Ref] SoftBodySharedSettingsLRA at(long inIndex);
@@ -2852,6 +2869,7 @@ interface SoftBodySharedSettingsVertexAttributes {
 };
 
 interface ArraySoftBodySharedSettingsVertexAttributes {
+	void ArraySoftBodySharedSettingsVertexAttributes();
 	boolean empty();
 	long size();
 	[Ref] SoftBodySharedSettingsVertexAttributes at(long inIndex);
@@ -2923,6 +2941,7 @@ interface SoftBodyVertexTraits {
 };
 
 interface ArraySoftBodyVertex {
+	void ArraySoftBodyVertex();
 	boolean empty();
 	long size();
 	[Ref] SoftBodyVertex at(long inIndex);
@@ -3084,6 +3103,7 @@ interface CharacterVirtualContact {
 };
 
 interface ArrayCharacterVirtualContact {
+	void ArrayCharacterVirtualContact();
 	boolean empty();
 	long size();
 	[Const, Ref] CharacterVirtualContact at(long inIndex);
@@ -3288,6 +3308,7 @@ interface LinearCurve {
 };
 
 interface ArrayFloat {
+	void ArrayFloat();
 	boolean empty();
 	long size();
 	float at(long inIndex);
@@ -3299,6 +3320,7 @@ interface ArrayFloat {
 };
 
 interface ArrayUint {
+	void ArrayUint();
 	boolean empty();
 	long size();
 	unsigned long at(long inIndex);
@@ -3310,6 +3332,7 @@ interface ArrayUint {
 };
 
 interface ArrayUint8 {
+	void ArrayUint8();
 	boolean empty();
 	long size();
 	octet at(long inIndex);
@@ -3321,6 +3344,7 @@ interface ArrayUint8 {
 };
 
 interface ArrayVehicleAntiRollBar {
+	void ArrayVehicleAntiRollBar();
 	boolean empty();
 	long size();
 	[Ref] VehicleAntiRollBar at(long inIndex);
@@ -3330,6 +3354,7 @@ interface ArrayVehicleAntiRollBar {
 };
 
 interface ArrayWheelSettings {
+	void ArrayWheelSettings();
 	boolean empty();
 	long size();
 	WheelSettings at(long inIndex);
@@ -3339,6 +3364,7 @@ interface ArrayWheelSettings {
 };
 
 interface ArrayVehicleDifferentialSettings {
+	void ArrayVehicleDifferentialSettings();
 	boolean empty();
 	long size();
 	[Ref] VehicleDifferentialSettings at(long inIndex);
