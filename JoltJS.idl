@@ -1044,7 +1044,9 @@ ConvexHullShape implements ConvexShape;
 
 // Compound shape
 interface CompoundShapeSettings {
-	void AddShape([Const, Ref] Vec3 inPosition, [Const, Ref] Quat inRotation, [Const] ShapeSettings inShape, unsigned long inUserData);
+	void AddShape([Const, Ref] Vec3 inPosition, [Const, Ref] Quat inRotation, [Const] ShapeSettings inShape, unsigned long inUserData); // Deprecated
+	[BindTo="AddShape"] void AddShapeShapeSettings([Const, Ref] Vec3 inPosition, [Const, Ref] Quat inRotation, [Const] ShapeSettings inShape, unsigned long inUserData);
+	[BindTo="AddShape"] void AddShapeShape([Const, Ref] Vec3 inPosition, [Const, Ref] Quat inRotation, [Const] Shape inShape, unsigned long inUserData);
 };
 
 CompoundShapeSettings implements ShapeSettings;

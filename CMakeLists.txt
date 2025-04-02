@@ -222,7 +222,7 @@ add_custom_command(
 	OUTPUT ${JOLT_TYPING}
 	COMMAND npx webidl-dts-gen -e -d -i jolt.idl -o ${JOLT_TYPING} -n Jolt
 	DEPENDS jolt.idl
-	COMMENT "Generating JoltPhysics.js bindings"
+	COMMENT "Generating JoltPhysics.js typing"
 	VERBATIM)
 
 add_custom_command(
