@@ -424,6 +424,7 @@ interface Vec4 {
 	void Set(float inX, float inY, float inZ, float inW);
 	[Operator="[]"] float GetComponent(unsigned long inCoordinate);
 	boolean IsClose([Const, Ref] Vec4 inV, optional float inMaxDistSq);
+	boolean IsNearZero(optional float inMaxDistSq);
 	boolean IsNormalized(optional float inTolerance);
 	[Operator="+=", Ref] Vec4 Add([Const, Ref] Vec4 inV);
 	[Operator="-=", Ref] Vec4 Sub([Const, Ref] Vec4 inV);
@@ -1421,6 +1422,7 @@ interface HingeConstraint {
 	float GetTargetAngularVelocity();
 	void SetTargetAngle(float inAngle);
 	float GetTargetAngle();
+	void SetTargetOrientationBS([Const, Ref] Quat inOrientation);
 	void SetLimits(float inLimitsMin, float inLimitsMax);
 	float GetLimitsMin();
 	float GetLimitsMax();
@@ -2772,6 +2774,24 @@ interface SoftBodySharedSettingsLRA {
 	attribute float mMaxDistance;
 };
 
+interface SoftBodySharedSettingsRodStretchShear {
+	void SoftBodySharedSettingsRodStretchShear(unsigned long inVertex1, unsigned long inVertex2, float inCompliance);
+
+	attribute unsigned long[] mVertex;
+	attribute float mLength;
+	attribute float mInvMass;
+	attribute float mCompliance;
+	[Value] attribute Quat mBishop;
+};
+
+interface SoftBodySharedSettingsRodBendTwist {
+	void SoftBodySharedSettingsRodBendTwist(unsigned long inRod1, unsigned long inRod2, float inCompliance);
+
+	attribute unsigned long[] mRod;
+	attribute float mCompliance;
+	[Value] attribute Quat mOmega0;
+};
+
 interface ArraySoftBodySharedSettingsVertex {
 	void ArraySoftBodySharedSettingsVertex();
 	boolean empty();
@@ -2860,6 +2880,28 @@ interface ArraySoftBodySharedSettingsLRA {
 	void clear();
 };
 
+interface ArraySoftBodySharedSettingsRodStretchShear {
+	void ArraySoftBodySharedSettingsRodStretchShear();
+	boolean empty();
+	long size();
+	[Ref] SoftBodySharedSettingsRodStretchShear at(long inIndex);
+	void push_back([Const, Ref] SoftBodySharedSettingsRodStretchShear inValue);
+	void reserve(unsigned long inSize);
+	void resize(unsigned long inSize);
+	void clear();
+};
+
+interface ArraySoftBodySharedSettingsRodBendTwist {
+	void ArraySoftBodySharedSettingsRodBendTwist();
+	boolean empty();
+	long size();
+	[Ref] SoftBodySharedSettingsRodBendTwist at(long inIndex);
+	void push_back([Const, Ref] SoftBodySharedSettingsRodBendTwist inValue);
+	void reserve(unsigned long inSize);
+	void resize(unsigned long inSize);
+	void clear();
+};
+
 interface SoftBodySharedSettingsVertexAttributes {
 	void SoftBodySharedSettingsVertexAttributes();
 
@@ -2890,6 +2932,7 @@ interface SoftBodySharedSettings {
 	void CreateConstraints(SoftBodySharedSettingsVertexAttributes inVertexAttributes, unsigned long inVertexAttributesLength, optional SoftBodySharedSettings_EBendType inBendType, optional float inAngleTolerance);
 	void AddFace([Const, Ref] SoftBodySharedSettingsFace inFace);
 	void CalculateEdgeLengths();
+	void CalculateRodProperties();
 	void CalculateLRALengths();
 	void CalculateBendConstraintConstants();
 	void CalculateVolumeConstraintVolumes();
@@ -2905,6 +2948,8 @@ interface SoftBodySharedSettings {
 	[Value] attribute ArraySoftBodySharedSettingsSkinned mSkinnedConstraints;
 	[Value] attribute ArraySoftBodySharedSettingsInvBind mInvBindMatrices;
 	[Value] attribute ArraySoftBodySharedSettingsLRA mLRAConstraints;
+	[Value] attribute ArraySoftBodySharedSettingsRodStretchShear mRodStretchShearConstraints;
+	[Value] attribute ArraySoftBodySharedSettingsRodBendTwist mRodBendTwistConstraints;
 	[Value] attribute PhysicsMaterialList mMaterials;
 	attribute float mVertexRadius;
 };
@@ -2957,6 +3002,8 @@ interface SoftBodyMotionProperties {
 	[Const] SoftBodySharedSettings GetSettings();
 	[Ref] ArraySoftBodyVertex GetVertices();
 	[Ref] SoftBodyVertex GetVertex(unsigned long inIndex);
+	[Value] Quat GetRodRotation(unsigned long inIndex);
+	[Value] Vec3 GetRodAngularVelocity(unsigned long inIndex);
 	[Const, Ref] PhysicsMaterialList GetMaterials();
 	[Const, Ref] ArraySoftBodySharedSettingsFace GetFaces();
 	[Const, Ref] SoftBodySharedSettingsFace GetFace(unsigned long inIndex);

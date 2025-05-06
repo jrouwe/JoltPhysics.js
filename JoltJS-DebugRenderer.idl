@@ -55,6 +55,9 @@ interface BodyManagerDrawSettings {
 	attribute boolean mDrawSoftBodyVolumeConstraints;
 	attribute boolean mDrawSoftBodySkinConstraints;
 	attribute boolean mDrawSoftBodyLRAConstraints;
+	attribute boolean mDrawSoftBodyRods;
+	attribute boolean mDrawSoftBodyRodStates;
+	attribute boolean mDrawSoftBodyRodBendTwistConstraints;
 	attribute boolean mDrawSoftBodyPredictedBounds;
 	attribute ESoftBodyConstraintColor mDrawSoftBodyConstraintColor;
 };
