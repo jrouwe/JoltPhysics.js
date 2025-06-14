@@ -5,3 +5,5 @@ RVec3.prototype['Clone'] = RVec3.prototype.Clone = function () { return new RVec
 Quat.prototype['ToString'] = Quat.prototype.ToString = function () { return `(${this.GetX()}, ${this.GetY()}, ${this.GetZ()}, ${this.GetW()})` };
 Quat.prototype['Clone'] = Quat.prototype.Clone = function () { return new Quat(this.GetX(), this.GetY(), this.GetZ(), this.GetW()); };
 AABox.prototype['ToString'] = AABox.prototype.ToString = function () { return `[${this.mMax.ToString()}, ${this.mMin.ToString()}]`; };
+BodyID.prototype['Clone'] = BodyID.prototype.Clone = function () { return new BodyID(this.GetIndexAndSequenceNumber()); };
+BodyID.prototype['ToString'] = BodyID.prototype.ToString = function () { return `${this.GetIndexAndSequenceNumber()}`; };
