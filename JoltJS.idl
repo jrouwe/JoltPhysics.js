@@ -409,6 +409,7 @@ interface Vec4 {
 	[Value] static Vec4 sReplicate(float inV);
 	[Value] static Vec4 sMin([Const, Ref] Vec4 inLHS, [Const, Ref] Vec4 inRHS);
 	[Value] static Vec4 sMax([Const, Ref] Vec4 inLHS, [Const, Ref] Vec4 inRHS);
+	[Value] static Vec4 sClamp([Const, Ref] Vec4 inValue, [Const, Ref] Vec4 inMin, [Const, Ref] Vec4 inMax);
 	[Value] static Vec4 sFusedMultiplyAdd([Const, Ref] Vec4 inMul1, [Const, Ref] Vec4 inMul2, [Const, Ref] Vec4 inAdd);
 	[Value] static Vec4 sOr([Const, Ref] Vec4 inV1, [Const, Ref] Vec4 inV2);
 	[Value] static Vec4 sXor([Const, Ref] Vec4 inV1, [Const, Ref] Vec4 inV2);
@@ -426,6 +427,8 @@ interface Vec4 {
 	boolean IsClose([Const, Ref] Vec4 inV, optional float inMaxDistSq);
 	boolean IsNearZero(optional float inMaxDistSq);
 	boolean IsNormalized(optional float inTolerance);
+	long GetLowestComponentIndex();
+	long GetHighestComponentIndex();
 	[Operator="+=", Ref] Vec4 Add([Const, Ref] Vec4 inV);
 	[Operator="-=", Ref] Vec4 Sub([Const, Ref] Vec4 inV);
 	[Operator="*=", Ref] Vec4 Mul(float inV);
@@ -486,6 +489,7 @@ interface Quat {
 	void SetZ(float inZ);
 	void SetW(float inW);
 	void Set(float inX, float inY, float inZ, float inW);
+	[Const, Value] Quat sMultiplyImaginary([Const, Ref] Vec3 inLHS, [Const, Ref] Quat inRHS);
 	[Const, Value] Vec3 InverseRotate([Const, Ref] Vec3 inV);
 	[Const, Value] Vec3 RotateAxisX();
 	[Const, Value] Vec3 RotateAxisY();
@@ -1986,6 +1990,8 @@ interface BodyInterface {
 	float GetGravityFactor([Const, Ref] BodyID inBodyID);
 	void SetUseManifoldReduction([Const, Ref] BodyID inBodyID, boolean inUseReduction);
 	boolean GetUseManifoldReduction([Const, Ref] BodyID inBodyID);
+	void SetIsSensor([Const, Ref] BodyID inBodyID, boolean inIsSensor);
+	boolean IsSensor([Const, Ref] BodyID inBodyID);
 	void SetCollisionGroup([Const, Ref] BodyID inBodyID, [Const, Ref] CollisionGroup inCollisionGroup);
 	[Const, Ref] CollisionGroup GetCollisionGroup([Const, Ref] BodyID inBodyID);
 	void AddForce([Const, Ref] BodyID inBodyID, [Const, Ref] Vec3 inForce, EActivation inActivationMode);
@@ -2951,7 +2957,6 @@ interface SoftBodySharedSettings {
 	[Value] attribute ArraySoftBodySharedSettingsRodStretchShear mRodStretchShearConstraints;
 	[Value] attribute ArraySoftBodySharedSettingsRodBendTwist mRodBendTwistConstraints;
 	[Value] attribute PhysicsMaterialList mMaterials;
-	attribute float mVertexRadius;
 };
 
 interface SoftBodyCreationSettings {
@@ -2969,9 +2974,11 @@ interface SoftBodyCreationSettings {
 	attribute float mFriction;
 	attribute float mPressure;
 	attribute float mGravityFactor;
+	attribute float mVertexRadius;
 	attribute boolean mUpdatePosition;
 	attribute boolean mMakeRotationIdentity;
 	attribute boolean mAllowSleeping;
+	attribute boolean mFacesDoubleSided;
 };
 
 interface SoftBodyVertex {
@@ -3017,6 +3024,8 @@ interface SoftBodyMotionProperties {
 	void SetEnableSkinConstraints(boolean inEnableSkinConstraints);
 	float GetSkinnedMaxDistanceMultiplier();
 	void SetSkinnedMaxDistanceMultiplier(float inSkinnedMaxDistanceMultiplier);
+	float GetVertexRadius();
+	void SetVertexRadius(float inVertexRadius);
 	[Const, Ref] AABox GetLocalBounds();
 	void CustomUpdate(float inDeltaTime, [Ref] Body ioSoftBody, [Ref] PhysicsSystem inSystem);
 	void SkinVertices([Const, Ref] RMat44 inRootTransform, Mat44MemRef inJointMatrices, unsigned long inNumJoints, boolean inHardSkinAll, [Ref] TempAllocator ioTempAllocator);
@@ -3462,7 +3471,9 @@ VehicleConstraintSettings implements ConstraintSettings;
 interface VehicleConstraint {
 	void VehicleConstraint([Ref] Body inVehicleBody, [Const, Ref] VehicleConstraintSettings inSettings);
 	void SetMaxPitchRollAngle(float inMaxPitchRollAngle);
+	float GetMaxPitchRollAngle();
 	void SetVehicleCollisionTester([Const] VehicleCollisionTester inTester);
+	[Const] VehicleCollisionTester GetVehicleCollisionTester();
 	void OverrideGravity([Const, Ref] Vec3 inGravity);
 	boolean IsGravityOverridden();
 	[Value] Vec3 GetGravityOverride();
