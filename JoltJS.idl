@@ -1988,6 +1988,10 @@ interface BodyInterface {
 	float GetFriction([Const, Ref] BodyID inBodyID);
 	void SetGravityFactor([Const, Ref] BodyID inBodyID, float inFactor);
 	float GetGravityFactor([Const, Ref] BodyID inBodyID);
+	void SetMaxLinearVelocity([Const, Ref] BodyID inBodyID, float inLinearVelocity);
+	float GetMaxLinearVelocity([Const, Ref] BodyID inBodyID);
+	void SetMaxAngularVelocity([Const, Ref] BodyID inBodyID, float inAngularVelocity);
+	float GetMaxAngularVelocity([Const, Ref] BodyID inBodyID);
 	void SetUseManifoldReduction([Const, Ref] BodyID inBodyID, boolean inUseReduction);
 	boolean GetUseManifoldReduction([Const, Ref] BodyID inBodyID);
 	void SetIsSensor([Const, Ref] BodyID inBodyID, boolean inIsSensor);
