@@ -69,14 +69,14 @@ if (ENABLE_MULTI_THREADING)
 		--post-js ${CMAKE_CURRENT_SOURCE_DIR}/multi-threaded.js
 		-s SHARED_MEMORY)
 	set(ENVIRONMENT_FLAG
-		-s ENVIRONMENT='web,node,worker'
+		-s ENVIRONMENT=web,node,worker
 		-s PTHREAD_POOL_SIZE=16)
 	set(CMAKE_CXX_FLAGS "-pthread -s SHARED_MEMORY")
 	set(OUTPUT_BASE_NAME "${OUTPUT_FOLDER}jolt-physics.multithread")
 	set(REMOVE_THREAD_LOCAL "")
 else()
 	set(MULTI_THREADED_FLAG "")
-	set(ENVIRONMENT_FLAG "-s ENVIRONMENT='web,node'")
+	set(ENVIRONMENT_FLAG -s ENVIRONMENT=web,node)
 	set(OUTPUT_BASE_NAME "${OUTPUT_FOLDER}jolt-physics")
 	# Tried to keep this multi-platform since windows/mac/linux all treat -i different,
 	# though this creates extra backup file in a non-tracked folder.
