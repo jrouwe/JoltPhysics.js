@@ -76,7 +76,7 @@ if (ENABLE_MULTI_THREADING)
 	set(REMOVE_THREAD_LOCAL "")
 else()
 	set(MULTI_THREADED_FLAG "")
-	set(ENVIRONMENT_FLAG -s ENVIRONMENT=web,node)
+	set(ENVIRONMENT_FLAG -s ENVIRONMENT=web,node,worker)
 	set(OUTPUT_BASE_NAME "${OUTPUT_FOLDER}jolt-physics")
 	# Tried to keep this multi-platform since windows/mac/linux all treat -i different,
 	# though this creates extra backup file in a non-tracked folder.
