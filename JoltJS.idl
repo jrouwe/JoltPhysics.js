@@ -2608,11 +2608,16 @@ interface PhysicsStepListenerJS {
 interface BodyActivationListener {
 };
 
-[JSImplementation="BodyActivationListener"]
+interface BodyActivationListenerEm {
+};
+
+BodyActivationListenerEm implements BodyActivationListener;
+
+[JSImplementation="BodyActivationListenerEm"]
 interface BodyActivationListenerJS {
 	void BodyActivationListenerJS();
-	void OnBodyActivated([Const, Ref] BodyID inBodyID, unsigned long long inBodyUserData);
-	void OnBodyDeactivated([Const, Ref] BodyID inBodyID, unsigned long long inBodyUserData);
+	void OnBodyActivated([Const, Ref] BodyID inBodyID, unsigned long inBodyUserData);
+	void OnBodyDeactivated([Const, Ref] BodyID inBodyID, unsigned long inBodyUserData);
 };
 
 interface BodyIDVector {
