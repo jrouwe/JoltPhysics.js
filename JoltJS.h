@@ -578,6 +578,24 @@ private:
 	Array<const PhysicsMaterial *>	mMaterials;
 };
 
+/// A wrapper around BodyActivationListener that is compatible with JavaScript
+class BodyActivationListenerEm : public BodyActivationListener
+{
+public:
+	virtual void			OnBodyActivated(const BodyID &inBodyID, uint32 inBodyUserData) = 0;
+	virtual void			OnBodyDeactivated(const BodyID &inBodyID, uint32 inBodyUserData) = 0;
+
+	virtual void			OnBodyActivated(const BodyID &inBodyID, uint64 inBodyUserData)
+	{
+		OnBodyActivated(inBodyID, (uint32)inBodyUserData);
+	}
+
+	virtual void			OnBodyDeactivated(const BodyID &inBodyID, uint64 inBodyUserData)
+	{
+		OnBodyDeactivated(inBodyID, (uint32)inBodyUserData);
+	}
+};
+
 /// A wrapper around ContactListener that is compatible with JavaScript
 class ContactListenerEm: public ContactListener
 {

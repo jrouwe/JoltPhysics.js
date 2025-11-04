@@ -27,14 +27,27 @@
 				// Initialize this example
 				initExample(Jolt, null);
 
+				// Get the text box
+				var collisionLog = document.getElementById('collision-log');
+
+				// Register activation listener
+				var activationListener = new Jolt.BodyActivationListenerJS;
+				activationListener.OnBodyActivated = (bodyId, userData) => {
+					bodyId = Jolt.wrapPointer(bodyId, Jolt.BodyID);
+					collisionLog.value += 'OnBodyActivated ' + bodyId.GetIndex() + ' ' + userData + '\n';
+				};
+				activationListener.OnBodyDeactivated = (bodyId, userData) => {
+					bodyId = Jolt.wrapPointer(bodyId, Jolt.BodyID);
+					collisionLog.value += 'OnBodyDeactivated ' + bodyId.GetIndex() + ' ' + userData + '\n';
+				};
+				physicsSystem.SetBodyActivationListener(activationListener);
+
 				// Create a basic floor
 				createFloor();
 
 				// Create a sphere
-				createSphere(new Jolt.RVec3(0, 3, 0), 1, Jolt.EMotionType_Dynamic, LAYER_MOVING, 0x00ff00);
-
-				// Get the text box
-				var collisionLog = document.getElementById('collision-log');
+				var sphere = createSphere(new Jolt.RVec3(0, 3, 0), 1, Jolt.EMotionType_Dynamic, LAYER_MOVING, 0x00ff00);
+				sphere.SetUserData(1234567890);
 
 				// Register contact listener
 				const contactListener = new Jolt.ContactListenerJS();

@@ -867,7 +867,7 @@ interface ShapeSettings {
 	[Value] ShapeResult Create();
 	void ClearCachedResult();
 
-	attribute unsigned long long mUserData;
+	attribute unsigned long mUserData;
 };
 
 interface Shape {
@@ -880,15 +880,15 @@ interface Shape {
 	[Value] AABox GetLocalBounds();
 	[Value] AABox GetWorldSpaceBounds([Const, Ref] Mat44 inCenterOfMassTransform, [Const, Ref] Vec3 inScale);
 	[Value] Vec3 GetCenterOfMass();
-	unsigned long long GetUserData();
-	void SetUserData(unsigned long long inUserData);
+	unsigned long GetUserData();
+	void SetUserData(unsigned long inUserData);
 	unsigned long GetSubShapeIDBitsRecursive();
 	float GetInnerRadius();
 	[Value] MassProperties GetMassProperties();
 	[Const] Shape GetLeafShape([Const, Ref] SubShapeID inSubShapeID, [Ref] SubShapeID outRemainder);
 	[Const] PhysicsMaterial GetMaterial([Const, Ref] SubShapeID inSubShapeID);
 	[Value] Vec3 GetSurfaceNormal([Const, Ref] SubShapeID inSubShapeID, [Const, Ref] Vec3 inLocalSurfacePosition);
-	unsigned long long GetSubShapeUserData([Const, Ref] SubShapeID inSubShapeID);
+	unsigned long GetSubShapeUserData([Const, Ref] SubShapeID inSubShapeID);
 	[Value] TransformedShape GetSubShapeTransformedShape([Const, Ref] SubShapeID inSubShapeID, [Const, Ref] Vec3 inPositionCOM, [Const, Ref] Quat inRotation, [Const, Ref] Vec3 inScale, [Ref] SubShapeID outRemainder);
 	float GetVolume();
 	boolean IsValidScale([Const, Ref] Vec3 inScale);
@@ -1284,8 +1284,8 @@ interface Constraint {
 	void SetEnabled(boolean inEnabled);
 	boolean GetEnabled();
 	boolean IsActive();
-	unsigned long long GetUserData();
-	void SetUserData(unsigned long long inUserData);
+	unsigned long GetUserData();
+	void SetUserData(unsigned long inUserData);
 	void ResetWarmStart();
 	void SaveState([Ref] StateRecorder inStream);
 	void RestoreState([Ref] StateRecorder inStream);
@@ -1909,8 +1909,8 @@ interface Body {
 	[Value] SoftBodyCreationSettings GetSoftBodyCreationSettings();
 	MotionProperties GetMotionProperties();
 	[Const, Value] Vec3 GetWorldSpaceSurfaceNormal([Const, Ref] SubShapeID inSubShapeID, [Const, Ref] RVec3 inPosition);
-	unsigned long long GetUserData();
-	void SetUserData(unsigned long long inUserData);
+	unsigned long GetUserData();
+	void SetUserData(unsigned long inUserData);
 	void SaveState([Ref] StateRecorder inStream);
 	void RestoreState([Ref] StateRecorder inStream);
 };
@@ -2007,8 +2007,8 @@ interface BodyInterface {
 	void AddImpulse([Const, Ref] BodyID inBodyID, [Const, Ref] Vec3 inImpulse, [Const, Ref] RVec3 inPosition);
 	void AddAngularImpulse([Const, Ref] BodyID inBodyID, [Const, Ref] Vec3 inAngularImpulse);
 	[Value] TransformedShape GetTransformedShape([Const, Ref] BodyID inBodyID);
-	unsigned long long GetUserData([Const, Ref] BodyID inBodyID);
-	void SetUserData([Const, Ref] BodyID inBodyID, unsigned long long inUserData);
+	unsigned long GetUserData([Const, Ref] BodyID inBodyID);
+	void SetUserData([Const, Ref] BodyID inBodyID, unsigned long inUserData);
 	[Const] PhysicsMaterial GetMaterial([Const, Ref] BodyID inBodyID, [Const, Ref] SubShapeID inSubShapeID);
 	void InvalidateContactCache([Const, Ref] BodyID inBodyID);
 };
@@ -2608,11 +2608,16 @@ interface PhysicsStepListenerJS {
 interface BodyActivationListener {
 };
 
-[JSImplementation="BodyActivationListener"]
+interface BodyActivationListenerEm {
+};
+
+BodyActivationListenerEm implements BodyActivationListener;
+
+[JSImplementation="BodyActivationListenerEm"]
 interface BodyActivationListenerJS {
 	void BodyActivationListenerJS();
-	void OnBodyActivated([Const, Ref] BodyID inBodyID, unsigned long long inBodyUserData);
-	void OnBodyDeactivated([Const, Ref] BodyID inBodyID, unsigned long long inBodyUserData);
+	void OnBodyActivated([Const, Ref] BodyID inBodyID, unsigned long inBodyUserData);
+	void OnBodyDeactivated([Const, Ref] BodyID inBodyID, unsigned long inBodyUserData);
 };
 
 interface BodyIDVector {
@@ -2690,7 +2695,7 @@ interface BodyCreationSettings {
 	[Value] attribute Quat mRotation;
 	[Value] attribute Vec3 mLinearVelocity;
 	[Value] attribute Vec3 mAngularVelocity;
-	attribute unsigned long long mUserData;
+	attribute unsigned long mUserData;
 	attribute unsigned long mObjectLayer;
 	[Value] attribute CollisionGroup mCollisionGroup;
 	attribute EMotionType mMotionType;
@@ -2968,7 +2973,7 @@ interface SoftBodyCreationSettings {
 
 	[Value] attribute RVec3 mPosition;
 	[Value] attribute Quat mRotation;
-	attribute unsigned long long mUserData;
+	attribute unsigned long mUserData;
 	attribute unsigned long mObjectLayer;
 	[Value] attribute CollisionGroup mCollisionGroup;
 	attribute unsigned long mNumIterations;
@@ -3157,7 +3162,7 @@ interface CharacterVirtualContact {
 	attribute EMotionType mMotionTypeB;
 	attribute boolean mIsSensorB;
 	[Const] attribute CharacterVirtual mCharacterB;
-	attribute unsigned long long mUserData;
+	attribute unsigned long mUserData;
 	[Const] attribute PhysicsMaterial mMaterial;
 	attribute boolean mHadCollision;
 	attribute boolean mWasDiscarded;
@@ -3334,8 +3339,8 @@ interface CharacterVirtual {
 	boolean GetMaxHitsExceeded();
 	[Value] Vec3 GetShapeOffset();
 	void SetShapeOffset([Const, Ref] Vec3 inShapeOffset);
-	unsigned long long GetUserData();
-	void SetUserData(unsigned long long inUserData);
+	unsigned long GetUserData();
+	void SetUserData(unsigned long inUserData);
 	[Value] BodyID GetInnerBodyID();
 	void StartTrackingContactChanges();
 	void FinishTrackingContactChanges();
@@ -4023,6 +4028,6 @@ interface JoltInterface {
 	TempAllocator GetTempAllocator();
 	ObjectLayerPairFilter GetObjectLayerPairFilter();
 	ObjectVsBroadPhaseLayerFilter GetObjectVsBroadPhaseLayerFilter();
-	static unsigned long long sGetTotalMemory();
-	static unsigned long long sGetFreeMemory();
+	static unsigned long sGetTotalMemory();
+	static unsigned long sGetFreeMemory();
 };
