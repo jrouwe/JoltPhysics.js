@@ -3907,7 +3907,7 @@ interface ArrayRagdollAdditionalConstraint {
 interface RagdollSettings {
 	void RagdollSettings();
 	boolean Stabilize();
-	Ragdoll CreateRagdoll(long inCollisionGroup, long inUserData, PhysicsSystem inSystem);
+	Ragdoll CreateRagdoll(long inCollisionGroup, unsigned long inUserData, PhysicsSystem inSystem);
 	Skeleton GetSkeleton();
 	void DisableParentChildCollisions([Const] optional Mat44MemRef inJointMatrices, optional float inMinSeparationDistance);
 	void CalculateBodyIndexToConstraintIndex();
