@@ -4,6 +4,10 @@ on:
   push:
     branches: [ main ]
 
+permissions:
+  id-token: write # Required for OIDC
+  contents: read
+  
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
@@ -29,8 +33,4 @@ jobs:
         force_orphan: true
 
     - name: Publish NPM
-      env:
-        NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-      run: |
-        echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc 
-        ./ci/npm-publish.sh
+      run: ./ci/npm-publish.sh
