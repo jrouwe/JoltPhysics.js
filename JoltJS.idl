@@ -2281,6 +2281,7 @@ interface BroadPhaseQuery {
 	void CollidePoint([Const, Ref] Vec3 inPoint, [Ref] CollideShapeBodyCollector ioCollector, [Const, Ref] BroadPhaseLayerFilter inBroadPhaseFilter, [Const, Ref] ObjectLayerFilter inObjectLayerFilter);
 	void CollideOrientedBox([Const, Ref] OrientedBox inBox, [Ref] CollideShapeBodyCollector ioCollector, [Const, Ref] BroadPhaseLayerFilter inBroadPhaseFilter, [Const, Ref] ObjectLayerFilter inObjectLayerFilter);
 	void CastAABox([Const, Ref] AABoxCast inBox, [Ref] CastShapeBodyCollector ioCollector, [Const, Ref] BroadPhaseLayerFilter inBroadPhaseFilter, [Const, Ref] ObjectLayerFilter inObjectLayerFilter);
+	[Const, Value] AABox GetBounds();
 };
 
 interface RayCastSettings {
@@ -3910,6 +3911,7 @@ interface RagdollSettings {
 	Ragdoll CreateRagdoll(long inCollisionGroup, unsigned long inUserData, PhysicsSystem inSystem);
 	Skeleton GetSkeleton();
 	void DisableParentChildCollisions([Const] optional Mat44MemRef inJointMatrices, optional float inMinSeparationDistance);
+	void CalculateConstraintPriorities(optional long inBasePriority);
 	void CalculateBodyIndexToConstraintIndex();
 	void CalculateConstraintIndexToBodyIdxPair();
 
