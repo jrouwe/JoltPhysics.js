@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>JoltPhysics.js demo</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<link rel="stylesheet" type="text/css" href="../style.css">
+	</head>
+	<body>
+		<div id="container">Loading...</div>
+		<div id="info">JoltPhysics.js Soft LRA Constraint<br /> Red: LRA Type None<br /> Green: LRA Type Euclidean Distance</div>
+
+		<script src="../js/three/three.min.js"></script>
+		<script src="../js/three/OrbitControls.js"></script>
+		<script src="../js/three/WebGL.js"></script>
+		<script src="../js/three/stats.min.js"></script>
+		<script src="../js/example.js"></script>
+		<script src="../js/soft-body-creator.js"></script>
+
+		<script type="module">
+
+			// In case you haven't built the library yourself, replace URL with: https://www.unpkg.com/jolt-physics/dist/jolt-physics.wasm-compat.js
+			import initJolt from '../js/jolt-physics.wasm-compat.js';
+
+			const cNumVerticesX = 10;
+			const cNumVerticesZ = 50;
+			const cVertexSpacing = 0.5;
+
+			initJolt().then(async function (Jolt) {
+				// Initialize this example
+				initExample(Jolt, null);
+
+				createFloor();
+				camera.position.z += 40;
+				const inv_mass = (x, z) => z == 0 ? 0 : 1;
+				const perturbation = (_x, inZ) => ({
+					x: 0,
+					y: 0,
+					z: 0
+				});
+
+				const rotation = Jolt.Quat.prototype.sIdentity();
+				const position = new Jolt.RVec3();
+
+				const va = new Jolt.SoftBodySharedSettingsVertexAttributes();
+				va.mShearCompliance = va.mCompliance = 1.0e-3; // Soften the edges a bit so that the effect of the LRA constraints is more visible
+
+				const COLOR_NONE = 0xaa0000;
+				const COLOR_EUCLID_DISTANCE = 0x00aa00;
+
+				{
+					// Cloth with distance bend constraints
+					va.mLRAType = Jolt.SoftBodySharedSettings_ELRAType_None;
+					const cloth_settings = SoftBodyCreator.CreateCloth(cNumVerticesX, cNumVerticesZ, cVertexSpacing, inv_mass, perturbation, Jolt.SoftBodySharedSettings_EBendType_None, va);
+					position.Set(-10, 25, 0);
+					const cloth = new Jolt.SoftBodyCreationSettings(cloth_settings, position, rotation, LAYER_MOVING);
+					const body = bodyInterface.CreateSoftBody(cloth);
+					addToScene(body, COLOR_NONE);
+				}
+
+				{
+					// Cloth with dihedral bend constraints
+					va.mLRAType = Jolt.SoftBodySharedSettings_ELRAType_EuclideanDistance;
+					const cloth_settings = SoftBodyCreator.CreateCloth(cNumVerticesX, cNumVerticesZ, cVertexSpacing, inv_mass, perturbation, Jolt.SoftBodySharedSettings_EBendType_None, va);
+					position.Set(10, 25, 0);
+					const cloth = new Jolt.SoftBodyCreationSettings(cloth_settings, position, rotation, LAYER_MOVING);
+					const body = bodyInterface.CreateSoftBody(cloth);
+					addToScene(body, COLOR_EUCLID_DISTANCE);
+				}
+
+			});
+		</script>
+	</body>
+</html>
