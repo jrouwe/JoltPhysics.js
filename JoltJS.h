@@ -493,6 +493,12 @@ public:
 		return total_memory - dynamic_top + i.fordblks;
 	}
 
+	/// Access to Body::sFixedToWorld, we can't expose it in a different way
+	static Body *			sGetFixedToWorldBody()
+	{
+		return &Body::sFixedToWorld;
+	}
+
 private:
 	TempAllocatorImpl *		mTempAllocator = nullptr;
 	JobSystemThreadPool *	mJobSystem = nullptr;

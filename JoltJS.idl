@@ -4032,4 +4032,5 @@ interface JoltInterface {
 	ObjectVsBroadPhaseLayerFilter GetObjectVsBroadPhaseLayerFilter();
 	static unsigned long sGetTotalMemory();
 	static unsigned long sGetFreeMemory();
+	static Body sGetFixedToWorldBody();
 };
