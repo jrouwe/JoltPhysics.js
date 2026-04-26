@@ -4011,6 +4011,15 @@ interface ObjectLayerPairFilterMask {
 
 ObjectLayerPairFilterMask implements ObjectLayerPairFilter;
 
+interface AssertFailedHandler {
+};
+
+[JSImplementation="AssertFailedHandler"]
+interface AssertFailedHandlerJS {
+	void AssertFailedHandlerJS();
+	void OnAssertFailed([Const] DOMString inExpression, [Const] DOMString inMessage, [Const] DOMString inFile, unsigned long inLine);
+};
+
 interface JoltSettings {
 	void JoltSettings();
 
@@ -4021,6 +4030,7 @@ interface JoltSettings {
 	attribute BroadPhaseLayerInterface mBroadPhaseLayerInterface;
 	attribute ObjectVsBroadPhaseLayerFilter mObjectVsBroadPhaseLayerFilter;
 	attribute ObjectLayerPairFilter mObjectLayerPairFilter;
+	attribute AssertFailedHandler mAssertFailedHandler;
 };
 
 interface JoltInterface {

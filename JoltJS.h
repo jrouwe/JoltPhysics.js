@@ -364,19 +364,13 @@ static void TraceImpl(const char *inFMT, ...)
 	cout << buffer << endl;
 }
 
-#ifdef JPH_ENABLE_ASSERTS
-
-// Callback for asserts
-static bool AssertFailedImpl(const char *inExpression, const char *inMessage, const char *inFile, uint inLine)
-{ 
-	// Print to the TTY
-	cout << inFile << ":" << inLine << ": (" << inExpression << ") " << (inMessage != nullptr? inMessage : "") << endl;
-
-	// Breakpoint
-	return true;
+/// A wrapper around the assert failed handler that is compatible with JavaScript
+class AssertFailedHandler
+{
+public:
+	virtual					~AssertFailedHandler() = default;
+	virtual void			OnAssertFailed(const char *inExpression, const char *inMessage, const char *inFile, uint inLine) = 0;
 };
-
-#endif // JPH_ENABLE_ASSERTS
 
 /// Settings to pass to constructor
 class JoltSettings
@@ -390,6 +384,7 @@ public:
 	BroadPhaseLayerInterface *mBroadPhaseLayerInterface = nullptr;
 	ObjectVsBroadPhaseLayerFilter *mObjectVsBroadPhaseLayerFilter = nullptr;
 	ObjectLayerPairFilter *	mObjectLayerPairFilter = nullptr;
+	AssertFailedHandler *	mAssertFailedHandler = nullptr;
 };
 
 /// Main API for JavaScript
@@ -399,9 +394,24 @@ public:
 	/// Constructor
 							JoltInterface(const JoltSettings &inSettings)
 	{
-		// Install callbacks
+		// Install trace handler
 		Trace = TraceImpl;
-		JPH_IF_ENABLE_ASSERTS(AssertFailed = AssertFailedImpl;)
+
+		// Install assert handler
+#ifdef JPH_ENABLE_ASSERTS
+		sAssertFailedHandler = inSettings.mAssertFailedHandler;
+		AssertFailed = [](const char *inExpression, const char *inMessage, const char *inFile, uint inLine)
+		{
+			// Log the assert
+			if (sAssertFailedHandler != nullptr)
+				sAssertFailedHandler->OnAssertFailed(inExpression, inMessage != nullptr ? inMessage : "", inFile, inLine);
+			else
+				cout << inFile << ":" << inLine << ": (" << inExpression << ") " << (inMessage != nullptr? inMessage : "") << endl;
+
+			// No breakpoint
+			return false;
+		};
+#endif // JPH_ENABLE_ASSERTS
 
 		// Create a factory
 		Factory::sInstance = new Factory();
@@ -444,6 +454,9 @@ public:
 		delete Factory::sInstance;
 		Factory::sInstance = nullptr;
 		UnregisterTypes();
+#ifdef JPH_ENABLE_ASSERTS
+		sAssertFailedHandler = nullptr;
+#endif
 	}
 
 	/// Step the world
@@ -506,6 +519,9 @@ private:
 	ObjectVsBroadPhaseLayerFilter *mObjectVsBroadPhaseLayerFilter = nullptr;
 	ObjectLayerPairFilter *	mObjectLayerPairFilter = nullptr;
 	PhysicsSystem *			mPhysicsSystem = nullptr;
+#ifdef JPH_ENABLE_ASSERTS
+	inline static AssertFailedHandler *sAssertFailedHandler = nullptr;
+#endif
 };
 
 /// Helper class to extract triangles from the shape
