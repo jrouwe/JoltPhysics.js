@@ -3203,11 +3203,17 @@ interface DefaultBroadPhaseLayerFilter {
 	void DefaultBroadPhaseLayerFilter([Const, Ref] ObjectVsBroadPhaseLayerFilter inFilter, unsigned long inObjectLayer);
 };
 
-DefaultBroadPhaseLayerFilter implements ObjectLayerFilter;
+DefaultBroadPhaseLayerFilter implements BroadPhaseLayerFilter;
 
 interface ObjectLayerFilter {
 	void ObjectLayerFilter();
 };
+
+interface SpecifiedBroadPhaseLayerFilter {
+	void SpecifiedBroadPhaseLayerFilter([Const, Ref] BroadPhaseLayer inBroadPhaseLayer);
+};
+
+SpecifiedBroadPhaseLayerFilter implements BroadPhaseLayerFilter;
 
 [JSImplementation="ObjectLayerFilter"]
 interface ObjectLayerFilterJS {
