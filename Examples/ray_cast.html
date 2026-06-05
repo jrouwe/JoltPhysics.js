@@ -56,7 +56,7 @@
 				let collector = new Jolt.CastRayCollectorJS;
 				let drawHit = (body, hit) => {
 					let hitPoint = ray.GetPointOnRay(hit.mFraction);
-					addMarker(hitPoint, 1, 0x0000ff);
+					addMarker(hitPoint, 1, 0x00ffff);
 					let hitNormal = body.GetWorldSpaceSurfaceNormal(hit.mSubShapeID2, hitPoint);
 					addLine(hitPoint, hitPoint.Clone().Add(hitNormal.Mul(2)), 0x00ff00);
 				}
