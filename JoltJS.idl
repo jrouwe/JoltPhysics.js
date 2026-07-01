@@ -670,6 +670,10 @@ interface AABox {
 interface OrientedBox {
 	void OrientedBox();
 	void OrientedBox([Const, Ref] Mat44 inOrientation, [Const, Ref] Vec3 inHalfExtents);
+	void OrientedBox([Const, Ref] Mat44 inOrientation, [Const, Ref] AABox inBox);
+
+    boolean Overlaps([Const, Ref] AABox inBox, optional float inEpsilon=1.0=-6f);
+    boolean Overlaps([Const, Ref] OrientedBox inBox, optional float inEpsilon=1.0=-6f);
 
 	[Value] attribute Mat44 mOrientation;
 	[Value] attribute Vec3 mHalfExtents;
