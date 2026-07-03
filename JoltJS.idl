@@ -671,6 +671,9 @@ interface OrientedBox {
 	void OrientedBox();
 	void OrientedBox([Const, Ref] Mat44 inOrientation, [Const, Ref] Vec3 inHalfExtents);
 
+	[BindTo="Overlaps"] boolean OverlapsAABox([Const, Ref] AABox inBox, optional float inEpsilon);
+	[BindTo="Overlaps"] boolean OverlapsOrientedBox([Const, Ref] OrientedBox inBox, optional float inEpsilon);
+
 	[Value] attribute Mat44 mOrientation;
 	[Value] attribute Vec3 mHalfExtents;
 };
