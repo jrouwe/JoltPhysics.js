@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>JoltPhysics.js demo</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<link rel="stylesheet" type="text/css" href="style.css">
+	</head>
+
+	<body>
+		<div id="container">Loading...</div>
+		<div id="info">JoltPhysics.js buoyancy demo<br />
+		</div>
+
+		<script src="js/three/three.min.js"></script>
+		<script src="js/three/OrbitControls.js"></script>
+		<script src="js/three/WebGL.js"></script>
+		<script src="js/three/stats.min.js"></script>
+		<script src="js/example.js"></script>
+
+		<script type="module">
+			// In case you haven't built the library yourself, replace URL with: https://www.unpkg.com/jolt-physics/dist/jolt-physics.wasm-compat.js
+			import initJolt from './js/jolt-physics.wasm-compat.js';
+
+			function createSensorBox(position, rotation, halfExtent, motionType, layer, color = 0xffffff) {
+				let shape = new Jolt.BoxShape(halfExtent, 0.05, null);
+				let creationSettings = new Jolt.BodyCreationSettings(shape, position, rotation, motionType, layer);
+				creationSettings.mIsSensor = true;
+				let body = bodyInterface.CreateBody(creationSettings);
+				Jolt.destroy(creationSettings);
+				addToScene(body, color);
+				return body;
+			}
+
+			initJolt().then(async function (Jolt) {
+				// Initialize this example
+				initExample(Jolt, null);
+
+				const position = new Jolt.RVec3(12, 8, -15);
+				const rotation = Jolt.Quat.prototype.sRotation(new Jolt.Vec3(0, 0, 1), -0.2 * Math.PI);
+				const ident = new Jolt.Quat(0, 0, 0, 1);
+				const size = new Jolt.Vec3(.2, 6, 1)
+				createBox(position, rotation, size, Jolt.EMotionType_Static, LAYER_NON_MOVING);
+				size.SetY(4);
+				position.Set(8.5, -1, -15);
+				createBox(position, ident, size, Jolt.EMotionType_Static, LAYER_NON_MOVING);
+				position.Set(0, -6, -15);
+				size.SetY(5);
+				createBox(position, ident, size, Jolt.EMotionType_Static, LAYER_NON_MOVING);
+				size.SetY(3.25);
+				position.Set(-15, -8, -15);
+				createBox(position, ident, size, Jolt.EMotionType_Static, LAYER_NON_MOVING);
+
+				size.Set(30, 3, 1);
+				position.Set(-8, -14, -15);
+				createBox(position, ident, size, Jolt.EMotionType_Static, LAYER_NON_MOVING);
+
+				size.SetX(11);
+				position.Set(11, -8, -15);
+				createBox(position, ident, size, Jolt.EMotionType_Static, LAYER_NON_MOVING);
+
+				position.Set(10, 12, -15);
+				const ball = createSphere(position, 1, Jolt.EMotionType_Dynamic, LAYER_MOVING, 0xFF0000);
+				const ballID = ball.GetID().GetIndexAndSequenceNumber();
+
+				size.Set(5.5, 4.5, 1.5);
+				position.Set(5.5, -2, -15);
+				const movingWater = createSensorBox(position, ident, size, Jolt.EMotionType_Static, LAYER_NON_MOVING, 0x1111FF);
+				const movingWaterID = movingWater.GetID().GetIndexAndSequenceNumber();
+				const waterThreeModel = dynamicObjects[dynamicObjects.length - 1];
+				waterThreeModel.material.wireframe = true;
+
+				size.Set(7.5, 2, 1.5);
+				position.Set(-7.5, -8.5, -15);
+				const standingWater = createSensorBox(position, ident, size, Jolt.EMotionType_Static, LAYER_NON_MOVING, 0x1133FF);
+				const standingWaterID = standingWater.GetID().GetIndexAndSequenceNumber();
+				const standingThreeModel = dynamicObjects[dynamicObjects.length - 1];
+				standingThreeModel.material.wireframe = true;
+
+				const buoyancy = 1.1;
+				const linearDrag = 0.3;
+				const angularDrag = 0.05;
+				const surfaceNormal = new Jolt.Vec3(0, 1, 0);
+				const gravity = new Jolt.Vec3(0, -9.8, 0);
+
+				const movingFluidVelocity = new Jolt.Vec3(-0.5, 0, 0);
+				const movingWaterSurfacePosition = new Jolt.RVec3(0, 2.5, 0);
+				let objectsInMovingWater = [];
+
+				const standingWaterFluidVelocity = new Jolt.Vec3(0, 0, 0);
+				const standingWaterSurfacePosition = new Jolt.RVec3(0, -6.5, 0);
+				let objectsInStandingWater = [];
+
+				const contactListener = new Jolt.ContactListenerJS();
+				contactListener.OnContactAdded = (body1, body2, manifold, settings) => {
+					body1 = Jolt.wrapPointer(body1, Jolt.Body);
+					body2 = Jolt.wrapPointer(body2, Jolt.Body);
+					const body1ID = body1.GetID().GetIndexAndSequenceNumber();
+					const body2ID = body2.GetID().GetIndexAndSequenceNumber();
+					// We cannot modify the velocity of an object in a contact callback, so we store the objects in a list and modify them in the update loop
+					if (body1ID == ballID || body2ID == ballID) {
+						if (body1ID == movingWaterID || body2ID == movingWaterID)
+							objectsInMovingWater.push(body1ID == ballID? body1 : body2);
+						if (body1ID == standingWaterID || body2ID == standingWaterID)
+							objectsInStandingWater.push(body1ID == ballID? body1 : body2);
+					}
+				};
+				contactListener.OnContactPersisted = contactListener.OnContactAdded;
+				contactListener.OnContactValidate = (body1, body2, baseOffset, collideShapeResult) => {
+					return Jolt.ValidateResult_AcceptAllContactsForThisBodyPair;
+				};
+				contactListener.OnContactRemoved = (subShapePair) => { };
+				physicsSystem.SetContactListener(contactListener);
+
+				onExampleUpdate = function (time, deltaTime) {
+					for (const body of objectsInMovingWater)
+						body.ApplyBuoyancyImpulse(movingWaterSurfacePosition, surfaceNormal, buoyancy, linearDrag, angularDrag, movingFluidVelocity, gravity, deltaTime);
+					objectsInMovingWater.length = 0;
+
+					for (const body of objectsInStandingWater)
+						body.ApplyBuoyancyImpulse(standingWaterSurfacePosition, surfaceNormal, buoyancy, linearDrag, angularDrag, standingWaterFluidVelocity, gravity, deltaTime);
+					objectsInStandingWater.length = 0;
+				}
+			});
+		</script>
+	</body>
+</html>

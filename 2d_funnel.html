@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>JoltPhysics.js demo</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<link rel="stylesheet" type="text/css" href="style.css">
+	</head>
+	<body>
+		<div id="container">Loading...</div>
+		<div id="info">JoltPhysics.js 2d funnel demo<br/>
+			This demo shows how to limit the simulation to 2D</div>
+
+		<script src="js/three/three.min.js"></script>
+		<script src="js/three/OrbitControls.js"></script>
+		<script src="js/three/WebGL.js"></script>
+		<script src="js/three/stats.min.js"></script>
+		<script src="js/example.js"></script>
+
+		<script type="module">
+			// In case you haven't built the library yourself, replace URL with: https://www.unpkg.com/jolt-physics/dist/jolt-physics.wasm-compat.js
+			import initJolt from './js/jolt-physics.wasm-compat.js';
+
+			initJolt().then(function (Jolt) {
+				// Initialize this example
+				initExample(Jolt, null);
+
+				// Create a basic floor
+				createFloor();
+
+				createBox(new Jolt.RVec3(-12, 8, -5), Jolt.Quat.prototype.sRotation(new Jolt.Vec3(0, 0, 1), 0.2 * Math.PI), new Jolt.Vec3(0.1, 10, 1), Jolt.EMotionType_Static, LAYER_NON_MOVING);
+				createBox(new Jolt.RVec3(12, 8, -5), Jolt.Quat.prototype.sRotation(new Jolt.Vec3(0, 0, 1), -0.2 * Math.PI), new Jolt.Vec3(0.1, 10, 1), Jolt.EMotionType_Static, LAYER_NON_MOVING);
+
+				let shape = new Jolt.SphereShape(0.5, null);
+				let creationSettings = new Jolt.BodyCreationSettings(shape, new Jolt.RVec3(0, 0, 0), Jolt.Quat.prototype.sIdentity(), Jolt.EMotionType_Dynamic, LAYER_MOVING);
+				creationSettings.mAllowedDOFs = Jolt.EAllowedDOFs_Plane2D;
+
+				for (let x = 0; x < 20; ++x)
+					for (let y = 0; y < 10; ++y) { 
+						creationSettings.mPosition = new Jolt.RVec3(-10 + x, 10 + y, -5)
+						let body = bodyInterface.CreateBody(creationSettings);
+						addToScene(body, 0xff0000);
+					}
+			});
+
+		</script>
+	</body>
+</html>

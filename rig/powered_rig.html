@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>JoltPhysics.js demo</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<link rel="stylesheet" type="text/css" href="../style.css">
+	</head>
+	<body>
+		<div id="container">Loading...</div>
+		<div id="info">JoltPhysics.js Powered Rig demo<br />
+			<label>Animation: <select id="sAnimations"></select></label>
+		</div>
+		<script src="../js/three/three.min.js"></script>
+		<script src="../js/three/OrbitControls.js"></script>
+		<script src="../js/three/WebGL.js"></script>
+		<script src="../js/three/stats.min.js"></script>
+		<script src="../js/example.js"></script>
+		<script src="../js/object_stream.js"></script>
+		<script src="../js/ragdoll_loader.js"></script>
+		<script type="module">
+			// In case you haven't built the library yourself, replace URL with: https://www.unpkg.com/jolt-physics/dist/jolt-physics.wasm-compat.js
+			import initJolt from './../js/jolt-physics.wasm-compat.js';
+
+			const texLoader = new THREE.TextureLoader();
+			const texture = texLoader.load('data:image/gif;base64,R0lGODdhAgACAIABAAAAAP///ywAAAAAAgACAAACA0QCBQA7');
+			texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+			texture.offset.set(0, 0);
+			texture.repeat.set(20, 20);
+			texture.magFilter = THREE.NearestFilter;
+
+			initJolt().then(async function (Jolt) {
+
+				const sAnimations = [
+					"Neutral",
+					"Walk",
+					"Sprint",
+					"Dead_Pose1",
+					"Dead_Pose2",
+					"Dead_Pose3",
+					"Dead_Pose4"];
+
+				let sAnimationName = "Sprint";
+
+				let mAnimation, mPose, mRagdoll;
+
+				let mAnimationTime = 0;
+				const root_offset = new Jolt.RVec3();
+				const joint_rot = new Jolt.Quat();
+				// Initialize this example
+				initExample(Jolt, (mTime, mDeltaTime) => {
+					if (mAnimation && mPose && mRagdoll) {
+						mAnimation.Sample(mAnimationTime, mPose);
+
+						const joint = mPose.GetJoint(0);
+						joint.mTranslation = Jolt.RVec3.prototype.sZero();
+						mRagdoll.GetRootTransform(root_offset, joint_rot);
+						joint.mRotation = joint_rot;
+						mPose.SetRootOffset(root_offset);
+						mAnimationTime += mDeltaTime;
+						mPose.CalculateJointMatrices();
+						mRagdoll.DriveToPoseUsingMotors(mPose);
+					}
+				});
+
+				scene.add(new THREE.AmbientLight(0xFFFFFF, 0.2));
+
+				// Create a basic floor
+				createFloor();
+				const floorModel = dynamicObjects[dynamicObjects.length - 1];
+				floorModel.material.map = texture;
+
+				let shape = new Jolt.BoxShape(new Jolt.Vec3(0.2, 0.2, 0.2));
+				const position = new Jolt.RVec3();
+				const rotation = Jolt.Quat.prototype.sIdentity();
+				let boxes = [];
+
+				function buildBoxes() {
+					boxes.forEach(box => {
+						removeFromScene(box);
+					});
+					boxes = [];
+					for (let i = 0; i < 3; ++i)
+						for (let j = i / 2; j < 10 - (i + 1) / 2; ++j) {
+							position.Set(-2.0 + j * 0.4 + (i & 1 ? 0.2 : 0.0), 0.2 + i * 0.4, -2.0);
+							let creationSettings = new Jolt.BodyCreationSettings(shape, position,
+								rotation, Jolt.EMotionType_Dynamic, LAYER_MOVING);
+							creationSettings.mFriction = 0.1;
+							creationSettings.mOverrideMassProperties = Jolt.EOverrideMassProperties_CalculateInertia;
+							creationSettings.mMassPropertiesOverride.mMass = 1;
+							let body = bodyInterface.CreateBody(creationSettings);
+							addToScene(body, 0x00ffff);
+							boxes.push(dynamicObjects[dynamicObjects.length - 1]);
+						}
+				}
+
+				const dropdown = document.getElementById('sAnimations');
+				sAnimations.forEach(type => {
+					const option = document.createElement('option');
+					option.value = type;
+					option.innerText = type;
+					dropdown.appendChild(option);
+				});
+				dropdown.value = sAnimationName;
+
+				const mRagdollSettings = await RagdollLoader.load(Jolt, "../assets/Human/Human.tof", Jolt.EMotionType_Dynamic, "Ragdoll");
+				mRagdollSettings.DisableParentChildCollisions();
+				mRagdoll = mRagdollSettings.CreateRagdoll(0, 0, physicsSystem);
+				mRagdoll.AddToPhysicsSystem(Jolt.EActivation_Activate);
+
+				// Create ragdoll
+				let bodyCount = mRagdoll.GetBodyCount();
+				for (let i = 0; i < bodyCount; i++) {
+					const bodyID = mRagdoll.GetBodyID(i);
+					let body = physicsSystem.GetBodyLockInterfaceNoLock().TryGetBody(bodyID);
+					addToThreeScene(body, 0xFF00FF);
+				}
+
+				mPose = new Jolt.SkeletonPose();
+				mPose.SetSkeleton(mRagdollSettings.GetSkeleton());
+
+				async function loadAnimation() {
+					if (mAnimation) {
+						Jolt.destroy(mAnimation);
+						mAnimation = undefined;
+					}
+
+					buildBoxes();
+
+					sAnimationName = dropdown.value;
+					mAnimation = await RagdollLoader.loadAnimation(Jolt, "../assets/Human/animations/" + sAnimationName.toLocaleLowerCase() + ".tof");
+					mAnimationTime = 0;
+
+					// Drive the ragdoll to the first frame of the animation using motors
+					mAnimation.Sample(0.0, mPose);
+					mPose.CalculateJointMatrices();
+					mRagdoll.SetPose(mPose);
+
+					// Wake up, in case we tried to animate to a Pose and all bodies are sleeping
+					mRagdoll.Activate();
+				}
+
+				dropdown.onchange = () => loadAnimation();
+
+				loadAnimation();
+
+				// Position the camera
+				camera.position.z = -8;
+				camera.position.y = 3;
+			});
+		</script>
+	</body>
+</html>

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>JoltPhysics.js demo</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<link rel="stylesheet" type="text/css" href="../style.css">
+	</head>
+	<body>
+		<div id="container">Loading...</div>
+		<div id="info">JoltPhysics.js Soft Body Gravity Factor<br /> Gravity increases, Left to Right</div>
+
+		<script src="../js/three/three.min.js"></script>
+		<script src="../js/three/OrbitControls.js"></script>
+		<script src="../js/three/WebGL.js"></script>
+		<script src="../js/three/stats.min.js"></script>
+		<script src="../js/example.js"></script>
+		<script src="../js/soft-body-creator.js"></script>
+
+		<script type="module">
+			// In case you haven't built the library yourself, replace URL with: https://www.unpkg.com/jolt-physics/dist/jolt-physics.wasm-compat.js
+			import initJolt from '../js/jolt-physics.wasm-compat.js';
+
+			initJolt().then(async function (Jolt) {
+				// Initialize this example
+				initExample(Jolt, null);
+
+				const floor = createFloor();
+				camera.position.z += 40;
+
+				// Bodies with increasing friction
+				const sphere_settings = SoftBodyCreator.CreateSphere();
+				const sphere = new Jolt.SoftBodyCreationSettings(sphere_settings, Jolt.RVec3.prototype.sZero(), Jolt.Quat.prototype.sIdentity(), LAYER_MOVING);
+				sphere.mPressure = 2000.0;
+
+				for (let i = 0; i <= 10; ++i) {
+					sphere.mPosition.Set(-40.0 + i * 8.0, 10.0, 0);
+					sphere.mGravityFactor = 0.1 * i;
+					const body = bodyInterface.CreateSoftBody(sphere);
+					addToScene(body, 0x333333 + (i << 20) + ((10 - i) << 12))
+				}
+
+				const cube_settings = SoftBodyCreator.CreateCube();
+				const cube = new Jolt.SoftBodyCreationSettings(cube_settings, Jolt.RVec3.prototype.sZero(), Jolt.Quat.prototype.sIdentity(), LAYER_MOVING);
+
+				for (let i = 0; i <= 10; ++i) {
+					cube.mPosition.Set(-40.0 + i * 8.0, 10.0, -5.0);
+					cube.mGravityFactor = 0.1 * i;
+					const body = bodyInterface.CreateSoftBody(cube);
+					addToScene(body, 0x333333 + (i << 4) + ((10 - i) << 20))
+				}
+
+			});
+		</script>
+	</body>
+</html>
