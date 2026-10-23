@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>JoltPhysics.js demo</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<link rel="stylesheet" type="text/css" href="style.css">
+    <style>
+      .time-buttons {
+        position: fixed;
+        top: 30px;
+        left: 50%;
+        transform: translateX(-50%);
+      }
+    </style>
+	</head>
+	<body>
+		<div id="container">Loading...</div>
+		<div id="info">JoltPhysics.js world state snapshot demo</div>
+
+		<div class="time-buttons">
+			<button id="tick-0" disabled>0 sec</button>
+			<button id="tick-1" disabled>1 sec</button>
+			<button id="tick-2" disabled>2 sec</button>
+			<button id="tick-3" disabled>3 sec</button>
+		</div>
+
+		<script src="js/three/three.min.js"></script>
+		<script src="js/three/OrbitControls.js"></script>
+		<script src="js/three/WebGL.js"></script>
+		<script src="js/three/stats.min.js"></script>
+		<script src="js/example.js"></script>
+
+		<script type="module">
+			// In case you haven't built the library yourself, replace URL with: https://www.unpkg.com/jolt-physics/dist/jolt-physics.wasm-compat.js
+			import initJolt from './js/jolt-physics.wasm-compat.js';
+
+			initJolt().then(function (Jolt) {
+				const snapshots = [];
+				const buttons = [document.getElementById('tick-0'), document.getElementById('tick-1'), document.getElementById('tick-2'), document.getElementById('tick-3')]
+				buttons.forEach((e, i) => {
+					if ((i & 1) == 0) {
+						// Use StateRecorderImpl to save/restore the state
+						snapshots.push(new Jolt.StateRecorderImpl());
+					} else {
+						// Use StateRecorderJS to allow saving/restoring state to a custom buffer that can e.g. be sent over the network
+						let recorder = new Jolt.StateRecorderJS();
+						recorder.buffer = new ArrayBuffer(100 * 1024); // Left out resizing logic for simplicity
+						recorder.writePos = 0;
+						recorder.readPos = 0;
+						recorder.ReadBytes = (data, size) => {
+							let d = new Uint8Array(Jolt.HEAP8.buffer, data, size);
+							for (let j = 0; j < size; j++) {
+								d[j] = recorder.buffer[recorder.readPos++];
+							}
+						};
+						recorder.WriteBytes = (data, size) => {
+							let d = new Uint8Array(Jolt.HEAP8.buffer, data, size);
+							for (let j = 0; j < size; j++) {
+								recorder.buffer[recorder.writePos++] = d[j];
+							}
+						};
+						recorder.IsEOF = () => {
+							return recorder.readPos >= recorder.writePos;
+						};
+						recorder.IsFailed = () => {
+							return false;
+						};
+						recorder.Rewind = () => {
+							recorder.readPos = 0;
+						};
+						snapshots.push(recorder);
+					}
+					e.isSet = false;
+					e.addEventListener('click', () => {
+						if (e.disabled == false) {
+							// Restore the state of the physics system to the state of the snapshot
+							const s = snapshots[i];
+							s.Rewind();
+							physicsSystem.RestoreState(s);
+						}
+					});
+				})
+
+				// Initialize this example
+				initExample(Jolt, (time, deltaTime) => {
+					// Create 4 snapshots with 1 second intervals
+					const i = parseInt(time) - 1;
+					if (buttons[i] && buttons[i].isSet == false) {
+						buttons[i].isSet = true;
+						physicsSystem.SaveState(snapshots[i]);
+						if (i == 3) {
+							buttons.forEach(button => button.disabled = false);
+						}
+					}
+				});
+
+				// Create a basic floor
+				createFloor();
+
+				// Create a funnel
+				createBox(new Jolt.RVec3(-12, 8, -5), Jolt.Quat.prototype.sRotation(new Jolt.Vec3(0, 0, 1), 0.2 * Math.PI), new Jolt.Vec3(0.1, 10, 1), Jolt.EMotionType_Static, LAYER_NON_MOVING);
+				createBox(new Jolt.RVec3(12, 8, -5), Jolt.Quat.prototype.sRotation(new Jolt.Vec3(0, 0, 1), -0.2 * Math.PI), new Jolt.Vec3(0.1, 10, 1), Jolt.EMotionType_Static, LAYER_NON_MOVING);
+
+				// Create spheres in the funnel
+				let shape = new Jolt.SphereShape(0.5, null);
+				let creationSettings = new Jolt.BodyCreationSettings(shape, new Jolt.RVec3(0, 0, 0), Jolt.Quat.prototype.sIdentity(), Jolt.EMotionType_Dynamic, LAYER_MOVING);
+				creationSettings.mAllowedDOFs = Jolt.EAllowedDOFs_Plane2D;
+
+				for (let x = 0; x < 20; ++x)
+					for (let y = 0; y < 10; ++y) {
+						creationSettings.mPosition = new Jolt.RVec3(-10 + x, 15 + y, -5)
+						let body = bodyInterface.CreateBody(creationSettings);
+						addToScene(body, 0xff0000);
+					}
+
+				// Lower gravity so it is easier to see the difference between the snapshots
+				physicsSystem.SetGravity(new Jolt.Vec3(0, -1, 0))
+			});
+
+		</script>
+	</body>
+</html>
