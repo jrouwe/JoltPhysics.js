@@ -1,6 +1,6 @@
 #!/bin/bash
 
-EMSDK_VERSION=6.0.8
+EMSDK_VERSION=6.0.13
 
 git clone https://github.com/emscripten-core/emsdk.git
 

@@ -35,6 +35,7 @@
 #include "Jolt/Physics/Collision/GroupFilterTable.h"
 #include "Jolt/Physics/Collision/CollideShape.h"
 #include "Jolt/Physics/Collision/SimShapeFilter.h"
+#include "Jolt/Physics/Collision/EstimateCollisionResponse.h"
 #include "Jolt/Physics/Constraints/FixedConstraint.h"
 #include "Jolt/Physics/Constraints/PointConstraint.h"
 #include "Jolt/Physics/Constraints/DistanceConstraint.h"
@@ -91,6 +92,7 @@ static_assert(sizeof(ObjectLayer) == 4);
 using JPHString = String;
 using ArrayVec3 = Array<Vec3>;
 using ArrayFloat = Array<float>;
+using ContactImpulses = decltype(CollisionEstimationResult::mContactImpulse);
 using ArrayUint = Array<uint>;
 using ArrayUint8 = Array<uint8>;
 using Vec3MemRef = Vec3;
@@ -518,6 +520,12 @@ public:
 	static Body *			sGetFixedToWorldBody()
 	{
 		return &Body::sFixedToWorld;
+	}
+
+	/// Wrapper around EstimateCollisionResponse because we can't call global functions
+	static void				sEstimateCollisionResponse(const Body &inBody1, const Body &inBody2, const ContactManifold &inManifold, CollisionEstimationResult &outResult, const ContactSettings &inContactSettings, float inMinVelocityForRestitution = 1.0f, unsigned int inNumIterations = 10)
+	{
+		EstimateCollisionResponse(inBody1, inBody2, inManifold, outResult, inContactSettings, inMinVelocityForRestitution, inNumIterations);
 	}
 
 private:

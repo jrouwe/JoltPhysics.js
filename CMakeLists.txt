@@ -60,7 +60,7 @@ set(DISABLE_CUSTOM_ALLOCATOR ON)
 set(ENABLE_OBJECT_STREAM OFF)
 
 # Use 32-bit object layers to support more bits in ObjectLayerPairFilterMask
-set(OBJECT_LAYER_BITS 32)
+set(OBJECT_LAYER_BITS 32 CACHE STRING "")
 
 # Enable multi threading
 if (ENABLE_MULTI_THREADING)
@@ -102,7 +102,7 @@ include(FetchContent)
 FetchContent_Declare(
         JoltPhysics
         GIT_REPOSITORY "https://github.com/jrouwe/JoltPhysics"
-        GIT_TAG "v5.6.0"
+        GIT_TAG "6f8bc72fd5fc6a58a52a7fbfe49ca7b5170b4990"
 		SOURCE_SUBDIR "Build"
 )
 FetchContent_MakeAvailable(JoltPhysics)
@@ -193,16 +193,15 @@ if ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
 	set(JOLT_IDL_FILE ${JOLT_IDL_FILE} ${CMAKE_CURRENT_SOURCE_DIR}/JoltJS-DebugRenderer.idl )
 	set(EMCC_GLUE_ARGS
 		${EMCC_GLUE_ARGS}
-		-DJPH_DEBUG_RENDERER -DJPH_PROFILE_ENABLED -D_DEBUG)
+		-DJPH_DEBUG_RENDERER -DJPH_PROFILE_ENABLED -DJPH_DEBUG)
 elseif ("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
 	set(JOLT_IDL_FILE ${JOLT_IDL_FILE} ${CMAKE_CURRENT_SOURCE_DIR}/JoltJS-DebugRenderer.idl )
 	set(EMCC_GLUE_ARGS
 		${EMCC_GLUE_ARGS}
-		-DJPH_DEBUG_RENDERER -DJPH_PROFILE_ENABLED -DNDEBUG)
+		-DJPH_DEBUG_RENDERER -DJPH_PROFILE_ENABLED)
 elseif ("${CMAKE_BUILD_TYPE}" STREQUAL "Distribution")
 	set(EMCC_GLUE_ARGS
-		${EMCC_GLUE_ARGS}
-		-DNDEBUG)
+		${EMCC_GLUE_ARGS})
 else()
 	message("Unknown CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
 endif()

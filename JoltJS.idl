@@ -2100,7 +2100,6 @@ interface PhysicsSettings {
 	attribute float mMinVelocityForRestitution;
 	attribute float mTimeBeforeSleep;
 	attribute float mPointVelocitySleepThreshold;
-	attribute boolean mDeterministicSimulation;
 	attribute boolean mConstraintWarmStart;
 	attribute boolean mUseBodyPairContactCache;
 	attribute boolean mUseManifoldReduction;
@@ -2167,6 +2166,25 @@ interface ContactSettings {
 	attribute boolean mIsSensor;
 	[Value] attribute Vec3 mRelativeLinearSurfaceVelocity;
 	[Value] attribute Vec3 mRelativeAngularSurfaceVelocity;
+};
+
+interface ContactImpulses {
+	boolean empty();
+	long size();
+	float at(long inIndex);
+	FloatMemRef data();
+};
+
+interface CollisionEstimationResult {
+	void CollisionEstimationResult();
+	[Value] attribute Vec3 mLinearVelocity1;
+	[Value] attribute Vec3 mAngularVelocity1;
+	[Value] attribute Vec3 mLinearVelocity2;
+	[Value] attribute Vec3 mAngularVelocity2;
+	[Value] attribute Vec3 mFrictionPoint;
+	[Value] attribute Vec3 mFrictionImpulse;
+	attribute float mAngularFrictionImpulse;
+	[Value] attribute ContactImpulses mContactImpulse;
 };
 
 interface SubShapeIDPair {
@@ -4064,4 +4082,5 @@ interface JoltInterface {
 	static unsigned long sGetTotalMemory();
 	static unsigned long sGetFreeMemory();
 	static Body sGetFixedToWorldBody();
+	static void sEstimateCollisionResponse([Const, Ref] Body inBody1, [Const, Ref] Body inBody2, [Const, Ref] ContactManifold inManifold, [Ref] CollisionEstimationResult outResult, [Const, Ref] ContactSettings inContactSettings, optional float inMinVelocityForRestitution, optional unsigned long inNumIterations);
 };

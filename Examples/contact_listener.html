@@ -49,6 +49,17 @@
 				var sphere = createSphere(new Jolt.RVec3(0, 3, 0), 1, Jolt.EMotionType_Dynamic, LAYER_MOVING, 0x00ff00);
 				sphere.SetUserData(1234567890);
 
+				// Estimate the collision response and log the contact impulses
+				function logContactImpulses(body1, body2, manifold, settings) {
+					const collisionEstimate = new Jolt.CollisionEstimationResult();
+					Jolt.JoltInterface.prototype.sEstimateCollisionResponse(body1, body2, manifold, collisionEstimate, settings);
+					let str = '';
+					const impulses = collisionEstimate.mContactImpulse;
+					for (let i = 0; i < impulses.size(); i++)
+						str += (i > 0 ? ', ' : '') + impulses.at(i).toFixed(3);
+					collisionLog.value += '  Contact impulses: ' + str + '\n';
+				}
+
 				// Register contact listener
 				const contactListener = new Jolt.ContactListenerJS();
 				contactListener.OnContactValidate = (body1, body2, baseOffset, collideShapeResult) => {
@@ -64,6 +75,7 @@
 					manifold = Jolt.wrapPointer(manifold, Jolt.ContactManifold);
 					settings = Jolt.wrapPointer(settings, Jolt.ContactSettings);
 					collisionLog.value += 'OnContactAdded ' + body1.GetID().GetIndex() + ' ' + body2.GetID().GetIndex() + ' ' + manifold.mWorldSpaceNormal.ToString() + '\n';
+					logContactImpulses(body1, body2, manifold, settings);
 
 					// Override the restitution to 0.5
 					settings.mCombinedRestitution = 0.5;
@@ -74,6 +86,7 @@
 					manifold = Jolt.wrapPointer(manifold, Jolt.ContactManifold);
 					settings = Jolt.wrapPointer(settings, Jolt.ContactSettings);
 					collisionLog.value += 'OnContactPersisted ' + body1.GetID().GetIndex() + ' ' + body2.GetID().GetIndex() + ' ' + manifold.mWorldSpaceNormal.ToString() + '\n';
+					logContactImpulses(body1, body2, manifold, settings);
 
 					// Override the restitution to 0.5
 					settings.mCombinedRestitution = 0.5;
