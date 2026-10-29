@@ -18,6 +18,9 @@ option(ENABLE_MEMORY_PROFILER "Enable emscriptens memory profiler to help find l
 # Option to turn on double precision
 option(DOUBLE_PRECISION "Compile the library in double precision mode" OFF)
 
+# When turning this option on, the library will be compiled in such a way to attempt to keep the simulation deterministic across platforms
+option(CROSS_PLATFORM_DETERMINISTIC "Cross platform deterministic" OFF)
+
 # Option to turn multi threading on
 option(ENABLE_MULTI_THREADING "Compile the library in multi threading mode (warning: doesn't work in Safari nor with any JS callbacks currently)'" OFF)
 
@@ -209,6 +212,10 @@ endif()
 # Add double precision define
 if (DOUBLE_PRECISION)
 	set(EMCC_GLUE_ARGS ${EMCC_GLUE_ARGS} -DJPH_DOUBLE_PRECISION)
+endif()
+
+if (CROSS_PLATFORM_DETERMINISTIC)
+	set(EMCC_GLUE_ARGS ${EMCC_GLUE_ARGS} -DJPH_CROSS_PLATFORM_DETERMINISTIC)
 endif()
 
 project("JoltPhysics.js")
