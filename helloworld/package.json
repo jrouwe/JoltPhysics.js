@@ -10,6 +10,6 @@
 	"author": "Jorrit Rouwe",
 	"license": "MIT",
 	"dependencies": {
-		"jolt-physics": "^0.38.0"
+		"jolt-physics": "^1.1.1"
 	}
 }
