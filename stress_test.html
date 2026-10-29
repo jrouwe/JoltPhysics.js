@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>JoltPhysics.js demo</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<link rel="stylesheet" type="text/css" href="style.css">
+	</head>
+	<body>
+		<div id="container">Loading...</div>
+		<div id="info">JoltPhysics.js stress test demo</div>
+
+		<script src="js/three/three.min.js"></script>
+		<script src="js/three/OrbitControls.js"></script>
+		<script src="js/three/WebGL.js"></script>
+		<script src="js/three/stats.min.js"></script>
+		<script src="js/example.js"></script>
+
+		<script type="module">
+			// In case you haven't built the library yourself, replace URL with: https://www.unpkg.com/jolt-physics/dist/jolt-physics.wasm-compat.js
+			import initJolt from './js/jolt-physics.wasm-compat.js';
+
+			initJolt().then(function (Jolt) {
+				let towerHeight = 11;
+
+				// Initialize this example
+				initExample(Jolt, null);
+
+				// Create a basic floor
+				createFloor();
+
+				// Create pyramid
+				let material = new THREE.MeshPhongMaterial({ color: 0xffffff });
+				let geometry = new THREE.BoxGeometry(1, 1, 1);
+				let shape = new Jolt.BoxShape(new Jolt.Vec3(0.5, 0.5, 0.5), 0.05, null);
+				let creationSettings = new Jolt.BodyCreationSettings(shape, Jolt.RVec3.prototype.sZero(), Jolt.Quat.prototype.sIdentity(), Jolt.EMotionType_Dynamic, LAYER_MOVING);
+
+				for (let y = 0; y < towerHeight; y++) {
+
+					let baseOffset = towerHeight - 1 - y;
+
+					for (let x = -baseOffset; x <= baseOffset; x++) {
+						for (let z = -baseOffset; z <= baseOffset; z++) {
+							creationSettings.mPosition = new Jolt.RVec3(x, y + 0.5, z);
+							let body = bodyInterface.CreateBody(creationSettings);
+
+							addToScene(body, 0xffffff);
+						}
+					}
+				}
+
+				// Create block to fall on scene
+				shape = new Jolt.BoxShape(new Jolt.Vec3(1, 1, 1), 0.05, null);
+				let body = bodyInterface.CreateBody(new Jolt.BodyCreationSettings(shape, new Jolt.RVec3(0, 20, 0), Jolt.Quat.prototype.sIdentity(), Jolt.EMotionType_Dynamic, LAYER_MOVING));
+				addToScene(body, 0xff0000);
+			});
+
+		</script>
+	</body>
+</html>

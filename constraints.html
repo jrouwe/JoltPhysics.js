@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>JoltPhysics.js demo</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<link rel="stylesheet" type="text/css" href="style.css">
+	</head>
+	<body>
+		<div id="container">Loading...</div>
+		<div id="info">JoltPhysics.js constraint demo<br/>
+		From left to right: fixed constraint, point constraint, distance constraint, hinge constraint, slider constraint, cone constraint, swing twist constraint, 6 DOF constraint</div>
+
+		<script src="js/three/three.min.js"></script>
+		<script src="js/three/OrbitControls.js"></script>
+		<script src="js/three/WebGL.js"></script>
+		<script src="js/three/stats.min.js"></script>
+		<script src="js/example.js"></script>
+		
+		<script type="module">
+			// In case you haven't built the library yourself, replace URL with: https://www.unpkg.com/jolt-physics/dist/jolt-physics.wasm-compat.js
+			import initJolt from './js/jolt-physics.wasm-compat.js';
+
+			initJolt().then(function (Jolt) {
+				// Initialize this example
+				initExample(Jolt, null);
+
+				// Better position the camera
+				camera.position.set(10, 30, 30);
+
+				// Create a basic floor
+				createFloor();
+
+				// Create group filter that filters out collisions between body N and N + 1 in the same chain
+				let filter = new Jolt.GroupFilterTable(10);
+				for (let z = 0; z < 9; ++z)
+					filter.DisableCollision(z, z + 1);
+
+				let shape = new Jolt.BoxShape(new Jolt.Vec3(0.5, 0.5, 0.5), 0.05, null);
+				let creationSettings = new Jolt.BodyCreationSettings(shape, new Jolt.RVec3(-15, 20, 0), Jolt.Quat.prototype.sIdentity(), Jolt.EMotionType_Dynamic, LAYER_MOVING);
+				creationSettings.mCollisionGroup.SetGroupFilter(filter);
+
+				function createBody(creationSettings, z) {
+					creationSettings.mMotionType = z == 0 ? Jolt.EMotionType_Static : Jolt.EMotionType_Dynamic;
+					creationSettings.mObjectLayer = z == 0 ? LAYER_NON_MOVING : LAYER_MOVING;
+					creationSettings.mPosition.SetZ(z);
+					creationSettings.mCollisionGroup.SetSubGroupID(z);
+
+					let body = bodyInterface.CreateBody(creationSettings);
+					addToScene(body, 0xff0000);
+
+					// Add an impulse (gravity is really boring, many constraints look the same)
+					if (z == 9)
+						body.AddImpulse(new Jolt.Vec3(1000, 0, 0));
+
+					return body;
+				}
+
+				// Fixed constraint
+				creationSettings.mCollisionGroup.SetGroupID(0);
+				{
+					let constraintSettings = new Jolt.FixedConstraintSettings();
+					constraintSettings.mAutoDetectPoint = true;
+					let prevBody = null;
+
+					for (let z = 0; z < 10; ++z) {
+						let body = createBody(creationSettings, z);
+
+						if (prevBody != null) {
+							physicsSystem.AddConstraint(constraintSettings.Create(prevBody, body));
+						}
+
+						prevBody = body;
+					}
+				}
+
+				// Point constraint
+				creationSettings.mCollisionGroup.SetGroupID(creationSettings.mCollisionGroup.GetGroupID() + 1);
+				creationSettings.mPosition.SetX(creationSettings.mPosition.GetX() + 5);
+				{
+					let constraintSettings = new Jolt.PointConstraintSettings();
+					constraintSettings.mPoint1 = constraintSettings.mPoint2 = creationSettings.mPosition;
+					let prevBody = null;
+
+					for (let z = 0; z < 10; ++z) {
+						let body = createBody(creationSettings, z);
+
+						if (prevBody != null) {
+							constraintSettings.mPoint1.SetZ(z - 0.5);
+							constraintSettings.mPoint2.SetZ(z - 0.5);
+							physicsSystem.AddConstraint(constraintSettings.Create(prevBody, body));
+						}
+
+						prevBody = body;
+					}
+				}
+
+				// Distance constraint
+				creationSettings.mCollisionGroup.SetGroupID(creationSettings.mCollisionGroup.GetGroupID() + 1);
+				creationSettings.mPosition.SetX(creationSettings.mPosition.GetX() + 5);
+				{
+					let constraintSettings = new Jolt.DistanceConstraintSettings();
+					constraintSettings.mPoint1 = constraintSettings.mPoint2 = creationSettings.mPosition;
+					constraintSettings.mMinDistance = 0;
+					constraintSettings.mMaxDistance = 1;
+					let prevBody = null;
+
+					for (let z = 0; z < 10; ++z) {
+						let body = createBody(creationSettings, z);
+
+						if (prevBody != null) {
+							constraintSettings.mPoint1.SetZ(z - 0.5);
+							constraintSettings.mPoint2.SetZ(z - 0.5);
+							physicsSystem.AddConstraint(constraintSettings.Create(prevBody, body));
+						}
+
+						prevBody = body;
+					}
+				}
+
+				// Hinge constraint
+				creationSettings.mCollisionGroup.SetGroupID(creationSettings.mCollisionGroup.GetGroupID() + 1);
+				creationSettings.mPosition.SetX(creationSettings.mPosition.GetX() + 5);
+				{
+					let constraintSettings = new Jolt.HingeConstraintSettings();
+					constraintSettings.mPoint1 = constraintSettings.mPoint2 = new Jolt.RVec3(creationSettings.mPosition.GetX(), creationSettings.mPosition.GetY() - 0.5, creationSettings.mPosition.GetZ());
+					constraintSettings.mHingeAxis1 = constraintSettings.mHingeAxis2 = new Jolt.Vec3(1, 0, 0);
+					constraintSettings.mNormalAxis1 = constraintSettings.mNormalAxis2 = new Jolt.Vec3(0, 1, 0);
+					
+					let prevBody = null;
+
+					for (let z = 0; z < 10; ++z) {
+						let body = createBody(creationSettings, z);
+
+						if (prevBody != null) {
+							constraintSettings.mPoint1.SetZ(z - 0.5);
+							constraintSettings.mPoint2.SetZ(z - 0.5);
+							physicsSystem.AddConstraint(constraintSettings.Create(prevBody, body));
+						}
+
+						prevBody = body;
+					}
+				}
+
+				// Slider constraint
+				creationSettings.mCollisionGroup.SetGroupID(creationSettings.mCollisionGroup.GetGroupID() + 1);
+				creationSettings.mPosition.SetX(creationSettings.mPosition.GetX() + 5);
+				{
+					let constraintSettings = new Jolt.SliderConstraintSettings();
+					constraintSettings.mPoint1 = constraintSettings.mPoint2 = creationSettings.mPosition;
+					constraintSettings.mSliderAxis1 = constraintSettings.mSliderAxis2 = new Jolt.Vec3(0, -1, 1).Normalized();
+					constraintSettings.mNormalAxis1 = constraintSettings.mNormalAxis2 = constraintSettings.mSliderAxis1.GetNormalizedPerpendicular();
+					constraintSettings.mLimitsMin = 0;
+					constraintSettings.mLimitsMax = 1;
+
+					let prevBody = null;
+
+					for (let z = 0; z < 10; ++z) {
+						let body = createBody(creationSettings, z);
+
+						if (prevBody != null) {
+							constraintSettings.mPoint1.SetZ(z - 0.5);
+							constraintSettings.mPoint2.SetZ(z - 0.5);
+							physicsSystem.AddConstraint(constraintSettings.Create(prevBody, body));
+						}
+
+						prevBody = body;
+					}
+				}
+
+				// Cone constraint
+				creationSettings.mCollisionGroup.SetGroupID(creationSettings.mCollisionGroup.GetGroupID() + 1);
+				creationSettings.mPosition.SetX(creationSettings.mPosition.GetX() + 5);
+				{
+					let constraintSettings = new Jolt.ConeConstraintSettings();
+					constraintSettings.mPoint1 = constraintSettings.mPoint2 = creationSettings.mPosition;
+					constraintSettings.mTwistAxis1 = constraintSettings.mTwistAxis2 = new Jolt.Vec3(0, 0, 1);
+					constraintSettings.mHalfConeAngle = 0.1 * Math.PI;
+
+					let prevBody = null;
+
+					for (let z = 0; z < 10; ++z) {
+						let body = createBody(creationSettings, z);
+
+						if (prevBody != null) {
+							constraintSettings.mPoint1.SetZ(z);
+							constraintSettings.mPoint2.SetZ(z);
+							physicsSystem.AddConstraint(constraintSettings.Create(prevBody, body));
+						}
+
+						prevBody = body;
+					}
+				}
+
+				// Swing twist constraint
+				creationSettings.mCollisionGroup.SetGroupID(creationSettings.mCollisionGroup.GetGroupID() + 1);
+				creationSettings.mPosition.SetX(creationSettings.mPosition.GetX() + 5);
+				{
+					let constraintSettings = new Jolt.SwingTwistConstraintSettings();
+					constraintSettings.mPosition1 = constraintSettings.mPosition2 = creationSettings.mPosition;
+					constraintSettings.mTwistAxis1 = constraintSettings.mTwistAxis2 = new Jolt.Vec3(0, 0, 1);
+					constraintSettings.mPlaneAxis1 = constraintSettings.mPlaneAxis2 = new Jolt.Vec3(1, 0, 0);
+					constraintSettings.mNormalHalfConeAngle = 0.2 * Math.PI;
+					constraintSettings.mPlaneHalfConeAngle = 0.1 * Math.PI;
+					constraintSettings.mTwistMinAngle = -0.3 * Math.PI;
+					constraintSettings.mTwistMaxAngle = 0.4 * Math.PI;
+
+					let prevBody = null;
+
+					for (let z = 0; z < 10; ++z) {
+						let body = createBody(creationSettings, z);
+
+						if (prevBody != null) {
+							constraintSettings.mPosition1.SetZ(z);
+							constraintSettings.mPosition2.SetZ(z);
+							physicsSystem.AddConstraint(constraintSettings.Create(prevBody, body));
+						}
+
+						prevBody = body;
+					}
+				}
+
+				// Six DOF constraint
+				creationSettings.mCollisionGroup.SetGroupID(creationSettings.mCollisionGroup.GetGroupID() + 1);
+				creationSettings.mPosition.SetX(creationSettings.mPosition.GetX() + 5);
+				{
+					let constraintSettings = new Jolt.SixDOFConstraintSettings();
+					constraintSettings.mPosition1 = constraintSettings.mPosition2 = creationSettings.mPosition;
+					constraintSettings.mAxisX1 = constraintSettings.mAxisX2 = new Jolt.Vec3(0, 0, 1);
+					constraintSettings.mAxisY1 = constraintSettings.mAxisY2 = new Jolt.Vec3(1, 0, 0);
+					constraintSettings.SetLimitedAxis(Jolt.SixDOFConstraintSettings_EAxis_TranslationX, -0.1, 0.1);
+					constraintSettings.SetLimitedAxis(Jolt.SixDOFConstraintSettings_EAxis_TranslationY, -0.1, 0.1);
+					constraintSettings.SetLimitedAxis(Jolt.SixDOFConstraintSettings_EAxis_TranslationZ, -0.1, 0.1);
+					let maxAngle = DegreesToRadians(10);
+					constraintSettings.SetLimitedAxis(Jolt.SixDOFConstraintSettings_EAxis_RotationX, -maxAngle, maxAngle);
+					constraintSettings.SetLimitedAxis(Jolt.SixDOFConstraintSettings_EAxis_RotationY, -maxAngle, maxAngle);
+					constraintSettings.SetLimitedAxis(Jolt.SixDOFConstraintSettings_EAxis_RotationZ, -maxAngle, maxAngle);
+
+					let prevBody = null;
+
+					for (let z = 0; z < 10; ++z) {
+						let body = createBody(creationSettings, z);
+
+						if (prevBody != null) {
+							constraintSettings.mPosition1.SetZ(z);
+							constraintSettings.mPosition2.SetZ(z);
+							physicsSystem.AddConstraint(constraintSettings.Create(prevBody, body));
+						}
+
+						prevBody = body;
+					}
+				}
+			});
+
+		</script>
+	</body>
+</html>

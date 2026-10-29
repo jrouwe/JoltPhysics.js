@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>JoltPhysics.js demo</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<link rel="stylesheet" type="text/css" href="style.css">
+	</head>
+	<body>
+		<div id="container">Loading...</div>
+		<div id="info">JoltPhysics.js alternative collision filtering demo</div>
+
+		<script src="js/three/three.min.js"></script>
+		<script src="js/three/OrbitControls.js"></script>
+		<script src="js/three/WebGL.js"></script>
+		<script src="js/three/stats.min.js"></script>
+		<script src="js/example.js"></script>
+
+		<script type="module">
+			// In case you haven't built the library yourself, replace URL with: https://www.unpkg.com/jolt-physics/dist/jolt-physics.wasm-compat.js
+			import initJolt from './js/jolt-physics.wasm-compat.js';
+
+			initJolt().then(function (Jolt) {
+				// Define the group bits
+				const GROUP_STATIC = 1;
+				const GROUP_FLOOR1 = 2;
+				const GROUP_FLOOR2 = 4;
+				const GROUP_FLOOR3 = 8;
+				const GROUP_ALL = GROUP_STATIC | GROUP_FLOOR1 | GROUP_FLOOR2 | GROUP_FLOOR3;
+
+				// Configure alternative collision filtering
+				setupCollisionFiltering = function (settings) {
+					// Filter class to test if two objects can collide based on their object layer. Used while finding collision pairs.
+					// Uses group bits and mask bits. Two layers can collide if Object1.Group & Object2.Mask is non-zero and Object2.Group & Object1.Mask is non-zero.
+					// The behavior is similar to that in e.g. Bullet.
+					let objectFilter = new Jolt.ObjectLayerPairFilterMask();
+
+					// Layer that objects can be in, determines which other objects it can collide with
+					// Typically you at least want to have 1 layer for moving bodies and 1 layer for static bodies, but you can have more
+					// layers if you want. E.g. you could have a layer for high detail collision (which is not used by the physics simulation
+					// but only if you do collision testing).
+					const NUM_BROAD_PHASE_LAYERS = 2;
+					const BP_LAYER_STATIC = new Jolt.BroadPhaseLayer(0);
+					const BP_LAYER_DYNAMIC = new Jolt.BroadPhaseLayer(1);
+					let bpInterface = new Jolt.BroadPhaseLayerInterfaceMask(NUM_BROAD_PHASE_LAYERS);
+					bpInterface.ConfigureLayer(BP_LAYER_STATIC, GROUP_STATIC, 0); // Anything that has the static bit set goes into the static broadphase layer
+					bpInterface.ConfigureLayer(BP_LAYER_DYNAMIC, GROUP_FLOOR1 | GROUP_FLOOR2 | GROUP_FLOOR3, 0); // Anything that has one of the floor bits set goes into the dynamic broadphase layer
+
+					settings.mObjectLayerPairFilter = objectFilter;
+					settings.mBroadPhaseLayerInterface = bpInterface;
+					settings.mObjectVsBroadPhaseLayerFilter = new Jolt.ObjectVsBroadPhaseLayerFilterMask(bpInterface);
+				};
+
+				// Initialize this example
+				initExample(Jolt);
+
+				// Typing shortcut
+				const sGetObjectLayer = function (group, mask) { return Jolt.ObjectLayerPairFilterMask.prototype.sGetObjectLayer(group, mask); }
+
+				// Create a basic floor that collides with everything
+				createBox(Jolt.RVec3.prototype.sZero(), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(50, 0.5, 50), Jolt.EMotionType_Static, sGetObjectLayer(GROUP_STATIC, GROUP_ALL));
+
+				// 1st floor: Part of group static but colliding only with GROUP_FLOOR1
+				createBox(new Jolt.RVec3(0, 3, 0), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(5, 0.5, 5), Jolt.EMotionType_Static, sGetObjectLayer(GROUP_STATIC, GROUP_FLOOR1), 0x9f0000);
+
+				// 2nd floor: Part of group static but colliding only with GROUP_FLOOR2
+				createBox(new Jolt.RVec3(0, 6, 0), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(5, 0.5, 5), Jolt.EMotionType_Static, sGetObjectLayer(GROUP_STATIC, GROUP_FLOOR2), 0x009f00);
+
+				// 3rd floor: Part of group static but colliding only with GROUP_FLOOR3
+				createBox(new Jolt.RVec3(0, 9, 0), Jolt.Quat.prototype.sIdentity(), new Jolt.Vec3(5, 0.5, 5), Jolt.EMotionType_Static, sGetObjectLayer(GROUP_STATIC, GROUP_FLOOR3), 0x00009f);
+
+				// Create dynamic objects that collide only with a specific floor or the ground floor
+				for (let x = 0; x < 10; x++)
+					for (let z = 0; z < 10; z++)
+						for (let l = 0; l < 3; l++)
+						{
+							// Create physics body
+							let pos = new Jolt.RVec3(1.2 * x - 5.4, 12 + 2 * l, 1.2 * z - 5.4);
+							let size = new Jolt.Vec3(0.5, 0.5, 0.5);
+							let shape = null;
+							let layer = 0;
+							let color = 0;
+							switch (l) {
+								case 0:
+									shape = new Jolt.BoxShape(new Jolt.Vec3(0.5, 0.5, 0.5));
+									layer = GROUP_FLOOR1;
+									color = 0xff0000;
+									break;
+								case 1:
+									shape = new Jolt.SphereShape(0.5);
+									layer = GROUP_FLOOR2;
+									color = 0x00ff00;
+									break;
+								case 2:
+									shape = new Jolt.CapsuleShape(0.5, 0.5);
+									layer = GROUP_FLOOR3;
+									color = 0x0000ff;
+									break;
+							}
+							let creationSettings = new Jolt.BodyCreationSettings(shape, pos, Jolt.Quat.prototype.sIdentity(), Jolt.EMotionType_Dynamic, sGetObjectLayer(layer, GROUP_ALL));
+							let body = bodyInterface.CreateBody(creationSettings);
+							addToScene(body, color);
+						}
+			});
+
+		</script>
+	</body>
+</html>
