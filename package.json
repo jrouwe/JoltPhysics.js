@@ -22,10 +22,6 @@
 			"types": "./dist/jolt-physics.debug.wasm-compat.d.ts",
 			"default": "./dist/jolt-physics.debug.wasm-compat.js"
 		},
-		"./asm": {
-			"types": "./dist/jolt-physics.d.ts",
-			"default": "./dist/jolt-physics.js"
-		},
 		"./wasm-multithread": {
 			"types": "./dist/jolt-physics.multithread.wasm.d.ts",
 			"default": "./dist/jolt-physics.multithread.wasm.js"
@@ -53,7 +49,6 @@
 	"files": [
 		"README.md",
 		"LICENSE",
-		"./dist/jolt-physics.js",
 		"./dist/jolt-physics.d.ts",
 		"./dist/jolt-physics.wasm-compat.js",
 		"./dist/jolt-physics.wasm-compat.d.ts",
@@ -70,7 +65,6 @@
 		"./dist/jolt-physics.multithread.wasm.d.ts",
 		"./dist/jolt-physics.multithread.wasm.wasm",
 		"./dist/types.d.ts",
-		"asm",
 		"wasm",
 		"wasm-compat",
 		"debug-wasm-compat",

@@ -163,13 +163,6 @@ else()
 		-O3)
 endif()
 
-set(EMCC_JS_ARGS ${EMCC_ARGS}
-  -s AGGRESSIVE_VARIABLE_ELIMINATION=1
-  -s ELIMINATE_DUPLICATE_FUNCTIONS=1
-  -s SINGLE_FILE=1
-  -s LEGACY_VM_SUPPORT=1
-  -s WASM=0)
-
 set(EMCC_WASM_ARGS ${EMCC_ARGS}
   -s BINARYEN_IGNORE_IMPLICIT_TRAPS=1
   -s WASM=1)
@@ -246,17 +239,6 @@ add_custom_command(
 add_custom_target(jolt-bindings ALL DEPENDS glue.js glue.o ${JOLT_TYPING})
 
 if (NOT BUILD_WASM_COMPAT_ONLY)
-	if (NOT ENABLE_MULTI_THREADING # Not compatible with multi threading due to error: 'void wasm::I64ToI32Lowering::visitStore(Store *): Assertion `!curr->isAtomic && "atomic store not implemented"' failed.'
-		AND NOT ENABLE_SIMD) # Not compatible with SIMD due to error: 'unhandled unaligned load'
-		add_custom_command(
-			OUTPUT ${OUTPUT_BASE_NAME}.js
-			COMMAND em++ glue.o $<TARGET_FILE:Jolt> ${EMCC_JS_ARGS} -o ${OUTPUT_BASE_NAME}.js
-			DEPENDS jolt-bindings ${JOLT_FRONT_MATTER_FILE} ${JOLT_TARGETS} ${JOLT_IDL_FILE} ${JOLT_HEADER_FILE}
-			COMMENT "Building JoltPhysics.js javascript"
-			VERBATIM)
-		add_custom_target(jolt-javascript ALL DEPENDS ${OUTPUT_BASE_NAME}.js)
-	endif()
-
 	add_custom_command(
 		OUTPUT ${OUTPUT_BASE_NAME}.wasm.js ${OUTPUT_BASE_NAME}.wasm.wasm
 		COMMAND em++ glue.o $<TARGET_FILE:Jolt> ${EMCC_WASM_ARGS} -o ${OUTPUT_BASE_NAME}.wasm.js

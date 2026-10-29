@@ -17,7 +17,6 @@ This library comes in 7 flavours:
 - `wasm-compat` - A WASM version with the WASM file (encoded in base64) embedded in the bundle
 - `debug-wasm-compat` - Same as `wasm-compat` but with debug checking enabled (outputs errors to the console and enables the debug renderer).
 - `wasm` - A WASM version with a separate WASM file
-- `asm` - A JavaScript version that uses [asm.js](https://developer.mozilla.org/en-US/docs/Games/Tools/asm.js)
 - `wasm-compat-multithread` - Same as `wasm-compat` but with multi threading enabled.
 - `debug-wasm-compat-multithread` - Same as `wasm-compat-multithread` but with debug checking enabled (outputs errors to the console and enables the debug renderer).
 - `wasm-multithread` - Same as `wasm` but with multi threading enabled.
@@ -50,9 +49,6 @@ import Jolt from 'jolt-physics/debug-wasm-compat';
 
 // WASM
 import Jolt from 'jolt-physics/wasm';
-
-// asm.js
-import Jolt from 'jolt-physics/asm';
 
 // WASM embedded in the bundle, multithread enabled
 import Jolt from 'jolt-physics/wasm-compat-multithread';

@@ -1,5 +1,0 @@
-{
-  "type": "module",
-  "main": "../dist/jolt-physics.js",
-  "types": "../dist/jolt-physics.d.ts"
-}
