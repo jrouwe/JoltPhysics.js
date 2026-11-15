@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>JoltPhysics.js demo</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<link rel="stylesheet" type="text/css" href="../style.css">
+	</head>
+	<body>
+		<div id="container">Loading...</div>
+		<div id="info">JoltPhysics.js Soft Body - Sphere Pressure<br /> Pressure increases, Left to Right</div>
+
+		<script src="../js/three/three.min.js"></script>
+		<script src="../js/three/OrbitControls.js"></script>
+		<script src="../js/three/WebGL.js"></script>
+		<script src="../js/three/stats.min.js"></script>
+		<script src="../js/example.js"></script>
+		<script src="../js/soft-body-creator.js"></script>
+
+		<script type="module">
+			// In case you haven't built the library yourself, replace URL with: https://www.unpkg.com/jolt-physics/dist/jolt-physics.wasm-compat.js
+			import initJolt from '../js/jolt-physics.wasm-compat.js';
+
+			initJolt().then(async function (Jolt) {
+				// Initialize this example
+				initExample(Jolt, null);
+
+				createFloor();
+
+				camera.position.z += 40;
+
+
+				// Bodies with increasing pressure
+				const sphereSettings = SoftBodyCreator.CreateSphere(2.0);
+				const sphere = new Jolt.SoftBodyCreationSettings(sphereSettings, Jolt.RVec3.prototype.sZero(), Jolt.Quat.prototype.sIdentity(), LAYER_MOVING);
+
+				for (let i = 0; i <= 10; ++i) {
+					sphere.mPosition.Set(-40 + i * 8, 10, 0);
+					sphere.mPressure = 1000.0 * i;
+					sphere.mUpdatePosition = false;
+					const body = bodyInterface.CreateSoftBody(sphere);
+					addToScene(body, (25 * i) | 0x00aa00 | (((10 - i) * 25) << 16));
+				}
+
+			});
+		</script>
+	</body>
+</html>
