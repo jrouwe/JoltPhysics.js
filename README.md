@@ -99,6 +99,7 @@ For more information on the `locateFile` function, see the [Emscripten documenta
 
 This project has only been compiled under Linux.
 
+* Install nodejs and npm (Ubuntu: `apt install nodejs npm`)
 * Install [emscripten](https://emscripten.org/) and ensure that its environment variables have been setup
 * Install [cmake](https://cmake.org/)
 * Run ```./build.sh``` to build both the Debug and Distribution build, ```./build.sh Debug``` for only the Debug build.
