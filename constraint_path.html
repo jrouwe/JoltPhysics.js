@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<title>JoltPhysics.js demo</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+	<link rel="stylesheet" type="text/css" href="style.css">
+</head>
+<body>
+	<div id="container">Loading...</div>
+	<div id="info">
+		JoltPhysics.js 2d path constraint demo<br />
+		This demo shows the various constraint settings on Path RotationConstraintType<br />
+		<div style="font-weight: bold;background: rgba(0.2,0.2,0.2,0.2);display:inline-block;padding:10px">
+			<span style="color:red">Red: Free Constraint</span><br />
+			<span style="color:green">Green: Path-Tangent Constraint</span><br />
+			<span style="color:blue">Blue: Path-Normal Constraint</span><br />
+			<span style="color:magenta">Magenta: Path-Binormal Constraint</span><br />
+			<span style="color:yellow">Yellow: Path-Space Constraint</span><br />
+			<span style="color:cyan">Cyan: Fully Constrained to Body1</span>
+		</div>
+	</div>
+
+	<script src="js/three/three.min.js"></script>
+	<script src="js/three/OrbitControls.js"></script>
+	<script src="js/three/WebGL.js"></script>
+	<script src="js/three/stats.min.js"></script>
+	<script src="js/example.js"></script>
+
+	<script type="module">
+		// In case you haven't built the library yourself, replace URL with: https://www.unpkg.com/jolt-physics/dist/jolt-physics.wasm-compat.js
+		import initJolt from './js/jolt-physics.wasm-compat.js';
+
+		class Line3DMesh {
+			constructor(points, color) {
+				this._points = points;
+				const material = new THREE.LineBasicMaterial({ color });
+				const geometry = this._geometry = new THREE.BufferGeometry().setFromPoints(points);
+				this._line = new THREE.Line(geometry, material);
+			}
+
+			update() {
+				this._geometry.setFromPoints(this._points);
+			}
+
+			getMesh() {
+				return this._line;
+			}
+		}
+
+		initJolt().then(function (Jolt) {
+
+			// Initialize this example
+			const updates = [];
+			initExample(Jolt, () => {
+				updates.forEach(func => func());
+			});
+
+			// Create a basic floor
+			createFloor();
+
+			const rotation = Jolt.Quat.prototype.sIdentity();
+			const position = new Jolt.RVec3();
+			const size = new Jolt.Vec3(0.5, 0.1, 0.5);
+
+			const pathPoints = [];
+			const pointResolution = 100;
+			for (let i = 0; i < pointResolution; i++) {
+				const x = Math.cos(i * 2 * Math.PI / pointResolution) * 2
+				const y = Math.sin(i * 2 * Math.PI / pointResolution) * 2
+				pathPoints.push(new THREE.Vector3(x, 0, y));
+			}
+			const pathGeo = new Line3DMesh(pathPoints, '#0000FF');
+			const pathMesh = pathGeo.getMesh();
+
+			const SetV3 = (joltV3, threeV3) => threeV3.set(joltV3.GetX(), joltV3.GetY(), joltV3.GetZ());
+
+			const path = new Jolt.PathConstraintPathJS();
+			path.GetPathMaxFraction = () => pointResolution;
+			const tmp = new THREE.Vector3();
+			const tmp2 = new THREE.Vector3();
+			path.GetClosestPoint = (vecPtr, fractionHint) => {
+				const jVec3 = Jolt.wrapPointer(vecPtr, Jolt.Vec3);
+				SetV3(jVec3, tmp2);
+				const body2Loc = tmp2;
+				let closest = 31;
+				let maxLen = Number.POSITIVE_INFINITY;
+				pathPoints.forEach((p, i) => {
+					tmp.subVectors(p, body2Loc);
+					const len = tmp.length();
+					if (len < maxLen) {
+						closest = i;
+						maxLen = len;
+					}
+				});
+				return closest;
+			}
+			const normal = new THREE.Vector3(0, 1, 0);
+			path.GetPointOnPath = (inFraction, outPathPositionPtr, outPathTangentPtr, outPathNormalPtr, outPathBinormalPtr) => {
+				const outPathPosition = Jolt.wrapPointer(outPathPositionPtr, Jolt.Vec3);
+				const outPathTangent = Jolt.wrapPointer(outPathTangentPtr, Jolt.Vec3);
+				const outPathNormal = Jolt.wrapPointer(outPathNormalPtr, Jolt.Vec3);
+				const outPathBinormal = Jolt.wrapPointer(outPathBinormalPtr, Jolt.Vec3);
+
+				const pointAIdx = Math.floor(inFraction);
+				const pointBIdx = Math.ceil(inFraction + 0.0001) % pointResolution;
+				const percent = inFraction - pointAIdx;
+
+				const pointA = pathPoints[pointAIdx];
+				const pointB = pathPoints[pointBIdx];
+				const pos = tmp.lerpVectors(pointA, pointB, percent);
+
+				outPathNormal.Set(normal.x, normal.y, normal.z);
+				outPathPosition.Set(pos.x, pos.y, pos.z);
+
+				const tan = tmp.subVectors(pointB, pointA).normalize();
+				outPathTangent.Set(tan.x, tan.y, tan.z);
+
+				const binormal = tmp.crossVectors(tan, normal).normalize();
+				outPathBinormal.Set(binormal.x, binormal.y, binormal.z);
+			}
+			Jolt.castObject(path, Jolt.PathConstraintPath).SetIsLooping(true);
+
+			const _jPosition = new Jolt.Vec3();
+			const _jTangent = new Jolt.Vec3();
+			const _jNormal = new Jolt.Vec3();
+			const _jBinormal = new Jolt.Vec3();
+
+			const positionMaterial = new THREE.MeshPhongMaterial({ color: '#00ff00' });
+			const positionGeo = new THREE.SphereGeometry(0.25, 32, 32);
+			function renderPathData(parent, constraint) {
+				parent.add(pathMesh.clone());
+				const pos = new THREE.Mesh(positionGeo, positionMaterial);
+				parent.add(pos);
+				const tanLine = new Line3DMesh([new THREE.Vector3(), new THREE.Vector3()], '#FF0000');
+				pos.add(tanLine.getMesh());
+				const normLine = new Line3DMesh([new THREE.Vector3(), new THREE.Vector3()], '#00FF00');
+				pos.add(normLine.getMesh());
+				const binLine = new Line3DMesh([new THREE.Vector3(), new THREE.Vector3()], '#FF00FF');
+				pos.add(binLine.getMesh());
+
+				updates.push(() => {
+					path.GetPointOnPath(constraint.GetPathFraction(),
+						Jolt.getPointer(_jPosition), Jolt.getPointer(_jTangent), Jolt.getPointer(_jNormal), Jolt.getPointer(_jBinormal));
+					SetV3(_jPosition, pos.position);
+					SetV3(_jTangent, tanLine._points[1]); tanLine.update();
+					SetV3(_jNormal, normLine._points[1]); normLine.update();
+					SetV3(_jBinormal, binLine._points[1]); binLine.update();
+				})
+			}
+
+			let offsetX = -8;
+			let offsetZ = 0;
+			{
+				position.Set(0 + offsetX, 5, 0 + offsetZ);
+				const box1 = createBox(position, rotation, size, Jolt.EMotionType_Static, LAYER_NON_MOVING);
+				const threeBox = dynamicObjects[dynamicObjects.length - 1]
+				position.Set(2.5 + offsetX, 5, 0 + offsetZ);
+				const box2 = createBox(position, rotation, size, Jolt.EMotionType_Dynamic, LAYER_MOVING, '#ff0000');
+
+				const pathConstraintSettings = new Jolt.PathConstraintSettings();
+				pathConstraintSettings.mRotationConstraintType = Jolt.EPathRotationConstraintType_Free
+
+				const pathConstraint = Jolt.castObject(pathConstraintSettings.Create(box1, box2), Jolt.PathConstraint);
+				pathConstraint.SetPath(path, 0);
+
+				physicsSystem.AddConstraint(pathConstraint);
+				pathConstraint.SetPositionMotorState(Jolt.EMotorState_Velocity);
+				pathConstraint.SetTargetVelocity(2);
+				renderPathData(threeBox, pathConstraint);
+			}
+			offsetX = 0;
+			{
+				position.Set(0 + offsetX, 5, 0 + offsetZ);
+				const box1 = createBox(position, rotation, size, Jolt.EMotionType_Static, LAYER_NON_MOVING);
+				const threeBox = dynamicObjects[dynamicObjects.length - 1]
+				position.Set(2.5 + offsetX, 5, 0 + offsetZ);
+				const box2 = createBox(position, rotation, size, Jolt.EMotionType_Dynamic, LAYER_MOVING, '#00ff00');
+
+				const pathConstraintSettings = new Jolt.PathConstraintSettings();
+				pathConstraintSettings.mRotationConstraintType = Jolt.EPathRotationConstraintType_ConstrainAroundTangent
+				const pathConstraint = Jolt.castObject(pathConstraintSettings.Create(box1, box2), Jolt.PathConstraint);
+				pathConstraint.SetPath(path, 0);
+
+				physicsSystem.AddConstraint(pathConstraint);
+				pathConstraint.SetPositionMotorState(Jolt.EMotorState_Velocity);
+				pathConstraint.SetTargetVelocity(2);
+				renderPathData(threeBox, pathConstraint);
+			}
+			offsetX = 8;
+			{
+				position.Set(0 + offsetX, 5, 0 + offsetZ);
+				const box1 = createBox(position, rotation, size, Jolt.EMotionType_Static, LAYER_NON_MOVING);
+				const threeBox = dynamicObjects[dynamicObjects.length - 1]
+				position.Set(2.5 + offsetX, 5, 0 + offsetZ);
+				const box2 = createBox(position, rotation, size, Jolt.EMotionType_Dynamic, LAYER_MOVING, '#0000ff');
+
+				const pathConstraintSettings = new Jolt.PathConstraintSettings();
+				pathConstraintSettings.mRotationConstraintType = Jolt.EPathRotationConstraintType_ConstrainAroundNormal
+				const pathConstraint = Jolt.castObject(pathConstraintSettings.Create(box1, box2), Jolt.PathConstraint);
+				pathConstraint.SetPath(path, 0);
+
+				physicsSystem.AddConstraint(pathConstraint);
+				pathConstraint.SetPositionMotorState(Jolt.EMotorState_Velocity);
+				pathConstraint.SetTargetVelocity(2);
+				renderPathData(threeBox, pathConstraint);
+			}
+
+			offsetX = -8;
+			offsetZ = 8;
+			{
+				position.Set(0 + offsetX, 5, 0 + offsetZ);
+				const box1 = createBox(position, rotation, size, Jolt.EMotionType_Static, LAYER_NON_MOVING);
+				const threeBox = dynamicObjects[dynamicObjects.length - 1]
+				position.Set(2.5 + offsetX, 5, 0 + offsetZ);
+				const box2 = createBox(position, rotation, size, Jolt.EMotionType_Dynamic, LAYER_MOVING, '#ff00ff');
+
+				const pathConstraintSettings = new Jolt.PathConstraintSettings();
+				pathConstraintSettings.mRotationConstraintType = Jolt.EPathRotationConstraintType_ConstrainAroundBinormal
+
+				const pathConstraint = Jolt.castObject(pathConstraintSettings.Create(box1, box2), Jolt.PathConstraint);
+				pathConstraint.SetPath(path, 0);
+
+				physicsSystem.AddConstraint(pathConstraint);
+				pathConstraint.SetPositionMotorState(Jolt.EMotorState_Velocity);
+				pathConstraint.SetTargetVelocity(2);
+				renderPathData(threeBox, pathConstraint);
+			}
+			offsetX = 0;
+			{
+				position.Set(0 + offsetX, 5, 0 + offsetZ);
+				const box1 = createBox(position, rotation, size, Jolt.EMotionType_Static, LAYER_NON_MOVING);
+				const threeBox = dynamicObjects[dynamicObjects.length - 1]
+				position.Set(2.5 + offsetX, 5, 0 + offsetZ);
+				const box2 = createBox(position, rotation, size, Jolt.EMotionType_Dynamic, LAYER_MOVING, '#ffff00');
+
+				const pathConstraintSettings = new Jolt.PathConstraintSettings();
+				pathConstraintSettings.mRotationConstraintType = Jolt.EPathRotationConstraintType_ConstrainToPath
+				const pathConstraint = Jolt.castObject(pathConstraintSettings.Create(box1, box2), Jolt.PathConstraint);
+				pathConstraint.SetPath(path, 0);
+
+				physicsSystem.AddConstraint(pathConstraint);
+				pathConstraint.SetPositionMotorState(Jolt.EMotorState_Velocity);
+				pathConstraint.SetTargetVelocity(2);
+				renderPathData(threeBox, pathConstraint);
+			}
+			offsetX = 8;
+			{
+				position.Set(0 + offsetX, 5, 0 + offsetZ);
+				const box1 = createBox(position, rotation, size, Jolt.EMotionType_Static, LAYER_NON_MOVING);
+				const threeBox = dynamicObjects[dynamicObjects.length - 1]
+				position.Set(2.5 + offsetX, 5, 0 + offsetZ);
+				const box2 = createBox(position, rotation, size, Jolt.EMotionType_Dynamic, LAYER_MOVING, '#00ffff');
+
+				const pathConstraintSettings = new Jolt.PathConstraintSettings();
+				pathConstraintSettings.mRotationConstraintType = Jolt.EPathRotationConstraintType_FullyConstrained
+				const pathConstraint = Jolt.castObject(pathConstraintSettings.Create(box1, box2), Jolt.PathConstraint);
+				pathConstraint.SetPath(path, 0);
+
+				physicsSystem.AddConstraint(pathConstraint);
+				pathConstraint.SetPositionMotorState(Jolt.EMotorState_Velocity);
+				pathConstraint.SetTargetVelocity(2);
+				renderPathData(threeBox, pathConstraint);
+			}
+
+		});
+
+	</script>
+</body>
+</html>

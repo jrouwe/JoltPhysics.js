@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<title>JoltPhysics.js demo</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+	<link rel="stylesheet" type="text/css" href="style.css">
+</head>
+<body>
+	<div id="container">Loading...</div>
+	<div id="info">
+		JoltPhysics.js 2d svg-based path constraint demo<br />
+		These examples sample SVGs to demonstrate more complex PathConstraints<br />
+	</div>
+
+	<script src="js/three/three.min.js"></script>
+	<script src="js/three/OrbitControls.js"></script>
+	<script src="js/three/WebGL.js"></script>
+	<script src="js/three/stats.min.js"></script>
+	<script src="js/example.js"></script>
+	<svg id="svgHeart" style='display: none' xmlns="http://www.w3.org/2000/svg" xml:space="preserve" viewBox="0 0 256 256">
+		<path xmlns="http://www.w3.org/2000/svg" d="M0 100 v-100 h100      a50,50 90 0,1 0,100     a50,50 90 0,1 -100,0     z" />
+	</svg>
+	<svg id="svgStar" style='display: none' xmlns="http://www.w3.org/2000/svg" xml:space="preserve" viewBox="0 0 256 256">
+		<path xmlns="http://www.w3.org/2000/svg" d="m25,1 6,17h18l-14,11 5,17-15-10-15,10 5-17-14-11h18z" />
+	</svg>
+	<svg id="svgLoops" style="display: none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+		<path fill="none" stroke="black" d="m 74.5,174.2 c -23.5,-23.5 -23.5,-76.4 0,-100.0 11.7,-11.7 38.2,-11.7 49.9,0 11.7,11.7 11.7,38.2 0,50.0 -23.5,23.5 -76.4,23.5 -99.9,0 -11.7,-11.7 -11.7,-38.2 0,-50.0 23.5,-23.5 76.4,-23.5 99.9,0 11.7,11.7 11.7,38.2 0,50.0 -11.7,11.7 -38.2,11.7 -49.9,0 -23.5,-23.5 -23.5,-76.4 0,-100.0 11.7,-11.7 38.2,-11.7 49.9,0 23.5,23.5 23.5,76.4 0,100.0 -11.7,11.7 -38.2,11.7 -49.9,0 -11.7,-11.7 -11.7,-38.2 0,-50.0 23.5,-23.5 76.4,-23.5 99.9,0 11.7,11.7 11.7,38.2 0,50.0 -23.5,23.5 -76.4,23.5 -99.9,0 -11.7,-11.7 -11.7,-38.2 0,-50.0 11.7,-11.7 38.2,-11.7 49.9,0 23.5,23.5 23.5,76.4 0,100.0 -11.7,11.7 -38.2,11.7 -49.9,0 z" />
+	</svg>
+	<svg id="svgX" style="display: none" xmlns="http://www.w3.org/2000/svg" xml:space="preserve" viewBox="0 0 460.77 460.77">
+		<path d="M -0.31461863,25.798729 26.113347,0 79.283898,53.485168 105.08263,53.17055 159.19703,0.31461863 185.31038,27.057204 l -53.79979,52.226694 0.62924,27.057202 53.17055,53.17055 -27.0572,26.42797 -53.17055,-54.74365 -26.42797,0.31462 L 26.742585,184.36652 -0.31461863,157.30932 52.855931,106.3411 V 79.598516 Z" />
+	</svg>
+	<svg id="svgTriangle" style="display: none" xmlns="http://www.w3.org/2000/svg" xml:space="preserve" viewBox="0 0 460.77 460.77">
+		<path d="M 0.31461863,198.52436 95.644069,0.6292373 199.46822,200.41207 Z" />
+	</svg>
+	<svg id="svgFigure8" style="display: none" xmlns="http://www.w3.org/2000/svg" xml:space="preserve">
+		<path d="m 131.82521,-0.31461863 c -12.8301,0.14919851 -23.95522,15.16188663 -26.74258,27.68644163 -6.044679,27.160828 33.25594,51.843194 27.0572,78.969277 -2.7589,12.07312 -14.0554,23.60354 -26.11335,26.42797 C 78.708159,139.16806 53.727239,98.917477 26.427966,105.39725 14.305629,108.27462 0.27732218,119.68074 0.31461863,132.13983 0.38965154,157.20499 28.107135,185.9305 53.17055,185.625 65.411052,185.4758 75.622589,170.81839 78.340042,158.88241 84.495278,131.84651 46.843062,106.59462 53.17055,79.598516 56.064748,67.250477 67.263371,55.175361 79.598516,52.226694 106.69459,45.749485 131.43431,85.917183 158.5678,79.598516 170.91829,76.722417 185.38498,65.22204 185.31038,52.541312 185.16293,27.476469 156.88879,-0.6060776 131.82521,-0.31461863 Z" />
+	</svg>
+	<script type="module">
+		// In case you haven't built the library yourself, replace URL with: https://www.unpkg.com/jolt-physics/dist/jolt-physics.wasm-compat.js
+		import initJolt from './js/jolt-physics.wasm-compat.js';
+
+		class Line3DMesh {
+			constructor(points, color) {
+				this._points = points;
+				const material = new THREE.LineBasicMaterial({ color });
+				material.linewidth = 2;
+				const geometry = this._geometry = new THREE.BufferGeometry().setFromPoints(points);
+				this._line = new THREE.Line(geometry, material);
+			}
+
+			update() {
+				this._geometry.setFromPoints(this._points);
+			}
+
+			getMesh() {
+				return this._line;
+			}
+		}
+
+		initJolt().then(function (Jolt) {
+
+			// Initialize this example
+			const updates = [];
+			initExample(Jolt, () => {
+				updates.forEach(func => func());
+			});
+
+			// Create a basic floor
+			createFloor();
+
+			const rotation = Jolt.Quat.prototype.sIdentity();
+			const position = new Jolt.RVec3();
+			const size = new Jolt.Vec3(0.5, 0.1, 0.5);
+
+			const SetV3 = (joltV3, threeV3) => threeV3.set(joltV3.GetX(), joltV3.GetY(), joltV3.GetZ());
+
+			const normal = new THREE.Vector3(0, 1, 0);
+			class SVGJoltPath extends Jolt.PathConstraintPathJS {
+				constructor(svgPath, velocity, scale, sampleRate) {
+					super();
+					this._svgPath = svgPath;
+					this._velocity = velocity;
+					this._scale = scale || 1;
+					this._sampleRate = sampleRate || 1;
+					this._tmpVec = [new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3()];
+
+					// Emscripten require properties, not methods, for these functions, so we can not just declare them as normal class methods
+					this.GetClosestPoint = this.getClosestPoint;
+					this.GetPathMaxFraction = this.getPathMaxFraction;
+					this.GetPointOnPath = this.getPointOnPath;
+
+					this.points = [];
+					// This SVG's native sampling is slow, so pre-calculate the needed points. Reduce sample-rate for this demo, since
+					const pathLen = this._svgPath.getTotalLength();
+					for (let i = 0; i < pathLen; i += this._sampleRate) {
+						this.points.push(this._getPos(i, new THREE.Vector3()));
+					}
+					// calculate center and size for later re-centering and scaling the SVG
+					this._calcBoundingBox();
+					this.points.forEach(pos => {
+						pos.set((pos.x - this.bbox.center.x) / this.bbox.width * this._scale, 0, (pos.y - this.bbox.center.y) / this.bbox.height * this._scale)
+					})
+					this._length = this.points.length;
+				}
+
+				_calcBoundingBox() {
+					const bbox = this.bbox = { min: { x: Number.POSITIVE_INFINITY, y: Number.POSITIVE_INFINITY }, max: { x: -Number.POSITIVE_INFINITY, y: -Number.POSITIVE_INFINITY } }
+					this.points.forEach(p => {
+						bbox.min.x = Math.min(bbox.min.x, p.x)
+						bbox.min.y = Math.min(bbox.min.y, p.y)
+						bbox.max.x = Math.max(bbox.max.x, p.x)
+						bbox.max.y = Math.max(bbox.max.y, p.y)
+					});
+					bbox.width = bbox.max.x - bbox.min.x;
+					bbox.height = bbox.max.y - bbox.min.y;
+					bbox.center = { x: 0, y: 0 };
+					bbox.center.x = (bbox.max.x + bbox.min.x) / 2;
+					bbox.center.y = (bbox.max.y + bbox.min.y) / 2;
+				}
+
+				getMesh(color) {
+					const pathGeo = new Line3DMesh(this.points, color);
+					return pathGeo.getMesh();
+				}
+
+				_searchRange(current, indexA, indexB, iterations) {
+					const pointA = this.points[Math.floor((indexA + this.points.length) % this.points.length)];
+					const distA = this._tmpVec[3].subVectors(pointA, current).length();
+					const pointB = this.points[Math.floor((indexB + this.points.length) % this.points.length)];
+					const distB = this._tmpVec[3].subVectors(pointB, current).length();
+
+					const indexDelta = indexB - indexA;
+					if (distA == 0) {
+						return indexA;
+					}
+					if (distB == 0) {
+						return indexB;
+					}
+					const weightA = distA / (distA + distB);
+					const nextEstimate = indexA + weightA * indexDelta;
+					if (iterations == 1 || Math.abs(indexA - indexB) < 1) {
+						return nextEstimate;
+					}
+					return this._searchRange(current, nextEstimate - 0.125 * indexDelta, nextEstimate + 0.125 * indexDelta, iterations - 1);
+				}
+				getClosestPoint(vecPtr, fractionHint) {
+					const jVec3 = Jolt.wrapPointer(vecPtr, Jolt.Vec3);
+					const curPos = this._tmpVec[0];
+					SetV3(jVec3, curPos);
+					const closest = this._searchRange(curPos, fractionHint - this._velocity, fractionHint + this._velocity, 6)
+					return (closest + this.points.length) % this.points.length;
+				}
+
+				getPathMaxFraction() {
+					return this._length;
+				}
+
+				_getPos(fraction, threeVec) {
+					const pos = this._svgPath.getPointAtLength(fraction);
+					threeVec.set(pos.x, pos.y, 0);
+					return threeVec;
+				}
+
+				getPointOnPath(inFraction, outPathPositionPtr, outPathTangentPtr, outPathNormalPtr, outPathBinormalPtr) {
+					const outPathPosition = Jolt.wrapPointer(outPathPositionPtr, Jolt.Vec3);
+					const outPathTangent = Jolt.wrapPointer(outPathTangentPtr, Jolt.Vec3);
+					const outPathNormal = Jolt.wrapPointer(outPathNormalPtr, Jolt.Vec3);
+					const outPathBinormal = Jolt.wrapPointer(outPathBinormalPtr, Jolt.Vec3);
+
+					const indexA = Math.floor(inFraction + this.points.length) % this.points.length;
+					const indexB = Math.ceil(inFraction + 0.001 + this.points.length) % this.points.length;
+					const pointA = this.points[indexA];
+					const pointB = this.points[indexB];
+
+					const tmp = this._tmpVec[0];
+					const percent = inFraction - indexA;
+					const pos = tmp.lerpVectors(pointA, pointB, percent);
+
+					outPathPosition.Set(pos.x, pos.y, pos.z);
+					outPathNormal.Set(normal.x, normal.y, normal.z);
+
+					const tan = tmp.subVectors(pointB, pointA).normalize();
+					outPathTangent.Set(tan.x, tan.y, tan.z);
+					const binormal = tmp.crossVectors(tan, normal).normalize();
+					outPathBinormal.Set(binormal.x, binormal.y, binormal.z);
+				}
+			}
+
+			const _jPosition = new Jolt.Vec3();
+			const _jTangent = new Jolt.Vec3();
+			const _jNormal = new Jolt.Vec3();
+			const _jBinormal = new Jolt.Vec3();
+
+			const positionMaterial = new THREE.MeshPhongMaterial({ color: '#00ff00' });
+			const positionGeo = new THREE.SphereGeometry(0.25, 32, 32);
+			function renderPathData(path, parent, constraint, pathColor) {
+				parent.add(path.getMesh(pathColor).clone());
+				const pos = new THREE.Mesh(positionGeo, positionMaterial);
+				parent.add(pos);
+				const tanLine = new Line3DMesh([new THREE.Vector3(), new THREE.Vector3()], '#FF0000');
+				pos.add(tanLine.getMesh());
+				const normLine = new Line3DMesh([new THREE.Vector3(), new THREE.Vector3()], '#00FF00');
+				pos.add(normLine.getMesh());
+				const binLine = new Line3DMesh([new THREE.Vector3(), new THREE.Vector3()], '#FF00FF');
+				pos.add(binLine.getMesh());
+
+				updates.push(() => {
+					path.GetPointOnPath(constraint.GetPathFraction(),
+						Jolt.getPointer(_jPosition), Jolt.getPointer(_jTangent), Jolt.getPointer(_jNormal), Jolt.getPointer(_jBinormal));
+					SetV3(_jPosition, pos.position);
+					SetV3(_jTangent, tanLine._points[1]); tanLine.update();
+					SetV3(_jNormal, normLine._points[1]); normLine.update();
+					SetV3(_jBinormal, binLine._points[1]); binLine.update();
+				})
+			}
+
+			function buildSVGPath(selector, offsetX, offsetZ, color, sampleRate) {
+				const path = new SVGJoltPath(document.querySelector(selector), 2, 7, sampleRate);
+				Jolt.castObject(path, Jolt.PathConstraintPath).SetIsLooping(true);
+				position.Set(0 + offsetX, 5, 0 + offsetZ);
+				const box1 = createBox(position, rotation, size, Jolt.EMotionType_Static, LAYER_NON_MOVING);
+				const threeBox = dynamicObjects[dynamicObjects.length - 1]
+				const zeroPoint = path.points[5];
+				position.Set(zeroPoint.x + offsetX, zeroPoint.y + 5, zeroPoint.z + offsetZ);
+				const box2 = createBox(position, rotation, size, Jolt.EMotionType_Dynamic, LAYER_MOVING, '#ff0000');
+
+				const pathConstraintSettings = new Jolt.PathConstraintSettings();
+				pathConstraintSettings.mRotationConstraintType = Jolt.EPathRotationConstraintType_Free
+
+				const pathConstraint = Jolt.castObject(pathConstraintSettings.Create(box1, box2), Jolt.PathConstraint);
+				pathConstraint.SetPath(path, 5);
+
+				physicsSystem.AddConstraint(pathConstraint);
+				pathConstraint.SetPositionMotorState(Jolt.EMotorState_Velocity);
+				pathConstraint.SetTargetVelocity(2);
+				renderPathData(path, threeBox, pathConstraint, color);
+			}
+
+			buildSVGPath('#svgHeart path', -8, 0, 'red', 5);
+			buildSVGPath('#svgStar path', 0, 0, 'yellow', 0.5);
+			buildSVGPath('#svgLoops path', 8, 0, 'blue', 6);
+			buildSVGPath('#svgTriangle path', -8, 8, 'cyan', 5);
+			buildSVGPath('#svgX path', 0, 8, 'pink', 5);
+			buildSVGPath('#svgFigure8 path', 8, 8, 'orange', 5);
+		});
+
+	</script>
+</body>
+</html>

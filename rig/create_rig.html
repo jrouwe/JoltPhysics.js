@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>JoltPhysics.js demo</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<link rel="stylesheet" type="text/css" href="../style.css">
+	</head>
+	<body>
+		<div id="container">Loading...</div>
+		<div id="info">JoltPhysics.js skeleton rig creation demo<br /></div>
+
+		<script src="../js/three/three.min.js"></script>
+		<script src="../js/three/OrbitControls.js"></script>
+		<script src="../js/three/WebGL.js"></script>
+		<script src="../js/three/stats.min.js"></script>
+		<script src="../js/example.js"></script>
+
+		<script type="module">
+			// In case you haven't built the library yourself, replace URL with: https://www.unpkg.com/jolt-physics/dist/jolt-physics.wasm-compat.js
+			import initJolt from './../js/jolt-physics.wasm-compat.js';
+
+			initJolt().then(function (Jolt) {
+				// Initialize this example
+				initExample(Jolt, null);
+
+				createFloor();
+
+				const skeleton = new Jolt.Skeleton();
+				const S = (string) => new Jolt.JPHString(string, string.length);
+				const lower_body = skeleton.AddJoint(S("LowerBody"), -1);
+				const mid_body = skeleton.AddJoint(S("MidBody"), lower_body);
+				const upper_body = skeleton.AddJoint(S("UpperBody"), mid_body);
+					/*uint head =*/ skeleton.AddJoint(S("Head"), upper_body);
+				const upper_arm_l = skeleton.AddJoint(S("UpperArmL"), upper_body);
+				const upper_arm_r = skeleton.AddJoint(S("UpperArmR"), upper_body);
+					/*uint lower_arm_l =*/ skeleton.AddJoint(S("LowerArmL"), upper_arm_l);
+					/*uint lower_arm_r =*/ skeleton.AddJoint(S("LowerArmR"), upper_arm_r);
+				const upper_leg_l = skeleton.AddJoint(S("UpperLegL"), lower_body);
+				const upper_leg_r = skeleton.AddJoint(S("UpperLegR"), lower_body);
+					/*uint lower_leg_l =*/ skeleton.AddJoint(S("LowerLegL"), upper_leg_l);
+					/*uint lower_leg_r =*/ skeleton.AddJoint(S("LowerLegR"), upper_leg_r);
+
+				const shapes = [
+					new Jolt.CapsuleShape(0.15, 0.10),		// Lower Body
+					new Jolt.CapsuleShape(0.15, 0.10),		// Mid Body
+					new Jolt.CapsuleShape(0.15, 0.10),		// Upper Body
+					new Jolt.CapsuleShape(0.075, 0.10),		// Head
+					new Jolt.CapsuleShape(0.15, 0.06),		// Upper Arm L
+					new Jolt.CapsuleShape(0.15, 0.06),		// Upper Arm R
+					new Jolt.CapsuleShape(0.15, 0.05),		// Lower Arm L
+					new Jolt.CapsuleShape(0.15, 0.05),		// Lower Arm R
+					new Jolt.CapsuleShape(0.2, 0.075),		// Upper Leg L
+					new Jolt.CapsuleShape(0.2, 0.075),		// Upper Leg R
+					new Jolt.CapsuleShape(0.2, 0.06),		// Lower Leg L
+					new Jolt.CapsuleShape(0.2, 0.06),		// Lower Leg R
+				];
+				const positions = [
+					new Jolt.RVec3(0, 1.15, 0),				// Lower Body
+					new Jolt.RVec3(0, 1.35, 0),				// Mid Body
+					new Jolt.RVec3(0, 1.55, 0),				// Upper Body
+					new Jolt.RVec3(0, 1.825, 0),			// Head
+					new Jolt.RVec3(-0.425, 1.55, 0),		// Upper Arm L
+					new Jolt.RVec3(0.425, 1.55, 0),			// Upper Arm R
+					new Jolt.RVec3(-0.8, 1.55, 0),			// Lower Arm L
+					new Jolt.RVec3(0.8, 1.55, 0),			// Lower Arm R
+					new Jolt.RVec3(-0.15, 0.8, 0),			// Upper Leg L
+					new Jolt.RVec3(0.15, 0.8, 0),			// Upper Leg R
+					new Jolt.RVec3(-0.15, 0.3, 0),			// Lower Leg L
+					new Jolt.RVec3(0.15, 0.3, 0),			// Lower Leg R
+				];
+
+				const rotateZ90 = Jolt.Quat.prototype.sRotation(Jolt.Vec3.prototype.sAxisZ(), 0.5 * Math.PI).Clone();
+				const rotations = [
+					rotateZ90,								// Lower Body
+					rotateZ90,								// Mid Body
+					rotateZ90,								// Upper Body
+					Jolt.Quat.prototype.sIdentity(),		// Head
+					rotateZ90,								// Upper Arm L
+					rotateZ90,								// Upper Arm R
+					rotateZ90,								// Lower Arm L
+					rotateZ90,								// Lower Arm R
+					Jolt.Quat.prototype.sIdentity(),		// Upper Leg L
+					Jolt.Quat.prototype.sIdentity(),		// Upper Leg R
+					Jolt.Quat.prototype.sIdentity(),		// Lower Leg L
+					Jolt.Quat.prototype.sIdentity()			// Lower Leg R
+				];
+
+				// World space constraint positions
+				const constraint_positions = [
+					Jolt.RVec3.prototype.sZero(),			// Lower Body (unused, there's no parent)
+					new Jolt.RVec3(0, 1.25, 0),				// Mid Body
+					new Jolt.RVec3(0, 1.45, 0),				// Upper Body
+					new Jolt.RVec3(0, 1.65, 0),				// Head
+					new Jolt.RVec3(-0.225, 1.55, 0),		// Upper Arm L
+					new Jolt.RVec3(0.225, 1.55, 0),			// Upper Arm R
+					new Jolt.RVec3(-0.65, 1.55, 0),			// Lower Arm L
+					new Jolt.RVec3(0.65, 1.55, 0),			// Lower Arm R
+					new Jolt.RVec3(-0.15, 1.05, 0),			// Upper Leg L
+					new Jolt.RVec3(0.15, 1.05, 0),			// Upper Leg R
+					new Jolt.RVec3(-0.15, 0.55, 0),			// Lower Leg L
+					new Jolt.RVec3(0.15, 0.55, 0),			// Lower Leg R
+				];
+
+				// World space twist axis directions
+				const minusAxisX = Jolt.Vec3.prototype.sAxisX().Mul(-1).Clone();
+				const minusAxisY = Jolt.Vec3.prototype.sAxisY().Mul(-1).Clone();
+				const twist_axis = [
+					Jolt.Vec3.prototype.sZero(),		// Lower Body (unused, there's no parent)
+					Jolt.Vec3.prototype.sAxisY(),		// Mid Body
+					Jolt.Vec3.prototype.sAxisY(),		// Upper Body
+					Jolt.Vec3.prototype.sAxisY(),		// Head
+					Jolt.Vec3.prototype.sAxisX(),		// Upper Arm L
+					Jolt.Vec3.prototype.sAxisX(),		// Upper Arm R
+					minusAxisX,							// Lower Arm L
+					Jolt.Vec3.prototype.sAxisX(),		// Lower Arm R
+					minusAxisY,							// Upper Leg L
+					minusAxisY,							// Upper Leg R
+					minusAxisY,							// Lower Leg L
+					minusAxisY,							// Lower Leg R
+				];
+
+				// Constraint limits
+				const twist_angle = [
+					0.0,		// Lower Body (unused, there's no parent)
+					5.0,		// Mid Body
+					5.0,		// Upper Body
+					90.0,		// Head
+					45.0,		// Upper Arm L
+					45.0,		// Upper Arm R
+					45.0,		// Lower Arm L
+					45.0,		// Lower Arm R
+					45.0,		// Upper Leg L
+					45.0,		// Upper Leg R
+					45.0,		// Lower Leg L
+					45.0,		// Lower Leg R
+				];
+
+				const normal_angle = [
+					0.0,		// Lower Body (unused, there's no parent)
+					10.0,		// Mid Body
+					10.0,		// Upper Body
+					45.0,		// Head
+					90.0,		// Upper Arm L
+					90.0,		// Upper Arm R
+					0.0,		// Lower Arm L
+					0.0,		// Lower Arm R
+					45.0,		// Upper Leg L
+					45.0,		// Upper Leg R
+					0.0,		// Lower Leg L
+					0.0,		// Lower Leg R
+				];
+
+				const plane_angle = [
+					0.0,		// Lower Body (unused, there's no parent)
+					10.0,		// Mid Body
+					10.0,		// Upper Body
+					45.0,		// Head
+					45.0,		// Upper Arm L
+					45.0,		// Upper Arm R
+					90.0,		// Lower Arm L
+					90.0,		// Lower Arm R
+					45.0,		// Upper Leg L
+					45.0,		// Upper Leg R
+					60.0,		// Lower Leg L (cheating here, a knee is not symmetric, we should have rotated the twist axis)
+					60.0,		// Lower Leg R
+				];
+
+				// Create ragdoll settings
+				const settings = new Jolt.RagdollSettings();
+				settings.mSkeleton = skeleton;
+				settings.mParts.resize(skeleton.GetJointCount());
+				for (let p = 0; p < skeleton.GetJointCount(); ++p) {
+					const part = settings.mParts.at(p);
+					part.SetShape(shapes[p]);
+					part.mPosition = positions[p];
+					part.mRotation = rotations[p];
+					part.mMotionType = Jolt.EMotionType_Dynamic;
+					part.mObjectLayer = 1;
+
+					// First part is the root, doesn't have a parent and doesn't have a constraint
+					if (p > 0) {
+						const constraint = new Jolt.SwingTwistConstraintSettings();
+						constraint.mDrawConstraintSize = 0.1;
+						constraint.mPosition1 = constraint.mPosition2 = constraint_positions[p];
+						constraint.mTwistAxis1 = constraint.mTwistAxis2 = twist_axis[p];
+						constraint.mPlaneAxis1 = constraint.mPlaneAxis2 = Jolt.Vec3.prototype.sAxisZ();
+						constraint.mTwistMinAngle = -DegreesToRadians(twist_angle[p]);
+						constraint.mTwistMaxAngle = DegreesToRadians(twist_angle[p]);
+						constraint.mNormalHalfConeAngle = DegreesToRadians(normal_angle[p]);
+						constraint.mPlaneHalfConeAngle = DegreesToRadians(plane_angle[p]);
+						part.mToParent = constraint;
+					}
+				}
+
+				// Optional: Stabilize the inertia of the limbs
+				settings.Stabilize();
+
+				// Disable parent child collisions so that we don't get collisions between constrained bodies
+				settings.DisableParentChildCollisions();
+
+				// Create ragdoll
+				const mRagdoll = settings.CreateRagdoll(0, 0, physicsSystem);
+				mRagdoll.AddToPhysicsSystem(Jolt.EActivation_Activate);
+
+				// The bodies have already been added to the physics system, now also add them to the three scene
+				let bodyCount = mRagdoll.GetBodyCount();
+				for (let i = 0; i < bodyCount; i++) {
+					const bodyID = mRagdoll.GetBodyID(i);
+					let body = physicsSystem.GetBodyLockInterfaceNoLock().TryGetBody(bodyID);
+					addToThreeScene(body, 0xFF00FF);
+				}
+				mRagdoll.SetLinearAndAngularVelocity(new Jolt.Vec3(1, 7, 0), new Jolt.Vec3(7, 0, 7), false);
+
+				// Position the camera
+				camera.position.z = 8;
+				camera.position.y = 2;
+			});
+
+		</script>
+	</body>
+</html>

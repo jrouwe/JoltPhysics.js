@@ -1,0 +1,26 @@
+body {
+	text-align: center;
+	margin: 0px;
+	overflow: hidden;
+}
+
+#info {
+	position: absolute;
+	top: 0px;
+	width: 100%;
+	padding: 5px;
+}
+
+div#memoryprofiler {
+	position: absolute;
+	bottom: 0;
+	background-color: white;
+}
+
+div#memoryprofiler_ptrs {
+	position: fixed;
+	bottom: 400px;
+	top: 0;
+	overflow: auto;
+	background-color: white;
+}
